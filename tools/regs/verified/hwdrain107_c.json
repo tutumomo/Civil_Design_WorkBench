@@ -1,0 +1,421 @@
+{
+ "formulas": [
+  {
+   "id": "hwdrain107_tau_critical",
+   "title": "臨界拖曳力 τc＝0.0801·d75（公路排水附錄K 式K-1）",
+   "src": "hwdrain107",
+   "clause": "附錄K",
+   "page": 124,
+   "keywords": "公路排水 臨界拖曳力 tau_c d75 非黏性 粗顆粒 渠道 沖刷",
+   "unit": "kgf/m2",
+   "output": "tau_c",
+   "latex": "\\tau_c=0.0801\\,d_{75}",
+   "vars": {
+    "d75": {
+     "desc": "粒徑分布曲線上重量通過百分比 75% 之粒徑 d75",
+     "unit": "mm",
+     "min": 0
+    }
+   },
+   "expr": "0.0801*d75",
+   "conditions": [
+    {
+     "expr": "d75>0",
+     "msg": "d75 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "d75": 100
+     },
+     "out": 8.01
+    },
+    {
+     "in": {
+      "d75": 25
+     },
+     "out": 2.0025,
+     "tol": 1e-09
+    }
+   ],
+   "notes": "附錄K（相關章節 4.3.2 節）：**輸送清水之非黏性粗顆粒土溝**，可用式(K-1) 計算臨界拖曳力 τc＝0.0801·d75（τc 單位 kgf/m²、d75 單位 mm）；摘自臺灣省水利局「防洪工程規劃講義」（民國70 年 4 月）。4.3.2：非黏性土壤渠道於設計流量下，渠底及側坡水流拖曳力不應大於土壤之臨界拖曳力。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路排水設計規範 附錄K 式(K-1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_continuity_A1V1",
+   "title": "連續性 Q＝A1V1＝A2V2（公路排水式4-1）",
+   "src": "hwdrain107",
+   "clause": "4.2.1",
+   "page": 33,
+   "keywords": "公路排水 連續性 流量 A1 A2 V1 V2 通水面積 平均流速",
+   "unit": "m3/s",
+   "output": "Q",
+   "latex": "Q=A_1V_1=A_2V_2",
+   "vars": {
+    "A1": {
+     "desc": "上游斷面通水面積 A1",
+     "unit": "m2",
+     "min": 0
+    },
+    "V1": {
+     "desc": "上游斷面平均流速 V1",
+     "unit": "m/s",
+     "min": 0
+    }
+   },
+   "expr": "A1*V1",
+   "conditions": [
+    {
+     "expr": "A1>=0 and V1>=0",
+     "msg": "A1、V1 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "A1": 2.0,
+      "V1": 1.5
+     },
+     "out": 3.0
+    },
+    {
+     "in": {
+      "A1": 0.8,
+      "V1": 2.5
+     },
+     "out": 2.0
+    }
+   ],
+   "notes": "4.2.1：Q＝A1V1＝A2V2（式4-1）。Q 為流量（m³/s）、A1、A2 分別為上、下游斷面之通水面積（m²）、V1、V2 為上、下游斷面之平均流速（m/s）。本式以 A1V1 計算，等值於 A2V2。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路排水設計規範 p.33 式(4-1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_underdrain_q_8_2",
+   "title": "地下排水溝單長排水量 q＝K·i·H0（式8-2，不透水層坡度 >0.47）",
+   "src": "hwdrain107",
+   "clause": "8.3.3",
+   "page": 75,
+   "keywords": "公路排水 地下排水溝 透水管 排水量 q K i H0 不透水層 坡度 0.47",
+   "unit": "m3/s/m",
+   "output": "q",
+   "latex": "q=K\\,i\\,H_0",
+   "vars": {
+    "K": {
+     "desc": "透水管附近地層透水係數 K",
+     "unit": "m/s",
+     "min": 0
+    },
+    "i": {
+     "desc": "不透水層之平均坡度 i（本式適用 i > 0.47）",
+     "unit": "-",
+     "min": 0
+    },
+    "H0": {
+     "desc": "透水管附近地下水位所擬降低之深度 H0",
+     "unit": "m",
+     "min": 0
+    }
+   },
+   "expr": "K*i*H0",
+   "conditions": [
+    {
+     "expr": "K>=0 and i>=0 and H0>=0",
+     "msg": "K、i、H0 須非負"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "i<=0.47",
+     "msg": "不透水層坡度 ≤0.47（25°）時應改用式(8-3) 或 (8-4)"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "K": 1e-05,
+      "i": 1.0,
+      "H0": 2.0
+     },
+     "out": 2e-05,
+     "tol": 1e-12
+    },
+    {
+     "in": {
+      "K": 5e-06,
+      "i": 0.6,
+      "H0": 3.0
+     },
+     "out": 9e-06,
+     "tol": 1e-12
+    }
+   ],
+   "notes": "8.3.3：地下排水溝設計流量依氣象、水文、地形、地質、地下水位坡降及不透水層位置等條件而定；**不透水層較淺者採式(8-2) 或 (8-3)、較深者採式(8-4)**。本式為第1 款：不透水層坡度 >0.47（25°）時 q＝KiH0（式8-2），q 為透水管每公尺長度排水量（m³/s/m）、K 為地層透水係數（m/s）、i 為不透水層平均坡度、H0 為擬降低之地下水位深度（m）。式(8-3)(8-4) 之文字層排版破碎，未收錄。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路排水設計規範 p.75 式(8-2)＋手算兩組",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_Talbot",
+   "title": "降雨強度 Talbot 公式 i＝a/(t＋b)（公路排水附錄E 式E-1，t ≤120 分鐘）",
+   "src": "hwdrain107",
+   "clause": "附錄E",
+   "page": 93,
+   "keywords": "公路排水 降雨強度 Talbot 塔伯特 延時公式 a b t 120分鐘 IDF",
+   "unit": "mm/hr",
+   "output": "i",
+   "latex": "i=\\frac{a}{t+b}",
+   "vars": {
+    "a": {
+     "desc": "Talbot 公式係數 a（由當地雨量站資料迴歸）",
+     "unit": "-",
+     "min": 0
+    },
+    "b": {
+     "desc": "Talbot 公式係數 b（分鐘）",
+     "unit": "min",
+     "min": 0
+    },
+    "t": {
+     "desc": "降雨延時 t（本式適用 t ≤ 120 分鐘）",
+     "unit": "min",
+     "min": 0
+    }
+   },
+   "expr": "a/(t+b)",
+   "conditions": [
+    {
+     "expr": "t+b>0",
+     "msg": "t＋b 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "a": 1000,
+      "b": 20,
+      "t": 30
+     },
+     "out": 20.0
+    },
+    {
+     "in": {
+      "a": 1500,
+      "b": 15,
+      "t": 60
+     },
+     "out": 20.0
+    }
+   ],
+   "notes": "附錄E（相關章節 3.4.4 節）：選用降雨強度公式應視自記雨量站位置分布與集流時間決定；**若無現成公式，可由日雨量關係公式推算**。常用三式：1. **Talbot 公式 i＝a/(t＋b)（式E-1，適用 t ≤120 分鐘）**；2. Sherman 公式 i＝a/t^c（式E-2，適用 t>120 分鐘，見 hwdrain107_Sherman）；3. Horner 公式 i＝a/(t＋b)^c（式E-3，適用 t≤120 分鐘，見 hwdrain107_Horner）。i 為降雨強度（mm/hr）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路排水設計規範 附錄E 式(E-1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_Sherman",
+   "title": "降雨強度 Sherman 公式 i＝a/t^c（公路排水附錄E 式E-2，t >120 分鐘）",
+   "src": "hwdrain107",
+   "clause": "附錄E",
+   "page": 93,
+   "keywords": "公路排水 降雨強度 Sherman 希爾曼 延時公式 a c t 120分鐘",
+   "unit": "mm/hr",
+   "output": "i",
+   "latex": "i=\\frac{a}{t^{c}}",
+   "vars": {
+    "a": {
+     "desc": "Sherman 公式係數 a",
+     "unit": "-",
+     "min": 0
+    },
+    "c": {
+     "desc": "Sherman 公式指數 c",
+     "unit": "-",
+     "min": 0
+    },
+    "t": {
+     "desc": "降雨延時 t（本式適用 t > 120 分鐘）",
+     "unit": "min",
+     "min": 0
+    }
+   },
+   "expr": "a/t**c",
+   "conditions": [
+    {
+     "expr": "t>0",
+     "msg": "t 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "t<=120",
+     "msg": "t ≤120 分鐘時宜改用 Talbot 或 Horner 公式"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "a": 1000,
+      "c": 1.0,
+      "t": 100
+     },
+     "out": 10.0
+    },
+    {
+     "in": {
+      "a": 2000,
+      "c": 0.5,
+      "t": 400
+     },
+     "out": 100.0
+    }
+   ],
+   "notes": "附錄E：Sherman 公式 i＝a/t^c（式E-2，**適用於 t>120 分鐘**）。i 為降雨強度（mm/hr）。三式比較見 hwdrain107_Talbot 的 notes。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路排水設計規範 附錄E 式(E-2)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_Horner",
+   "title": "降雨強度 Horner 公式 i＝a/(t＋b)^c（公路排水附錄E 式E-3，t ≤120 分鐘）",
+   "src": "hwdrain107",
+   "clause": "附錄E",
+   "page": 93,
+   "keywords": "公路排水 降雨強度 Horner 荷納 延時公式 a b c t 120分鐘",
+   "unit": "mm/hr",
+   "output": "i",
+   "latex": "i=\\frac{a}{(t+b)^{c}}",
+   "vars": {
+    "a": {
+     "desc": "Horner 公式係數 a",
+     "unit": "-",
+     "min": 0
+    },
+    "b": {
+     "desc": "Horner 公式係數 b（分鐘）",
+     "unit": "min",
+     "min": 0
+    },
+    "c": {
+     "desc": "Horner 公式指數 c",
+     "unit": "-",
+     "min": 0
+    },
+    "t": {
+     "desc": "降雨延時 t（本式適用 t ≤ 120 分鐘）",
+     "unit": "min",
+     "min": 0
+    }
+   },
+   "expr": "a/(t+b)**c",
+   "conditions": [
+    {
+     "expr": "t+b>0",
+     "msg": "t＋b 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "a": 1000,
+      "b": 10,
+      "c": 1.0,
+      "t": 40
+     },
+     "out": 20.0
+    },
+    {
+     "in": {
+      "a": 1000,
+      "b": 10,
+      "c": 0.8,
+      "t": 190
+     },
+     "out": 14.426999,
+     "tol": 1e-05
+    }
+   ],
+   "notes": "附錄E：Horner 公式 i＝a/(t＋b)^c（式E-3，適用 t≤120 分鐘）。i 為降雨強度（mm/hr）。注意 Horner 與 Talbot 皆適用 t≤120 分鐘，實際選用依當地雨量站建立之延時公式。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路排水設計規範 附錄E 式(E-3)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_grate_Q1",
+   "title": "一般格柵進水口落水量 Q1＝γ·Q（公路排水附錄M 式M-1）",
+   "src": "hwdrain107",
+   "clause": "附錄M",
+   "page": 126,
+   "keywords": "公路排水 格柵進水口 落水量 Q1 gamma 落下率 側溝流量 集水井",
+   "unit": "l/s",
+   "output": "Q1",
+   "latex": "Q_1=\\gamma\\,Q",
+   "vars": {
+    "gamma": {
+     "desc": "落下率 γ（依表M-1，隨格柵種類、開孔面積、路面橫向坡度與縱向坡度補正）",
+     "unit": "-",
+     "min": 0,
+     "max": 1
+    },
+    "Q": {
+     "desc": "側溝流量 Q",
+     "unit": "l/s",
+     "min": 0
+    }
+   },
+   "expr": "gamma*Q",
+   "conditions": [
+    {
+     "expr": "0<=gamma<=1",
+     "msg": "γ 須在 0~1 之間"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "gamma": 0.6,
+      "Q": 100
+     },
+     "out": 60.0
+    },
+    {
+     "in": {
+      "gamma": 0.45,
+      "Q": 200
+     },
+     "out": 90.0
+    }
+   ],
+   "notes": "附錄M（相關章節 5.8 節）：一般格柵進水口流量依 Q1＝γ·Q（式M-1）計算；Q1 為格柵進水口落水量（l/s）、γ 為落下率、Q 為側溝流量（l/s）。**表M-1「側溝集水井格柵之種類與落下率係數」** 依格柵種類（縱向格柵等）、格柵蓋開孔面積（100/200/300 cm²…）、未補正前落下率 γ*、路面橫向坡度 S（2/4/8% 以上）、縱向坡度 i（0.1/1/10%）之補正係數 ρ 求得 γ；該表文字層排版破碎，未逐格收錄，使用時請查原表。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路排水設計規範 附錄M 式(M-1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": []
+}

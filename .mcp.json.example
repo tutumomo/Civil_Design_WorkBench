@@ -1,0 +1,28 @@
+{
+  "_comment": [
+    "這是 MCP 設定範例。複製成 .mcp.json 後改成你自己的路徑（.mcp.json 已列在 .gitignore，不會進版控）。",
+    "Windows 使用者目錄預設在 %USERPROFILE%，可用絕對路徑或展開後的完整路徑。",
+    "ALLOWED_PATHS 是本專案的根目錄；留空表示不限制（不建議）。"
+  ],
+  "mcpServers": {
+    "autocad": {
+      "command": "<使用者家目錄>/mcp/autocad-mcp-pro/.venv/Scripts/autocad-mcp.exe",
+      "args": [],
+      "env": {
+        "AUTOCAD_MCP_BACKEND": "ezdxf",
+        "ALLOWED_PATHS": "<本專案根目錄>",
+        "TOOL_PROFILE": "full",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    "regs": {
+      "_comment": "規範查詢 MCP（可選）。註冊方式：python tools/regs/register_mcp.py",
+      "command": "<Python 直譯器路徑>",
+      "args": ["<本專案根目錄>/tools/regs/regs_server.py", "--mcp"],
+      "env": {
+        "CIVIL_AI_ROOT": "<本專案根目錄>",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}

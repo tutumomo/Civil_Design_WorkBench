@@ -1,0 +1,173 @@
+[
+  {
+    "display_value": 120.0,
+    "name": "W",
+    "unit": "mm",
+    "value": 120.0
+  },
+  {
+    "display_value": 80.0,
+    "name": "D",
+    "unit": "mm",
+    "value": 80.0
+  },
+  {
+    "display_value": 10.0,
+    "name": "T",
+    "unit": "mm",
+    "value": 10.0
+  },
+  {
+    "display_value": 20.0,
+    "name": "HOLE_D",
+    "unit": "mm",
+    "value": 20.0
+  },
+  {
+    "display_value": 30.0,
+    "name": "HOLE_PITCH",
+    "unit": "mm",
+    "value": 30.0
+  },
+  {
+    "bodies": [
+      "Base"
+    ],
+    "changed_bodies": [],
+    "created_bodies": [
+      "Base"
+    ],
+    "feature": 1,
+    "ms": 1.4346999999999999,
+    "name": "Plate",
+    "removed_bodies": [],
+    "warning": null
+  },
+  {
+    "bodies": [
+      "Base",
+      "CutterBody"
+    ],
+    "changed_bodies": [],
+    "created_bodies": [
+      "CutterBody"
+    ],
+    "feature": 2,
+    "ms": 1.5653,
+    "name": "Cutter",
+    "removed_bodies": [],
+    "warning": null
+  },
+  {
+    "bodies": [
+      "Base"
+    ],
+    "changed_bodies": [
+      "Base"
+    ],
+    "created_bodies": [],
+    "feature": 3,
+    "ms": 11.0602,
+    "name": "Combine1",
+    "removed_bodies": [
+      "CutterBody"
+    ],
+    "warning": null
+  },
+  {
+    "appearance": {
+      "color": "#8fa8c8",
+      "name": "Custom",
+      "opacity": 1.0
+    },
+    "bodies": [
+      "Base"
+    ],
+    "components": [],
+    "faces": []
+  },
+  {
+    "bytes": 9658,
+    "format": "Step",
+    "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\plate.step"
+  },
+  {
+    "bytes": 75284,
+    "format": "StlBinary",
+    "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\plate.stl"
+  },
+  {
+    "bytes": 6782,
+    "name": "plate",
+    "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\plate.solidcraft"
+  },
+  {
+    "format": "csv",
+    "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\params.csv",
+    "text": "name,unit,expression,value,comment,favorite\nW,mm,120,120,,false\nD,mm,80,80,,false\nT,mm,10,10,,false\nHOLE_D,mm,20,20,,false\nHOLE_PITCH,mm,30,30,,false\n"
+  },
+  {
+    "camera": {
+      "distance": 207.81696423776378,
+      "fov": 0.0,
+      "pitch": 0.6154797086703874,
+      "roll": 0.0,
+      "target": [
+        60.0,
+        40.0,
+        5.000000000000002
+      ],
+      "up": "z",
+      "yaw": -0.7853981633974483
+    },
+    "document_changed": false,
+    "empty": false
+  },
+  {
+    "bodies": [
+      {
+        "bounds": {
+          "max": [
+            120.0,
+            80.0,
+            10.000000000000004
+          ],
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "color": [
+          143,
+          168,
+          200
+        ],
+        "face_appearances": 0,
+        "name": "Base",
+        "opacity": 1.0,
+        "ordinal": 0,
+        "stable_target": {
+          "component": 0,
+          "definition": "Base",
+          "feature": 1,
+          "occurrence_path": []
+        },
+        "triangles": 204
+      }
+    ],
+    "bounds": {
+      "max": [
+        120.0,
+        80.0,
+        10.000000000000004
+      ],
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "overlays": false
+  }
+]

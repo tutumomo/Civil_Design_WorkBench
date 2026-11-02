@@ -1,0 +1,118 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_Vbrg_shear_stud",
+   "title": "剪力榫受剪之標稱承壓強度 Vbrg,sl（混凝土結構設計規範 112 年版 式17.11.2.1）",
+   "src": "rc112",
+   "clause": "17.11.2.1",
+   "page": 266,
+   "keywords": "混凝土 錨栓 剪力榫 承壓強度 Vbrg,sl 1.7 fc′ Aef,sl Ybrg,sl Cook Michler 2017 均勻承壓應力",
+   "unit": "tf",
+   "output": "Vbrg",
+   "latex": "V_{brg,sl}=1.7f'_c\\,A_{ef,sl}\\,Y_{brg,sl}",
+   "vars": {
+    "fc": {
+     "desc": "混凝土名義抗壓強度 f′c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Aef": {
+     "desc": "剪力榫有效承壓面積 A_ef,sl（cm²）",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Y": {
+     "desc": "Y_brg,sl（依第 17.11.2.2 節；無修正時取 1.0）",
+     "unit": "-",
+     "min": 0,
+     "default": 1.0
+    }
+   },
+   "expr": "1.7*fc*Aef*Y",
+   "conditions": [
+    {
+     "expr": "fc>0 and Aef>0",
+     "msg": "f′c、A_ef,sl 須為正"
+    },
+    {
+     "expr": "Y>0",
+     "msg": "Y_brg,sl 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "Aef": 20.0,
+      "Y": 1.0
+     },
+     "out": 9520.0
+    },
+    {
+     "in": {
+      "fc": 350.0,
+      "Aef": 30.0,
+      "Y": 0.8
+     },
+     "out": 14280.0
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**17.11.2.1 式(17.11.2.1)**：**剪力榫受剪下之標稱承壓強度 Vbrg,sl 應依下式計算：Vbrg,sl＝1.7 f′c·A_ef,sl·Y_brg,sl**；**其中 Y_brg,sl 依第 17.11.2.2 節**。解說：**本式係基於均勻承壓應力 1.7 f′c 作用於剪力榫有效面積**（詳 Cook 和 Michler, 2017）。**具剪力榫之基板之剪力作用下承壓強度與剪力榫承壓、埋置板（如果有）、銲接錨栓（如果有）有關；第 17.11.2 節之方法僅包含剪力榫之貢獻**（Cook 和 Michler 2017 另討論該方法之發展及包含埋置板與銲接錨栓承壓貢獻下之較不保守程序）。**量綱檢查：f′c(kgf/cm²)×A_ef(cm²)＝kgf ✓，與 Vbrg,sl 為力量一致。**",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱檢查（B 類；本條算式在文字層可辨識，依 SOP §2.1 以量綱與邊界條件交叉檢查）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase1b.json"
+  },
+  {
+   "id": "rc112_ANao_adhesive_anchor",
+   "title": "黏結式錨栓之投影影響面積 ANao＝(2cNa)²（混凝土結構設計規範 112 年版 式17.6.5.1.2a）",
+   "src": "rc112",
+   "clause": "17.6.5.1.2",
+   "page": 241,
+   "keywords": "混凝土 黏結式錨栓 投影影響面積 ANao 2cNa cNa 邊距 τuncr da 17.6.5.1.2a 握裹強度 混凝土拉破",
+   "unit": "cm2",
+   "output": "ANao",
+   "latex": "A_{Nao}=\\left(2c_{Na}\\right)^{2};\\qquad c_{Na}=\\frac{10\\tau_{uncr}}{7.7\\sqrt{d_a}}\\ \\left[\\ =\\frac{10\\tau_{uncr}}{7.6\\sqrt{d_a}}\\ \\text{(MPa 版)}\\right]",
+   "vars": {
+    "cNa": {
+     "desc": "c_Na（cm；由式17.6.5.1.2b 計算，或直接給值）",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "(2*cNa)**2",
+   "conditions": [
+    {
+     "expr": "cNa>=0",
+     "msg": "c_Na 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "cNa": 10.0
+     },
+     "out": 400.0
+    },
+    {
+     "in": {
+      "cNa": 15.0
+     },
+     "out": 900.0
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**17.6.5.1.2 式(17.6.5.1.2a)(17.6.5.1.2b)**：**A_Nao 是單根黏結式錨栓其邊距大於或等於 c_Na 所形成之投影影響面積：A_Nao＝(2c_Na)²**（式17.6.5.1.2a）；**其中 c_Na＝10τ_uncr/(7.7√d_a)**（式17.6.5.1.2b；方括號內並列 MPa 制之 **10τ_uncr/(7.6√d_a)**）。解說：**握裹強度之評估僅適用於黏結式錨栓**。**埋設較淺之單根錨栓承受拉力載重到破壞可能出現混凝土拉破破壞，而埋設較深則產生握裹破壞**；**當個別受力會產生握裹破壞之黏結式錨栓處於錨栓群或鄰邊緣之條件下，可能會產生混凝土破壞**；**所有情況下黏結式錨栓之拉力強度皆受限於由式(17.6.2.1a) 和 (17.6.2.1b)（Eligehausen 等人 2006a）計算之混凝土拉破強度**。**受拉黏結式錨栓其標稱握裹強度對於錨栓間距和邊距之影響，已包含於式(17.6.5.1a) 和 (17.6.5.1b) 中修正因數 A_Na/A_Nao 和 ψ_ed,Na。** ⚠ **文字層另給 τ_uncr 之 kg/cm² 與 MPa 兩版係數 7.7 與 7.6，比值僅 1.3%——與一般 kgf/cm²↔MPa 之 10.2 倍不同，研判為兩制分別迴歸之常數；引用時須確認所用單位制。本式回傳 A_Nao（cm²）。**",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱檢查（B 類；本條算式在文字層可辨識，依 SOP §2.1 以量綱與邊界條件交叉檢查）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase1b.json"
+  }
+ ],
+ "tables": []
+}

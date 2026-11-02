@@ -1,0 +1,20 @@
+{
+  "name": "export+render 測試",
+  "commands": [
+    { "command": "parameters.add", "params": { "name": "W", "expression": "120", "unit": "mm" } },
+    { "command": "parameters.add", "params": { "name": "D", "expression": "80", "unit": "mm" } },
+    { "command": "parameters.add", "params": { "name": "T", "expression": "10", "unit": "mm" } },
+    { "command": "parameters.add", "params": { "name": "HOLE_D", "expression": "20", "unit": "mm" } },
+    { "command": "parameters.add", "params": { "name": "HOLE_PITCH", "expression": "30", "unit": "mm" } },
+    { "command": "solid.box", "params": { "length": "W", "width": "D", "height": "T", "corner": [0,0,0], "name": "Plate", "body_name": "Base" } },
+    { "command": "solid.cylinder", "params": { "radius": "HOLE_D / 2", "height": "T * 3", "base": ["HOLE_PITCH", "D / 2", "-T"], "name": "Cutter", "body_name": "CutterBody" } },
+    { "command": "solid.combine", "params": { "target": "Base", "tools": ["CutterBody"], "operation": "cut" } },
+    { "command": "appearance.assign", "params": { "bodies": ["Base"], "color": "#8FA8C8" } },
+    { "command": "file.export", "params": { "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\plate.step", "format": "step" } },
+    { "command": "file.export", "params": { "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\plate.stl", "format": "stl", "quality": "fine" } },
+    { "command": "file.save", "params": { "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\plate.solidcraft", "format": "container" } },
+    { "command": "parameters.export", "params": { "path": "D:\\公司案件.AI\\docs\\_sc_test\\out\\params.csv", "format": "csv" } },
+    { "command": "render.camera.fit", "params": {} },
+    { "command": "render.scene", "params": {} }
+  ]
+}

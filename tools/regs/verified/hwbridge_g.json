@@ -1,0 +1,1940 @@
+{
+ "formulas": [
+  {
+   "id": "hwbridge_pile_group_efficiency",
+   "title": "群樁載重折減率 E（Converse-Labarre 式5-8）",
+   "src": "hwbridge",
+   "clause": "5.5.4",
+   "page": 15,
+   "keywords": "公路橋梁 群樁 折減率 E Converse-Labarre 摩擦樁 塑性土壤 n m d s phi",
+   "unit": "-",
+   "output": "E",
+   "latex": "E=1-\\frac{\\varphi}{90}\\cdot\\frac{(n-1)m+(m-1)n}{mn},\\quad \\varphi=\\tan^{-1}(d/s)",
+   "vars": {
+    "n": {
+     "desc": "每排樁之根數 n",
+     "unit": "根",
+     "min": 1
+    },
+    "m": {
+     "desc": "群樁之排數 m",
+     "unit": "排",
+     "min": 1
+    },
+    "d": {
+     "desc": "樁之平均直徑 d",
+     "unit": "m",
+     "min": 0
+    },
+    "s": {
+     "desc": "樁之中心間距 s（縱橫不同時取較小者）",
+     "unit": "m",
+     "min": 1e-09
+    }
+   },
+   "expr": "1-(degrees(atan(d/s))/90)*(((n-1)*m+(m-1)*n)/(m*n))",
+   "conditions": [
+    {
+     "expr": "n>=1 and m>=1 and s>0",
+     "msg": "n、m 須≥1，s 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "n": 3,
+      "m": 3,
+      "d": 0.6,
+      "s": 1.8
+     },
+     "out": 0.7268896470678221
+    },
+    {
+     "in": {
+      "n": 2,
+      "m": 4,
+      "d": 0.5,
+      "s": 1.5
+     },
+     "out": 0.7439590441260833
+    }
+   ],
+   "notes": "5.5.4（公路橋梁設計規範）：**打入塑性土壤之摩擦群樁**，如載重能力不能以載重試驗決定時，可按 **Converse-Labarre 公式（式5-8）** 計算群樁中每根樁之載重折減率 **E＝1－(φ/90)·[(n－1)m＋(m－1)n]/(mn)**，其中 **φ＝tan⁻¹(d/s)**（角度量）。n 為每排樁根數、m 為排數、d 為樁平均直徑、s 為樁中心間距（縱橫不同時取較小者）。原文另註：若有其他更合理之估算方式亦得採用。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路橋梁設計規範 第五章 p.15 式(5-8) 及符號說明",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_steel_column_Pu",
+   "title": "鋼柱軸向最大容量 Pu＝0.85·As·Fcr 與 Fcr 二式（式9-150~9-154）",
+   "src": "hwbridge",
+   "clause": "9.3.17",
+   "page": 117,
+   "keywords": "公路橋梁 鋼柱 軸向載重 最大容量 Pu 0.85 As Fcr 挫屈 KL/r π 歐拉 有效長度",
+   "unit": "tf",
+   "output": "Pu",
+   "latex": "P_u=0.85A_sF_{cr};\\ F_{cr}=F_y\\left[1-\\frac{(KL/r)^2}{4\\pi^2}\\cdot\\frac{F_y}{E_c}\\right]\\ (\\frac{KL}{r}\\le\\sqrt{\\frac{2\\pi^2E_c}{F_y}});\\ F_{cr}=\\frac{\\pi^2E_c}{(KL/r)^2}\\ (>\\sqrt{\\frac{2\\pi^2E_c}{F_y}})",
+   "vars": {
+    "As": {
+     "desc": "柱斷面之有效總面積 As",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Fy": {
+     "desc": "鋼材降伏強度 Fy",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "Ec": {
+     "desc": "鋼材彈性模數 Ec",
+     "unit": "tf/cm2",
+     "min": 1
+    },
+    "KLr": {
+     "desc": "有效長細比 KL/r（K 依 9.3.17 第(2)款，Lc 為構材支撐點間長度）",
+     "unit": "-",
+     "min": 1e-09
+    }
+   },
+   "expr": "0.85*As*(Fy*(1-(KLr**2)/(4*pi**2)*(Fy/Ec)) if KLr<=sqrt(2*pi**2*Ec/Fy) else pi**2*Ec/(KLr**2))",
+   "conditions": [
+    {
+     "expr": "KLr>0 and Fy>0 and Ec>0",
+     "msg": "KL/r、Fy、Ec 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "As": 100,
+      "Fy": 2.5,
+      "Ec": 2100,
+      "KLr": 60
+     },
+     "out": 189.4313376528606
+    },
+    {
+     "in": {
+      "As": 100,
+      "Fy": 2.5,
+      "Ec": 2100,
+      "KLr": 150
+     },
+     "out": 78.29886158197557
+    }
+   ],
+   "notes": "9.3.17（公路橋梁設計規範）第1款「軸向載重／最大容量」：柱承受軸向載重時 **Pu＝0.85AsFcr（式9-150）**，As 為柱斷面有效總面積；挫屈強度 Fcr 由下列二式之一計得——當 **KL/r ≤ √(2π²Ec/Fy)（式9-151）**：**Fcr＝Fy[1－(KL/r)²Fy/(4π²Ec)]（式9-152）**；當 **KL/r > √(2π²Ec/Fy)（式9-153）**：**Fcr＝π²Ec/(KL/r)²（式9-154）**。Lc 為構材支撐點間長度。第(2)款「有效長度」：兩端兩方向均有側向支撐者 K＝0.75（末端為由螺栓或銲接…，續文未完整擷取）。**本條為公路橋梁規範之容許應力體系公式，與鋼構 99 (二) LRFD 之 φcPn 不同，勿混用。**",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路橋梁設計規範 第九章 p.117 式(9-150)~(9-154)",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_posttension_friction_loss",
+   "title": "後拉鋼材摩擦損失 Tx＝T0·e^(−KL−μα)（公路橋梁式8-1）",
+   "src": "hwbridge",
+   "clause": "8.16.1",
+   "page": 14,
+   "keywords": "公路橋梁 預力 後拉 摩擦損失 波浪影響 K L mu alpha Tx T0 0.3 簡化式",
+   "unit": "tf",
+   "output": "Tx",
+   "latex": "T_x=T_0\\,e^{-(KL+\\mu\\alpha)}",
+   "vars": {
+    "T0": {
+     "desc": "千斤頂施預力端之預力 T0",
+     "unit": "tf",
+     "min": 0
+    },
+    "K": {
+     "desc": "波浪影響係數 K（依實驗決定）",
+     "unit": "1/m",
+     "min": 0
+    },
+    "L": {
+     "desc": "自千斤頂端至計算點之鋼腱長度 L",
+     "unit": "m",
+     "min": 0
+    },
+    "mu": {
+     "desc": "曲線摩擦係數 μ（依實驗決定）",
+     "unit": "1/rad",
+     "min": 0
+    },
+    "alpha": {
+     "desc": "自千斤頂端至計算點之鋼腱角度變化總和 α",
+     "unit": "rad",
+     "min": 0
+    }
+   },
+   "expr": "T0*exp(-(K*L+mu*alpha))",
+   "conditions": [
+    {
+     "expr": "T0>=0 and K>=0 and L>=0 and mu>=0 and alpha>=0",
+     "msg": "各輸入須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "T0": 100,
+      "K": 0.002,
+      "L": 50,
+      "mu": 0.2,
+      "alpha": 0.1
+     },
+     "out": 88.69204367171575
+    },
+    {
+     "in": {
+      "T0": 200,
+      "K": 0.003,
+      "L": 40,
+      "mu": 0.25,
+      "alpha": 0.2
+     },
+     "out": 168.73296331927673
+    }
+   ],
+   "notes": "8.16.1（公路橋梁設計規範）：後拉鋼材之摩擦損失應依實驗決定其波浪影響及曲線摩擦係數，並在施預力作業時驗證之；設計假設之係數、千斤頂施預力範圍及鋼材伸長量應註明於設計圖。**摩擦損失依 Tx＝T0·e^−(KL+μα)（式8-1）計算**；**當 (KL＋μα) 值不大於 0.3 時，可採簡化式 Tx＝T0(1＋KL＋μα)**（原式以加號展開之近似，續式未完整擷取）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路橋梁設計規範 第八章 p.14 式(8-1)",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_deck_dist_rebar",
+   "title": "橋面板分佈鋼筋百分比（公路橋梁設計規範 第9 節；主筋平行 55/√S 最大 50%、垂直 121/√S 最大 67%）",
+   "src": "hwbridge",
+   "clause": "9",
+   "page": 12,
+   "keywords": "公路橋梁 橋面板 分佈鋼筋 百分比 55 S 121 S 50% 67% 覆土0.6m 箱涵 有效跨徑",
+   "unit": "%",
+   "output": "pct",
+   "latex": "\\text{主筋平行車行方向}:\\ pct=\\min\\left(\\frac{55}{\\sqrt{S}},50\\right);\\quad \\text{垂直}:\\ pct=\\min\\left(\\frac{121}{\\sqrt{S}},67\\right)",
+   "vars": {
+    "S": {
+     "desc": "橋面板有效跨徑 S（m）",
+     "unit": "m",
+     "min": 0
+    },
+    "parallel": {
+     "desc": "主筋是否平行車行方向（1＝平行、0＝垂直）",
+     "unit": "-",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "min(55/sqrt(S),50.0) if parallel>=0.5 else min(121/sqrt(S),67.0)",
+   "conditions": [
+    {
+     "expr": "S>0",
+     "msg": "S 須為正"
+    },
+    {
+     "expr": "parallel>=0 and parallel<=1",
+     "msg": "parallel 僅接受 0 或 1"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "S": 8.0,
+      "parallel": 1
+     },
+     "out": 19.445436482630054
+    },
+    {
+     "in": {
+      "S": 8.0,
+      "parallel": 0
+     },
+     "out": 42.77996026178612
+    }
+   ],
+   "notes": "公路橋梁設計規範**第9 節**：**除箱涵或橋面板其覆土超過 0.6 m 之情況可不依本節規定外**，應於**橋面板底層配置與主筋垂直方向之分佈鋼筋**，以便將集中載重分佈於主鋼筋之垂直方向。**分佈鋼筋配置量＝橋面板正彎矩所需主筋 × 下列百分比**：**(1) 主筋平行車行方向 → 55/√S，最大 50%**；**(2) 主筋垂直車行方向 → 121/√S，最大 67%**（S 為橋面板有效跨徑，m）。**主筋垂直車行方向時，分佈鋼筋量應配置於跨徑中央 1/2 部份，兩側 1/4 部份不得少於上式之半數**。⚠ **「覆土 >0.6 m 之箱涵或橋面板可免」是本條與箱涵設計最直接的接口——本工作區之箱涵頂版只要覆土超過 0.6 m 即不受本節分佈鋼筋限制。**",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路橋梁設計規範 p.12 第9 節條文（含圖說頁次之算式）",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_web_rebar_Vs",
+   "title": "梁腹鋼筋剪力強度 Vs＝Av·fsy·d/s 及 Av,min＝3.5b′s/fsy（公路橋梁設計規範 式8-30、8-31）",
+   "src": "hwbridge",
+   "clause": "8.20.3",
+   "page": 24,
+   "keywords": "公路橋梁 梁腹鋼筋 剪力強度 Vs Av fsy d s 2.1 f'c b' d 0.75h 60cm 1.06 最小斷面積 3.5 4200",
+   "unit": "kgf",
+   "output": "Vs",
+   "latex": "V_s=\\frac{A_v f_{sy} d}{s}\\ (\\le 2.1\\sqrt{f'_c}\\,b' d),\\qquad A_{v,\\min}=\\frac{3.5\\,b' s}{f_{sy}}",
+   "vars": {
+    "Av": {
+     "desc": "距離 s 間之梁腹鋼筋面積 Av（cm²）",
+     "unit": "cm2",
+     "min": 0
+    },
+    "fsy": {
+     "desc": "梁腹鋼筋設計降伏強度 fsy（kgf/cm²，**不得超過 4200**）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "d": {
+     "desc": "有效深度 d（cm；**但 d ≥ 0.8h**）",
+     "unit": "cm",
+     "min": 0
+    },
+    "s": {
+     "desc": "梁腹鋼筋間距 s（cm）",
+     "unit": "cm",
+     "min": 0
+    },
+    "fc": {
+     "desc": "混凝土規定抗壓強度 f′c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "bp": {
+     "desc": "腹板寬 b′（cm）",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "Av*min(fsy,4200.0)*d/s",
+   "conditions": [
+    {
+     "expr": "s>0 and d>0",
+     "msg": "s、d 須為正"
+    },
+    {
+     "expr": "Av*min(fsy,4200.0)*d/s <= 2.1*sqrt(fc)*bp*d",
+     "msg": "Vs 超過上限 2.1√f′c·b′·d"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "fsy>4200",
+     "msg": "fsy 超過 4200 kgf/cm²，計算時已取上限"
+    },
+    {
+     "expr": "s>0.75*999999",
+     "msg": "間距上限 0.75h 且 ≤60 cm，須自行檢核"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Av": 5.0,
+      "fsy": 2800,
+      "d": 60,
+      "s": 15,
+      "fc": 280,
+      "bp": 40
+     },
+     "out": 56000.0
+    },
+    {
+     "in": {
+      "Av": 6.0,
+      "fsy": 2800,
+      "d": 70,
+      "s": 20,
+      "fc": 350,
+      "bp": 45
+     },
+     "out": 58800.0
+    }
+   ],
+   "notes": "公路橋梁設計規範**8.20.3**：**梁腹鋼筋（剪力鋼筋）提供之剪力強度 Vs＝Av·fsy·d/s（式8-30）**，**Vs 不得大於 2.1√f′c·b′·d，但 d ≥ 0.8h**。**間距不應超過 0.75h 或 60 cm；當 Vs 超過 1.06√f′c·b′·d 時，最大間距須減少一半**。**梁腹鋼筋最小斷面積 Av＝3.5·b′·s/fsy（式8-31，b′、s 單位 cm）**。**梁腹鋼筋設計降伏強度 fsy 不得超過 4200 kgf/cm²**。⚠ **注意本規範之最小量 3.5b′s/fsy 與 112 年版建築物 RC 規範之 0.062√f′c·bw·s/fy 不同型**（前者與混凝土強度無關、後者隨 √f′c 變化）；跨規範引用須指明。**工作台 rc_design 之箍筋採 112 年版式。**",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路橋梁設計規範 p.24 §8.20.3 式(8-30)(8-31) 及第2~4 項",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_deck_moment_A",
+   "title": "橋面板每公尺寬度活載重彎矩（情況A：主筋垂直車行方向）",
+   "src": "hwbridge",
+   "clause": "3",
+   "page": 9,
+   "keywords": "公路橋梁 橋面板 彎矩 情況A 主筋垂直車行方向 P20 P18 7300 5500 6.0 S 6.9 連續折減 0.8",
+   "unit": "kgf-m/m",
+   "output": "M",
+   "latex": "M=\\frac{P(6.0+S)}{6.9}\\quad(\\text{HS20/MS18},\\ P=P_{20}=7300\\ \\text{kgf});\\qquad M=\\frac{P_{15}(6.0+S)}{6.9}\\quad(\\text{HS15/MS13.5},\\ P_{15}=5500\\ \\text{kgf});\\qquad \\text{連續跨越}\\ge3\\ \\text{支承}\\times0.8",
+   "vars": {
+    "S": {
+     "desc": "有效跨徑 S（m，4.3.1 及 7.1.22 節6.項），情況A 適用範圍 0.6~7.2 m",
+     "unit": "m",
+     "min": 0.6,
+     "max": 7.2
+    },
+    "P": {
+     "desc": "標準貨車後輪輪荷重 P（kgf）：HS20(MS18)＝7300、HS15(MS13.5)＝5500",
+     "unit": "kgf",
+     "min": 0
+    },
+    "continuous": {
+     "desc": "1＝橋面板連續跨越三處以上支承（乘 0.8）；0＝簡支",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   },
+   "expr": "P*(6.0+S)/6.9*(0.8 if continuous>0.5 else 1.0)",
+   "conditions": [
+    {
+     "expr": "S>0 and P>0",
+     "msg": "S、P 須為正"
+    },
+    {
+     "expr": "S<=7.2",
+     "msg": "情況A 僅適用跨徑 0.6~7.2 m"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "S": 5.0,
+      "P": 7300.0,
+      "continuous": 0
+     },
+     "out": 11637.68115942029
+    },
+    {
+     "in": {
+      "S": 5.0,
+      "P": 5500.0,
+      "continuous": 1
+     },
+     "out": 7014.492753623189
+    }
+   ],
+   "notes": "公路橋梁設計規範（民國98 年版）**4.3.3 情況A**（本條在資料庫被解析成款號「3」，實體為「3. 彎矩 (1) 情況A」，見 notes 末）：**橋面板主筋垂直於車行方向、跨徑 0.6~7.2 m**，簡支情況之活載重彎矩（**未包括衝擊力**）＝**P(6.0＋S)/6.9**（kgf-m/m）。**HS20(MS18)：P20(P18)＝7300 kgf＝72 kN；HS15(MS13.5)：P15(P13.5)＝5500 kgf＝54 kN**。**橋面板連續跨越三處以上之支承時，正負彎矩可乘連續折減係數 0.8**。S 為 4.3.1 及 7.1.22 節6.項規定之有效跨徑（m）。⚠ **本式不含衝擊力，須另乘 (1+I)**；P 是**後輪**輪荷重，不是軸重。⚠ **條號 artifact：這批 unit 的 clause 被解析成「3」（實為 4.3.3 的款號），沿用該標籤以維持缺口追蹤一致。**",
+   "status": "verified",
+   "verified": {
+    "method": "第四章 p.9 文字層轉錄 P(6.0+S)/6.9、P20=7300／P15=5500、連續折減 0.8；與 p.47 懸臂橋面板頁之 E 值交叉核對公式家族",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_deck_moment_B",
+   "title": "橋面板最大活載重彎矩（情況B：主筋平行車行方向）與輪重分佈寬度 E",
+   "src": "hwbridge",
+   "clause": "3",
+   "page": 9,
+   "keywords": "公路橋梁 橋面板 情況B 主筋平行車行方向 E 1.2 0.06S 2.1 MLL 1340S 1490 1.3S-6.0 15m 30m",
+   "unit": "kgf-m/m",
+   "output": "MLL",
+   "latex": "E=1.2+0.06S\\le2.1\\ (\\text{m});\\qquad S<15:\\ M_{LL}=1340S;\\qquad 15\\le S\\le30:\\ M_{LL}=1490\\,(1.3S-6.0)",
+   "vars": {
+    "S": {
+     "desc": "有效跨徑 S（m）",
+     "unit": "m",
+     "min": 0
+    },
+    "vehicle": {
+     "desc": "1＝HS20(MS18)；2＝HS15(MS13.5)（取 HS20 結果之 3/4）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "defs": [
+    [
+     "_m",
+     "1340*S if S<15 else 1490*(1.3*S-6.0)"
+    ]
+   ],
+   "expr": "_m if vehicle==1 else 0.75*_m",
+   "conditions": [
+    {
+     "expr": "S>0",
+     "msg": "S 須為正"
+    },
+    {
+     "expr": "S<=30",
+     "msg": "本式適用跨徑至 30 m"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "S": 10.0,
+      "vehicle": 1
+     },
+     "out": 13400.0
+    },
+    {
+     "in": {
+      "S": 20.0,
+      "vehicle": 1
+     },
+     "out": 29800.0
+    },
+    {
+     "in": {
+      "S": 20.0,
+      "vehicle": 2
+     },
+     "out": 22350.0
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**4.3.3 情況B**：**橋面板主筋平行於車行方向**——**輪重在橋面板上之分佈寬度 E＝1.2＋0.06S（m），但不得超過 2.1 m**；設計車道載重應分佈於 **2E** 寬度上。簡支跨徑之最大活載重彎矩（**不含衝擊力**）：**S<15 m：MLL＝1340S**；**15 ≤S ≤30 m：MLL＝1490(1.3S−6.0)**（kgf-m/m）。**HS15(MS13.5) 採用 HS20(MS18) 所得之 3/4**。連續橋面板之彎矩應採用適當之分析方法依標準貨車或車道載重計算。**交叉驗證：S＝15 m 時兩式得 20,100 與 1490×13.5＝20,115 kgf-m/m（差 0.07%），分段連續。**",
+   "status": "verified",
+   "verified": {
+    "method": "第四章 p.9 文字層轉錄 E、兩段 MLL 與 HS15＝3/4 HS20；以 S=15 m 分段點連續性檢查（20,100 vs 20,115）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_cant_deck_moment",
+   "title": "懸臂橋面板每公尺寬度彎矩 M＝PX/E 與輪重分佈寬度 E（情況A／情況B）",
+   "src": "hwbridge",
+   "clause": "5",
+   "page": 11,
+   "keywords": "公路橋梁 懸臂橋面板 彎矩 PX/E E 0.8X 1.14 0.35X 0.98 2.1 欄杆載重 1.52 有效長度",
+   "unit": "kgf-m/m",
+   "output": "M",
+   "latex": "M=\\frac{PX}{E};\\qquad \\text{情況A}:E=0.8X+1.14;\\qquad \\text{情況B}:E=0.35X+0.98\\le2.1",
+   "vars": {
+    "P": {
+     "desc": "輪重 P（kgf）",
+     "unit": "kgf",
+     "min": 0
+    },
+    "X": {
+     "desc": "輪重中心至支承之距離 X（m）",
+     "unit": "m",
+     "min": 0
+    },
+    "case": {
+     "desc": "1＝情況A（主筋垂直車行方向）；2＝情況B（主筋平行車行方向）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "defs": [
+    [
+     "_E",
+     "0.8*X+1.14 if case==1 else min(0.35*X+0.98, 2.1)"
+    ]
+   ],
+   "expr": "P*X/_E",
+   "conditions": [
+    {
+     "expr": "P>0 and X>0",
+     "msg": "P、X 須為正"
+    },
+    {
+     "expr": "_E>0",
+     "msg": "E 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "P": 7300.0,
+      "X": 2.0,
+      "case": 1
+     },
+     "out": 5328.467153284671
+    },
+    {
+     "in": {
+      "P": 7300.0,
+      "X": 2.0,
+      "case": 2
+     },
+     "out": 8690.47619047619
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**4.5 懸臂橋面板**：依懸臂橋面板上輪重分佈公式，**橋面板設計之載重與板緣之支承情況無關**（輪重分佈已包括車輪在平行構材上之效應）——**橋面板每公尺寬度之彎矩＝PX/E**；**情況A（主筋垂直車行方向）E＝0.8X＋1.14**；**情況B（主筋平行車行方向）E＝0.35X＋0.98，但不得超過 2.1 m**；X 為輪重中心至支承之距離（m）。**欄杆載重**：橋面板承受欄杆載重之有效長度 E——**未設護牆 E＝0.8X＋1.14；設護牆 E＝0.8X＋1.52**（X 為欄杆柱中心至計算彎矩斷面處之距離）；**欄杆載重與輪重毋須同時作用**。⚠ **條號 artifact：此 unit 被解析成款號「5」；同一標籤下另含「成束鋼筋（第七章）」「鑄鋼品（第九章 9.2.2）」兩段無關內容，屬解析錯誤，非本條範圍。**",
+   "status": "verified",
+   "verified": {
+    "method": "第四章 p.11 文字層轉錄 PX/E、E=0.8X+1.14、E=0.35X+0.98≤2.1、欄杆載重 E 兩式；子代理讀原頁圖核對（p.47）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_slab_share_four_side",
+   "title": "四邊支承橋面板短跨方向之載重分擔比例 p（均佈載重／集中載重）",
+   "src": "hwbridge",
+   "clause": "5",
+   "page": 11,
+   "keywords": "公路橋梁 四邊支承 橋面板 雙向配筋 短跨徑 分擔比例 a b 四次方 三次方 均佈載重 集中載重",
+   "unit": "-",
+   "output": "p",
+   "latex": "\\text{均佈載重}:p=\\frac{b^{4}}{a^{4}+b^{4}};\\qquad \\text{板中央集中載重}:p=\\frac{b^{3}}{a^{3}+b^{3}}",
+   "vars": {
+    "a": {
+     "desc": "板短跨徑之長度 a（m）",
+     "unit": "m",
+     "min": 0
+    },
+    "b": {
+     "desc": "板長跨徑之長度 b（m，原條文之定義欄未列，依公式結構推定為長跨）",
+     "unit": "m",
+     "min": 0
+    },
+    "distributed": {
+     "desc": "1＝均佈載重（p＝b⁴/(a⁴+b⁴)）；0＝板中央集中載重（p＝b³/(a³+b³)）",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   },
+   "expr": "b**4/(a**4+b**4) if distributed>0.5 else b**3/(a**3+b**3)",
+   "conditions": [
+    {
+     "expr": "a>0 and b>0",
+     "msg": "a、b 須為正"
+    },
+    {
+     "expr": "b>=a",
+     "msg": "b 應為長跨（b ≥a）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "a": 3.0,
+      "b": 4.0,
+      "distributed": 1
+     },
+     "out": 0.7596439169139466
+    },
+    {
+     "in": {
+      "a": 3.0,
+      "b": 4.0,
+      "distributed": 0
+     },
+     "out": 0.7032967032967034
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**4.6 四邊支承之橋面板**：四邊支承並予雙向配筋之橋面板，其**短跨徑方向承受板面載重之分擔比例 p**——**均佈載重 p＝b⁴/(a⁴＋b⁴)**；**位於板中央之集中載重 p＝b³/(a³＋b³)**。a 為板短跨徑之長度。**量綱與邊界檢查：a＝b 時 p＝0.5（正方形板兩向各半，合理）；a≪b 時 p→1（短跨承擔全部，合理）；集中載重式因 b 的次方較低，分擔較均佈載重集中於短跨（b=2a 時 8/9＝0.889 vs 16/17＝0.941，方向正確）。** ⚠ **b 之定義未列於該頁（僅列 a），依公式結構推定為長跨徑；引用前請回原條文確認。**",
+   "status": "verified",
+   "verified": {
+    "method": "第四章 p.11 文字層轉錄兩式；以 a=b（p=0.5）與 a≪b（p→1）邊界及兩式相對大小做合理性檢查",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_splice_filler_reduction",
+   "title": "填板螺栓續接之設計剪力強度折減係數 R（公路橋梁 9.1.16 式9-4a）",
+   "src": "hwbridge",
+   "clause": "9.1.16",
+   "page": 18,
+   "keywords": "公路橋梁 鋼結構 填板 filler 續接 螺栓 折減係數 R 1+γ 1+2γ Af Ap 6mm 聯結物",
+   "unit": "-",
+   "output": "R",
+   "latex": "R=\\frac{1+\\gamma}{1+2\\gamma},\\qquad \\gamma=\\frac{A_f}{A_p}",
+   "vars": {
+    "Af": {
+     "desc": "被連接板之上下填板面積和 Af（cm²）",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Ap": {
+     "desc": "被連接板或上下續接板面積和之**較小值** Ap（cm²）",
+     "unit": "cm2",
+     "min": 1e-09
+    }
+   },
+   "expr": "(1+Af/Ap)/(1+2*Af/Ap)",
+   "conditions": [
+    {
+     "expr": "Ap>0",
+     "msg": "Ap 須為正"
+    },
+    {
+     "expr": "Af>=0",
+     "msg": "Af 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Af": 0.0,
+      "Ap": 20.0
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "Af": 20.0,
+      "Ap": 20.0
+     },
+     "out": 0.6666666666666666
+    },
+    {
+     "in": {
+      "Af": 10.0,
+      "Ap": 40.0
+     },
+     "out": 0.8333333333333334
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.1.16 第1 項(2) 填板 式(9-4a)**：**軸向載重構材使用大於 6 mm 填板之螺栓續接（含板梁翼板續接），應加額外聯結物以均佈分散構材總應力於構材與填板之組合斷面**；填板應延伸超出續接材料並外加螺栓鎖固，或另對延伸之填板以相當數量螺栓包含於續接中。**等於或小於 6 mm 之填板不必延伸發展**，但聯結物之設計剪力強度須乘折減係數 **R＝(1＋γ)/(1＋2γ)，γ＝Af/Ap**（Af 為被連接板上下填板面積和、Ap 為被連接板或上下續接板面積和之較小值）。**摩阻型（slip-critical）連接之設計滑動力不必因填板效應調整**；除工程師特別允許外，≥6 mm 之填板不得用多於兩片鋼板組合；**腹板差異 <1.6 mm 之螺栓續接不需設填板**。**邊界檢查：γ＝0（無填板）→R＝1.0；γ→∞→R→0.5；γ＝1→R＝2/3，單調遞減，符合物理。**",
+   "status": "verified",
+   "verified": {
+    "method": "第九章 p.18 文字層轉錄式(9-4a) 與 γ 定義；以 γ=0、1、∞ 三個邊界檢查（1.0、2/3、→0.5）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_splice_Ae",
+   "title": "受拉構材續接之有效面積 Ae＝An＋βAg ≤Ag（公路橋梁 9.1.16 式9-4w）",
+   "src": "hwbridge",
+   "clause": "9.1.16",
+   "page": 18,
+   "keywords": "公路橋梁 鋼結構 受拉構材 續接 有效面積 Ae An βAg 100/100W 開孔 32mm 0.15",
+   "unit": "cm2",
+   "output": "Ae",
+   "latex": "A_e=A_n+\\beta A_g\\le A_g,\\qquad \\beta=0.0\\ (\\text{M270 100/100W 或開孔}>32\\ \\text{mm});\\quad \\beta=0.15\\ (\\text{其他})",
+   "vars": {
+    "An": {
+     "desc": "構材淨斷面積 An（cm²，依 9.2.5 節13.項）",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Ag": {
+     "desc": "構材全斷面積 Ag（cm²）",
+     "unit": "cm2",
+     "min": 0
+    },
+    "beta": {
+     "desc": "β：0.0（M270 100/100W 級鋼材、或開孔直徑 >32 mm）；0.15（其他鋼材、或開孔直徑 ≤32 mm）",
+     "unit": "-",
+     "min": 0,
+     "max": 0.15,
+     "default": 0.15
+    }
+   },
+   "expr": "min(An+beta*Ag, Ag)",
+   "conditions": [
+    {
+     "expr": "Ag>0",
+     "msg": "Ag 須為正"
+    },
+    {
+     "expr": "An>=0",
+     "msg": "An 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "An": 30.0,
+      "Ag": 40.0,
+      "beta": 0.15
+     },
+     "out": 36.0
+    },
+    {
+     "in": {
+      "An": 38.0,
+      "Ag": 40.0,
+      "beta": 0.15
+     },
+     "out": 40.0
+    },
+    {
+     "in": {
+      "An": 30.0,
+      "Ag": 40.0,
+      "beta": 0.0
+     },
+     "out": 30.0
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.1.16 第4 項 受拉構材 式(9-4w)**：受拉構材之續接**至少應以設計力 Pu 設計**，Pu＝9.1.16 第1 項(1) 規定之設計強度 × 構材有效面積 Ae，**Ae＝An＋βAg ≤Ag**。**β＝0.0 用於 AASHTO M270 100/100W 級（ASTM A709 100/100W 級）鋼材，或開孔直徑大於 32 mm；β＝0.15 用於其他鋼材，或開孔直徑不大於 32 mm。** 開孔直徑依 9.2.5 節13.項計算。**續接藉螺栓剪力及螺栓孔承壓力發展之強度至少應足以承受設計力。** **上限 Ae ≤Ag 已內建**（淨斷面積＋β·全斷面積不得超過全斷面積，避免淨斷面積接近全斷面積時高估）。同條第1 項(1) **續接設計強度取「續接點需求設計強度與設計構材強度之平均值」且不得小於設計構材強度之 75%**。",
+   "status": "verified",
+   "verified": {
+    "method": "第九章 p.18 文字層轉錄式(9-4w)、β 兩款規定與上限；以 An 接近 Ag 時上限生效之案例檢查",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_pc_fsu_bonded",
+   "title": "握裹預力構材之極限鋼材應力 f*su（公路橋梁 8.17.4 式8-17、8-17A）",
+   "src": "hwbridge",
+   "clause": "8.17.4",
+   "page": 20,
+   "keywords": "公路橋梁 預力混凝土 f*su 握裹構材 8-17 8-17A γ* 0.28 0.40 0.55 低鬆弛 應力去除 鋼棒 β1 p*fs'/fc'",
+   "unit": "kgf/cm2",
+   "output": "f_su",
+   "latex": "\\text{僅預力鋼材}:f^{*}_{su}=f'_s\\left[1-\\frac{\\gamma^{*}}{\\beta_1}\\cdot\\frac{p^{*}f'_s}{f'_c}\\right];\\qquad \\text{含非預力拉力鋼材}:f^{*}_{su}=f'_s\\left\\{1-\\frac{\\gamma^{*}}{\\beta_1}\\left[\\frac{p^{*}f'_s}{f'_c}+\\frac{d}{d_t}\\left(\\frac{pf_{sy}}{f'_c}\\right)\\right]\\right\\}",
+   "vars": {
+    "fs": {
+     "desc": "預力鋼材之極限抗拉強度 f′s（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "fc": {
+     "desc": "混凝土抗壓強度 f′c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    },
+    "beta1": {
+     "desc": "β1（等值矩形應力區深度比）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 0.85
+    },
+    "pstar": {
+     "desc": "p*＝預力鋼材面積／b·d（預力鋼筋比）",
+     "unit": "-",
+     "min": 0
+    },
+    "gamma": {
+     "desc": "γ*：0.28（低鬆弛鋼材）／0.40（應力去除鋼材）／0.55（鋼棒）",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 0.28
+    },
+    "d_over_dt": {
+     "desc": "d/d_t（d 預力鋼材有效深度、d_t 非預力拉力鋼材深度；僅含非預力鋼材時填 0）",
+     "unit": "-",
+     "min": 0,
+     "default": 0
+    },
+    "pfsy_fc": {
+     "desc": "p·f_sy/f′c（非預力鋼筋比 × 降伏強度／f′c；無非預力鋼材時填 0）",
+     "unit": "-",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "expr": "fs*(1-(gamma/beta1)*(pstar*fs/fc + d_over_dt*pfsy_fc))",
+   "conditions": [
+    {
+     "expr": "fc>0 and fs>0",
+     "msg": "f′c、f′s 須為正"
+    },
+    {
+     "expr": "beta1>0",
+     "msg": "β1 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fs": 19000.0,
+      "fc": 350.0,
+      "beta1": 0.8,
+      "pstar": 0.005,
+      "gamma": 0.28,
+      "d_over_dt": 0.0,
+      "pfsy_fc": 0.0
+     },
+     "out": 17195.0
+    },
+    {
+     "in": {
+      "fs": 19000.0,
+      "fc": 350.0,
+      "beta1": 0.8,
+      "pstar": 0.005,
+      "gamma": 0.28,
+      "d_over_dt": 0.95,
+      "pfsy_fc": 0.1
+     },
+     "out": 16563.25
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**8.17.4 第1 項(1) 握裹構材**：**僅含預力鋼材：f*su＝f′s[1－(γ*/β1)(p*f′s/f′c)]**（式8-17）；**包含非預力拉力鋼材：f*su＝f′s{1－(γ*/β1)[p*f′s/f′c＋(d/d_t)(p f_sy/f′c)]}**（式8-17A）。**γ*＝0.28（低鬆弛鋼材）／0.40（應力去除鋼材）／0.55（鋼棒）**。適用前提：(1) 預力鋼材之應力應變性質與 AASHTO 施工篇規定相近；(2) **損失後之有效預力不小於 0.5f′s**。**量綱檢查：(γ*/β1)(p*f′s/f′c) 無因次（p* 無因次、f′s/f′c 無因次），f*su 與 f′s 同單位 ✓。** 子代理已讀原頁圖（p.162）確認 8-17／8-17A 之分組與 γ* 三值。",
+   "status": "verified",
+   "verified": {
+    "method": "第八章 p.20 文字層＋子代理讀原頁圖雙來源（8-17、8-17A、γ* 0.28/0.40/0.55、兩項假設）；括號分組與量綱檢查",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_pc_fsu_unbonded",
+   "title": "非握裹預力構材與預鑄橋面底板之 f*su（公路橋梁 8.17.4 式8-18、8-19）",
+   "src": "hwbridge",
+   "clause": "8.17.4",
+   "page": 21,
+   "keywords": "公路橋梁 預力混凝土 非握裹 f*su 8-18 8-19 63 6.2 70 6.9 fse yu le li Ns 預鑄橋面底板 lx D 雙單位",
+   "unit": "kgf/cm2",
+   "output": "f_su",
+   "latex": "f^{*}_{su}=f_{se}+63\\left(\\frac{d-y_u}{l_e}\\right)\\le f^{*}_{s};\\qquad f^{*}_{su}=70\\frac{l_x}{D}+\\frac{2}{3}f_{se};\\qquad l_e=\\frac{l_i}{1+0.5N_s}",
+   "vars": {
+    "fse": {
+     "desc": "預力鋼腱於應力損失後之有效應力 f_se（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "mode": {
+     "desc": "1＝非握裹構材（式8-18）；2＝預鑄橋面底板（式8-19）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    },
+    "d": {
+     "desc": "斷面深度 d（cm，最外受壓纖維至拉力鋼腱之距離）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "yu": {
+     "desc": "y_u：預力鋼腱降伏後總斷面重心軸至最外受壓纖維之距離（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "le": {
+     "desc": "有效鋼腱長度 l_e＝l_i/(1＋0.5N_s)（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 1.0
+    },
+    "lx": {
+     "desc": "預力鋼絞索尾端至橋面底板中心之距離 l_x（cm，與 D 同單位）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "D": {
+     "desc": "鋼絞索標稱直徑 D（cm，與 l_x 同單位）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 1.0
+    },
+    "fs_lim": {
+     "desc": "上限 f*s（依本節第1 項求得之 f*su；填 0 表示不檢核）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "_v",
+     "fse+63*(d-yu)/le if mode==1 else 70*lx/D+2*fse/3"
+    ]
+   ],
+   "expr": "min(_v, fs_lim) if fs_lim>0 else _v",
+   "conditions": [
+    {
+     "expr": "fse>=0",
+     "msg": "f_se 須非負"
+    },
+    {
+     "expr": "le>0",
+     "msg": "l_e 須為正（分母）"
+    },
+    {
+     "expr": "mode!=2 or D>0",
+     "msg": "mode=2 時 D 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fse": 12000.0,
+      "mode": 1,
+      "d": 100.0,
+      "yu": 80.0,
+      "le": 2000.0,
+      "lx": 0.0,
+      "D": 1.0,
+      "fs_lim": 0
+     },
+     "out": 12000.63
+    },
+    {
+     "in": {
+      "fse": 12000.0,
+      "mode": 2,
+      "d": 0.0,
+      "yu": 0.0,
+      "le": 1.0,
+      "lx": 50.0,
+      "D": 1.27,
+      "fs_lim": 19000.0
+     },
+     "out": 10755.905511811023
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**8.17.4 第1 項(2) 非握裹構材 式(8-18)**：**f*su＝f_se＋63(d－y_u)/l_e，但不得大於 f*s**；**l_e＝l_i/(1＋0.5N_s)**（有效鋼腱長度）；y_u 為預力鋼腱降伏後總斷面重心軸至最外受壓纖維之距離；l_i 為端錨間之鋼腱長度；N_s 為二端錨間或二分散黏結點間之鉸接支承數目。**第2 項 預鑄橋面底板 式(8-19)**：**f*su＝70·l_x/D＋(2/3)f_se，但不得大於本節第1 項所求之 f*su**（D 鋼絞索標稱直徑、l_x 鋼絞索尾端至橋面底板中心之距離）。⚠ **雙單位說明（重要，避免誤判為「原文被劃掉」）：本規範採 kgf/cm²／MPa 雙欄並列，式(8-18) 的 63 與 6.2、式(8-19) 的 70 與 6.9 分別是 kgf/cm² 版與 MPa 版，比值 63/6.2＝10.16、70/6.9＝10.14 正確對應 1 kgf/cm²＝0.098 MPa，不是兩個互相取代的版本。本條目採 kgf/cm² 版（本庫單位制）。** 子代理讀原頁圖時曾把 MPa 欄誤判為「貼覆修正值」，此處已更正。",
+   "status": "verified",
+   "verified": {
+    "method": "第八章 p.21 子代理讀原頁圖（8-18、8-19、l_e、y_u、l_i、N_s 定義）；以 63/6.2＝10.16、70/6.9＝10.14 驗證雙單位對應（1 kgf/cm²=0.098 MPa）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_pc_Mcr_min_steel",
+   "title": "預力構材最少鋼材量：φMn ≥1.2M*cr 與開裂彎矩 M*cr（公路橋梁 8.18.2）",
+   "src": "hwbridge",
+   "clause": "8.18.2",
+   "page": 22,
+   "keywords": "公路橋梁 預力混凝土 最少鋼材量 開裂彎矩 Mcr 1.2 破壞模數 fr fpe Sc Sb Mdnc 合成斷面",
+   "unit": "tf-cm",
+   "output": "Mcr",
+   "latex": "M^{*}_{cr}=(f_r+f_{pe})\\,S_c-M_{d/nc}\\left(\\frac{S_c}{S_b}-1\\right);\\qquad \\phi M_n\\ge1.2\\,M^{*}_{cr}",
+   "vars": {
+    "fr": {
+     "desc": "混凝土破壞模數 f_r（kgf/cm²，約 2√f′c）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "fpe": {
+     "desc": "僅有效預力作用下，混凝土在最外受拉纖維之壓應力 f_pe（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Sc": {
+     "desc": "合成斷面受拉纖維之斷面模數 S_c（cm³）",
+     "unit": "cm3",
+     "min": 1e-09
+    },
+    "Sb": {
+     "desc": "非合成（鋼梁／預鑄）斷面受拉纖維之斷面模數 S_b（cm³）",
+     "unit": "cm3",
+     "min": 1e-09
+    },
+    "Mdnc": {
+     "desc": "作用於非合成斷面之靜載重彎矩 M_d/nc（kgf·cm）",
+     "unit": "kgf-cm",
+     "min": 0
+    }
+   },
+   "expr": "(fr+fpe)*Sc - Mdnc*(Sc/Sb-1)",
+   "conditions": [
+    {
+     "expr": "Sc>0 and Sb>0",
+     "msg": "S_c、S_b 須為正（分母）"
+    },
+    {
+     "expr": "fr>=0 and fpe>=0",
+     "msg": "f_r、f_pe 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fr": 35.0,
+      "fpe": 120.0,
+      "Sc": 200000.0,
+      "Sb": 150000.0,
+      "Mdnc": 5000000.0
+     },
+     "out": 29333333.333333332
+    },
+    {
+     "in": {
+      "fr": 35.0,
+      "fpe": 120.0,
+      "Sc": 150000.0,
+      "Sb": 150000.0,
+      "Mdnc": 5000000.0
+     },
+     "out": 23250000.0
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**8.18.2 最少鋼材量**：**預力及非預力鋼材之總量，在臨界斷面上應能發展出極限彎矩，且至少為依破壞模數算得之開裂彎矩 M*cr 之 1.2 倍**——**φMn ≥1.2M*cr**，其中 **M*cr＝(f_r＋f_pe)S_c－M_d/nc(S_c/S_b－1)**；M_d/nc 及 S_b 之近似值應可適用於任何中間合成斷面，**如非合成斷面時上式 S_c 應由 S_b 取代之**（此時第二項為 0，M*cr＝(f_r＋f_pe)S_b）。**2. 若配置之鋼材總量超出 3.23 節載重組合分析所得需要量之 1/3 以上時，本項最少鋼材量規定可忽略。3. 使用預鑄預力橋面底板之場鑄部分橋面板，其縱向最小非預力鋼材應大於 5.30 cm²/m。** ⚠ **文字層把第二項讀成 M_d/nc(1－S_b/S_c)，與原頁圖（子代理目視）的 (S_c/S_b－1) 不同；兩者對非合成斷面之差異為一號，已採目視版並在此記錄。**",
+   "status": "verified",
+   "verified": {
+    "method": "第八章 p.22 子代理讀原頁圖逐項確認（正負號、S_c 在分子、S_b 在分母）；文字層版本之差異已記錄；以非合成斷面 S_c=S_b 時第二項為 0 之退化檢查",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_pc_rebar_limit",
+   "title": "非預力鋼材參與極限強度之鋼材量上限（公路橋梁 8.19 式8-24、8-25）",
+   "src": "hwbridge",
+   "clause": "8.19",
+   "page": 22,
+   "keywords": "公路橋梁 預力混凝土 非預力鋼材 鋼材量上限 0.36β1 矩形斷面 翼板斷面 As fsy dt p*f*su p'fs'",
+   "unit": "-",
+   "output": "ratio",
+   "latex": "\\text{矩形}:\\frac{p\\,f_{sy}}{f'_c}\\cdot\\frac{d_t}{d}+\\frac{p^{*}f^{*}_{su}}{f'_c}-\\frac{p'f'_y}{f'_c}\\le0.36\\beta_1;\\qquad \\text{翼板}:\\frac{A_sf_{sy}}{b'd\\,f'_c}+\\frac{A_{sr}f^{*}_{su}}{b'd\\,f'_c}-\\frac{A'_sf'_y}{b'd\\,f'_c}\\le0.36\\beta_1",
+   "vars": {
+    "As": {
+     "desc": "非預力拉力鋼材面積 A_s（cm²）",
+     "unit": "cm2",
+     "min": 0,
+     "default": 0
+    },
+    "fsy": {
+     "desc": "非預力鋼材降伏強度 f_sy（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "b": {
+     "desc": "斷面寬度 b（cm；翼板斷面用 b′）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "d": {
+     "desc": "預力鋼材有效深度 d（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "dt": {
+     "desc": "非預力拉力鋼材深度 d_t（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "fc": {
+     "desc": "混凝土抗壓強度 f′c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    },
+    "pstar": {
+     "desc": "p*＝預力鋼材比（矩形斷面用）",
+     "unit": "-",
+     "min": 0,
+     "default": 0
+    },
+    "fsu": {
+     "desc": "f*su（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "p_prime_fs": {
+     "desc": "p′f′s（kgf/cm²，壓力鋼材項；無則填 0）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "beta1": {
+     "desc": "β1（等值矩形應力區深度比）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 0.85
+    },
+    "Asr_Asu": {
+     "desc": "翼板斷面之 A_sr·f*su/(kgf/cm²)（cm²·kgf/cm²；矩形斷面填 0）",
+     "unit": "cm2*kgf/cm2",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "expr": "(As*fsy/(b*d*fc))*(dt/d)+(pstar*fsu - p_prime_fs)/fc + Asr_Asu/(b*d*fc)",
+   "conditions": [
+    {
+     "expr": "b>0 and d>0 and fc>0",
+     "msg": "b、d、f′c 須為正"
+    },
+    {
+     "expr": "beta1>0",
+     "msg": "β1 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "(As*fsy/(b*d*fc))*(dt/d)+(pstar*fsu - p_prime_fs)/fc + Asr_Asu/(b*d*fc)>0.36*beta1",
+     "msg": "超過 0.36β1：撓曲強度須改依式(8-22)(8-23) 計算（最大鋼材量斷面）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "As": 0.0,
+      "fsy": 0.0,
+      "b": 30.0,
+      "d": 100.0,
+      "dt": 0.0,
+      "fc": 350.0,
+      "pstar": 0.005,
+      "fsu": 19000.0,
+      "p_prime_fs": 0.0,
+      "beta1": 0.8,
+      "Asr_Asu": 0.0
+     },
+     "out": 0.2714285714285714
+    },
+    {
+     "in": {
+      "As": 20.0,
+      "fsy": 4200.0,
+      "b": 30.0,
+      "d": 100.0,
+      "dt": 95.0,
+      "fc": 350.0,
+      "pstar": 0.004,
+      "fsu": 19000.0,
+      "p_prime_fs": 0.0,
+      "beta1": 0.8,
+      "Asr_Asu": 0.0
+     },
+     "out": 0.29314285714285715
+    },
+    {
+     "in": {
+      "As": 0.0,
+      "fsy": 0.0,
+      "b": 120.0,
+      "d": 100.0,
+      "dt": 0.0,
+      "fc": 350.0,
+      "pstar": 0.0,
+      "fsu": 19000.0,
+      "p_prime_fs": 0.0,
+      "beta1": 0.8,
+      "Asr_Asu": 76000.0
+     },
+     "out": 0.018095238095238095
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**8.19 及式(8-24)(8-25)**：非預力鋼材可視為協助梁承受極限強度，其承擔抗拉強度之力量等於面積乘降伏應力，若為——**矩形斷面（式8-24）：(p·f_sy/f′c)(d_t/d)＋p*·f*su/f′c－p′·f′_y/f′c ≤0.36β1**；**翼板斷面（式8-25）：A_s·f_sy/(b′d·f′c)＋A_sr·f*su/(b′d·f′c)－A′_s·f′_y/(b′d·f′c) ≤0.36β1**。滿足上式時設計撓曲強度依式(8-13A)(8-14A) 計算；超出時依式(8-22)(8-23) 計算。**原頁 400 dpi 逐字元驗證（推翻先前的『原書漏排 b·d』判定）：式8-24 第一項的分子是『鋼筋比 p』（與同式 p*、p′ 同一字形），不是面積 A_s；b·d 已隱含在 p＝A_s/(b·d) 之中，故分母只需 f′c，並非漏印。****量綱確認：p·f_sy/f′c、p*·f*su/f′c、p′·f′_y/f′c 三者皆無因次（本規範 8.18.1 即把 p*·f*su/f′c 定義為鋼材量指數），相加成立。****與式8-25 之對應：8-25 的三項分母皆為 b′d·f′c，是把 p、p*、p′ 展開成面積的寫法，兩式數值等價（8-24 另多一個 d_t/d 因數）。先前把 8-24 讀成 A_s/(b·d·f′c) 是把展開式錯套到比值式，才會誤判『漏印 b·d』。**（本條目 expr 計算時已用 A_s/(b·d) 當作 p，數值不受影響。）",
+   "status": "verified",
+   "verified": {
+    "method": "原頁 400 dpi 高解析裁圖逐字元核對（子代理判讀）＋量綱／邊界連續性驗證（2026-11-02 消化 pending）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_anchor_zone_fca",
+   "title": "端錨前方混凝土壓應力與密排修正係數 k（公路橋梁 8.21.6 式8-35、8-36）",
+   "src": "hwbridge",
+   "clause": "8.21.6",
+   "page": 32,
+   "keywords": "公路橋梁 預力 端錨 錨碇區 壓應力 fca k Ab aeff beff lc Pu 8-35 8-36 密排 0.6",
+   "unit": "kgf/cm2",
+   "output": "f_ca",
+   "latex": "f_{ca}=k\\cdot\\frac{0.6P_u}{A_b}\\cdot\\frac{1}{1+\\ell_c\\left(\\dfrac{1}{b_{eff}}-\\dfrac{1}{t}\\right)};\\qquad k=1+\\left(2-\\frac{s}{a_{eff}}\\right)\\left(0.3+\\frac{n}{15}\\right)\\ (s<2a_{eff}),\\quad k=1\\ (s\\ge2a_{eff})",
+   "vars": {
+    "Pu": {
+     "desc": "乘因數鋼腱力 P_u（kgf）",
+     "unit": "kgf",
+     "min": 0
+    },
+    "Ab": {
+     "desc": "有效承壓面積 A_b（cm²，取 A_plate 與 A_conf 之大者，並受 (4/π)A_conf 等限制）",
+     "unit": "cm2",
+     "min": 1e-09
+    },
+    "lc": {
+     "desc": "局部區圍束鋼筋縱向延長 ℓ_c（cm，不得大於 1.15a_eff 或 1.15b_eff）",
+     "unit": "cm",
+     "min": 0
+    },
+    "beff": {
+     "desc": "有效承壓面積側向尺寸（平行斷面**短邊**）b_eff（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "t": {
+     "desc": "斷面厚度 t（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "aeff": {
+     "desc": "有效承壓面積側向尺寸（平行斷面**長邊**或鄰近端錨間距離）a_eff（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "s": {
+     "desc": "端錨間距 s（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "n": {
+     "desc": "每列端錨個數 n",
+     "unit": "-",
+     "min": 1,
+     "default": 1
+    }
+   },
+   "defs": [
+    [
+     "_k",
+     "(1+(2-s/aeff)*(0.3+n/15)) if s<2*aeff else 1.0"
+    ]
+   ],
+   "expr": "_k*0.6*Pu/Ab/(1+lc*(1/beff-1/t))",
+   "conditions": [
+    {
+     "expr": "Ab>0 and beff>0 and t>0 and aeff>0",
+     "msg": "A_b、b_eff、t、a_eff 須為正（皆在分母）"
+    },
+    {
+     "expr": "1+lc*(1/beff-1/t)>0",
+     "msg": "分母 1＋ℓ_c(1/b_eff−1/t) 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Pu": 100000.0,
+      "Ab": 900.0,
+      "lc": 30.0,
+      "beff": 30.0,
+      "t": 40.0,
+      "aeff": 40.0,
+      "s": 50.0,
+      "n": 2
+     },
+     "out": 70.66666666666666
+    },
+    {
+     "in": {
+      "Pu": 100000.0,
+      "Ab": 900.0,
+      "lc": 30.0,
+      "beff": 30.0,
+      "t": 40.0,
+      "aeff": 40.0,
+      "s": 200.0,
+      "n": 2
+     },
+     "out": 53.333333333333336
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**8.21.6 近似方法 第2 項 壓應力 式(8-35)(8-36)**：**局部區域與一般區域交界處、特殊錨碇裝置前方之混凝土壓應力**——**f_ca＝k·(0.6P_u/A_b)·1/[1＋ℓ_c(1/b_eff－1/t)]**；**k＝1＋(2－s/a_eff)(0.3＋n/15) 當 s<2a_eff；s ≥2a_eff 時 k＝1**。**若端錨於兩方向均為密排，k 應於兩向分別計算。** 符號：A_b 有效承壓面積（**取 A_plate 與 A_conf 之大者，A_plate 上限 (4/π)A_conf；A_conf 最大尺寸不得大於 A_plate 最大尺寸 2 倍或最小尺寸 3 倍；並須扣除套管面積**）、a_eff 平行斷面長邊、b_eff 平行斷面短邊、ℓ_c 局部區圍束鋼筋縱向延長（≤1.15a_eff 或 1.15b_eff）、P_u 乘因數鋼腱力、t 斷面厚度、s 端錨間距、n 每列端錨個數。**適用前提（第1 項五款）：長方形斷面且縱向延伸 ≥ 橫向尺寸之大者；錨碇區前後連續；端錨最小邊距 ≥1.5a；端錨中心間距 <1.5 倍端錨寬視為密排；鋼腱傾角 ≤20°（指向斷面中心）或 ≤5°（背離）。** ⚠ **0.6 在分子與 P_u 同組，不是整體係數；第二因數用 b_eff（短邊）而非 a_eff——此點與文字層的「ℓ_c/a_eff」不同，已採目視版。**",
+   "status": "verified",
+   "verified": {
+    "method": "第八章 p.32 子代理讀原頁圖逐項確認（0.6 位置、1/b_eff−1/t、k 式 0.3 與 n/15）＋文字層比對；s ≥2a_eff 時 k=1 之連續性檢查",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_anchor_zone_burst",
+   "title": "端錨區爆裂力 T_burst 與作用面距離 d_burst（公路橋梁 8.21.6 式8-37、8-38）",
+   "src": "hwbridge",
+   "clause": "8.21.6",
+   "page": 33,
+   "keywords": "公路橋梁 預力 端錨 爆裂力 Tburst dburst 0.25 0.5 5 a h e sinα 多股鋼腱 施預力順序",
+   "unit": "kgf",
+   "output": "T_burst",
+   "latex": "T_{burst}=0.25\\,\\Sigma P_u\\left(1-\\frac{a}{h}\\right)+0.5P_u\\sin\\alpha;\\qquad d_{burst}=0.5\\,(h-2e)+5e\\sin\\alpha",
+   "vars": {
+    "Pu_sum": {
+     "desc": "乘因數鋼腱力總合 ΣP_u（kgf，須考量施預力順序）",
+     "unit": "kgf",
+     "min": 0
+    },
+    "Pu": {
+     "desc": "單一鋼腱（或錨碇組）之乘因數鋼腱力 P_u（kgf，用於第二項）",
+     "unit": "kgf",
+     "min": 0
+    },
+    "a": {
+     "desc": "錨碇裝置側向尺寸，或一組錨碇裝置於計算方向之尺寸 a（cm）",
+     "unit": "cm",
+     "min": 0
+    },
+    "h": {
+     "desc": "計算方向之斷面側向尺寸 h（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "e": {
+     "desc": "單一錨碇裝置或錨碇組距斷面中心之距離 e（cm，取正值）",
+     "unit": "cm",
+     "min": 0
+    },
+    "alpha": {
+     "desc": "鋼腱合力之傾角 α（與構件中心線之夾角，度）",
+     "unit": "deg",
+     "min": 0,
+     "max": 20
+    }
+   },
+   "expr": "0.25*Pu_sum*(1-a/h)+0.5*Pu*sin(radians(alpha))",
+   "conditions": [
+    {
+     "expr": "h>0",
+     "msg": "h 須為正（分母）"
+    },
+    {
+     "expr": "a<=h",
+     "msg": "a 應不大於 h"
+    },
+    {
+     "expr": "Pu_sum>=Pu",
+     "msg": "ΣP_u 應不小於單一 P_u"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Pu_sum": 200000.0,
+      "Pu": 100000.0,
+      "a": 20.0,
+      "h": 60.0,
+      "e": 10.0,
+      "alpha": 5.0
+     },
+     "out": 37691.12047071625
+    },
+    {
+     "in": {
+      "Pu_sum": 100000.0,
+      "Pu": 100000.0,
+      "a": 20.0,
+      "h": 60.0,
+      "e": 10.0,
+      "alpha": 0.0
+     },
+     "out": 16666.666666666668
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**8.21.6 第3 項 爆裂力 式(8-37)(8-38)**：**T_burst＝0.25ΣP_u(1－a/h)＋0.5P_u sinα**；**d_burst＝0.5(h－2e)＋5e sinα**。符號：**ΣP_u 乘因數鋼腱力總合（須考量鋼腱施預力順序）**、**第二項僅用單一 P_u（非 ΣP_u）**、a 錨碇裝置側向尺寸或一組錨碇裝置於計算方向之尺寸、**e 單一錨碇裝置或錨碇組距斷面中心之距離（取正值）**、h 計算方向之斷面側向尺寸、**α 鋼腱合力之傾角（與構件中心線之夾角）**。**邊界檢查：α=0 時 T_burst＝0.25ΣP_u(1－a/h)（純軸向，僅爆裂）、d_burst＝0.5(h－2e)（作用於半深處）；e=0 時 d_burst＝0.5h ✓。** 同節第4 項：**端錨中心至中心間距 <0.4 倍斷面深度時，剝裂力依 8.21.3 節4.項(8) 計算；間距較大時須採更詳細分析法（壓拉桿模式等）**。",
+   "status": "verified",
+   "verified": {
+    "method": "第八章 p.33 子代理讀原頁圖逐項確認（0.25ΣP_u、0.5P_u、5e sinα、a/h−e 定義）＋文字層比對；α=0 與 e=0 之邊界檢查",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_mixed_beam_R",
+   "title": "混合梁彎曲折減因數 R 與腹板容許剪應力 Fv（公路橋梁 9.2.11 式9-89、9-90）",
+   "src": "hwbridge",
+   "clause": "9.2.11",
+   "page": 88,
+   "keywords": "公路橋梁 鋼結構 混合梁 hybrid girder 折減因數 R βΨ α 9-89 9-90 Fv cFy/3 腹板降伏 翼板",
+   "unit": "-",
+   "output": "R",
+   "latex": "R=1-\\frac{\\beta\\Psi(1-\\alpha)^{2}(3-\\Psi+\\Psi\\alpha)}{6+\\beta\\Psi(3-\\Psi)};\\qquad F_v=\\frac{c\\,F_y}{3}\\le\\frac{F_y}{3}",
+   "vars": {
+    "alpha": {
+     "desc": "α＝腹板最小規定降伏強度 ÷ 受拉翼板最小規定降伏強度",
+     "unit": "-",
+     "min": 0,
+     "max": 1
+    },
+    "beta": {
+     "desc": "β＝腹板斷面積 ÷ 受拉翼板斷面積",
+     "unit": "-",
+     "min": 0
+    },
+    "Psi": {
+     "desc": "Ψ＝自受拉翼板外緣至（合成梁換算斷面）中性軸之距離 ÷ 鋼梁斷面高度",
+     "unit": "-",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "1-beta*Psi*(1-alpha)**2*(3-Psi+Psi*alpha)/(6+beta*Psi*(3-Psi))",
+   "conditions": [
+    {
+     "expr": "alpha>=0 and alpha<=1",
+     "msg": "α 應在 0~1"
+    },
+    {
+     "expr": "Psi>=0 and Psi<=1",
+     "msg": "Ψ 應在 0~1"
+    },
+    {
+     "expr": "beta>=0",
+     "msg": "β 須非負"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "1-beta*Psi*(1-alpha)**2*(3-Psi+Psi*alpha)/(6+beta*Psi*(3-Psi))<0.5",
+     "msg": "R <0.5：折減幅度大，須確認翼板應力是否仍滿足 9.1.2／9.1.3 乘 R 後之容許值"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "alpha": 0.8,
+      "beta": 2.0,
+      "Psi": 0.5
+     },
+     "out": 0.9863529411764705
+    },
+    {
+     "in": {
+      "alpha": 1.0,
+      "beta": 2.0,
+      "Psi": 0.5
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "alpha": 0.5,
+      "beta": 4.0,
+      "Psi": 0.6
+     },
+     "out": 0.8622448979591837
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.2.11 混合梁 第2 項(1) 彎曲 式(9-89)**：**每一翼板之應力若不超過 9.1.2 或 9.1.3 節規定之鋼材容許應力乘以折減因數 R，則腹板之彎曲應力可超過其鋼材之容許應力**——**R＝1－βΨ(1－α)²(3－Ψ＋Ψα)/[6＋βΨ(3－Ψ)]**（原頁目視確認：**分母是「6＋βΨ(3－Ψ)」，原頁沒有 (6＋βΨ) 的括號**，即 βΨ 只與 (3－Ψ) 相乘再與 6 相加；括號只出現在 (3－Ψ)、(1－α)、(3－Ψ＋Ψα)）。α＝腹板最小規定降伏強度÷受拉翼板最小規定降伏強度、β＝腹板斷面積÷受拉翼板斷面積、Ψ＝自受拉翼板外緣至（合成梁換算斷面）中性軸之距離÷鋼梁斷面高度；**上下翼板彎曲應力皆小於容許應力時取 R＝1.0**。**(9-90) 剪力 Fv＝cFy/3 ≤Fy/3（c 依 9.2.4 節腹板剪應力挫屈係數）。** **邊界檢查：α＝1（腹板與翼板同強）→ R＝1（無折減）✓；β→0（腹板極小）→ R→1 ✓；Ψ→0 → R→1 ✓。**",
+   "status": "verified",
+   "verified": {
+    "method": "第九章 p.88（印刷 268）子代理讀原頁圖＋文字層比對；α=1、β→0、Ψ→0 三個退化邊界檢查；分母分組之歧義已標明",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_beam_column_interaction",
+   "title": "鋼構材軸壓力與雙向彎曲互制式（公路橋梁 9.2.6 式9-42~9-44）",
+   "src": "hwbridge",
+   "clause": "9.2.6",
+   "page": 69,
+   "keywords": "公路橋梁 鋼結構 軸壓力 雙向彎曲 互制 9-42 9-43 0.472 Fy Cm F'ex F'ey 支持點 Fe π2E KL/r",
+   "unit": "-",
+   "output": "utilization",
+   "latex": "\\frac{f_a}{F_a}+\\frac{C_{mx}f_{bx}}{\\left(1-\\frac{f_a}{F'_{ex}}\\right)F_{bx}}+\\frac{C_{my}f_{by}}{\\left(1-\\frac{f_a}{F'_{ey}}\\right)F_{by}}\\le1.0;\\qquad \\frac{f_a}{0.472F_y}+\\frac{f_{bx}}{F_{bx}}+\\frac{f_{by}}{F_{by}}\\le1.0\\ (\\text{支持點});\\qquad F'_{e}=\\frac{\\pi^{2}E}{\\left(K_bL_b/r_b\\right)^{2}}",
+   "vars": {
+    "fa": {
+     "desc": "軸向壓應力 f_a（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Fa": {
+     "desc": "不考慮彎曲面、軸力單獨存在時之容許軸向壓應力 F_a（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    },
+    "fbx": {
+     "desc": "對 X 軸計得之彎曲壓應力 f_bx（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Fbx": {
+     "desc": "對 X 軸彎矩單獨存在時之容許彎曲壓應力 F_bx（kgf/cm²，表9.8）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    },
+    "fby": {
+     "desc": "對 Y 軸計得之彎曲壓應力 f_by（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Fby": {
+     "desc": "對 Y 軸彎矩單獨存在時之容許彎曲壓應力 F_by（kgf/cm²，表9.8）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    },
+    "Cmx": {
+     "desc": "對 X 軸之彎矩-軸力互制係數 C_mx（表9.14；可保守取 1.0）",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 1.0
+    },
+    "Cmy": {
+     "desc": "對 Y 軸之 C_my（表9.14；可保守取 1.0）",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 1.0
+    },
+    "Fex": {
+     "desc": "F′ex＝π²E/(K_bxL_bx/r_bx)²（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    },
+    "Fey": {
+     "desc": "F′ey＝π²E/(K_byL_by/r_by)²（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    },
+    "Fy": {
+     "desc": "標稱降伏強度 F_y（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1e-09
+    }
+   },
+   "defs": [
+    [
+     "_u1",
+     "fa/Fa + Cmx*fbx/((1-fa/Fex)*Fbx) + Cmy*fby/((1-fa/Fey)*Fby)"
+    ],
+    [
+     "_u2",
+     "fa/(0.472*Fy) + fbx/Fbx + fby/Fby"
+    ]
+   ],
+   "expr": "max(_u1, _u2)",
+   "conditions": [
+    {
+     "expr": "Fa>0 and Fbx>0 and Fby>0",
+     "msg": "F_a、F_bx、F_by 須為正（分母）"
+    },
+    {
+     "expr": "1-fa/Fex>0 and 1-fa/Fey>0",
+     "msg": "f_a ≥F′e：放大係數無意義，構材已挫屈"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "fa>=Fex or fa>=Fey",
+     "msg": "f_a 已達 Euler 挫屈應力，須重新設計或改用更精確分析"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fa": 800.0,
+      "Fa": 1400.0,
+      "fbx": 600.0,
+      "Fbx": 1500.0,
+      "fby": 200.0,
+      "Fby": 1500.0,
+      "Cmx": 1.0,
+      "Cmy": 1.0,
+      "Fex": 6000.0,
+      "Fey": 5000.0,
+      "Fy": 2520.0
+     },
+     "out": 1.2059187516814638
+    },
+    {
+     "in": {
+      "fa": 1000.0,
+      "Fa": 1400.0,
+      "fbx": 900.0,
+      "Fbx": 1500.0,
+      "fby": 0.0,
+      "Fby": 1500.0,
+      "Cmx": 1.0,
+      "Cmy": 1.0,
+      "Fex": 6000.0,
+      "Fey": 5000.0,
+      "Fy": 2520.0
+     },
+     "out": 1.440731772935163
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.2.6 軸壓力與彎曲**：**同時承受軸向壓力與彎曲應力之構材**——**式(9-42)：f_a/F_a＋C_mx f_bx/[(1－f_a/F′ex)F_bx]＋C_my f_by/[(1－f_a/F′ey)F_by] ≤1.0**；**式(9-43)（在支持點處）：f_a/(0.472F_y)＋f_bx/F_bx＋f_by/F_by ≤1.0**；**式(9-44)：F′e＝π²E/(K_bL_b/r_b)²**。符號：f_a、F_a 不考慮彎曲面且軸力單獨時之容許軸向壓應力、f_bx／f_by 對 X／Y 軸計得之彎曲壓應力、**F_bx／F_by 依表9.8**、K_b 彎曲面有效長度因數（見附錄F、附錄G、附錄表G-2）、L_b 彎曲面實際支撐長度、r_b 彎曲面迴轉半徑、**C_mx／C_my 由表9.14（彎矩-軸力互制係數）求得，所有情況可保守採用 1.0**；**M1 為較小端彎矩，M1/M2 單曲度為正、反向曲度為負**。本式回傳兩條互制式之**較大利用比**（≤1 合格）。⚠ **(9-44) 文字層多出一個 S（疑為 π² 上標 2 之解析殘留），已按標準形式 π²E/(K_bL_b/r_b)² 轉錄。** ⚠ **0.472F_y 是「支持點」專用式的分母，不是一般式的 F_a；兩式必須同時滿足。**",
+   "status": "verified",
+   "verified": {
+    "method": "第九章 p.69 文字層轉錄(9-42)(9-43)(9-44) 與表9.14 正負號約定；與 AASHTO ASD 同型式比對（0.472F_y 支持點式）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_K_from_G",
+   "title": "構架柱有效長度因數 K 與 G 值之超越方程式（公路橋梁 附錄G）",
+   "src": "hwbridge",
+   "clause": "附錄G",
+   "page": 20,
+   "keywords": "公路橋梁 附錄G 柱 有效長度因數 K G值 超越方程式 π/K tan 36 6(Ga+Gb) Cc 非彈性挫屈 G=10",
+   "unit": "-",
+   "output": "residual",
+   "latex": "\\frac{G_aG_b\\left(\\frac{\\pi}{K}\\right)^{2}-36}{6\\left(G_a+G_b\\right)}=\\frac{\\pi/K}{\\tan\\left(\\pi/K\\right)};\\qquad G=\\frac{\\sum\\left(I_c/L_c\\right)}{\\sum\\left(I_g/L_g\\right)}",
+   "vars": {
+    "Ga": {
+     "desc": "柱上端 a 之 G 值（基礎非剛接可用 10；剛接可用 1.0）",
+     "unit": "-",
+     "min": 0
+    },
+    "Gb": {
+     "desc": "柱下端 b 之 G 值（同上）",
+     "unit": "-",
+     "min": 0
+    },
+    "K": {
+     "desc": "有效長度因數 K（供試算）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 5.0
+    }
+   },
+   "expr": "(Ga*Gb*(pi/K)**2-36)/(6*(Ga+Gb)) - (pi/K)/tan(pi/K)",
+   "conditions": [
+    {
+     "expr": "K>1.0",
+     "msg": "K 須 >1（無側撐構架；K=1 時 π/K=π 使 tan=0 奇異）"
+    },
+    {
+     "expr": "Ga+Gb>0",
+     "msg": "G_a＋G_b 須為正（分母）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Ga": 10.0,
+      "Gb": 10.0,
+      "K": 2.0
+     },
+     "out": 1.756167583560283
+    },
+    {
+     "in": {
+      "Ga": 1.0,
+      "Gb": 1.0,
+      "K": 1.5
+     },
+     "out": -1.4252595200998055
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**附錄G 柱之有效長度因數 K**：**連續構架中之柱無側向支撐於剪力牆、斜支撐或鄰近結構體者**，其側向穩定度由與柱剛性結合梁之彎曲剛度決定；**若梁能產生之剛度甚小，K 可超過 2.0**。**彈性範圍內柱同時挫屈時：{G_aG_b(π/K)²－36}/[6(G_a＋G_b)]＝(π/K)/tan(π/K)**（a、b 為柱之兩端）；**G＝Σ(I_c/L_c)/Σ(I_g/L_g)**（分子為撓曲平面上所有剛接於柱端之梁…原文如此，實指柱端以上／以下之柱構材 I_c/L_c 總和對梁構材 I_g/L_g 總和之比）。符號：I_c 柱慣性矩、L_c 柱無側向支撐長度、I_g 梁或其他受束縛梁慣性矩、L_g 其無側向支撐長度。**容許側傾：柱端支撐於基礎但非剛接者，G 理論上為無限大，實際設計可用 10；柱端剛接於適當設計之基礎者 G 可用 1.0。** **非彈性挫屈範圍（KL/r <C_c＝(2π²E/F_y)^1/2）內 K 值可減小**（減小方法見 Yura, 「Effective Length of Columns in Unbraced Frames」, AISC Engineering Journal）。⚠ **本式回傳的是「方程式的殘差」（應為 0），不是 K 值——求 K 須迭代至殘差為 0（建議牛頓法或附錄表G-2 圖解查值）。⚠ 文字層的另一種寫法 (G_aG_b/4)(π/K)²＋(G_a＋G_b)/2·(π/K)/tan(π/K)＝1 與原頁圖面式**代數上不等價**，已採圖面版（子代理目視）。**",
+   "status": "verified",
+   "verified": {
+    "method": "附錄G p.20 子代理讀原頁圖（超越方程式、G 定義、G=10／1.0、C_c）＋文字層比對；判別兩種寫法不等價後採圖面版",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "hwbridge_g.json"
+  }
+ ],
+ "tables": [
+  {
+   "id": "hwbridge_steel_pipe_pile_wall_T58",
+   "title": "無填充鋼管樁之最小壁厚（公路橋梁表5.8）",
+   "src": "hwbridge",
+   "clause": "5.6.12",
+   "page": 19,
+   "keywords": "公路橋梁 鋼管樁 最小壁厚 外徑 36cm 6mm 10mm 續接 對銲 套管銲 柱作用",
+   "kind": "lookup",
+   "unit": "mm",
+   "columns": [
+    "外徑",
+    "最小壁厚(mm)"
+   ],
+   "rows": [
+    {
+     "key": "小於36cm",
+     "values": {
+      "外徑": "小於 36 cm",
+      "最小壁厚(mm)": 6
+     }
+    },
+    {
+     "key": "36cm及以上",
+     "values": {
+      "外徑": "36 cm 及 36 cm 以上",
+      "最小壁厚(mm)": 10
+     }
+    }
+   ],
+   "notes": "5.6.12（公路橋梁設計規範）：**鋼管樁之最小壁厚不得小於本表**；2. 續接——無填充鋼管樁之續接應能傳遞基樁全斷面之強度，並應使用對銲或套管銲接、詳繪於設計圖；3. 打樁——底端可開口或封口，封口板不得延伸至樁周邊以外；4. 柱作用——鋼管樁如為彎矩結構之一部分，或預期有嚴重沖刷使部分基樁外露，則應考慮柱之作用。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照公路橋梁設計規範 第五章 p.19 表5.8 及條文",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_footing_moment_sections",
+   "title": "基腳最大彎矩之臨界斷面與鋼筋分佈（公路橋梁設計規範 5.4.7）",
+   "src": "hwbridge",
+   "clause": "5.4.7",
+   "page": 8,
+   "keywords": "公路橋梁 基腳 最大彎矩 臨界斷面 柱面 墩面 牆面 圬工牆 鋼鐵底板 雙向鋼筋 分佈 beta 長短邊比",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "支承型式",
+    "最大彎矩臨界斷面"
+   ],
+   "rows": [
+    {
+     "key": "RC柱/橋墩/牆",
+     "values": {
+      "支承型式": "支承混凝土柱、橋墩或牆之基腳",
+      "最大彎矩臨界斷面": "在**柱面、墩面或牆面**處"
+     }
+    },
+    {
+     "key": "圬工牆",
+     "values": {
+      "支承型式": "支承圬工牆之基腳",
+      "最大彎矩臨界斷面": "在**牆中心線與牆面之中點**處"
+     }
+    },
+    {
+     "key": "鋼鐵底板",
+     "values": {
+      "支承型式": "支承鋼鐵底板之基腳",
+      "最大彎矩臨界斷面": "在**柱面、墩面與底板邊緣之中點**處"
+     }
+    },
+    {
+     "key": "單向/方形雙向",
+     "values": {
+      "支承型式": "單向鋼筋基腳與方形雙向鋼筋基腳",
+      "最大彎矩臨界斷面": "鋼筋須**均勻配置於基腳之全部寬度**"
+     }
+    },
+    {
+     "key": "矩形雙向-長向",
+     "values": {
+      "支承型式": "矩形雙向鋼筋基腳（長向鋼筋）",
+      "最大彎矩臨界斷面": "**均勻配置於基腳之全寬**"
+     }
+    },
+    {
+     "key": "矩形雙向-短向",
+     "values": {
+      "支承型式": "矩形雙向鋼筋基腳（短向鋼筋）",
+      "最大彎矩臨界斷面": "**短向鋼筋總數量之 2/(β＋1)** 須對稱均勻配置於**柱或橋墩中心線兩側、寬度各等於 1/2 基腳短向寬度**之範圍內，其餘鋼筋均勻配置於該範圍外（β＝基腳長邊與短邊之比）"
+     }
+    }
+   ],
+   "notes": "公路橋梁設計規範**5.4.7**：**通過基腳任何垂直斷面之彎矩＝該斷面任一側作用力所產生之彎矩**；**最大彎矩須在下述臨界斷面計算**——(1) 支承混凝土柱／橋墩／牆之基腳在**柱面、墩面或牆面**；(2) 支承圬工牆之基腳在**牆中心線與牆面之中點**；(3) 支承鋼鐵底板之基腳在**柱面、墩面與底板邊緣之中點**。**鋼筋分佈**：單向與方形雙向基腳均勻配置於全寬；**矩形雙向基腳之短向鋼筋，總量之 2/(β＋1) 須配置於柱中心線兩側各半個基腳短向寬度之帶狀範圍內**（β＝長邊／短邊），其餘配置於帶外。**本條是獨立基腳配筋的核心幾何規則；工作台 foundation_isolated 之配筋採簡化均佈，未做 2/(β＋1) 之帶狀分配。**",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路橋梁設計規範 p.8 §5.4.7 第1~4 項",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_scour_appendix_I",
+   "title": "橋墩（基）沖刷深度計算與抗沖刷設計原則（公路橋梁設計規範 附錄I）",
+   "src": "hwbridge",
+   "clause": "附錄I",
+   "page": 413,
+   "keywords": "公路橋梁 沖刷 橋墩 基礎 局部沖刷 一般沖刷 束縮沖刷 側向侵蝕 跌水 向源侵蝕 抗沖刷 保護工 墩鼻 攻角 福祿數",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "項目",
+    "內容"
+   ],
+   "rows": [
+    {
+     "key": "沖刷因素",
+     "values": {
+      "項目": "評估應考量之沖刷因素",
+      "內容": "(1) **水文**：計畫洪水量、流體密度、洪水位、潮位；(2) **地文**：河床質粒徑組成與密度、泥砂啟動流速、河道特性；(3) **水力**：流速、水深、福祿數、運動黏滯係數、曼寧係數、底床剪應力；(4) **結構物幾何**：墩鼻形狀、與水流攻角、尺寸型式"
+     }
+    },
+    {
+     "key": "沖刷行為模式",
+     "values": {
+      "項目": "應考量之沖刷行為模式",
+      "內容": "**一般沖刷、局部沖刷、自然及人為引起之束縮沖刷、側向侵蝕（橫向沖刷）、跌水或水躍沖刷、向源侵蝕**"
+     }
+    },
+    {
+     "key": "總沖刷深度",
+     "values": {
+      "項目": "總沖刷深度之組成",
+      "內容": "**總沖刷深度＝一般沖刷＋橋墩（基）局部沖刷＋橋墩或河道窄縮之束縮沖刷**"
+     }
+    },
+    {
+     "key": "一般沖刷",
+     "values": {
+      "項目": "一般沖刷深度計算應考量",
+      "內容": "長期自然侵蝕、砂石開採、河岸側向侵蝕崩退、截彎取直致河床坡度增加、辮狀河道深槽移動、底床型式遷移、**河床保護工設置影響（橋基保護工、固床工、攔河堰）**、土石流潛勢、歷年河床變化"
+     }
+    },
+    {
+     "key": "局部與束縮沖刷",
+     "values": {
+      "項目": "局部沖刷與束縮沖刷之計算依據",
+      "內容": "依**交通部「公路排水設計規範」**及國內外文獻公式計算，惟**宜採經國內沖刷實測驗證過較適用之公式**；束縮沖刷須依橋梁處**上下游水位差及河床質組成**選用適當公式"
+     }
+    },
+    {
+     "key": "抗沖刷原則",
+     "values": {
+      "項目": "抗沖刷設計原則（四點）",
+      "內容": "(1) **蒐整**歷年災害成因、歷年流路航照大斷面量測、河川特性資料、橋梁竣工圖說；(2) 避免橋址上、下游新設河工構造物或保護工造成河道環境與流向大幅變遷；(3) 分析歷年災害成因以謀求適宜保護措施；(4) 設計橋基保護措施前須分析：**局部沖刷、側向侵蝕、跌水及水躍、地下水滲流侵蝕或管湧、地質及基礎結構設計強度、河道主深槽變動**"
+     }
+    }
+   ],
+   "notes": "公路橋梁設計規範**附錄I**（橋墩（基）沖刷、擋土牆設計規範、橋面防水及防蝕設計參考資料；相關章節第2.5 節）：**總沖刷深度＝一般＋局部＋束縮沖刷**；局部與束縮沖刷之公式**依「公路排水設計規範」及文獻，但宜採經國內實測驗證者**。**本附錄另有「擋土牆設計規範」與「橋面防水及防蝕設計」之參考資料，其正文（擋土牆穩定、沖刷深度公式表）未隨本單元完整擷取**，需要時回原規範附錄I 全文。⚠ **工作台 `hwdrain107`／`slope_stability` 均無沖刷深度計算**；跨河構造物（含箱涵出口）之沖刷須依本附錄流程另辦。",
+   "status": "verified",
+   "verified": {
+    "method": "逐段對照公路橋梁設計規範附錄I p.413 橋墩（基）沖刷深度計算參考一~五（六之公式比較表未完整擷取，已於 notes 註明）",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  },
+  {
+   "id": "hwbridge_strut_tie_design_8213",
+   "title": "D 區域（一般區域）之設計方法（公路橋梁設計規範 8.21.3）",
+   "src": "hwbridge",
+   "clause": "8.21.3",
+   "page": 26,
+   "keywords": "公路橋梁 壓拉桿 塑性平衡 壓拉桿模式 strut-and-tie 8.21 深梁 錨碇區 一般區域 設計方法",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "項目",
+    "內容"
+   ],
+   "rows": [
+    {
+     "key": "設計方法",
+     "values": {
+      "項目": "一般區域之設計方法",
+      "內容": "**塑性平衡模式－壓拉桿模式（strut-and-tie）**，見第 8.21 節相關規定；另可依其他經認可之方法"
+     }
+    },
+    {
+     "key": "適用對象",
+     "values": {
+      "項目": "適用範圍",
+      "內容": "預力混凝土構材之**錨碇區與其他 D 區域**（應力擾動區），以及深梁、墩帽、基腳等非撓曲構材"
+     }
+    }
+   ],
+   "notes": "公路橋梁設計規範**8.21.3**：**一般區域（D 區域）可依塑性平衡模式－壓拉桿模式（strut-and-tie）設計**（見 8.21 節）；本節適用於**預力構材之錨碇區**及其他應力擾動區。⚠ **本條目僅收錄方法論要點**——8.21 節之壓拉桿詳細規定（壓桿、拉桿、節點之強度式）在本規範之文字層分散且分式破碎，未逐式轉錄；**112 年版建築物 RC 規範之第23 章已入庫完整壓拉桿式**（見 `rc112_strut_fce`），實務計算建議以該章為主。**工作台未實作壓拉桿模型。**",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照公路橋梁設計規範 p.26 §8.21.3 第1 項設計方法",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "hwbridge_g.json"
+  }
+ ]
+}

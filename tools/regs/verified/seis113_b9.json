@@ -1,0 +1,123 @@
+{
+ "formulas": [
+  {
+   "id": "seis113_viscous_damper_beta_1032",
+   "title": "消能元件之模態有效阻尼比與模態功（建築物耐震設計規範 113 年版 10.3.2 式10-16~10-18）",
+   "src": "seis113",
+   "clause": "10.3.2",
+   "page": 143,
+   "keywords": "耐震 消能元件 速度型 黏滯阻尼器 模態有效阻尼比 β m-eff Wmj Wmk Cj δmrj Tm 10-16 10-17 10-18 振態反應譜",
+   "unit": "-",
+   "output": "result",
+   "latex": "\\beta_{m-eff}=\\beta_m+\\frac{\\sum_jW_{mj}}{4\\pi W_{mk}};\\quad W_{mk}=\\frac12\\sum_iF_{mi}u_{mi};\\quad W_{mj}=\\frac{2\\pi^{2}}{T_m}C_j\\delta_{mrj}^{2}",
+   "vars": {
+    "beta_m": {
+     "desc": "構架系統第 m 個振態之有效阻尼比 βm（不含元件）",
+     "unit": "-",
+     "min": 0,
+     "default": 0.05
+    },
+    "SWmj": {
+     "desc": "所有元件於第 m 振態完成一個循環所做的功之總和 ΣWmj",
+     "unit": "tf-m",
+     "min": 0,
+     "default": 10.0
+    },
+    "Wmk": {
+     "desc": "構架在第 m 振態之最大應變能 Wmk",
+     "unit": "tf-m",
+     "min": 1e-09,
+     "default": 100.0
+    },
+    "Tm": {
+     "desc": "包含速度型元件勁度之結構在第 m 振態之週期 Tm（s；mode=3）",
+     "unit": "s",
+     "min": 1e-09,
+     "default": 1.0
+    },
+    "Cj": {
+     "desc": "第 j 個元件之阻尼係數 Cj（mode=3）",
+     "unit": "tf-s/m",
+     "min": 0,
+     "default": 50.0
+    },
+    "delta": {
+     "desc": "第 j 個元件在第 m 振態下沿軸向兩端點間之相對位移 δmrj（m；mode=3）",
+     "unit": "m",
+     "min": 0,
+     "default": 0.01
+    },
+    "SFu": {
+     "desc": "ΣFmi·umi：各層水平慣性力×水平位移之和（tf·m；mode=2）",
+     "unit": "tf-m",
+     "min": 0,
+     "default": 200.0
+    },
+    "mode": {
+     "desc": "1＝βm-eff（式10-16）；2＝Wmk＝½ΣFmi·umi（式10-17）；3＝單一黏滯元件之循環功 Wmj（式10-18）",
+     "unit": "-",
+     "min": 1,
+     "max": 3,
+     "default": 1
+    }
+   },
+   "expr": "(beta_m+SWmj/(4.0*pi*Wmk)) if mode==1 else (0.5*SFu if mode==2 else 2.0*pi**2/Tm*Cj*delta**2)",
+   "tests": [
+    {
+     "in": {
+      "beta_m": 0.05,
+      "SWmj": 10.0,
+      "Wmk": 100.0,
+      "Tm": 1.0,
+      "Cj": 50.0,
+      "delta": 0.01,
+      "SFu": 200.0,
+      "mode": 1
+     },
+     "out": 0.05795774715459477
+    },
+    {
+     "in": {
+      "beta_m": 0.05,
+      "SWmj": 10.0,
+      "Wmk": 100.0,
+      "Tm": 1.0,
+      "Cj": 50.0,
+      "delta": 0.01,
+      "SFu": 200.0,
+      "mode": 2
+     },
+     "out": 100.0
+    },
+    {
+     "in": {
+      "beta_m": 0.05,
+      "SWmj": 10.0,
+      "Wmk": 100.0,
+      "Tm": 1.0,
+      "Cj": 50.0,
+      "delta": 0.01,
+      "SFu": 200.0,
+      "mode": 3
+     },
+     "out": 0.09869604401089359
+    }
+   ],
+   "notes": "建築物耐震設計規範（113 年版）**10.3.2 B. 速度型元件**：**第 m 個振態之有效阻尼 βm-eff＝βm＋ΣjWmj/(4π·Wmk)**（式10-16）；**βm 為構架系統第 m 個振態之有效阻尼比，Wmj 為第 j 個元件以該振態之樓層位移為基準完成一個完整循環所做的功，Wmk 為構架在第 m 振態之最大應變能**；**Wmk＝½ΣiFmi·umi**（式10-17；Fmi、umi 分別為第 m 個振態下第 i 層樓板的水平慣性力與水平位移）；**第 j 個線性黏滯元件於第 m 振態完成一個完整循環所做的功 Wmj＝(2π²/Tm)·Cj·δ²mrj**（式10-18；Tm 為包含速度型元件所提供勁度之結構在第 m 振態之週期，Cj 為元件阻尼係數，δmrj 為元件軸向兩端點間之相對位移）。**與 ASCE 7 §18.6.3 / FEMA 356 之 βm＝βI＋βV＋βH、Wj＝(2π²/T)·Cj·φ²rj 同型 ✓；式10-16 後之『(10-16) 式計算』為原書筆誤，應為式10-17。** **合理性：Wmj≥0 使 βm-eff≥βm；元件愈多（ΣWmj 大）阻尼愈大 ✓。** **另：動力分析所得最大基底剪力未達 10.3.1 節修正後等效基底剪力之 90% 時，所有子結構與桿件之作用力與變形量須等比例放大，達 90% 水準；有效阻尼低於臨界阻尼之 30% 時方可採振態反應譜疊加法。**",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Wmk>0 and Tm>0",
+     "msg": "Wmk、Tm 須為正"
+    }
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

@@ -1,0 +1,134 @@
+{
+ "schema": "civil-case/1",
+ "_note": "本檔由 tools\\case_package\\case_new.py 產生（骨架）。標「範例」的數字必須改成實際設計值；數量由 qty_models 派生，只需改 quantities.values 的輸入，boq／report 會自動跟隨。",
+ "project": {
+  "name": "箱涵三孔測試",
+  "full_name": "箱涵三孔測試（請改為正式工程名稱）",
+  "category": "箱涵",
+  "client": "（委託單位待填）",
+  "designer": "（設計者待填）",
+  "contractor": "",
+  "agency": "（主辦機關待填）",
+  "date": "（日期待填，如 114.10.28）",
+  "location": {
+   "county": "（縣市）",
+   "town": "（鄉鎮市區）",
+   "village": "（村里）",
+   "section": "（地段）",
+   "desc": "（地點描述，會印在預算書封面）"
+  },
+  "crs": {
+   "name": "TWD97 TM2 二度分帶",
+   "epsg": "EPSG:3826",
+   "unit": "公尺"
+  },
+  "coords": [],
+  "report_title": "設計報告書",
+  "report_subtitle": "箱涵"
+ },
+ "quantities": {
+  "model": "box_culvert",
+  "values": {
+   "length_m": 20.0,
+   "cell_count": 3,
+   "clear_width_m": 3.0,
+   "clear_height_m": 2.5,
+   "wall_thickness_m": 0.35,
+   "interior_wall_thickness_m": 0.3,
+   "top_slab_thickness_m": 0.4,
+   "bottom_slab_thickness_m": 0.45,
+   "cover_depth_m": 0.6
+  },
+  "notes": [
+   "箱涵尺寸為**範例值**：3 孔 3.00 m × 2.50 m、涵長 20.0 m、覆土 0.60 m。正式設計前須用 `tools\\design\\box_culvert.py` 完成水力與平面構架檢核。",
+   "混凝土量採外框矩形減孔洞；數量表不含翼牆、保護工、路面結構與損耗。",
+   "設計流量與土工參數目前為假設值，未完成前不得當作正式設計。"
+  ]
+ },
+ "boq": {
+  "items": [
+   {
+    "name": "施工測量及放樣",
+    "unit": "式",
+    "qty": 1,
+    "price": 4000.0,
+    "note": "經驗值",
+    "no": "01"
+   },
+   {
+    "name": "箱涵基礎開挖（含兩側工作面）",
+    "unit": "m3",
+    "qty_from": "excavation_m3",
+    "price": 320.0,
+    "note": "假設值，須詢價",
+    "no": "02"
+   },
+   {
+    "name": "結構用混凝土 fc'=280 kgf/cm2（含澆置）",
+    "unit": "m3",
+    "qty_from": "concrete_volume_m3",
+    "price": 3500.0,
+    "note": "假設值，須詢價",
+    "no": "03"
+   },
+   {
+    "name": "鋼筋及加工組立",
+    "unit": "kg",
+    "qty_from": "rebar_kg",
+    "price": 32.0,
+    "note": "假設值；正式預算須以配筋設計值或詢價確認",
+    "no": "04"
+   },
+   {
+    "name": "模板（箱涵內壁及底板頂面）",
+    "unit": "m2",
+    "qty_from": "formwork_m2",
+    "price": 520.0,
+    "note": "假設值，須詢價",
+    "no": "05"
+   },
+   {
+    "name": "頂版覆土回填及夯實",
+    "unit": "m3",
+    "qty_from": "soil_cover_volume_m3",
+    "price": 420.0,
+    "note": "假設值，須詢價",
+    "no": "06"
+   },
+   {
+    "name": "伸縮縫（填縫料及止水帶）",
+    "unit": "處",
+    "qty_from": "expansion_joint_count",
+    "price": 4500.0,
+    "note": "假設值",
+    "no": "07"
+   },
+   {
+    "name": "機具進出場費",
+    "unit": "式",
+    "qty": 1,
+    "price": 41800.0,
+    "note": "經驗值",
+    "no": "08"
+   }
+  ]
+ },
+ "report": {},
+ "hydraulics": {
+  "design_flow_m3s": 1.0,
+  "slope": 0.005,
+  "manning_n": 0.014,
+  "freeboard_min_m": 0.2,
+  "_note": "設計流量 1.0 m³/s 為**範例值**。正式設計須以 `tools\\design\\hydrology.py` 由集水區條件計算，或由排水網路分析提供。"
+ },
+ "culvert": {
+  "soil_unit_weight_kn_m3": 18.0,
+  "soil_phi_deg": 30.0,
+  "surcharge_kpa": 0.0,
+  "traffic_load_kpa": 10.0,
+  "groundwater_depth_m": null,
+  "internal_water_depth_m": 0.0,
+  "load_factor": 1.7,
+  "_note": "土工與活載參數為**假設值**，須依鑽探、道路等級與實際覆土替換。"
+ }
+}

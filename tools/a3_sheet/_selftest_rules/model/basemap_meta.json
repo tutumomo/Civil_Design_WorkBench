@@ -1,0 +1,33 @@
+{
+ "name": "規定測試",
+ "lat": 24.23662713391102,
+ "lon": 120.62833272619253,
+ "crs": "EPSG:3826",
+ "center_E": 212255.2638360802,
+ "center_N": 2681279.564613122,
+ "E0": 212115.2638360802,
+ "N0": 2681179.564613122,
+ "E1": 212395.2638360802,
+ "N1": 2681379.564613122,
+ "res_m": 0.1,
+ "scale": 600,
+ "osm_ok": true,
+ "bldg_source": "國土測繪中心 通用電子地圖 EMAPX99 向量化並正交化（連棟合併為建物群）",
+ "road_smooth_max_dev_m": 0.0,
+ "admin": {
+  "ctyName": "臺中市",
+  "townName": "大雅區",
+  "villageName": "六寶里",
+  "sectName": "六雅段",
+  "officeName": "雅潭"
+ },
+ "counts": {
+  "road_edges": 6,
+  "road_lots": 1,
+  "parcels": 4,
+  "buildings": 13,
+  "water": 2,
+  "osm_roads": 0
+ },
+ "dxf": "規定測試_現況平面圖_TWD97.dxf"
+}

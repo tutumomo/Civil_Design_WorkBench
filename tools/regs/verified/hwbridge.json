@@ -1,0 +1,1808 @@
+{
+ "formulas": [
+  {
+   "id": "hwbridge_impact_I",
+   "title": "衝擊係數 I=15.24/(L+38.1)（3.13 第3款，上限 30%）",
+   "src": "hwbridge",
+   "clause": "3.13",
+   "page": 12,
+   "keywords": "衝擊 衝擊係數 impact 橋梁 活載重 動力",
+   "unit": "-",
+   "output": "I",
+   "latex": "I=\\frac{15.24}{L+38.1}\\le0.30",
+   "vars": {
+    "L": {
+     "desc": "產生最大應力時之載重長度（橋面用設計跨徑；橫梁用支點中距；剪力用至較遠支點間長度）",
+     "unit": "m",
+     "min": 0.1,
+     "max": 200
+    }
+   },
+   "expr": "min(0.30,15.24/(L+38.1))",
+   "notes": "A 類項目（上部結構含剛構架支柱、橋墩不含基腳及地下部分、地面以上支撐上部結構之混凝土或鋼構）須計衝擊；B 類（橋台、擋土牆非 A 類第(3)項之基腳、基礎壓力及基腳、木結構、人行道載重、填土厚度 0.9 m 以上之涵洞）不計。懸臂部分剪力計算用 30%。涵洞覆土 0~0.3 m I=30%、0.3~0.6 m I=20%、0.6~0.9 m I=10%；橋面伸縮縫 I=100%。單位 kgf、m。",
+   "tests": [
+    {
+     "in": {
+      "L": 20
+     },
+     "out": 0.2623063683304647,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "L": 5
+     },
+     "out": 0.3
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第三章 p.27＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_sidewalk_load",
+   "title": "人行道活載重（3.12，跨徑超過 30 m）",
+   "src": "hwbridge",
+   "clause": "3.12",
+   "page": 11,
+   "keywords": "人行道 活載重 人行橋 sidewalk",
+   "unit": "kgf/m2",
+   "output": "P",
+   "latex": "P=\\left(150+\\frac{4500}{L}\\right)\\frac{16.7-W}{15.2}\\le300\\;(1470+44100/L)\\frac{16.7-W}{15.2}\\;(\\text{SI})",
+   "vars": {
+    "L": {
+     "desc": "人行道載重長度（跨徑）",
+     "unit": "m",
+     "min": 1,
+     "max": 300
+    },
+    "W": {
+     "desc": "人行道寬度",
+     "unit": "m",
+     "min": 0.5,
+     "max": 16.7
+    }
+   },
+   "expr": "min(300,(150+4500/L)*(16.7-W)/15.2)",
+   "notes": "適用跨徑超過 30 m；最大 300 kgf/m2（2.940 Pa）。承受懸臂式人行道應假設僅一遭受全部載重。人行橋兼供腳踏車通行者設計活載重 400 kgf/m2（3.920 Pa）。單位 kgf、m。",
+   "tests": [
+    {
+     "in": {
+      "L": 35,
+      "W": 2.0
+     },
+     "out": 269.4078947368421,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第三章 p.26＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_curb_load",
+   "title": "緣石橫向設計載重（3.12 第2款）",
+   "src": "hwbridge",
+   "clause": "3.12",
+   "page": 11,
+   "keywords": "緣石 curb 橫向力 護欄",
+   "unit": "kgf/m",
+   "output": "load",
+   "latex": "w=750\\ \\text{kgf/m}\\;(7.350\\ \\text{kN/m}),\\;\\text{作用於緣石頂；緣石高出橋面 }>25\\text{ cm 時作用於橋面上 25 cm}",
+   "vars": {
+    "on_bridge": {
+     "desc": "是否與車行欄杆成一體（＝1 須另計欄杆載重，見 2.9 節）",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "750.0",
+   "notes": "緣石設計至少承受 750 kgf/m 橫向力。與車行欄杆成一體時另計欄杆載重（2.9 節，未收錄）。",
+   "tests": [
+    {
+     "in": {
+      "on_bridge": 0
+     },
+     "out": 750.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第三章 p.26",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_centrifugal_C",
+   "title": "離心力百分比 C=0.79S²/R（3.22）",
+   "src": "hwbridge",
+   "clause": "3.22",
+   "page": 19,
+   "keywords": "離心力 曲線 超高 centrifugal",
+   "unit": "%",
+   "output": "C",
+   "latex": "C=\\frac{0.79S^2}{R}",
+   "vars": {
+    "S": {
+     "desc": "設計速率（依路面超高決定）",
+     "unit": "km/h",
+     "min": 10,
+     "max": 150
+    },
+    "R": {
+     "desc": "曲線半徑",
+     "unit": "m",
+     "min": 10,
+     "max": 5000
+    }
+   },
+   "expr": "0.79*S**2/R",
+   "notes": "C 為不含衝擊力之活載重產生之離心力百分比（乘活載重設計）。作用於沿路幅中心線路面上 1.8 m 處；每一車道以一標準貨車（不用車道載重）置於產生最大載重之位置。超高影響應予考慮。",
+   "tests": [
+    {
+     "in": {
+      "S": 60,
+      "R": 200
+     },
+     "out": 14.22,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第三章 p.33＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_longitudinal_force",
+   "title": "縱向力＝同方向活載重之 5%（3.14）",
+   "src": "hwbridge",
+   "clause": "3.14",
+   "page": 13,
+   "keywords": "縱向力 剎車 5% 活載重",
+   "unit": "tf",
+   "output": "LF",
+   "latex": "LF=0.05\\times(\\text{同方向各車道活載重，含車道載重與集中載重，不計衝擊力})",
+   "vars": {
+    "live_load": {
+     "desc": "所有車道同一方向之活載重合力（含車道載重及計算彎矩之集中載重；已依 3.10 折減；不含衝擊力）",
+     "unit": "tf",
+     "min": 0
+    }
+   },
+   "expr": "0.05*live_load",
+   "notes": "作用於橋面上 1.8 m 高度，經上部結構傳至下部結構。活動支承之摩擦或橡膠支承抗剪力亦應計入。",
+   "tests": [
+    {
+     "in": {
+      "live_load": 100
+     },
+     "out": 5.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第三章 p.27＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_min_load_class",
+   "title": "最小載重等級（省市重要道路、國道，3.6／3.7 前段「最小載重」與「國道」）",
+   "src": "hwbridge",
+   "clause": "3.6",
+   "page": 9,
+   "keywords": "橋梁 最小載重 車道數 國道 替代軍用載重 HS20",
+   "unit": "-",
+   "output": "ratio",
+   "latex": "\\text{載重}\\ge1.25\\times HS20(MS18)\\;\\text{（國道另可用 1.2 m 軸距、每軸 11,000 kgf[108 kN] 之雙軸替代軍用載重）}",
+   "vars": {
+    "kind": {
+     "desc": "1＝省市重要道路及有重型貨車行駛之橋梁；2＝國道公路橋梁",
+     "unit": "-",
+     "min": 1,
+     "max": 2
+    },
+    "exclude_fatigue_defl": {
+     "desc": "9.1.3 疲勞應力與 9.1.7 撓度已另有規定＝1（該二項不受本限制）",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "1.25",
+   "notes": "省市重要道路及有重型貨車行駛並經橋梁主管機關認定之橋梁：載重不得小於 HS20-44(MS18) 之 **1.25 倍**（除 9.1.3 疲勞、9.1.7 撓度另有規定外）。國道公路橋梁：不得小於 HS20-44(MS18) 之 1.25 倍，**或**以軸距 1.2 m、每軸 11,000 kgf（108 kN）之 1.25 倍之雙軸「替代軍用載重」，擇其能產生最大應力者。輸出為載重倍數（1.25）。",
+   "tests": [
+    {
+     "in": {
+      "kind": 1
+     },
+     "out": 1.25
+    },
+    {
+     "in": {
+      "kind": 2
+     },
+     "out": 1.25
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第三章 p.23（第6、7款）＋手算；輸出僅為倍數，實際載重值須查規範載重圖",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_design_lane_count",
+   "title": "設計車道數（3.7 車道）",
+   "src": "hwbridge",
+   "clause": "3.7",
+   "page": 9,
+   "keywords": "橋梁 車道 設計車道寬 3.65 車道數 路面寬度",
+   "unit": "-",
+   "output": "N_design",
+   "latex": "N=\\left\\lfloor\\frac{W_{road}}{3.65}\right\rfloor;\\;6.0\\le W_{road}\\le7.3\\ \\text{m 時分為 2 車道，各佔半寬}",
+   "vars": {
+    "Wroad": {
+     "desc": "橋梁路面寬度（緣石間之距離）",
+     "unit": "m",
+     "min": 2,
+     "max": 60
+    }
+   },
+   "defs": [
+    [
+     "Nf",
+     "floor(Wroad/3.65)"
+    ]
+   ],
+   "expr": "2.0 if 6.0<=Wroad<=7.3 else Nf",
+   "notes": "載重佔 3.0 m 寬度，置於 3.65 m 之設計車道寬度內；車道數與位置應使所考慮構材產生最大應力。**不應使用零星之設計車道**（即取整數）。路面寬 6.0~7.3 m 者分為兩個設計車道、各佔路幅一半。",
+   "tests": [
+    {
+     "in": {
+      "Wroad": 8.0
+     },
+     "out": 2.0
+    },
+    {
+     "in": {
+      "Wroad": 7.0
+     },
+     "out": 2.0
+    },
+    {
+     "in": {
+      "Wroad": 15.0
+     },
+     "out": 4.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "依 3.7 條文導出（取整數、6.0~7.3 m 特別規定）＋手算；輸出為車道數",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_beta1",
+   "title": "橋梁 RC 之 β1（7.3.2 第6款）",
+   "src": "hwbridge",
+   "clause": "7.3.2",
+   "page": 39,
+   "keywords": "橋梁 鋼筋混凝土 beta1 等值應力區",
+   "unit": "-",
+   "output": "beta1",
+   "latex": "\\beta_1=0.85\\;(f'_c\\le280\\text{ kgf/cm}^2);\\;0.85-0.05\\frac{f'_c-280}{70}\\ge0.65",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度（kgf/cm2）",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    }
+   },
+   "expr": "0.85 if fc<=280 else max(0.65,0.85-0.05*(fc-280)/70)",
+   "notes": "橋梁規範以 kgf/cm2 表述（280 kgf/cm2＝27.6 MPa、每 70 kgf/cm2＝6.9 MPa 遞減），與 RC 112 版（28 MPa／7 MPa）等值。β1 不得小於 0.65。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280
+     },
+     "out": 0.85
+    },
+    {
+     "in": {
+      "fc": 350
+     },
+     "out": 0.7999999999999999,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 560
+     },
+     "out": 0.65
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章 p.39（第6款）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_rho_b",
+   "title": "平衡鋼筋比 ρb 與最大鋼筋量 0.75ρb（7.3.3 第1、2(2)款，式7-16）",
+   "src": "hwbridge",
+   "clause": "7.3.3",
+   "page": 39,
+   "keywords": "橋梁 鋼筋比 rho_b 平衡應變 最大鋼筋量 0.75",
+   "unit": "-",
+   "output": "rho_b",
+   "latex": "\\rho_b=\\frac{0.85\\beta_1f'_c}{f_y}\\left(\\frac{6120}{6120+f_y}\\right)\\ [\\frac{600}{600+f_y}],\\quad \\rho\\le0.75\\rho_b",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "kgf/cm2",
+     "min": 2400,
+     "max": 7000
+    },
+    "beta1": {
+     "desc": "β1（hwbridge_beta1）",
+     "unit": "-",
+     "default": 0.85,
+     "min": 0.65,
+     "max": 0.85
+    }
+   },
+   "defs": [
+    [
+     "rho_b",
+     "0.85*beta1*fc/fy*(6120/(6120+fy))"
+    ],
+    [
+     "rho_max",
+     "0.75*rho_b"
+    ]
+   ],
+   "expr": "rho_b",
+   "notes": "方括號為 SI 版（600/(600+fy)，fy 以 MPa 計）。輸出 ρb，steps.rho_max 為 0.75ρb（受撓構材鋼筋比上限）。有壓力鋼筋構材時，被壓力鋼筋平衡之 ρb 部份不必按 0.75 折減。平衡應變狀態：拉力鋼筋達 fy 對應應變、受壓混凝土達 0.003。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280,
+      "fy": 4200,
+      "beta1": 0.85
+     },
+     "out": 0.028563953488372092,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.39（式7-16）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_phi_Mn_rect",
+   "title": "僅受拉鋼筋矩形斷面設計彎矩 φMn（式7-14、7-15）",
+   "src": "hwbridge",
+   "clause": "7.3.3",
+   "page": 39,
+   "keywords": "橋梁 矩形斷面 設計彎矩 phiMn 鋼筋量",
+   "unit": "kgf·cm",
+   "output": "phiMn",
+   "latex": "\\varphi M_n=\\varphi[A_sf_y(d-0.6\\rho f_y/f'_c)]=\\varphi[A_sf_y(d-a/2)],\\quad a=\\frac{A_sf_y}{0.85f'_cb}",
+   "vars": {
+    "As": {
+     "desc": "受拉鋼筋面積",
+     "unit": "cm2",
+     "min": 0.1
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "kgf/cm2",
+     "min": 2400,
+     "max": 7000
+    },
+    "d": {
+     "desc": "有效深度",
+     "unit": "cm",
+     "min": 5
+    },
+    "b": {
+     "desc": "斷面寬",
+     "unit": "cm",
+     "min": 5
+    },
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "phi": {
+     "desc": "強度折減因數 φ",
+     "unit": "-",
+     "default": 0.9,
+     "min": 0.6,
+     "max": 1.0
+    }
+   },
+   "defs": [
+    [
+     "a",
+     "As*fy/(0.85*fc*b)"
+    ],
+    [
+     "Mn",
+     "As*fy*(d-a/2)"
+    ]
+   ],
+   "expr": "phi*Mn",
+   "notes": "兩式等價（式7-14 以 ρ 表示、式7-15 以 a 表示）；本式採式7-15 並於 steps 保留 a、Mn。僅適用矩形斷面且僅受拉鋼筋。",
+   "tests": [
+    {
+     "in": {
+      "As": 20,
+      "fy": 4200,
+      "d": 50,
+      "b": 30,
+      "fc": 280
+     },
+     "out": 3335294.117647059,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.39（式7-14、7-15）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_phi_Mn_Tbeam",
+   "title": "T 型梁（受壓翼板厚度小於 a）設計彎矩 φMn（式7-17）",
+   "src": "hwbridge",
+   "clause": "7.3.3",
+   "page": 39,
+   "keywords": "橋梁 T型梁 翼板 phiMn 設計彎矩",
+   "unit": "kgf·cm",
+   "output": "phiMn",
+   "latex": "\\varphi M_n=\\varphi[(A_s-A_{sf})f_y(d-a/2)+A_{sf}f_y(d-0.5h_f)]",
+   "vars": {
+    "As": {
+     "desc": "總受拉鋼筋面積",
+     "unit": "cm2",
+     "min": 0.1
+    },
+    "Asf": {
+     "desc": "與翼板懸出部分壓力平衡之鋼筋面積",
+     "unit": "cm2",
+     "min": 0
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "kgf/cm2",
+     "min": 2400,
+     "max": 7000
+    },
+    "d": {
+     "desc": "有效深度",
+     "unit": "cm",
+     "min": 5
+    },
+    "a": {
+     "desc": "等值應力塊深度",
+     "unit": "cm",
+     "min": 0.5
+    },
+    "hf": {
+     "desc": "受壓翼板厚度",
+     "unit": "cm",
+     "min": 1
+    },
+    "phi": {
+     "desc": "強度折減因數",
+     "unit": "-",
+     "default": 0.9,
+     "min": 0.6,
+     "max": 1.0
+    }
+   },
+   "expr": "phi*((As-Asf)*fy*(d-a/2)+Asf*fy*(d-0.5*hf))",
+   "notes": "僅適用受壓翼板厚度小於 a 之情況；翼板厚度等於或大於 a 者依 7.3.3 第2項(1)（矩形斷面式）計算。",
+   "tests": [
+    {
+     "in": {
+      "As": 30,
+      "Asf": 8,
+      "fy": 4200,
+      "d": 50,
+      "a": 11.764705882352942,
+      "hf": 15
+     },
+     "out": 4954023.529411765,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.39（式7-17）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_side_face_reinf",
+   "title": "深梁側面縱向分佈鋼筋（7.1.7 第2款）",
+   "src": "hwbridge",
+   "clause": "7.1.7",
+   "page": 10,
+   "keywords": "橋梁 深梁 側面鋼筋 分佈鋼筋 側面深度",
+   "unit": "cm2/m",
+   "output": "As_side",
+   "latex": "A_s\\ge0.1(d-76\\text{ cm})\\;(\\text{每面每公尺}),\\quad s\\le\\min(30\\text{ cm},d/6)",
+   "vars": {
+    "d": {
+     "desc": "構材深度（>90 cm 才適用）",
+     "unit": "cm",
+     "min": 90,
+     "max": 400
+    }
+   },
+   "defs": [
+    [
+     "As_side",
+     "0.1*(d-76)"
+    ],
+    [
+     "s_max",
+     "min(30.0,d/6)"
+    ]
+   ],
+   "expr": "As_side",
+   "conditions": [
+    {
+     "expr": "d>90",
+     "msg": "構材側面深度須超過 90 cm 才適用本款"
+    }
+   ],
+   "notes": "用於構材側面深度超過 90 cm 者：縱向分佈鋼筋應沿構材兩側面距最近撓曲張力鋼筋 d/2 之距離均勻分布，**每一面每公尺構材深度之表面鋼筋面積 As 不小於 0.1(d−76 cm)**，間距不得大於 min(30 cm, d/6)。此鋼筋得併入計算撓曲容量（限以應力-應變相容性分析求得者），但兩側面之總面積不須超過所需撓曲張力鋼筋之 1/2。輸出 As_side（cm2/m），steps.s_max 為間距上限。",
+   "tests": [
+    {
+     "in": {
+      "d": 150
+     },
+     "out": 7.4,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章 p.10（7.1.7 第2款）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_shrinkage_temp_steel",
+   "title": "乾縮及溫度鋼筋（7.1.11）",
+   "src": "hwbridge",
+   "clause": "7.1.11",
+   "page": 14,
+   "keywords": "橋梁 乾縮 溫度鋼筋 最小鋼筋量 間距",
+   "unit": "cm2/m",
+   "output": "As_min",
+   "latex": "A_s\\ge2.7\\ \\text{cm}^2/\\text{m},\\quad s\\le\\min(3t,\\;45\\text{ cm})",
+   "vars": {
+    "t": {
+     "desc": "牆或板厚",
+     "unit": "cm",
+     "min": 5,
+     "max": 200
+    }
+   },
+   "defs": [
+    [
+     "s_max",
+     "min(3*t,45.0)"
+    ]
+   ],
+   "expr": "2.7",
+   "notes": "於牆或板之近外露部分，如無其他加強鋼筋，應配置乾縮及溫度應力鋼筋，**總面積至少 2.7 cm2/m**，間距不得大於牆或板厚之 3 倍且不得大於 45 cm。輸出 As_min（cm2/m），steps.s_max 為間距上限。",
+   "tests": [
+    {
+     "in": {
+      "t": 30
+     },
+     "out": 2.7
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章 p.14（7.1.11）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_bar_cutoff_Av",
+   "title": "鋼筋截斷處額外肋筋量 Av≥0.41bw·s/fy（7.1.12 第1(6)b 款）",
+   "src": "hwbridge",
+   "clause": "7.1.12",
+   "page": 14,
+   "keywords": "橋梁 鋼筋截斷 額外肋筋 Av 剪力 反彎",
+   "unit": "mm2",
+   "output": "Av",
+   "latex": "A_v\\ge\\frac{0.41b_ws}{f_y}\\ [\\frac{4.2b_ws}{f_y}],\\quad s\\le\\frac{d}{8\\beta_b}",
+   "vars": {
+    "bw": {
+     "desc": "腹板寬",
+     "unit": "mm",
+     "min": 50
+    },
+    "s": {
+     "desc": "肋筋間距",
+     "unit": "mm",
+     "min": 50
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度（MPa；kgf 版係數 4.2）",
+     "unit": "MPa",
+     "min": 240,
+     "max": 690
+    },
+    "d": {
+     "desc": "有效深度",
+     "unit": "mm",
+     "min": 50
+    },
+    "betab": {
+     "desc": "該斷面上截斷鋼筋面積與鋼筋總面積之比值",
+     "unit": "-",
+     "min": 0.1,
+     "max": 1.0
+    }
+   },
+   "defs": [
+    [
+     "Av",
+     "0.41*bw*s/fy"
+    ],
+    [
+     "s_max",
+     "d/(8*betab)"
+    ]
+   ],
+   "expr": "Av",
+   "notes": "條件：鋼筋截斷處之剪力不超過容許值之 2/3（容許值可含剪力鋼筋），且超過剪力所需之鋼筋面積、沿每支中斷鋼筋配置其距離超過中斷點等於 3d/4。**係數 0.41 屬 SI（MPa、mm）制；原書 kgf/cm2 版為 4.2**（方括號）。本式一律以 **mm、MPa** 計算，輸出 Av（mm2）；若以 cm 代入會得到數值相同但單位誤判的結果（0.41 的係數是為 mm 設計的），已於變數單位標明。steps.s_max 為間距上限 d/(8βb)。",
+   "tests": [
+    {
+     "in": {
+      "bw": 300,
+      "s": 250,
+      "fy": 420,
+      "d": 500,
+      "betab": 1.0
+     },
+     "out": 73.21428571428571,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章 p.14（7.1.12 第1(6)b）＋手算；兩版係數已對照",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_ld_basic",
+   "title": "受拉竹節鋼筋基本伸展長度 ℓd（橋梁 7.1.13 第1款）",
+   "src": "hwbridge",
+   "clause": "7.1.13",
+   "page": 15,
+   "keywords": "橋梁 伸展長度 ld 錨定 竹節鋼筋 麻面鋼線",
+   "unit": "cm",
+   "output": "ld",
+   "latex": "\\ell_d=\\frac{0.06A_bf_y}{\\sqrt{f'_c}}\\ (D36\\text{ 及較小}),\\;\\frac{0.82f_y}{\\sqrt{f'_c}}\\ (D43),\\;\\ge0.0057d_bf_y",
+   "vars": {
+    "Ab": {
+     "desc": "鋼筋斷面積（D36 及較小者使用；D43 不用）",
+     "unit": "cm2",
+     "min": 0.5
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "kgf/cm2",
+     "min": 2400,
+     "max": 7000
+    },
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "db": {
+     "desc": "鋼筋標稱直徑（用於下限 0.0057db·fy）",
+     "unit": "cm",
+     "min": 1.0,
+     "max": 6.0
+    },
+    "is_D43": {
+     "desc": "D43 鋼筋＝1（改用 0.82fy/√fc′，無 Ab 項）",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "ld0",
+     "(0.82*fy/sqrt(fc)) if is_D43>0.5 else (0.06*Ab*fy/sqrt(fc))"
+    ],
+    [
+     "ld_min",
+     "0.0057*db*fy"
+    ]
+   ],
+   "expr": "max(ld0,ld_min)",
+   "notes": "本式為**基本伸展長度**（kgf、cm 制）；實際 ℓd 尚須乘 7.1.13 第2、3項之適用修正因素，且不得小於第4項規定。輸出 ld（cm），steps.ld0 為未套下限之值。原書另以方框標示 SI 版本（19Ab·fy/√fc′、0.058db·fy、0.026fy/√fc′，單位標示為 m），其單位標示與數值量級不一致（疑為 mm 之誤植），本庫暫不實作 SI 版，使用前須核對。**與 RC 112 版 25.4.2.3 之閉式表法不同**（橋梁規範為舊版 AASHTO 式），同一構材以不同規範計算會得到不同 ℓd。",
+   "tests": [
+    {
+     "in": {
+      "Ab": 3.87,
+      "fy": 4200,
+      "fc": 280,
+      "db": 2.22
+     },
+     "out": 58.2817374483637,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "Ab": 3.87,
+      "fy": 4200,
+      "fc": 280,
+      "db": 2.22,
+      "is_D43": 1
+     },
+     "out": 205.81836652738258,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.15（7.1.13 第1款(1)(2)）＋手算；SI 方框版單位疑義已於 notes 揭露",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_ldh_hook",
+   "title": "標準彎鉤受拉鋼筋伸展長度 ℓdh（橋梁 7.1.16）",
+   "src": "hwbridge",
+   "clause": "7.1.16",
+   "page": 17,
+   "keywords": "橋梁 標準彎鉤 ldh 錨定 8db 15cm",
+   "unit": "mm",
+   "output": "ldh",
+   "latex": "\\ell_{dh}=\\frac{100d_b}{\\sqrt{f'_c}}\\ [\\frac{318d_b}{\\sqrt{f'_c}}],\\;\\times\\text{修正因素},\\;\\ge\\max(8d_b,150\\text{ mm})",
+   "vars": {
+    "db": {
+     "desc": "鋼筋標稱直徑",
+     "unit": "mm",
+     "min": 10,
+     "max": 60
+    },
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    },
+    "As_ratio": {
+     "desc": "(需要之 As)/(配置之 As)（無特別要求給 1.0）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.1,
+     "max": 1.0
+    },
+    "spiral_confined": {
+     "desc": "螺箍筋圍束（其直徑≧6.4 mm、螺距≦10 cm）＝1，修正因素乘 0.75",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "lhb",
+     "100*db/sqrt(fc)"
+    ],
+    [
+     "fac",
+     "(0.75 if spiral_confined>0.5 else 1.0)*As_ratio"
+    ],
+    [
+     "ldh0",
+     "lhb*fac"
+    ]
+   ],
+   "expr": "max(ldh0,8*db,150)",
+   "notes": "適用 fy=4,200 kgf/cm2 [414 MPa] 之竹節鋼筋（7.1.16 第2項）。kgf 版係數 318（方括號外為 SI 100）。修正因素：①(需要之As)/(配置之As) ②螺箍筋圍束 0.75。**ℓdh 不得小於 8db 或 15 cm，兩者取大**。彎鉤幾何（圖7.1）另有限制：90° 彎鉤延伸 12db；彎鉤後直線段 ≥4db(D10~D25)／≥5db(D29~D36)／≥6db(≥D39)，且 4db 或 7 cm 取大。**與 RC 112 版 18.5.5.1（0.06fy·db/(λ√fc′)，下限 8db／15cm）算法不同，數值可差數倍**（本例 D22、fc'=28：橋梁 420 mm vs RC112 約 152 mm），引用時須指明依據。輸出 ldh（mm）。",
+   "tests": [
+    {
+     "in": {
+      "db": 22.2,
+      "fc": 28
+     },
+     "out": 419.5405650402422,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.17（7.1.16，含 kgf 318 與 SI 100 兩版）＋手算；兩版互驗（42.2 cm ≈ 419.5 mm）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_bundle_factor",
+   "title": "成束鋼筋伸展長度增量（7.1.15）",
+   "src": "hwbridge",
+   "clause": "7.1.15",
+   "page": 17,
+   "keywords": "橋梁 成束鋼筋 伸展長度 束 20% 33%",
+   "unit": "-",
+   "output": "factor",
+   "latex": "\\text{三根成束}+20\\%,\\;\\text{四根成束}+33\\%",
+   "vars": {
+    "n": {
+     "desc": "每束鋼筋根數（3 或 4）",
+     "unit": "-",
+     "min": 2,
+     "max": 4
+    }
+   },
+   "expr": "1.0 if n<=2 else (1.2 if n==3 else 1.33)",
+   "notes": "成束鋼筋之伸展長度，無論受拉或受壓，應按單一鋼筋計算之伸展長度乘以下倍數：三根成束 1.20、四根成束 1.33（2 根不增）。輸出為乘數。",
+   "tests": [
+    {
+     "in": {
+      "n": 3
+     },
+     "out": 1.2
+    },
+    {
+     "in": {
+      "n": 4
+     },
+     "out": 1.33
+    },
+    {
+     "in": {
+      "n": 2
+     },
+     "out": 1.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章 p.17（7.1.15）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_shear_stress_v",
+   "title": "混凝土剪應力 v=V/(bw·d)（橋梁 ASD 7.2.5 式7-1）",
+   "src": "hwbridge",
+   "clause": "7.2.5",
+   "page": 31,
+   "keywords": "橋梁 剪應力 v ASD 容許應力設計法 bw d",
+   "unit": "kgf/cm2",
+   "output": "v",
+   "latex": "v=\\frac{V}{b_wd}",
+   "vars": {
+    "V": {
+     "desc": "所考慮斷面之設計剪力",
+     "unit": "kgf",
+     "min": 0
+    },
+    "bw": {
+     "desc": "腹板寬（圓形斷面取直徑；漸變腹板取平均寬或最小寬之 1.2 倍，兩者取小）",
+     "unit": "cm",
+     "min": 5
+    },
+    "d": {
+     "desc": "最外受壓纖維至受拉鋼筋重心之距離",
+     "unit": "cm",
+     "min": 5
+    }
+   },
+   "expr": "V/(bw*d)",
+   "notes": "需考慮扭矩影響時另計。距支承面 d 以內各斷面之剪力得用 d 處之設計剪力（但該點與支承面間有主要集中載重者，須加上該集中載重）。",
+   "tests": [
+    {
+     "in": {
+      "V": 10000,
+      "bw": 30,
+      "d": 50
+     },
+     "out": 6.666666666666667,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.31（式7-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_vc_asd",
+   "title": "混凝土容許剪應力 vc（橋梁 ASD 7.2.5 式7-2）",
+   "src": "hwbridge",
+   "clause": "7.2.5",
+   "page": 31,
+   "keywords": "橋梁 混凝土 容許剪應力 vc rho_w Vd/M ASD",
+   "unit": "kgf/cm2",
+   "output": "vc",
+   "latex": "v_c=0.25\\sqrt{f'_c}\\ [0.079\\sqrt{f'_c}];\\quad v_c=0.24\\sqrt{f'_c}+77\\rho_w\\frac{Vd}{M}",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "detailed": {
+     "desc": "採簡化值（0.25√fc′）＝0；採詳細式(7-2)＝1",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    },
+    "rho_w": {
+     "desc": "腹板拉力鋼筋比 ρw＝As/(bw·d)",
+     "unit": "-",
+     "default": 0.01,
+     "min": 0.001,
+     "max": 0.05
+    },
+    "VdM": {
+     "desc": "(V·d)/M（V 為該斷面設計剪力、M 為同時存在之彎矩；用於詳細式）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.0,
+     "max": 3.0
+    }
+   },
+   "defs": [
+    [
+     "vc_simple",
+     "0.25*sqrt(fc)"
+    ],
+    [
+     "vc_detail",
+     "0.24*sqrt(fc)+77*rho_w*VdM"
+    ]
+   ],
+   "expr": "vc_detail if detailed>0.5 else vc_simple",
+   "notes": "簡化值 0.25√fc′（kgf/cm²）＝0.079√fc′（MPa，方括號）。詳細式(7-2) 適用於僅受剪力與撓曲之梁、單向板及基腳。**兩版互驗**：fc′=280 kgf/cm² 時簡化值 4.18 kgf/cm²＝0.418 MPa。輸出 vc（kgf/cm²），steps 另含簡化與詳細值。此為 ASD 版（容許應力），與 RC 112 的 φVn（強度設計）不可直接比較。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280
+     },
+     "out": 4.183300132670378,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 280,
+      "detailed": 1,
+      "rho_w": 0.01,
+      "VdM": 1.0
+     },
+     "out": 4.785968127363562,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.31（7.2.5 第2(1)款、式7-2）＋手算；kgf/MPa 兩版互驗",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_EI_effective",
+   "title": "受壓構材有效撓曲剛度 EI=2.5EgIg/(1+βd)（橋梁式7-32）",
+   "src": "hwbridge",
+   "clause": "7.3.5",
+   "page": 45,
+   "keywords": "橋梁 細長柱 有效剛度 EI beta_d 側向位移",
+   "unit": "kgf·cm2",
+   "output": "EI",
+   "latex": "EI=\\frac{2.5E_gI_g}{1+\\beta_d}",
+   "vars": {
+    "Eg": {
+     "desc": "混凝土彈性模數",
+     "unit": "kgf/cm2",
+     "min": 100000,
+     "max": 500000
+    },
+    "Ig": {
+     "desc": "全斷面慣性矩",
+     "unit": "cm4",
+     "min": 100
+    },
+    "betad": {
+     "desc": "βd＝最大靜重彎矩／最大總載重彎矩（正值）",
+     "unit": "-",
+     "min": 0,
+     "max": 0.95
+    }
+   },
+   "expr": "2.5*Eg*Ig/(1+betad)",
+   "notes": "用於 7.3.5 受壓構材細長效應（力矩放大）。βd 恆為正。輸出 EI（kgf·cm²）。",
+   "tests": [
+    {
+     "in": {
+      "Eg": 250000,
+      "Ig": 100000,
+      "betad": 0.5
+     },
+     "out": 41666666666.666664,
+     "tol": 1e-06
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.45（式7-32）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_Cm",
+   "title": "端點彎矩修正係數 Cm=0.6+0.4(M1b/M2b)≥0.4（橋梁式7-33）",
+   "src": "hwbridge",
+   "clause": "7.3.5",
+   "page": 45,
+   "keywords": "橋梁 細長柱 Cm 端點彎矩 單曲率 雙曲率",
+   "unit": "-",
+   "output": "Cm",
+   "latex": "C_m=0.6+0.4\\frac{M_{1b}}{M_{2b}}\\ge0.4;\\quad \\text{其他情況 }C_m=1.0",
+   "vars": {
+    "M1b_over_M2b": {
+     "desc": "較小端彎矩／較大端彎矩（單曲率為正、雙曲率為負）",
+     "unit": "-",
+     "min": -1.0,
+     "max": 1.0
+    },
+    "has_support_no_transverse": {
+     "desc": "有支撑防止側移且支點間無側向載重＝1；其他情況＝0（Cm 取 1.0）",
+     "unit": "-",
+     "default": 1,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "max(0.4,0.6+0.4*M1b_over_M2b) if has_support_no_transverse>0.5 else 1.0",
+   "notes": "M1b 為較小端彎矩、M2b 為較大端彎矩；彎成單曲度時比值為正、反向（雙曲率）為負。**不得小於 0.4**；其他情況（無支撑側移或有側向載重）Cm 取 1.0。7.3.5(6)：兩端無彎矩或端偏心距小於 (1.5+0.03h) cm 時，M2b、M2s 應對每一主軸取 (1.5+0.03h) cm 之最小偏心距計算，且此時 M1b/M2b 得用算得之端彎矩或取 1.0。",
+   "tests": [
+    {
+     "in": {
+      "M1b_over_M2b": 0.5
+     },
+     "out": 0.8
+    },
+    {
+     "in": {
+      "M1b_over_M2b": -1.0
+     },
+     "out": 0.4
+    },
+    {
+     "in": {
+      "M1b_over_M2b": 0.5,
+      "has_support_no_transverse": 0
+     },
+     "out": 1.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.45（式7-33）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_Vc_strength",
+   "title": "梁／單向板／基腳混凝土剪力強度 Vc（橋梁強度設計法式7-36、7-37）",
+   "src": "hwbridge",
+   "clause": "7.3.6",
+   "page": 46,
+   "keywords": "橋梁 強度設計法 Vc 剪力強度 rho_w Mu Vu 上限",
+   "unit": "kgf",
+   "output": "Vc",
+   "latex": "V_c=\\left(0.504\\sqrt{f'_c}+176\\rho_w\\frac{V_ud}{M_u}\\right)b_wd\\ [0.158;17.2],\\;\\text{或 }0.530\\sqrt{f'_c}b_wd\\ [0.166]",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "bw": {
+     "desc": "腹板寬（圓形斷面取直徑；漸變腹板取平均寬或 1.2 倍最小寬之較小者）",
+     "unit": "cm",
+     "min": 5
+    },
+    "d": {
+     "desc": "最外受壓纖維至受拉鋼筋重心距離",
+     "unit": "cm",
+     "min": 5
+    },
+    "rho_w": {
+     "desc": "腹板拉力鋼筋比 ρw",
+     "unit": "-",
+     "default": 0.01,
+     "min": 0.001,
+     "max": 0.05
+    },
+    "VudMu": {
+     "desc": "(Vu·d)/Mu（詳細式用；**不得大於 1.0**）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0,
+     "max": 1.0
+    },
+    "detailed": {
+     "desc": "採詳細式(7-36)＝1；採簡化式(7-37)＝0",
+     "unit": "-",
+     "default": 1,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "r",
+     "sqrt(fc)"
+    ],
+    [
+     "Vc_detail",
+     "(0.504*r+176*rho_w*VudMu)*bw*d"
+    ],
+    [
+     "Vc_simple",
+     "0.530*r*bw*d"
+    ],
+    [
+     "Vc",
+     "Vc_detail if detailed>0.5 else Vc_simple"
+    ],
+    [
+     "cap",
+     "0.928*r*bw*d"
+    ]
+   ],
+   "expr": "min(Vc,0.928*sqrt(fc)*bw*d)",
+   "notes": "kgf 版係數 0.504／176／0.530／0.928；MPa 版為 0.158／17.2／0.166／0.291（方括號）。**詳細式之上限 0.928√fc′bw·d（MPa 0.291）；Vu·d/Mu 不得大於 1.0**。距支承面 d 內得用 d 處之 Vu（有主要集中載重者須加計）。輸出 Vc（kgf），steps 另含 detail／simple／cap 三值。設計式 Vu ≤ φVn、Vn=Vc+Vs（式7-34、7-35）。**與 ASD 版 vc（0.25√fc′）及 RC 112 的 Vc（0.17√fc′，新式含 ρw^(1/3)）算法皆不同**，不可混用。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280,
+      "bw": 30,
+      "d": 50,
+      "rho_w": 0.01,
+      "VudMu": 1.0
+     },
+     "out": 15290.299601195224,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 280,
+      "bw": 30,
+      "d": 50,
+      "detailed": 0
+     },
+     "out": 13302.8944218918,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.46（式7-36、7-37、上限、Vud/Mu≤1.0）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_Vc_column",
+   "title": "受軸壓力構材混凝土剪力強度 Vc（橋梁式7-38）",
+   "src": "hwbridge",
+   "clause": "7.3.6",
+   "page": 46,
+   "keywords": "橋梁 柱 軸壓力 Vc 剪力強度 Nu Ag",
+   "unit": "kgf",
+   "output": "Vc",
+   "latex": "V_c=0.530\\left(1+\\frac{N_u}{141A_g}\\right)\\sqrt{f'_c}b_wd",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "bw": {
+     "desc": "腹板寬",
+     "unit": "cm",
+     "min": 5
+    },
+    "d": {
+     "desc": "有效深度",
+     "unit": "cm",
+     "min": 5
+    },
+    "Nu": {
+     "desc": "軸壓力（壓力為正）",
+     "unit": "kgf",
+     "min": 0
+    },
+    "Ag": {
+     "desc": "全斷面積",
+     "unit": "cm2",
+     "min": 100
+    }
+   },
+   "expr": "0.530*(1+Nu/(141*Ag))*sqrt(fc)*bw*d",
+   "notes": "Nu 為軸壓力。係數 0.530 與 141 屬 kgf/cm² 制；MPa 版請以換算或查條文方括號值（本式未列 SI 版，使用前須核）。輸出 Vc（kgf）。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280,
+      "bw": 30,
+      "d": 50,
+      "Nu": 50000,
+      "Ag": 1500
+     },
+     "out": 16447.786720211378,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.46（式7-38）＋手算；SI 版未列已於 notes 標明",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_bearing_fb",
+   "title": "混凝土承壓應力上限 fb≤0.85φfc′·√(A2/A1)（橋梁 7.3.7）",
+   "src": "hwbridge",
+   "clause": "7.3.7",
+   "page": 52,
+   "keywords": "橋梁 承壓 支承 版 bearing fb A1 A2",
+   "unit": "kgf/cm2",
+   "output": "fb",
+   "latex": "f_b\\le0.85\\varphi f'_c\\sqrt{\\frac{A_2}{A_1}}\\le2\\times0.85\\varphi f'_c",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "A1": {
+     "desc": "承載面面積",
+     "unit": "cm2",
+     "min": 25
+    },
+    "A2": {
+     "desc": "支承面之混凝土面積（其每邊均較承載面大者）",
+     "unit": "cm2",
+     "min": 25
+    },
+    "phi": {
+     "desc": "強度折減因數 φ",
+     "unit": "-",
+     "default": 0.7,
+     "min": 0.5,
+     "max": 1.0
+    },
+    "perimeter_larger": {
+     "desc": "支承面之每邊均較承載面大＝1（可用 √(A2/A1)）；否則＝0（取 fb≤0.85φfc′）",
+     "unit": "-",
+     "default": 1,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "ratio",
+     "min(sqrt(A2/A1),2.0) if perimeter_larger>0.5 else 1.0"
+    ],
+    [
+     "fb",
+     "0.85*phi*fc*ratio"
+    ]
+   ],
+   "expr": "fb",
+   "conditions": [
+    {
+     "expr": "A2>=A1",
+     "msg": "A2 應為支承面混凝土面積，須 ≥ A1"
+    }
+   ],
+   "notes": "1. 除另有規定外，混凝土承載面上之承壓應力 fb 不得大於 0.85φfc′。2. 當支承面之**每邊均較承載面大**時，容許承壓應力得乘以 √(A2/A1)，**但不得超過 2 倍**（即上限 1.7φfc′）。輸出 fb（kgf/cm²），steps.ratio 為已夾持之 √(A2/A1)。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280,
+      "A1": 300,
+      "A2": 900,
+      "phi": 0.7
+     },
+     "out": 288.55966454097495,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 280,
+      "A1": 300,
+      "A2": 300,
+      "phi": 0.7
+     },
+     "out": 166.6,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章 p.52（7.3.7 第1、2款）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_corbel_rho_min",
+   "title": "托架／托梁主筋比下限 ρ≥0.04(fc′/fy)（橋梁 7.3.6 第(5)款）",
+   "src": "hwbridge",
+   "clause": "7.3.6",
+   "page": 52,
+   "keywords": "橋梁 托架 corbel 鋼筋比 下限 0.04",
+   "unit": "-",
+   "output": "rho_min",
+   "latex": "\\rho=\\frac{A_s}{bd}\\ge0.04\\frac{f'_c}{f_y}",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "kgf/cm2",
+     "min": 2400,
+     "max": 7000
+    }
+   },
+   "expr": "0.04*fc/fy",
+   "notes": "適用托架與托梁（剪力摩擦鋼筋 Avf 依第4項；承壓面外緣深度不得小於 0.5d；φ 取 0.85；Nuc 不得小於 0.2Vu）。閉合箍筋或繫筋面積 Ah 不得小於 0.5(As−An)，且均勻配置於緊臨 As 之 2/3 有效深度內。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280,
+      "fy": 4200
+     },
+     "out": 0.0026666666666666666,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章 p.52（第(5)款）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_fatigue_ff",
+   "title": "鋼筋疲勞應力差距上限 ff（橋梁 7.3.9）",
+   "src": "hwbridge",
+   "clause": "7.3.9",
+   "page": 53,
+   "keywords": "橋梁 疲勞 應力差距 ff 竹節 r/h 活載重 衝擊",
+   "unit": "kgf/cm2",
+   "output": "ff",
+   "latex": "f_f=1470-0.33f_{min}+560(r/h)\\ [145-0.33f_{min}+55(r/h)]",
+   "vars": {
+    "fmin": {
+     "desc": "最小應力代數值（拉力為正、壓力為負）",
+     "unit": "kgf/cm2",
+     "min": -3000,
+     "max": 4200
+    },
+    "rh": {
+     "desc": "竹節根部半徑與竹節節距之比（不知確實值時用 0.3）",
+     "unit": "-",
+     "default": 0.3,
+     "min": 0.05,
+     "max": 1.0
+    },
+    "mpa": {
+     "desc": "以 MPa 計＝1；kgf/cm2＝0",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "ff",
+     "(145-0.33*fmin+55*rh) if mpa>0.5 else (1470-0.33*fmin+560*rh)"
+    ]
+   ],
+   "expr": "ff",
+   "notes": "直鋼筋由活載重加衝擊力所產生之**最大拉應力與最小應力之差**不得大於 ff。**fmin 須與選定單位一致**：kgf 版 ff=1470−0.33fmin+560(r/h)；MPa 版 ff=145−0.33fmin+55(r/h)（方括號）。r/h 不知確實值時用 0.3。主筋在高應力區內應避免彎折。混凝土橋面板主筋垂直於車行方向且依 4.3 節第3項情況A 之近似法設計者，不須考慮疲勞限。輸出 ff（與輸入同單位）。",
+   "tests": [
+    {
+     "in": {
+      "fmin": 1000,
+      "rh": 0.3
+     },
+     "out": 1308.0,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.53（7.3.9，含 kgf/MPa 兩版）＋手算；兩版互驗（1308 kgf/cm2 ≈ 128.5 MPa）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_fs_crack_control",
+   "title": "受撓鋼筋使用載重應力上限 fs=z/(dc·A)^(1/3)（橋梁式7-49）",
+   "src": "hwbridge",
+   "clause": "7.3.10",
+   "page": 53,
+   "keywords": "橋梁 裂縫控制 z 值 fs dc A 鋼筋分布",
+   "unit": "kgf/cm2",
+   "output": "fs",
+   "latex": "f_s=\\frac{z}{(d_cA)^{1/3}}",
+   "vars": {
+    "z": {
+     "desc": "裂縫控制之 z 值（適度曝露 ≤30,300 kgf/cm[30 MN/m]；嚴重曝露 ≤23,200 kgf/cm[23 MN/m]）",
+     "unit": "kgf/cm",
+     "min": 1000,
+     "max": 100000
+    },
+    "dc": {
+     "desc": "自受拉面至最近鋼筋中心之距離",
+     "unit": "cm",
+     "min": 0.5,
+     "max": 30
+    },
+    "A": {
+     "desc": "每根鋼筋所負擔之混凝土受拉面積（=2dc·s 或依斷面）",
+     "unit": "cm2",
+     "min": 1,
+     "max": 5000
+    }
+   },
+   "expr": "z/(dc*A)**(1/3)",
+   "notes": "僅當 fy 超過 2,800 kgf/cm²[276 MPa] 時適用：最大正／負彎矩斷面在使用載重下之鋼筋應力 fs 不得超過本式值，且 **fs 不得大於 0.6fy**。**z 值上限：適度曝露 30,300 kgf/cm［30 MN/m］；嚴重曝露 23,200 kgf/cm［23 MN/m］**。A：有效張力面積＝圍繞受撓拉力鋼筋且與該主鋼筋同一形心之混凝土有效受拉面積÷鋼筋根數（不同尺寸時根數以總面積÷最大尺寸鋼筋面積）；計算 A 時混凝土淨保護層不須大於 5 cm。dc：自最外受拉纖維至最近鋼筋中心之混凝土厚度；計算 dc 時淨保護層不須大於 5 cm。嚴重侵蝕環境（如除冰劑）除本式外另須考慮混凝土密實度或防水系統。",
+   "tests": [
+    {
+     "in": {
+      "z": 30000,
+      "dc": 5,
+      "A": 2000
+     },
+     "out": 1392.476650083834,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章 p.53（式7-49）；z 值未收錄已於 notes 標明",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": [
+  {
+   "id": "hwbridge_wind_upper",
+   "title": "上部結構設計風壓（3.15，風速 200 km/h）",
+   "src": "hwbridge",
+   "clause": "3.15",
+   "page": 14,
+   "kind": "lookup",
+   "unit": "kgf/m2",
+   "columns": [
+    "風壓kgf/m2",
+    "最小總力kgf/m"
+   ],
+   "rows": [
+    {
+     "key": "桁架及拱（第II組及第V組載重）",
+     "values": {
+      "風壓kgf/m2": 580,
+      "最小總力kgf/m": null
+     }
+    },
+    {
+     "key": "梁（第II組及第V組載重）",
+     "values": {
+      "風壓kgf/m2": 390,
+      "最小總力kgf/m": null
+     }
+    },
+    {
+     "key": "桁架橋迎風面弦材總力之下限",
+     "values": {
+      "風壓kgf/m2": null,
+      "最小總力kgf/m": 700
+     }
+    },
+    {
+     "key": "桁架橋背風面弦材總力之下限",
+     "values": {
+      "風壓kgf/m2": null,
+      "最小總力kgf/m": 350
+     }
+    },
+    {
+     "key": "大梁之總風力下限",
+     "values": {
+      "風壓kgf/m2": null,
+      "最小總力kgf/m": 700
+     }
+    },
+    {
+     "key": "第III組及第VI組：第II、V組之 30% 再加（作用於垂直構軸向、高出橋面 1.8 m）",
+     "values": {
+      "風壓kgf/m2": null,
+      "最小總力kgf/m": 240
+     }
+    }
+   ],
+   "notes": "受風面積為各構材面積之和（含橋面結構及欄杆），以與結構縱軸成 90° 之立面計算。第III組及第VI組另含第II、V組值之 30%（本表最後一列之 240 kgf/m 為另加之作用力）。設計風速已變更時須註明於圖內。單位 kgf。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 第三章 p.28",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_lane_reduction_T310",
+   "title": "多車道活載重折減（3.10）",
+   "src": "hwbridge",
+   "clause": "3.10",
+   "page": 11,
+   "kind": "lookup",
+   "unit": "%",
+   "columns": [
+    "折減百分率"
+   ],
+   "rows": [
+    {
+     "key": "單車道或雙車道",
+     "values": {
+      "折減百分率": "100"
+     }
+    },
+    {
+     "key": "三車道",
+     "values": {
+      "折減百分率": "90"
+     }
+    },
+    {
+     "key": "四車道及以上",
+     "values": {
+      "折減百分率": "75"
+     }
+    }
+   ],
+   "notes": "僅當構材最大應力產生於「數車道同時載重」時適用。**例外**：縱梁之彎矩如係以表4.2 之輪重分擔係數計算而得者，不適用此折減。橫梁之折減方式與主桁架或大梁相同，但應依橋面寬度能使橫梁產生最大應力時之車道數目決定折減百分率。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第三章 p.25（3.10）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_sidewalk_load_T312",
+   "title": "人行道活載重（跨徑 0~30 m，3.12）",
+   "src": "hwbridge",
+   "clause": "3.12",
+   "page": 11,
+   "kind": "lookup",
+   "unit": "kgf/m2",
+   "columns": [
+    "活載重kgf/m2",
+    "SI(Pa)"
+   ],
+   "rows": [
+    {
+     "key": "人行道橋面、縱梁及其下之直接支撑等（一律）",
+     "values": {
+      "活載重kgf/m2": 400,
+      "SI(Pa)": 3920
+     }
+    },
+    {
+     "key": "大梁、桁架、拱及其他構材／跨徑 0~8 m（含 8 m）",
+     "values": {
+      "活載重kgf/m2": 400,
+      "SI(Pa)": 3920
+     }
+    },
+    {
+     "key": "大梁、桁架、拱及其他構材／跨徑 8~30 m",
+     "values": {
+      "活載重kgf/m2": 300,
+      "SI(Pa)": 2940
+     }
+    }
+   ],
+   "notes": "跨徑超過 30 m 者改用公式 P=(150+4500/L)(16.7−W)/15.2（上限 300 kgf/m2，見公式 hwbridge_sidewalk_load）。人行橋兼供腳踏車通行時另取 400 kgf/m2 作用於通行面積。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 第三章 p.25（3.12 第1款）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_phi_prestressed_T814",
+   "title": "極限強度之折減因數（8.14，預力混凝土）",
+   "src": "hwbridge",
+   "clause": "8.14",
+   "page": 12,
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "phi"
+   ],
+   "rows": [
+    {
+     "key": "廠製預鑄預力混凝土構材",
+     "values": {
+      "phi": 1.0
+     }
+    },
+    {
+     "key": "後拉法場鑄混凝土構材",
+     "values": {
+      "phi": 0.95
+     }
+    },
+    {
+     "key": "剪力",
+     "values": {
+      "phi": 0.9
+     }
+    },
+    {
+     "key": "端錨區（常重混凝土）",
+     "values": {
+      "phi": 0.85
+     }
+    },
+    {
+     "key": "端錨區（輕質混凝土）",
+     "values": {
+      "phi": 0.7
+     }
+    }
+   ],
+   "notes": "計算極限強度 φMn 不得小於 3.23 節載重因數設計之最大值；後拉預力端錨區之最大預力值載重因數應採 1.2。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 第八章 p.12（8.14）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwbridge_min_depth_T76",
+   "title": "等深度構材之建議最小深度（表7.6）",
+   "src": "hwbridge",
+   "clause": "7.3.11",
+   "page": 54,
+   "kind": "lookup",
+   "unit": "m",
+   "columns": [
+    "簡支梁",
+    "連續梁"
+   ],
+   "rows": [
+    {
+     "key": "主筋平行於行車方向之橋面板",
+     "values": {
+      "簡支梁": "1.2(S+3.0)/30",
+      "連續梁": "(S+3.0)/30，但不小於 0.17"
+     }
+    },
+    {
+     "key": "T 型梁",
+     "values": {
+      "簡支梁": "0.070S",
+      "連續梁": "0.065S"
+     }
+    },
+    {
+     "key": "箱型梁",
+     "values": {
+      "簡支梁": "0.060S",
+      "連續梁": "0.055S"
+     }
+    },
+    {
+     "key": "人行結構梁",
+     "values": {
+      "簡支梁": "0.033S",
+      "連續梁": "0.033S"
+     }
+    }
+   ],
+   "notes": "表註*：如用變深度構材，表中數值可就其正負彎矩斷面之相對勁度變化修正之。表註**：S 為 7.1.22 節第6項所定義之跨徑長度，單位 m。除非撓度計算顯示用較小深度無不利影響，最小深度建議採用本表。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 第七章 p.54 表7.6（含兩項表註）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

@@ -1,0 +1,381 @@
+{
+ "formulas": [
+  {
+   "id": "found112_passive_wedge_6338",
+   "title": "斜坡前方地盤被動土壓力之土楔模式（建築物基礎構造設計規範 112 年版 6.3.8 解說 式解6.3-3~解6.3-6）",
+   "src": "found112",
+   "clause": "6.3.8",
+   "page": 194,
+   "keywords": "基礎 井式基礎 被動土壓力 土楔 極限水平支承力 Rq 土楔重量 W 滑動面面積 A αs β 擴展角 θe 式解6.3-3 式解6.3-4 式解6.3-5 式解6.3-6",
+   "unit": "tf",
+   "output": "result",
+   "latex": "R_q=\\frac{W(\\cos\\alpha_s+\\sin\\alpha_s\\tan\\phi)+cA}{\\sin\\alpha_s-\\cos\\alpha_s\\tan\\phi};\\ W=\\gamma\\left\\{\\frac{B_e}{2}+\\frac{\\sin\\theta_e\\tan\\beta}{\\sin(\\theta_e+\\alpha_s)}\\frac z3\\right\\}\\frac{\\sin\\theta_e\\sin\\alpha_s}{\\sin(\\theta_e+\\alpha_s)}z^{2};\\ A=\\left\\{B_e+\\frac{\\sin\\theta_e\\tan\\beta}{\\sin(\\theta_e+\\alpha_s)}z\\right\\}\\frac{\\sin\\theta_e}{\\sin(\\theta_e+\\alpha_s)}z;\\ p_P=\\frac{1}{B_e}\\frac{\\partial R_q}{\\partial z}",
+   "vars": {
+    "gamma": {
+     "desc": "地盤單位重 γ（tf/m³）",
+     "unit": "tf/m3",
+     "min": 0,
+     "default": 1.8
+    },
+    "Be": {
+     "desc": "基礎有效正面寬 Be（m）",
+     "unit": "m",
+     "min": 1e-09,
+     "default": 4.0
+    },
+    "z": {
+     "desc": "深度 z（m）",
+     "unit": "m",
+     "min": 1e-09,
+     "default": 3.0
+    },
+    "c": {
+     "desc": "地盤有效凝聚力 c（tf/m²）",
+     "unit": "tf/m2",
+     "min": 0,
+     "default": 0.0
+    },
+    "phi": {
+     "desc": "地盤有效摩擦角 φ（度）",
+     "unit": "deg",
+     "min": 0,
+     "max": 60.0,
+     "default": 30.0
+    },
+    "beta": {
+     "desc": "土楔滑動面之擴展角 β（度；土砂及軟岩 30°+φ/3，硬岩 φ/3）",
+     "unit": "deg",
+     "min": 0,
+     "max": 60.0,
+     "default": 40.0
+    },
+    "theta_e": {
+     "desc": "設計地盤面與基礎正面之交角 θe（度；水平地表垂直前面為 90°）",
+     "unit": "deg",
+     "min": 1.0,
+     "max": 179.0,
+     "default": 90.0
+    },
+    "alpha_s": {
+     "desc": "土楔滑動面之角度 αs（度；式解6.3-3 須代入任意 αs，取使 Rq 為最小者——本式不自動搜尋，請由使用者掃描 αs）",
+     "unit": "deg",
+     "min": 1.0,
+     "max": 89.0,
+     "default": 55.0
+    },
+    "mode": {
+     "desc": "1＝土楔重量 W（tf）；2＝滑動面面積 A（m²）；3＝極限水平推力 Rq（tf）；4＝被動土壓力 pP（tf/m²，依 W、A 對 z 之解析偏微分）",
+     "unit": "-",
+     "min": 1,
+     "max": 4,
+     "default": 3
+    }
+   },
+   "expr": "_W if mode==1 else (_A if mode==2 else (_Rq if mode==3 else _pP))",
+   "tests": [
+    {
+     "in": {
+      "gamma": 1.8,
+      "Be": 4.0,
+      "z": 3.0,
+      "c": 0.0,
+      "phi": 30.0,
+      "beta": 40.0,
+      "theta_e": 90.0,
+      "alpha_s": 60.0,
+      "mode": 1
+     },
+     "out": 103.20741364471955
+    },
+    {
+     "in": {
+      "gamma": 1.8,
+      "Be": 4.0,
+      "z": 3.0,
+      "c": 0.0,
+      "phi": 30.0,
+      "beta": 40.0,
+      "theta_e": 90.0,
+      "alpha_s": 60.0,
+      "mode": 2
+     },
+     "out": 54.2075867223821
+    },
+    {
+     "in": {
+      "gamma": 1.8,
+      "Be": 4.0,
+      "z": 3.0,
+      "c": 0.0,
+      "phi": 30.0,
+      "beta": 40.0,
+      "theta_e": 90.0,
+      "alpha_s": 60.0,
+      "mode": 3
+     },
+     "out": 178.76048415043167
+    },
+    {
+     "in": {
+      "gamma": 1.8,
+      "Be": 4.0,
+      "z": 3.0,
+      "c": 0.0,
+      "phi": 30.0,
+      "beta": 0.0,
+      "theta_e": 90.0,
+      "alpha_s": 60.0,
+      "mode": 3
+     },
+     "out": 97.20000000000002
+    },
+    {
+     "in": {
+      "gamma": 1.8,
+      "Be": 4.0,
+      "z": 3.0,
+      "c": 0.0,
+      "phi": 30.0,
+      "beta": 0.0,
+      "theta_e": 90.0,
+      "alpha_s": 60.0,
+      "mode": 4
+     },
+     "out": 16.200000000000003
+    }
+   ],
+   "notes": "建築物基礎構造設計規範（112 年版）**6.3.8 解說 2. 地表傾斜情況：當基礎建構在斜坡面上，其被動土壓力應考慮基礎前方斜坡面之影響與滑動面三向度擴展等情況；基礎前方地盤之被動土壓力係根據圖-解6.3-5 所示之土楔模式，將土楔所提供之極限水平支承力 Rq 對深度微分求得。** **深度 z 之土楔極限水平支承力 Rq＝[W(cosαs＋sinαs·tanφ)＋c·A]／(sinαs－cosαs·tanφ)**（式解6.3-3）；**土楔重量 W＝γ{Be/2＋[sinθe·tanβ/sin(θe＋αs)]·(z/3)}·[sinθe·sinαs/sin(θe＋αs)]·z²**（式解6.3-4）；**滑動面面積 A＝(Be＋l·tanβ)·l＝{Be＋[sinθe·tanβ/sin(θe＋αs)]·z}·[sinθe/sin(θe＋αs)]·z**（式解6.3-5，l＝z·sinθe/sin(θe＋αs)）；**進一步將 Rq 對 z 偏微分可求得被動土壓力 pP＝(1/Be)(∂Rq/∂z)＝[(cosαs＋sinαs·tanφ)(∂W/∂z)＋c(∂A/∂z)]／[Be(sinαs－cosαs·tanφ)]**（式解6.3-6）。符號：Rq 深度 z 之土楔滑動時極限水平推力 (tf)；W 土楔重 (tf)；A 滑動面面積 (m²)；**αs 土楔滑動面角度，代入任意 αs 取使 Rq 為最小者**；φ 有效摩擦角；c 有效凝聚力；γ 單位重；Be 基礎有效正面寬；l 土楔滑動面長度；θ 設計地盤面傾斜角；θe 設計地盤面與基礎正面交角；**β 滑動面擴展角，土砂及軟岩 β＝30°＋φ/3、硬岩 β＝φ/3。** **原頁圖驗證（子代理讀 260 dpi，p.194~195）：式解6.3-3~6.3-6 括號分組、z/3、z² 位置皆清晰，無存疑。獨立驗證（強證據）：β＝0、θe＝90°、αs＝90°－(45°－φ/2)＝60°（φ＝30°）時 Rq＝γz²Be·Kp/2＝97.2 tf（Kp＝3，Rankine 被動），與本條目測試一致 ✓；加上 β＝40° 側向擴展後 Rq 約為二維值之 1.8~1.9 倍（αs＝55° 附近最小，Rq≈172 tf），為三維土楔增益。** ⚠ **式解6.3-6 之 ∂W/∂z＝γ·s2·[Be·z＋s1·tanβ·z²]、∂A/∂z＝Be·s1＋2·s1²·tanβ·z（s1＝sinθe/sin(θe＋αs)，s2＝sinθe·sinαs/sin(θe＋αs)）為本條目依式解6.3-4、6.3-5 自行微分，非原書展開式。** ⚠ 圖-解6.3-5 位於下一頁，未讀；θ（地面傾角）與 θe 之換算關係原文未於本頁說明，本條目以 θe 為直接輸入。",
+   "status": "verified",
+   "defs": [
+    [
+     "_s1",
+     "sin(radians(theta_e))/sin(radians(theta_e+alpha_s))"
+    ],
+    [
+     "_s2",
+     "sin(radians(theta_e))*sin(radians(alpha_s))/sin(radians(theta_e+alpha_s))"
+    ],
+    [
+     "_tb",
+     "tan(radians(beta))"
+    ],
+    [
+     "_W",
+     "gamma*(Be/2.0+_s1*_tb*z/3.0)*_s2*z**2"
+    ],
+    [
+     "_A",
+     "(Be+_s1*_tb*z)*_s1*z"
+    ],
+    [
+     "_den",
+     "sin(radians(alpha_s))-cos(radians(alpha_s))*tan(radians(phi))"
+    ],
+    [
+     "_num",
+     "cos(radians(alpha_s))+sin(radians(alpha_s))*tan(radians(phi))"
+    ],
+    [
+     "_Rq",
+     "(_W*_num+c*_A)/_den"
+    ],
+    [
+     "_dW",
+     "gamma*_s2*(Be*z+_s1*_tb*z**2)"
+    ],
+    [
+     "_dA",
+     "Be*_s1+2.0*_s1**2*_tb*z"
+    ],
+    [
+     "_pP",
+     "(_num*_dW+c*_dA)/(Be*_den)"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "_den>0",
+     "msg": "sinαs－cosαs·tanφ 須為正（αs 須大於 φ，αs 由鉛直量起）"
+    },
+    {
+     "expr": "Be>0 and z>0",
+     "msg": "Be、z 須為正"
+    }
+   ],
+   "_file": "payload_vis2.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "found112_passive_Kp_6213",
+   "title": "沉箱前方地層被動土壓力係數 KP、KPE（建築物基礎構造設計規範 112 年版 6.2.8 解說 式解6.2-13、解6.2-14）",
+   "src": "found112",
+   "clause": "6.2.8",
+   "page": 167,
+   "keywords": "基礎 沉箱 被動土壓力係數 KP KPE Coulomb 壁面摩擦角 δ -φ/3 -φ/6 地表傾角 α 式解6.2-13 式解6.2-14",
+   "unit": "-",
+   "output": "K",
+   "latex": "K_P=\\frac{\\cos^{2}\\phi}{\\cos\\delta\\left[1-\\sqrt{\\dfrac{\\sin(\\phi-\\delta)\\sin(\\phi+\\alpha)}{\\cos\\delta\\cos\\alpha}}\\right]^{2}},\\ \\delta=-\\phi/3;\\qquad K_{PE}:\\ \\delta\\to\\delta_E=-\\phi/6",
+   "vars": {
+    "phi": {
+     "desc": "土壤有效摩擦角 φ（度）",
+     "unit": "deg",
+     "min": 0,
+     "max": 60.0,
+     "default": 30.0
+    },
+    "alpha": {
+     "desc": "地表面與水平面之交角 α（度；上坡傾角為正、下坡俯角為負）",
+     "unit": "deg",
+     "min": -45.0,
+     "max": 45.0,
+     "default": 0.0
+    },
+    "mode": {
+     "desc": "1＝平時 KP（δ＝－φ/3）；2＝地震時 KPE（δE＝－φ/6）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "cos(radians(phi))**2/(cos(radians(_d))*(1.0-sqrt(sin(radians(phi-_d))*sin(radians(phi+alpha))/(cos(radians(_d))*cos(radians(alpha)))))**2)",
+   "tests": [
+    {
+     "in": {
+      "phi": 30.0,
+      "alpha": 0.0,
+      "mode": 1
+     },
+     "out": 4.143299513164072
+    },
+    {
+     "in": {
+      "phi": 30.0,
+      "alpha": 0.0,
+      "mode": 2
+     },
+     "out": 3.505156571541646
+    },
+    {
+     "in": {
+      "phi": 35.0,
+      "alpha": 10.0,
+      "mode": 1
+     },
+     "out": 9.416961865156352
+    }
+   ],
+   "notes": "建築物基礎構造設計規範（112 年版）**6.2.8 解說：被動土壓力係數 KP 與 KPE 可依下列方式計算：KP＝cos²φ／{cosδ[1－√(sin(φ－δ)·sin(φ＋α)／(cosδ·cosα))]²}**（式解6.2-13）；**KPE 同式，以地震時壁面摩擦角 δE 取代 δ**（式解6.2-14）。**δ＝平時之沉箱壁面與地層間之摩擦角，取(－φ/3)；δE＝地震時之沉箱壁面與地層間之摩擦角，取(－φ/6)；α＝地表面與水平面之交角，上坡傾角採正值，下坡俯角採負值。** **原頁圖驗證（子代理讀 260 dpi，p.167~168）：cos²φ 為分子（平方只蓋 φ）、cosδ 在方括號外不被平方、方括號內為 1－√(…)、根號內 sin(φ－δ)·sin(φ＋α)／(cosδ·cosα)，符號全數清晰。** **符號慣例（重要）：δ 取負值，故 sin(φ－δ)＝sin(φ＋|δ|)，即標準 Coulomb 被動式 sin(φ＋δ′) 搭配壁摩擦角 δ′＝+φ/3；φ＝30°、α＝0、δ＝－10° 時 KP＝4.14（>Rankine 3.0，壁面摩擦有利被動），δE＝－5° 時 KPE≈3.51。若誤讀為 sin(φ＋δ)（δ＝－10°）得 2.24，誤差極大。** 實作時務必保留 δ 的負值並照原文 sin(φ－δ)。 ⚠ 全段未見地震慣角 θE、kh、kv：KPE 與 KP 之差僅在 δ 取 －φ/6 而非 －φ/3。",
+   "status": "verified",
+   "defs": [
+    [
+     "_d",
+     "-phi/3.0 if mode==1 else -phi/6.0"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "phi>0",
+     "msg": "φ 須為正"
+    },
+    {
+     "expr": "sin(radians(phi+alpha))>0",
+     "msg": "φ＋α 須使 sin 為正"
+    }
+   ],
+   "_file": "payload_vis2.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "found112_caisson_skin_fs_6217",
+   "title": "沉箱基礎周面摩擦力 fs（建築物基礎構造設計規範 112 年版 6.2.8 解說 式解6.2-17、解6.2-18）",
+   "src": "found112",
+   "clause": "6.2.8",
+   "page": 168,
+   "keywords": "基礎 沉箱 周面摩擦力 fs 砂質土 粘性土 0.1N 0.5(c+p0tanφ) 5 10 式解6.2-17 式解6.2-18 靜止土壓力",
+   "unit": "tf/m2",
+   "output": "fs",
+   "latex": "\\text{砂質土}:\\ f_s=\\min\\left[0.1N,\\ 0.5(c+p_0\\tan\\phi),\\ 5\\right];\\qquad \\text{粘性土}:\\ f_s=\\min\\left[0.5(c+p_0\\tan\\phi),\\ 10\\right]",
+   "vars": {
+    "N": {
+     "desc": "標準貫入試驗 N 值（砂質土）",
+     "unit": "-",
+     "min": 0,
+     "default": 20.0
+    },
+    "c": {
+     "desc": "土壤有效凝聚力 c（tf/m²）",
+     "unit": "tf/m2",
+     "min": 0,
+     "default": 0.0
+    },
+    "p0": {
+     "desc": "作用於牆面之靜止土壓力 p0（tf/m²）",
+     "unit": "tf/m2",
+     "min": 0,
+     "default": 10.0
+    },
+    "phi": {
+     "desc": "土壤有效摩擦角 φ（度）",
+     "unit": "deg",
+     "min": 0,
+     "max": 60.0,
+     "default": 30.0
+    },
+    "kind": {
+     "desc": "1＝砂質土（解6.2-17）；2＝粘性土（解6.2-18）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "min(0.1*N, 0.5*(c+p0*tan(radians(phi))), 5.0) if kind==1 else min(0.5*(c+p0*tan(radians(phi))), 10.0)",
+   "tests": [
+    {
+     "in": {
+      "N": 20.0,
+      "c": 0.0,
+      "p0": 10.0,
+      "phi": 30.0,
+      "kind": 1
+     },
+     "out": 2.0
+    },
+    {
+     "in": {
+      "N": 20.0,
+      "c": 4.0,
+      "p0": 10.0,
+      "phi": 10.0,
+      "kind": 2
+     },
+     "out": 2.881634903542325
+    }
+   ],
+   "notes": "建築物基礎構造設計規範（112 年版）**6.2.8 解說（沉箱周面摩擦阻抗之上限）：砂質土 fs＝min[0.1N, 0.5(c＋p0·tanφ), 5] tf/m²**（式解6.2-17）；**粘性土 fs＝min[0.5(c＋p0·tanφ), 10] tf/m²**（式解6.2-18）。N 為標準貫入試驗 N 值，c 有效凝聚力，p0 作用於牆面之靜止土壓力，φ 有效摩擦角。**與 6.3.9 井式基礎周面摩擦力（砂 min[0.5N, c＋p0tanφ, 20]、黏 min[c＋p0tanφ, 15]，見 found112_skin_friction_limit_639）同型，係數約為其 1/5（N 項）與 1/2（庫侖項）、上限約 1/4 與 2/3——沉箱採較保守取值 ✓。** （此二式由子代理自 p.168 原頁圖讀出，原未被要求核對。）",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "phi>=0",
+     "msg": "φ 須非負"
+    }
+   ],
+   "_file": "payload_vis2.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

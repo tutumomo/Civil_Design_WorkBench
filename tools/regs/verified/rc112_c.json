@@ -1,0 +1,186 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_Po_Pnmax",
+   "title": "非預力柱純軸壓強度 Po 與最大設計軸壓強度 Pn,max（式22.4.2.2、表22.4.2.1）",
+   "src": "rc112",
+   "clause": "22.4.2.1",
+   "page": 374,
+   "keywords": "Po Pn,max 軸壓 柱 軸向強度 螺箍 箍筋",
+   "unit": "N",
+   "output": "Pn_max",
+   "latex": "P_o=0.85f'_c(A_g-A_{st})+f_yA_{st},\\quad P_{n,max}=0.80P_o\\;(\\text{箍筋});\\;0.85P_o\\;(\\text{螺箍筋})",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    },
+    "fy": {
+     "desc": "縱向鋼筋降伏強度（最大限制 550 MPa）",
+     "unit": "MPa",
+     "min": 240,
+     "max": 550
+    },
+    "Ag": {
+     "desc": "柱全斷面積",
+     "unit": "mm2",
+     "min": 1
+    },
+    "Ast": {
+     "desc": "全部非預力縱向鋼筋總面積",
+     "unit": "mm2",
+     "min": 0
+    },
+    "spiral": {
+     "desc": "橫向鋼筋為符合22.4.2.5之螺箍筋＝1；符合22.4.2.4之箍筋＝0",
+     "unit": "-",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "Po",
+     "0.85*fc*(Ag-Ast)+fy*Ast"
+    ]
+   ],
+   "expr": "(0.85 if spiral>0.5 else 0.80)*Po",
+   "conditions": [
+    {
+     "expr": "Ast<Ag",
+     "msg": "Ast 必須小於 Ag"
+    }
+   ],
+   "notes": "輸出為 Pn,max（標稱，未乘 φ）；設計強度 φPn,max，φ 見 rc112_phi_flexure（壓力控制）或表21.2.1。steps.Po 為 Po。僅適用非預力及合成柱；深基礎構材 0.80Po（表22.4.2.1(e)）亦同箍筋式。22.4.2.4/22.4.2.5 之箍筋／螺箍筋規定未收錄。",
+   "tests": [
+    {
+     "in": {
+      "fc": 28,
+      "fy": 420,
+      "Ag": 160000,
+      "Ast": 1600,
+      "spiral": 0
+     },
+     "out": 3553536.0,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 28,
+      "fy": 420,
+      "Ag": 160000,
+      "Ast": 1600,
+      "spiral": 1
+     },
+     "out": 3775632.0,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.374（表22.4.2.1、式22.4.2.2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "index_clause": "22.4.2.2"
+  },
+  {
+   "id": "rc112_punching_vc",
+   "title": "無剪力筋構材之雙向（穿孔）剪應力 vc（表22.6.5.2）",
+   "src": "rc112",
+   "clause": "22.6.5.2",
+   "page": 390,
+   "keywords": "穿孔剪力 雙向剪力 punching vc 基腳 版 柱",
+   "unit": "MPa",
+   "output": "vc",
+   "latex": "v_c=\\min\\left(0.33\\lambda_s\\lambda\\sqrt{f'_c},\\;0.17\\left(1+\\frac{2}{\\beta}\\right)\\lambda_s\\lambda\\sqrt{f'_c},\\;0.083\\left(2+\\frac{\\alpha_s d}{b_o}\\right)\\lambda_s\\lambda\\sqrt{f'_c}\\right)",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    },
+    "d": {
+     "desc": "有效深度",
+     "unit": "mm",
+     "min": 1
+    },
+    "bo": {
+     "desc": "臨界斷面周長",
+     "unit": "mm",
+     "min": 1
+    },
+    "beta": {
+     "desc": "柱、集中載重或反力面之長邊與短邊比值",
+     "unit": "-",
+     "min": 1
+    },
+    "alpha_s": {
+     "desc": "內柱 40、邊柱 30、角柱 20（22.6.5.3）",
+     "unit": "-",
+     "min": 20,
+     "max": 40
+    },
+    "lam": {
+     "desc": "輕質混凝土修正係數 λ",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.4,
+     "max": 1.0
+    }
+   },
+   "defs": [
+    [
+     "ls",
+     "min(1,sqrt(2/(1+d/250)))"
+    ],
+    [
+     "rf",
+     "sqrt(fc)"
+    ]
+   ],
+   "expr": "min(0.33*ls*lam*rf,0.17*(1+2/beta)*ls*lam*rf,0.083*(2+alpha_s*d/bo)*ls*lam*rf)",
+   "conditions": [
+    {
+     "expr": "alpha_s==40 or alpha_s==30 or alpha_s==20",
+     "msg": "αs 只能是 40（內柱）、30（邊柱）、20（角柱）"
+    }
+   ],
+   "notes": "SI（MPa、mm）。非預力雙向構材且未配剪力筋；λs 為尺寸效應係數（同 rc112_lambda_s）。輸出為剪應力 vc；設計須 φ·vc·bo·d ≥ Vu（φ=0.75，表21.2.1），臨界斷面位置（22.6.4.1）、Vu 與偏心彎矩傳遞（8.4.4.2）未收錄。預力版（22.6.5.5）與配剪力筋者（22.6.6、22.6.7）未收錄。",
+   "tests": [
+    {
+     "in": {
+      "fc": 28,
+      "d": 250,
+      "bo": 2600,
+      "beta": 1,
+      "alpha_s": 40
+     },
+     "out": 1.74619586530263,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 28,
+      "d": 400,
+      "bo": 1500,
+      "beta": 3,
+      "alpha_s": 30
+     },
+     "out": 1.3149371958613951,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.390-391（括號 MPa 版、αs 見 22.6.5.3）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": []
+}

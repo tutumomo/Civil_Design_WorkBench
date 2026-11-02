@@ -1,0 +1,12 @@
+{
+  "name": "參數化重建測試",
+  "commands": [
+    { "command": "parameters.add", "params": { "name": "W", "expression": "120", "unit": "mm" } },
+    { "command": "parameters.add", "params": { "name": "D", "expression": "80", "unit": "mm" } },
+    { "command": "parameters.add", "params": { "name": "T", "expression": "10", "unit": "mm" } },
+    { "command": "solid.box", "params": { "length": "W", "width": "D", "height": "T", "corner": [0,0,0], "name": "Plate", "body_name": "Base" } },
+    { "command": "parameters.change", "params": { "name": "W", "expression": "200" } },
+    { "command": "document.inspect", "params": { "measure": true } },
+    { "command": "parameters.graph", "params": {} }
+  ]
+}

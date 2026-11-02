@@ -1,0 +1,125 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_Tcr",
+   "title": "開裂扭矩 Tcr（表22.7.5.1，(a)(b)(c) 三式）",
+   "src": "rc112",
+   "clause": "22.7.5.1",
+   "page": 398,
+   "index_clause": "22.7.5.1",
+   "keywords": "扭力 Tcr 開裂扭矩 Acp Pcp fpc Nu 空心斷面 實心斷面",
+   "unit": "kgf·cm",
+   "output": "Tcr",
+   "latex": "T_{cr}=1.06\\lambda\\sqrt{f'_c}\\frac{A_{cp}^2}{P_{cp}}\\times\\begin{cases}1&(a)\\text{非預力}\\\\sqrt{1+\\frac{f_{pc}}{\\lambda\\sqrt{f'_c}}}&(b)\\text{預力}\\\\sqrt{1+\\frac{N_u}{A_g\\lambda\\sqrt{f'_c}}}&(c)\\text{承受軸力之非預力}\\end{cases}",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "kgf/cm2",
+     "min": 175,
+     "max": 700
+    },
+    "lam": {
+     "desc": "輕質混凝土修正係數 λ（常重 1.0）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.75,
+     "max": 1.0
+    },
+    "Acp": {
+     "desc": "構材斷面外周所圍之面積（空心斷面取外周）",
+     "unit": "cm2",
+     "min": 100
+    },
+    "Pcp": {
+     "desc": "構材斷面外周之周長",
+     "unit": "cm",
+     "min": 10
+    },
+    "mode": {
+     "desc": "1＝非預力(a)；2＝預力(b)；3＝承受軸力之非預力(c)",
+     "unit": "-",
+     "default": 1,
+     "min": 1,
+     "max": 3
+    },
+    "fpc": {
+     "desc": "構材受拉面（或撓曲受拉面）之混凝土壓應力（含有效預力）",
+     "unit": "kgf/cm2",
+     "default": 0.0,
+     "min": 0,
+     "max": 200
+    },
+    "Nu": {
+     "desc": "軸力（壓力為正、拉力為負）",
+     "unit": "kgf",
+     "default": 0.0
+    },
+    "Ag": {
+     "desc": "全斷面積（模式 3 使用）",
+     "unit": "cm2",
+     "default": 1.0,
+     "min": 1
+    }
+   },
+   "defs": [
+    [
+     "base",
+     "1.06*lam*sqrt(fc)*(Acp**2/Pcp)"
+    ],
+    [
+     "fac",
+     "1.0 if mode<1.5 else (sqrt(1+fpc/(lam*sqrt(fc))) if mode<2.5 else sqrt(1+Nu/(Ag*lam*sqrt(fc))))"
+    ]
+   ],
+   "expr": "max(0.0,base*fac)",
+   "conditions": [
+    {
+     "expr": "mode==1 or mode==2 or mode==3",
+     "msg": "mode 只能是 1、2、3"
+    }
+   ],
+   "notes": "表22.7.5.1：(a) 非預力、(b) 預力、(c) 承受軸力之非預力構材；MPa 版係數為 0.33（方括號），本式以 kgf 版實作（fc' kgf/cm2、Acp cm2、Pcp cm）。22.7.5.1 本文：Nu 為軸壓力時以**正值**計算、軸拉力時以**負值**計算。模式(3) 之 Nu 代入拉力（負值）會使根號內小於 0 而無實數解，程式以 max(0,·) 回 0，使用時應自行判讀。本式為**逐字讀原頁圖（rc112 p.398）**轉錄——該頁屬排版公式頁，文字層不可用。扭力設計界限＝開裂扭矩 Tcr 的 1/4（22.7.5 解說）。",
+   "tests": [
+    {
+     "in": {
+      "fc": 280,
+      "Acp": 1000,
+      "Pcp": 200
+     },
+     "out": 88685.96281261201,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 280,
+      "Acp": 1000,
+      "Pcp": 200,
+      "mode": 2,
+      "fpc": 20
+     },
+     "out": 131399.81757269253,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 280,
+      "Acp": 1000,
+      "Pcp": 200,
+      "mode": 3,
+      "Nu": 50000,
+      "Ag": 1000
+     },
+     "out": 177107.25604938433,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字讀原頁圖 rc112 p.398（表22.7.5.1，含 (a)(b)(c) 與 kgf/MPa 兩版；200dpi 放大確認根號與下標）＋手算",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

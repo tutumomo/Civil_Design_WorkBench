@@ -1,0 +1,611 @@
+{
+ "formulas": [
+  {
+   "id": "hwbridge104_column_axial_734",
+   "title": "受壓構材軸力強度上限與純壓設計強度（公路橋梁 104 年版 7.3.4 式7-22）",
+   "src": "hwbridge104",
+   "clause": "7.3.4",
+   "page": 31,
+   "keywords": "公路橋梁 104 受壓構材 軸力 螺箍 橫箍 φPn(max) φPo 0.85 0.80 0.75 0.70 Ag Ast 7-22 強度設計",
+   "unit": "tf",
+   "output": "result",
+   "latex": "\\phi P_{n(max)}=\\phi\\,\\alpha\\left[0.85f'_c(A_g-A_{st})+f_yA_{st}\\right],\\ \\alpha=0.85\\ (\\phi=0.75\\ \\text{螺箍}),\\ 0.80\\ (\\phi=0.70\\ \\text{橫箍});\\qquad \\phi P_o=\\phi\\left[0.85f'_c(A_g-A_{st})+f_yA_{st}\\right]",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 f'c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 280.0
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度 fy（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 4200.0
+    },
+    "Ag": {
+     "desc": "構材全斷面積 Ag（cm²）",
+     "unit": "cm2",
+     "min": 1e-09,
+     "default": 3600.0
+    },
+    "Ast": {
+     "desc": "縱向鋼筋總面積 Ast（cm²）",
+     "unit": "cm2",
+     "min": 0,
+     "default": 60.0
+    },
+    "kind": {
+     "desc": "1＝螺箍構材（7.1.10 節 2.(1)，φ＝0.75、上限 0.85）；2＝橫箍構材（7.1.10 節 2.(2)，φ＝0.70、上限 0.80）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    },
+    "mode": {
+     "desc": "1＝設計軸力強度上限 φPn(max)；2＝純壓無偏心設計軸力強度 φPo（式7-22）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "((0.75 if kind==1 else 0.70)*(0.85 if kind==1 else 0.80)*(0.85*fc*(Ag-Ast)+fy*Ast) if mode==1 else (0.75 if kind==1 else 0.70)*(0.85*fc*(Ag-Ast)+fy*Ast))/1000.0",
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "fy": 4200.0,
+      "Ag": 3600.0,
+      "Ast": 60.0,
+      "kind": 1,
+      "mode": 1
+     },
+     "out": 697.7565
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "fy": 4200.0,
+      "Ag": 3600.0,
+      "Ast": 60.0,
+      "kind": 2,
+      "mode": 1
+     },
+     "out": 612.9312
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "fy": 4200.0,
+      "Ag": 3600.0,
+      "Ast": 60.0,
+      "kind": 2,
+      "mode": 2
+     },
+     "out": 766.164
+    }
+   ],
+   "notes": "公路橋梁設計規範（104.03.19 版）**7.3.4 第1 項(2)**：**受軸力併受撓曲之構材應就伴隨此軸力之最大彎矩設計；對所給予偏心距之乘因數軸力 Pu 不得大於設計軸力強度 φPn(max)——a. 螺箍構材：φPn(max)＝0.85φ[0.85f′c(Ag－Ast)＋fy·Ast]，φ＝0.75；b. 橫箍構材：φPn(max)＝0.80φ[0.85f′c(Ag－Ast)＋fy·Ast]，φ＝0.70。** **第2 項(1) 純壓無偏心時之設計軸力強度 φPo＝φ[0.85f′c(Ag－Ast)＋fy·Ast]**（式7-22）；純壓強度乃設計上之假設載重狀態，故 1.(2) 限制軸力強度為無偏心時之 85%（螺箍）及 80%（橫箍）。**與 ACI 318-83 §10.3.5 完全一致（0.85／0.80 與 φ＝0.75／0.70）✓。** **量綱：kgf/cm²×cm²÷1000＝tf ✓。**",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Ag>Ast",
+     "msg": "Ast 不得大於 Ag"
+    }
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "hwbridge104_balanced_734",
+   "title": "矩形受壓構材平衡狀態之設計軸力 φPb 與設計彎矩 φMb（公路橋梁 104 年版 7.3.4 式7-23、7-24）",
+   "src": "hwbridge104",
+   "clause": "7.3.4",
+   "page": 31,
+   "keywords": "公路橋梁 104 受壓構材 平衡狀態 φPb φMb ab 6120 β1 f's 7-23 7-24 互制 塑性中心",
+   "unit": "tf",
+   "output": "result",
+   "latex": "\\phi P_b=\\phi\\left(0.85f'_cba_b+A'_sf'_s-A_sf_y\\right);\\ \\phi M_b=\\phi\\left[0.85f'_cba_b\\left(d-d''-\\tfrac{a_b}{2}\\right)+A'_sf'_s(d-d'-d'')+A_sf_yd''\\right];\\ a_b=\\beta_1d\\frac{6120}{6120+f_y};\\ f'_s=6120\\left[1-\\frac{d'}{d}\\frac{6120+f_y}{6120}\\right]\\le f_y",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 f'c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 280.0
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度 fy（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 4200.0
+    },
+    "b": {
+     "desc": "斷面寬度 b（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 40.0
+    },
+    "d": {
+     "desc": "受壓面至受拉鋼筋形心距離 d（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 54.0
+    },
+    "dp": {
+     "desc": "受壓面至受壓鋼筋形心距離 d'（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 6.0
+    },
+    "dpp": {
+     "desc": "塑性中心至受拉鋼筋形心距離 d''（cm；對稱配筋矩形＝h/2－d'）",
+     "unit": "cm",
+     "min": 0,
+     "default": 24.0
+    },
+    "As": {
+     "desc": "受拉鋼筋面積 As（cm²）",
+     "unit": "cm2",
+     "min": 0,
+     "default": 20.0
+    },
+    "Asp": {
+     "desc": "受壓鋼筋面積 A's（cm²）",
+     "unit": "cm2",
+     "min": 0,
+     "default": 20.0
+    },
+    "beta1": {
+     "desc": "等值矩形應力塊係數 β1",
+     "unit": "-",
+     "min": 0.65,
+     "max": 0.85,
+     "default": 0.85
+    },
+    "phi": {
+     "desc": "強度折減因數 φ（依 7.3.1 節）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 1.0,
+     "default": 0.7
+    },
+    "mode": {
+     "desc": "1＝設計軸力 φPb（tf）；2＝設計彎矩 φMb（tf·m）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "(phi*(0.85*fc*b*_ab+Asp*_fsp-As*fy)/1000.0) if mode==1 else (phi*(0.85*fc*b*_ab*(d-dpp-_ab/2.0)+Asp*_fsp*(d-dp-dpp)+As*fy*dpp)/1e5)",
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "fy": 4200.0,
+      "b": 40.0,
+      "d": 54.0,
+      "dp": 6.0,
+      "dpp": 24.0,
+      "As": 20.0,
+      "Asp": 20.0,
+      "beta1": 0.85,
+      "phi": 0.7,
+      "mode": 1
+     },
+     "out": 181.39253023255813
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "fy": 4200.0,
+      "b": 40.0,
+      "d": 54.0,
+      "dp": 6.0,
+      "dpp": 24.0,
+      "As": 20.0,
+      "Asp": 20.0,
+      "beta1": 0.85,
+      "phi": 0.7,
+      "mode": 2
+     },
+     "out": 57.95444662666306
+    }
+   ],
+   "notes": "公路橋梁設計規範（104.03.19 版）**7.3.4 第2 項(3) 平衡應變狀態**：**矩形斷面之一面或兩面排有鋼筋且位於距彎曲軸大致相等者，平衡設計軸力強度 φPb＝φ(0.85f′c·b·ab＋A′s·f′s－As·fy)**（式7-23）；**平衡設計彎矩強度 φMb＝φ[0.85f′c·b·ab·(d－d″－ab/2)＋A′s·f′s·(d－d′－d″)＋As·fy·d″]**（式7-24）；**ab＝β1·d·6120/(6120＋fy)（MPa 版 600/(600＋fy)）；f′s＝6120[1－(d′/d)(6120＋fy)/6120]≤fy（MPa 版 600）。** 式中 d″ 為塑性中心至受拉鋼筋形心之距離。**重建說明：文字層將 f′s 括號分組打散（`)] 6120 6120 )( ( 1[ 6120`），本條目依應變相容推導（c＝ab/β1＝6120d/(6120＋fy)，f′s＝6120(1－d′/c)）還原，與 ACI 318-83 平衡狀態公式一致 ✓。** **雙單位驗證：6120／600＝10.2 ✓。** **合理性：對稱配筋時 φMb＞0 且 φPb＞0 ✓。**",
+   "status": "verified",
+   "defs": [
+    [
+     "_ab",
+     "beta1*d*6120.0/(6120.0+fy)"
+    ],
+    [
+     "_fsp",
+     "min(fy, 6120.0*(1.0-(dp/d)*(6120.0+fy)/6120.0))"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "d>dp",
+     "msg": "d 須大於 d'"
+    }
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "hwbridge104_biaxial_734",
+   "title": "非圓形斷面雙軸彎矩之近似設計（公路橋梁 104 年版 7.3.4 第3 項 式7-25、7-26）",
+   "src": "hwbridge104",
+   "clause": "7.3.4",
+   "page": 31,
+   "keywords": "公路橋梁 104 雙軸彎矩 受壓構材 Bresler 倒數法 Pnxy 1/Pnx+1/Pny-1/Po 7-25 7-26 0.1fcAg 互制",
+   "unit": "-",
+   "output": "result",
+   "latex": "P_u\\ge0.1f'_cA_g:\\ \\frac{1}{P_{nxy}}=\\frac{1}{P_{nx}}+\\frac{1}{P_{ny}}-\\frac{1}{P_o};\\qquad P_u<0.1f'_cA_g:\\ \\frac{M_{ux}}{\\phi M_{nx}}+\\frac{M_{uy}}{\\phi M_{ny}}\\le1",
+   "vars": {
+    "Pnx": {
+     "desc": "僅有 ex 偏心時之標稱軸力強度 Pnx（tf）",
+     "unit": "tf",
+     "min": 1e-09,
+     "default": 300.0
+    },
+    "Pny": {
+     "desc": "僅有 ey 偏心時之標稱軸力強度 Pny（tf）",
+     "unit": "tf",
+     "min": 1e-09,
+     "default": 350.0
+    },
+    "Po": {
+     "desc": "無偏心標稱軸力強度 Po（tf）",
+     "unit": "tf",
+     "min": 1e-09,
+     "default": 900.0
+    },
+    "Mux": {
+     "desc": "x 方向因數化彎矩 Mux（tf·m；mode=2）",
+     "unit": "tf-m",
+     "min": 0,
+     "default": 0.0
+    },
+    "Muy": {
+     "desc": "y 方向因數化彎矩 Muy（tf·m；mode=2）",
+     "unit": "tf-m",
+     "min": 0,
+     "default": 0.0
+    },
+    "phiMnx": {
+     "desc": "φMnx（tf·m；mode=2）",
+     "unit": "tf-m",
+     "min": 1e-09,
+     "default": 40.0
+    },
+    "phiMny": {
+     "desc": "φMny（tf·m；mode=2）",
+     "unit": "tf-m",
+     "min": 1e-09,
+     "default": 30.0
+    },
+    "mode": {
+     "desc": "1＝Pnxy（Pu≥0.1f'cAg，式7-25）；2＝互制比 Mux/φMnx＋Muy/φMny（Pu<0.1f'cAg，式7-26，≤1 合格）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "1.0/(1.0/Pnx+1.0/Pny-1.0/Po) if mode==1 else Mux/phiMnx+Muy/phiMny",
+   "tests": [
+    {
+     "in": {
+      "Pnx": 300.0,
+      "Pny": 350.0,
+      "Po": 900.0,
+      "Mux": 0.0,
+      "Muy": 0.0,
+      "phiMnx": 40.0,
+      "phiMny": 30.0,
+      "mode": 1
+     },
+     "out": 196.875
+    },
+    {
+     "in": {
+      "Pnx": 300.0,
+      "Pny": 350.0,
+      "Po": 900.0,
+      "Mux": 20.0,
+      "Muy": 10.0,
+      "phiMnx": 40.0,
+      "phiMny": 30.0,
+      "mode": 2
+     },
+     "out": 0.8333333333333333
+    }
+   ],
+   "notes": "公路橋梁設計規範（104.03.19 版）**7.3.4 第3 項 雙軸載重**：**非圓形斷面構材承受雙軸彎矩之設計強度可用下述近似公式，以代替根據應力與應變相容性之一般斷面分析：當乘因數軸力 Pu≥0.1f′c·Ag 時，1/Pnxy＝1/Pnx＋1/Pny－1/Po**（式7-25；Pnx 僅有 ex 偏心之軸力強度、Pny 僅有 ey 偏心、Po 無偏心）；**當 Pu<0.1f′c·Ag 時，Mux/φMnx＋Muy/φMny≤1**（式7-26）。**此即 Bresler 倒數載重法，與 ACI 318-83 §10.3.6 同式 ✓。** **合理性：Pnx、Pny 皆趨近 Po 時 1/Pnxy→1/Po ✓（無偏心）；Pnxy 恆小於 min(Pnx,Pny) ✓。**",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "1.0/Pnx+1.0/Pny-1.0/Po>0",
+     "msg": "1/Pnx＋1/Pny－1/Po 須為正（Po 須大於 Pnx、Pny）"
+    }
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "hwbridge104_slender_limit_735",
+   "title": "受壓構材可忽略細長效應之長細比上限（公路橋梁 104 年版 7.3.5 第2 項(4)）",
+   "src": "hwbridge104",
+   "clause": "7.3.5",
+   "page": 31,
+   "keywords": "公路橋梁 104 受壓構材 細長效應 長細比 kℓu/r 34-12M1b/M2b 22 100 有支撐 無支撐 側移",
+   "unit": "-",
+   "output": "limit",
+   "latex": "\\frac{k\\ell_u}{r}<34-12\\frac{M_{1b}}{M_{2b}}\\ (\\text{有支撐});\\quad \\frac{k\\ell_u}{r}<22\\ (\\text{無支撐});\\quad \\frac{k\\ell_u}{r}>100\\Rightarrow\\text{須依 1.項分析}",
+   "vars": {
+    "M1M2": {
+     "desc": "M1b/M2b（單曲度為正、雙曲度為負）",
+     "unit": "-",
+     "min": -1.0,
+     "max": 1.0,
+     "default": 0.0
+    },
+    "braced": {
+     "desc": "1＝有支撐防止側移；0＝無支撐",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    "kl_r": {
+     "desc": "kℓu/r（用於比較；填 0 則僅回傳上限）",
+     "unit": "-",
+     "min": 0,
+     "default": 0.0
+    }
+   },
+   "expr": "(34.0-12.0*M1M2) if braced==1 else 22.0",
+   "tests": [
+    {
+     "in": {
+      "M1M2": 0.0,
+      "braced": 1,
+      "kl_r": 0.0
+     },
+     "out": 34.0
+    },
+    {
+     "in": {
+      "M1M2": -0.5,
+      "braced": 1,
+      "kl_r": 0.0
+     },
+     "out": 40.0
+    },
+    {
+     "in": {
+      "M1M2": 0.0,
+      "braced": 0,
+      "kl_r": 0.0
+     },
+     "out": 22.0
+    }
+   ],
+   "notes": "公路橋梁設計規範（104.03.19 版）**7.3.5 第2 項 細長效應之近似估算**：**(2) 矩形受壓斷面迴轉半徑 r 可用考慮穩定方向之總寬乘 0.30，圓形用直徑乘 0.25；(3) 有支撐防止側移之受壓構材有效長度因數 k 除非經分析用較小值否則為 1.0，無支撐者 k 須大於 1；(4) 有支撐防止側移之受壓構材當 kℓu/r<34－12(M1b/M2b) 時可不計細長效應；無支撐防止側移者當 kℓu/r<22 時可不計；所有 kℓu/r>100 之受壓構材均應按第1 項（精確二階分析）。** M1b/M2b 當構材彎曲成單曲度時為正。**與 ACI 318-83 §10.11.4 完全一致（34－12M1b/M2b、22、100）✓。**",
+   "status": "verified",
+   "warn_if": [
+    {
+     "expr": "kl_r>100.0",
+     "msg": "kℓu/r>100：須依 7.3.5 第1 項作二階分析，不可用近似法"
+    },
+    {
+     "expr": "kl_r>0 and kl_r<((34.0-12.0*M1M2) if braced==1 else 22.0)",
+     "msg": "kℓu/r 小於上限：可忽略細長效應"
+    }
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "hwbridge104_moment_magnifier_735",
+   "title": "細長受壓構材之放大彎矩 Mc＝δb·M2b＋δs·M2s（公路橋梁 104 年版 7.3.5 式7-27~7-33）",
+   "src": "hwbridge104",
+   "clause": "7.3.5",
+   "page": 31,
+   "keywords": "公路橋梁 104 受壓構材 彎矩放大 δb δs Cm Pc EI π2 βd 7-27 7-28 7-29 7-30 7-31 7-32 7-33",
+   "unit": "tf-m",
+   "output": "Mc",
+   "latex": "M_c=\\delta_bM_{2b}+\\delta_sM_{2s};\\ \\delta_b=\\frac{C_m}{1-P_u/\\phi P_c}\\ge1;\\ \\delta_s=\\frac{1}{1-\\sum P_u/\\phi\\sum P_c}\\ge1;\\ P_c=\\frac{\\pi^{2}EI}{(k\\ell_u)^{2}};\\ EI=\\frac{E_cI_g/5+E_sI_s}{1+\\beta_d}\\ \\text{或}\\ \\frac{E_cI_g/2.5}{1+\\beta_d};\\ C_m=0.6+0.4\\frac{M_{1b}}{M_{2b}}\\ge0.4",
+   "vars": {
+    "Pu": {
+     "desc": "乘因數軸力 Pu（tf）",
+     "unit": "tf",
+     "min": 0,
+     "default": 100.0
+    },
+    "phi": {
+     "desc": "強度折減因數 φ（螺箍 0.75／橫箍 0.70）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 1.0,
+     "default": 0.7
+    },
+    "Ec": {
+     "desc": "混凝土彈性模數 Ec（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 250000.0
+    },
+    "Ig": {
+     "desc": "混凝土全斷面慣性矩 Ig（cm⁴）",
+     "unit": "cm4",
+     "min": 1.0,
+     "default": 1080000.0
+    },
+    "Es": {
+     "desc": "鋼筋彈性模數 Es（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 2040000.0
+    },
+    "Is": {
+     "desc": "縱向鋼筋對斷面形心之慣性矩 Is（cm⁴；EI 選 7-32 時填 0）",
+     "unit": "cm4",
+     "min": 0,
+     "default": 20000.0
+    },
+    "betad": {
+     "desc": "最大靜重彎矩與最大總載重彎矩之比 βd（恆為正）",
+     "unit": "-",
+     "min": 0,
+     "max": 1.0,
+     "default": 0.5
+    },
+    "k": {
+     "desc": "有效長度因數 k",
+     "unit": "-",
+     "min": 0.5,
+     "default": 1.0
+    },
+    "lu": {
+     "desc": "受壓構材之無支撐長度 ℓu（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 400.0
+    },
+    "M1b": {
+     "desc": "較小端彎矩 M1b（tf·m；單曲度為正）",
+     "unit": "tf-m",
+     "default": 5.0
+    },
+    "M2b": {
+     "desc": "較大端彎矩 M2b（tf·m，有支撐側移之彎矩）",
+     "unit": "tf-m",
+     "min": 1e-09,
+     "default": 10.0
+    },
+    "M2s": {
+     "desc": "側移引致之較大端彎矩 M2s（tf·m）",
+     "unit": "tf-m",
+     "min": 0,
+     "default": 0.0
+    },
+    "ds": {
+     "desc": "側移放大因數 δs（有支撐防止側移者取 1.0）",
+     "unit": "-",
+     "min": 1.0,
+     "default": 1.0
+    },
+    "braced": {
+     "desc": "1＝有支撐且支點間無側向載重（Cm 用式7-33）；0＝其他情況 Cm＝1.0",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    "ei_mode": {
+     "desc": "1＝EI 用式7-31（Ec·Ig/5＋Es·Is）；2＝式7-32（Ec·Ig/2.5，保守）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "_db*M2b+ds*M2s",
+   "tests": [
+    {
+     "in": {
+      "Pu": 100.0,
+      "phi": 0.7,
+      "Ec": 250000.0,
+      "Ig": 1080000.0,
+      "Es": 2040000.0,
+      "Is": 20000.0,
+      "betad": 0.5,
+      "k": 1.0,
+      "lu": 400.0,
+      "M1b": 5.0,
+      "M2b": 10.0,
+      "M2s": 0.0,
+      "ds": 1.0,
+      "braced": 1,
+      "ei_mode": 1
+     },
+     "out": 10.0
+    },
+    {
+     "in": {
+      "Pu": 100.0,
+      "phi": 0.7,
+      "Ec": 250000.0,
+      "Ig": 1080000.0,
+      "Es": 2040000.0,
+      "Is": 0.0,
+      "betad": 0.5,
+      "k": 1.0,
+      "lu": 400.0,
+      "M1b": -5.0,
+      "M2b": 10.0,
+      "M2s": 3.0,
+      "ds": 1.2,
+      "braced": 1,
+      "ei_mode": 2
+     },
+     "out": 13.6
+    }
+   ],
+   "notes": "公路橋梁設計規範（104.03.19 版）**7.3.5 第2 項(5)**：**受壓構材應按一般彈性分析所得乘因數軸力 Pu 及放大乘因數彎矩 Mc 設計：Mc＝δb·M2b＋δs·M2s**（式7-27）；**δb＝Cm/(1－Pu/φPc)≥1.0**（式7-28）；**δs＝1/(1－ΣPu/φΣPc)≥1.0**（式7-29）；**Pc＝π²EI/(kℓu)²**（式7-30）；**EI＝(Ec·Ig/5＋Es·Is)/(1＋βd)**（式7-31）**或保守地 EI＝(Ec·Ig/2.5)/(1＋βd)**（式7-32）；**βd 為最大靜重彎矩與最大總載重彎矩之比，恆為正。有支撐防止側移且支點間無側向載重之構材 Cm＝0.6＋0.4(M1b/M2b)，但不得小於 0.4**（式7-33）；**其他情況 Cm＝1.0。** 當構材有支撐防止側移時 δs 可取 1.0；無支撐防止側移時 δb 應以有支撐構材計算、δs 以無支撐構材計算。**與 ACI 318-83 §10.11 一致 ✓；量綱：EI(kgf·cm²)／(cm)²＝kgf，÷1000＝tf ✓。** ⚠ **文字層式7-29 帶 Cm，ACI 為不含 Cm 之 1/(1－ΣPu/φΣPc)；本條目依 ACI 取 δs 為輸入（由使用者以 ΣPu、ΣPc 另行計算）。**",
+   "status": "verified",
+   "defs": [
+    [
+     "_EI",
+     "((Ec*Ig/5.0+Es*Is)/(1.0+betad)) if ei_mode==1 else (Ec*Ig/2.5/(1.0+betad))"
+    ],
+    [
+     "_Pc",
+     "pi**2*_EI/((k*lu)**2)/1000.0"
+    ],
+    [
+     "_Cm",
+     "max(0.4, 0.6+0.4*M1b/M2b) if braced==1 else 1.0"
+    ],
+    [
+     "_db",
+     "max(1.0, _Cm/(1.0-Pu/(phi*_Pc)))"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "Pu<phi*_Pc",
+     "msg": "Pu≥φPc：構材已達挫屈載重，δb 無意義，須加大斷面"
+    }
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

@@ -1,0 +1,5 @@
+name,unit,expression,value,comment,favorite
+L,mm,80 mm,80,,false
+W,mm,50 mm,50,,false
+T,mm,6 mm,6,,false
+inset,mm,8 mm,8,,false

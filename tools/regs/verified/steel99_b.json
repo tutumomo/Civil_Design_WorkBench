@@ -1,0 +1,546 @@
+{
+ "formulas": [
+  {
+   "id": "steel99_Mp_ZFy",
+   "title": "標稱塑性撓曲強度 Mp＝Z·Fy（鋼構 13.2.2 第1款，LRFD 版）",
+   "src": "steel99",
+   "clause": "13.2.2",
+   "page": 5,
+   "keywords": "鋼構 耐震 標稱塑性撓曲強度 Mp Z Fy 塑性斷面模數 LRFD",
+   "unit": "tf·cm",
+   "output": "Mp",
+   "latex": "M_p=ZF_y",
+   "vars": {
+    "Z": {
+     "desc": "塑性斷面模數 Z",
+     "unit": "cm3",
+     "min": 0
+    },
+    "Fy": {
+     "desc": "鋼材標稱降伏應力 Fy",
+     "unit": "tf/cm2",
+     "min": 0
+    }
+   },
+   "expr": "Z*Fy",
+   "conditions": [
+    {
+     "expr": "Z>=0 and Fy>=0",
+     "msg": "Z、Fy 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Z": 1000,
+      "Fy": 2.5
+     },
+     "out": 2500.0
+    },
+    {
+     "in": {
+      "Z": 500,
+      "Fy": 3.5
+     },
+     "out": 1750.0
+    }
+   ],
+   "notes": "13.2.2（(二) 強度設計法版）：本章構材及接合之標稱強度除另有說明者外，均以下述為依據——1. 標稱塑性撓曲強度 Mp＝Z·Fy；2. 標稱剪力強度 Vp＝0.6Fy·d·t（見 steel99_Vp）；3. 標稱軸向壓力強度 Puc＝Fcr·A、4. 標稱軸向拉力強度 Put＝Fy·A（見 steel99_Pn_axial）。**注意：鋼構 99 有 (一) 容許應力設計法與 (二) 強度設計法兩套，條號相同但內容不同**（SOP §8），本條目為 (二) 版（原檔 32_(二)第十三章_耐震設計.pdf）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二)強度設計法 第十三章 p.5 §13.2.2",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Vp",
+   "title": "標稱剪力強度 Vp＝0.6·Fy·d·t（鋼構 13.2.2 第2款，LRFD 版）",
+   "src": "steel99",
+   "clause": "13.2.2",
+   "page": 5,
+   "keywords": "鋼構 耐震 標稱剪力強度 Vp 0.6 Fy d t 腹板 LRFD",
+   "unit": "tf",
+   "output": "Vp",
+   "latex": "V_p=0.6F_y\\,d\\,t",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材標稱降伏應力 Fy",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "d": {
+     "desc": "構材深度 d",
+     "unit": "cm",
+     "min": 0
+    },
+    "t": {
+     "desc": "腹板厚度 t",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "0.6*Fy*d*t",
+   "conditions": [
+    {
+     "expr": "Fy>=0 and d>0 and t>0",
+     "msg": "Fy 非負、d 與 t 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "d": 40,
+      "t": 1
+     },
+     "out": 60.0
+    },
+    {
+     "in": {
+      "Fy": 3.5,
+      "d": 50,
+      "t": 1.2
+     },
+     "out": 126.0
+    }
+   ],
+   "notes": "13.2.2 第2款（(二) 強度設計法版）：標稱剪力強度 Vp＝0.6Fy·d·t。與 Mp 同條（見 steel99_Mp_ZFy 的 notes 說明 (一)/(二) 兩版差異）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十三章 p.5 §13.2.2",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Pn_axial",
+   "title": "標稱軸向壓力 Puc＝Fcr·A 與拉力 Put＝Fy·A（鋼構 13.2.2 第3、4款）",
+   "src": "steel99",
+   "clause": "13.2.2",
+   "page": 5,
+   "keywords": "鋼構 耐震 標稱軸向壓力 Fcr A 標稱軸向拉力 Fy A LRFD",
+   "unit": "tf",
+   "output": "Pn",
+   "latex": "P_{uc}=F_{cr}A,\\qquad P_{ut}=F_yA",
+   "vars": {
+    "F": {
+     "desc": "壓力時輸入 Fcr、拉力時輸入 Fy",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "A": {
+     "desc": "全斷面積 A",
+     "unit": "cm2",
+     "min": 0
+    }
+   },
+   "expr": "F*A",
+   "conditions": [
+    {
+     "expr": "F>=0 and A>=0",
+     "msg": "F、A 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "F": 2.4,
+      "A": 100
+     },
+     "out": 240.0
+    },
+    {
+     "in": {
+      "F": 3.5,
+      "A": 50
+     },
+     "out": 175.0
+    }
+   ],
+   "notes": "13.2.2 第3、4款（(二) 強度設計法版）：標稱軸向壓力強度 Puc＝Fcr·A；標稱軸向拉力強度 Put＝Fy·A。Fcr 之計算（λc 之迴歸式）見第六章（本庫已收 steel99_Fcr_lrfd）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十三章 p.5 §13.2.2",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_friction_tension_reduction",
+   "title": "摩阻型接合承受拉力時之折減因子（鋼構 10.3.7，LRFD 版）",
+   "src": "steel99",
+   "clause": "10.3.7",
+   "page": 19,
+   "keywords": "摩阻型接合 高強度螺栓 預拉力 Tb 拉力 折減因子 0.8 1.13",
+   "unit": "-",
+   "output": "reduction",
+   "latex": "\\text{工作載重: }1-\\frac{T}{0.8N_b};\\qquad \\text{係數化載重: }1-\\frac{T_u}{1.13N_b}",
+   "vars": {
+    "T": {
+     "desc": "接合承受之拉力（工作載重為 T、係數化載重為 Tu）",
+     "unit": "tf",
+     "min": 0
+    },
+    "Nb": {
+     "desc": "高強度螺栓之預拉力 Tb（見表10.3-1）",
+     "unit": "tf",
+     "min": 0
+    },
+    "factored": {
+     "desc": "1＝係數化載重（分母 1.13Nb）、0＝工作載重（分母 0.8Nb）",
+     "unit": "-",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   },
+   "expr": "(1-T/(1.13*Nb)) if factored>0.5 else (1-T/(0.8*Nb))",
+   "conditions": [
+    {
+     "expr": "Nb>0",
+     "msg": "螺栓預拉力 Nb 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "T": 2,
+      "Nb": 10,
+      "factored": 0
+     },
+     "out": 0.75
+    },
+    {
+     "in": {
+      "T": 2,
+      "Nb": 10,
+      "factored": 1
+     },
+     "out": 0.8230088495575221,
+     "tol": 1e-09
+    }
+   ],
+   "notes": "10.3.7（(二) 版）：在工作載重下摩阻型接合承受拉力作用時，依 10.3.5 節之計算值應再乘以折減因子 **1－T/(0.8Nb)**；在係數化載重下承受拉力 Tu 作用時，依 10.3.6 節之計算值應再乘以 **1－Tu/(1.13Nb)**。Tb 為高強度螺栓之預拉力（見表10.3-1）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十章 p.19 §10.3.7＋手算兩工況",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_bearing_Rn",
+   "title": "樞梢承壓加勁板端部之標稱承壓強度 Rn＝1.8Fy·Apb（鋼構 10.8-1，φ=0.75）",
+   "src": "steel99",
+   "clause": "10.8",
+   "page": 30,
+   "keywords": "承壓 樞梢 加勁板 研磨表面 擴孔 鑽孔 搪孔 Rn 1.8 Fy Apb φ 0.75",
+   "unit": "tf",
+   "output": "phiRn",
+   "latex": "\\phi R_n=0.75\\times1.8F_yA_{pb}",
+   "vars": {
+    "Fy": {
+     "desc": "規定最小降伏應力 Fy",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "Apb": {
+     "desc": "投影承壓面積 Apb",
+     "unit": "cm2",
+     "min": 0
+    }
+   },
+   "expr": "0.75*1.8*Fy*Apb",
+   "conditions": [
+    {
+     "expr": "Fy>=0 and Apb>=0",
+     "msg": "Fy、Apb 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "Apb": 100
+     },
+     "out": 337.5
+    },
+    {
+     "in": {
+      "Fy": 3.5,
+      "Apb": 50
+     },
+     "out": 236.25
+    }
+   ],
+   "notes": "10.8（(二) 版）：承壓表面之設計強度為 φRn，其中 φ＝0.75。1. 經研磨之表面或擴孔、鑽孔及搪孔之樞梢承壓加勁板之端部：Rn＝1.8Fy·Apb（式10.8-1），Apb 為投影承壓面積。2. 滾動支承和搖動支承另有式(10.8-2)（含直徑 d 與承壓長度 l 之形式），該式文字層排版破碎未收錄。解說：「研磨或加工表面」包含以任何適當方法精確鋸平或修平達到真實平面者。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十章 p.30 §10.8 式(10.8-1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_web_stiffener_need",
+   "title": "板梁不需橫向加勁板之條件（鋼構 7.6.3，LRFD 版）",
+   "src": "steel99",
+   "clause": "7.6.3",
+   "page": 12,
+   "keywords": "板梁 橫向加勁板 h/tw 110 Fyw Vu 0.6 phi Aw Cv 剪力",
+   "unit": "tf",
+   "output": "Vu_limit",
+   "latex": "h/t_w\\le110/\\sqrt{F_{yw}}\\ \\ \\text{或}\\ \\ V_u\\le0.6\\phi A_wF_{yw}C_v",
+   "vars": {
+    "Aw": {
+     "desc": "腹板面積 Aw",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Fyw": {
+     "desc": "腹板標稱降伏應力 Fyw",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "Cv": {
+     "desc": "剪力係數 Cv（依 k_v＝5、φ＝0.9 求得）",
+     "unit": "-",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "0.6*0.9*Aw*Fyw*Cv",
+   "conditions": [
+    {
+     "expr": "Aw>0 and Fyw>0",
+     "msg": "Aw、Fyw 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "Cv>1",
+     "msg": "Cv 不得大於 1.0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Aw": 40,
+      "Fyw": 2.5,
+      "Cv": 1.0
+     },
+     "out": 54.0
+    },
+    {
+     "in": {
+      "Aw": 50,
+      "Fyw": 3.5,
+      "Cv": 0.8
+     },
+     "out": 75.6
+    }
+   ],
+   "notes": "7.6.3（(二) 版）：當 h/tw ≤ 110/√Fyw，**或**當依因數化載重分析所得剪力 Vu ≤ 0.6φAwFywCv（Cv 以 kv＝5、φ＝0.9 求得）時，不需要橫向加勁板。本式回傳右側之 Vu 上限，供與實際 Vu 比較。加勁板最小慣性矩同 7.4 節；考慮張力場作用時加勁板面積 Ast 之下限見式(7.6-22)（含 D＝1.0 成對加勁板／1.8 單側角鋼／2.4 單側鋼板之係數，文字層排版破碎，未收錄）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第七章 p.12 §7.6.3＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_girder_MV_interaction",
+   "title": "考慮張力場之板梁彎矩與剪力互制（鋼構式7.6-23）",
+   "src": "steel99",
+   "clause": "7.6.4",
+   "page": 12,
+   "keywords": "板梁 張力場 彎矩剪力互制 1.375 0.625 0.6 0.75 phi 0.9",
+   "unit": "-",
+   "output": "interaction",
+   "latex": "\\frac{M_u}{\\phi M_n}+0.625\\frac{V_u}{\\phi V_n}\\le1.375",
+   "vars": {
+    "Mu": {
+     "desc": "所需撓曲強度 Mu",
+     "unit": "tf·cm",
+     "min": 0
+    },
+    "phiMn": {
+     "desc": "設計撓曲強度 φMn（Mn 依 7.6.1 節，φ＝0.9）",
+     "unit": "tf·cm",
+     "min": 1e-09
+    },
+    "Vu": {
+     "desc": "所需剪力強度 Vu",
+     "unit": "tf",
+     "min": 0
+    },
+    "phiVn": {
+     "desc": "設計剪力強度 φVn（Vn 依 7.6.2 節，φ＝0.9）",
+     "unit": "tf",
+     "min": 1e-09
+    }
+   },
+   "expr": "Mu/phiMn+0.625*Vu/phiVn",
+   "conditions": [
+    {
+     "expr": "phiMn>0 and phiVn>0",
+     "msg": "φMn、φVn 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result>1.375",
+     "msg": "超過 1.375：互制檢核不通過"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Mu": 1000,
+      "phiMn": 2000,
+      "Vu": 20,
+      "phiVn": 50
+     },
+     "out": 0.75
+    },
+    {
+     "in": {
+      "Mu": 1800,
+      "phiMn": 2000,
+      "Vu": 40,
+      "phiVn": 50
+     },
+     "out": 1.4
+    }
+   ],
+   "notes": "7.6.4（(二) 版）：考慮腹板張力場效應之板梁，必須滿足彎矩與剪力相互影響之規定——**當 0.6φVn ≤ Vu ≤ φVn 且 0.75φMn ≤ Mu ≤ φMn 時**，須滿足 Mu/(φMn)＋0.625·Vu/(φVn) ≤ 1.375（式7.6-23），其中 Mn 依 7.6.1 節、Vn 依 7.6.2 節、φ＝0.9。本式回傳互制式左側值，>1.375 即不通過（warn_if 自動提示）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第七章 p.12 式(7.6-23)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_solid_weak_axis_Mn",
+   "title": "實心圓形／方形斷面或弱軸彎曲結實斷面梁之標稱強度 Mn＝Mp ≤ 1.5My（7.2.6）",
+   "src": "steel99",
+   "clause": "7.2.6",
+   "page": 5,
+   "keywords": "實心圓形 實心方形 弱軸彎曲 結實斷面 Lb 不受限制 Mn Mp 1.5My",
+   "unit": "tf·cm",
+   "output": "Mn",
+   "latex": "M_n=M_p=\\min\\left(ZF_y,\\ 1.5M_y\\right)",
+   "vars": {
+    "Z": {
+     "desc": "塑性斷面模數 Z",
+     "unit": "cm3",
+     "min": 0
+    },
+    "Fy": {
+     "desc": "標稱降伏應力 Fy",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "S": {
+     "desc": "彈性斷面模數 S（用於 My＝S·Fy）",
+     "unit": "cm3",
+     "min": 0
+    }
+   },
+   "expr": "min(Z*Fy, 1.5*S*Fy)",
+   "conditions": [
+    {
+     "expr": "Z>=0 and Fy>=0 and S>=0",
+     "msg": "Z、Fy、S 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Z": 1000,
+      "Fy": 2.5,
+      "S": 900
+     },
+     "out": 2500.0
+    },
+    {
+     "in": {
+      "Z": 1000,
+      "Fy": 2.5,
+      "S": 600
+     },
+     "out": 2250.0
+    }
+   ],
+   "notes": "7.2.6（(二) 版）：對於實心圓形或實心方形斷面之梁、或對弱軸彎曲之結實斷面梁，**Lb 不受限制**，其標稱強度 Mn＝Mp ≤ 1.5My（My＝S·Fy）。非結實斷面梁請參閱附錄3。本式取 min(ZFy, 1.5SFy)。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第七章 p.5 §7.2.6＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_partial_frame_theta_p",
+   "title": "部分韌性抗彎矩構架梁柱接頭所需塑性轉角 θp（鋼構 13.7.2）",
+   "src": "steel99",
+   "clause": "13.7.2",
+   "page": 18,
+   "keywords": "部分韌性抗彎矩構架 梁柱接頭 塑性轉角 θp R 韌性容量 層間變位角 IMRF",
+   "unit": "rad",
+   "output": "theta_p",
+   "latex": "\\theta_p=1.1(R-1.0)\\,\\theta_E",
+   "vars": {
+    "R": {
+     "desc": "結構系統韌性容量 R",
+     "unit": "-",
+     "min": 1
+    },
+    "thetaE": {
+     "desc": "設計地震力 E 作用下之最大層間變位角 θE",
+     "unit": "rad",
+     "min": 0
+    }
+   },
+   "expr": "1.1*(R-1.0)*thetaE",
+   "conditions": [
+    {
+     "expr": "R>=1.0",
+     "msg": "韌性容量 R 須 ≥1.0"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result<0.01",
+     "msg": "接頭所需塑性轉角仍不得小於 0.01 弧度（三者取規定方式之一，見 notes）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "R": 3.0,
+      "thetaE": 0.01
+     },
+     "out": 0.022
+    },
+    {
+     "in": {
+      "R": 1.5,
+      "thetaE": 0.02
+     },
+     "out": 0.011000000000000003,
+     "tol": 1e-09
+    }
+   ],
+   "notes": "13.7.2（(二) 版）：抵抗地震力之部分韌性抗彎矩構架，其梁柱接頭應符合——1. 設計撓曲強度 Mu 同 13.6.1 節；2. 設計剪力強度同 13.6.1 節；3. 塑性轉角要求：接頭所需塑性轉角 θp 應以下述三規定之一決定：(1) 0.01 弧度；(2) 非線性動力分析所得最大塑性轉角加上 0.005 弧度；(3) **θp＝1.1(R－1.0)θE**（本式）；4. 銲接細則同 13.6.1 節。解說：部分韌性抗彎構架之接頭韌性仍應以試驗資料驗證，故無類似 OMRF 之標準接頭細部。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十三章 p.18 §13.7.2＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

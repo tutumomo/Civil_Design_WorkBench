@@ -1,0 +1,18 @@
+{
+  "name": "RC_U型溝渠_1m單元",
+  "commands": [
+    { "command": "parameters.add", "params": { "name": "UNIT_LEN", "expression": "1000", "unit": "mm", "comment": "單元長度（預鑄單元）" } },
+    { "command": "parameters.add", "params": { "name": "INNER_W", "expression": "600", "unit": "mm", "comment": "內寬" } },
+    { "command": "parameters.add", "params": { "name": "INNER_H", "expression": "600", "unit": "mm", "comment": "內高" } },
+    { "command": "parameters.add", "params": { "name": "WALL_T", "expression": "120", "unit": "mm", "comment": "側壁厚" } },
+    { "command": "parameters.add", "params": { "name": "BASE_T", "expression": "120", "unit": "mm", "comment": "底板厚" } },
+    { "command": "parameters.add", "params": { "name": "N_UNITS", "expression": "10", "unit": "", "comment": "單元數（純數量）" } },
+
+    { "command": "solid.box", "params": { "length": "UNIT_LEN * N_UNITS", "width": "INNER_W + 2 * WALL_T", "height": "INNER_H + BASE_T", "corner": [0, 0, 0], "name": "Outer", "body_name": "UChannel" } },
+    { "command": "solid.box", "params": { "length": "UNIT_LEN * N_UNITS", "width": "INNER_W", "height": "INNER_H + BASE_T + 1", "corner": [0, "WALL_T", "BASE_T"], "name": "Void", "body_name": "VoidBody" } },
+    { "command": "solid.combine", "params": { "target": "UChannel", "tools": ["VoidBody"], "operation": "cut" } },
+
+    { "command": "appearance.assign", "params": { "bodies": ["UChannel"], "color": "#B8B4AE" } },
+    { "command": "document.inspect", "params": { "measure": true } }
+  ]
+}

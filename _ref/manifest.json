@@ -1,0 +1,998 @@
+[
+ {
+  "key": "C001",
+  "file": "A.C.路面加封 標準圖.dwg",
+  "status": "ok",
+  "size": 879844
+ },
+ {
+  "key": "C002",
+  "file": "AC(非圖片).dwg",
+  "status": "ok",
+  "size": 794031
+ },
+ {
+  "key": "C003",
+  "file": "L溝(B=0.6m).dwg",
+  "status": "ok",
+  "size": 1113549
+ },
+ {
+  "key": "C004",
+  "file": "L溝(B=0.8m)(打除暗溝).dwg",
+  "status": "ok",
+  "size": 885583
+ },
+ {
+  "key": "C005",
+  "file": "L溝(三種型式).dwg",
+  "status": "ok",
+  "size": 3061089
+ },
+ {
+  "key": "C006",
+  "file": "P.C.路面、P.C.路面+點焊綱絲網D=9mm(20cmx20cm) 標準圖.dwg",
+  "status": "ok",
+  "size": 1155881
+ },
+ {
+  "key": "C007",
+  "file": "P.C.路面、P.C.路面+點焊鋼絲網 標準圖.dwg",
+  "status": "ok",
+  "size": 1060864
+ },
+ {
+  "key": "C008",
+  "file": "P.C.路面、P.C.路面+點焊鋼絲網 標準橫斷面圖.dwg",
+  "status": "ok",
+  "size": 1189404
+ },
+ {
+  "key": "C009",
+  "file": "P.C.路面、橫斷面圖範例、過水路面、曲線加寬.dwg",
+  "status": "ok",
+  "size": 2733185
+ },
+ {
+  "key": "C010",
+  "file": "P.V.C洩水管排列示意圖.dwg",
+  "status": "ok",
+  "size": 2026049
+ },
+ {
+  "key": "C011",
+  "file": "P.V.C洩水管排列示意圖2.dwg",
+  "status": "ok",
+  "size": 900759
+ },
+ {
+  "key": "C012",
+  "file": "PU回覆型防撞桿.dwg",
+  "status": "ok",
+  "size": 996421
+ },
+ {
+  "key": "C013",
+  "file": "R.C.路面+點焊鋼絲網(75x75x3.2).dwg",
+  "status": "ok",
+  "size": 1121011
+ },
+ {
+  "key": "C014",
+  "file": "dr-02 候車亭.dwg",
+  "status": "ok",
+  "size": 2749569
+ },
+ {
+  "key": "C015",
+  "file": "不鏽鋼欄杆詳圖(彙整).dwg",
+  "status": "ok",
+  "size": 3966136
+ },
+ {
+  "key": "C016",
+  "file": "不鏽鋼欄杆詳圖.dwg",
+  "status": "ok",
+  "size": 2716511
+ },
+ {
+  "key": "C017",
+  "file": "乾砌大塊石 標準圖.dwg",
+  "status": "ok",
+  "size": 1060545
+ },
+ {
+  "key": "C018",
+  "file": "仿漂流木欄杆(太魯閣圖騰)-繩索.dwg",
+  "status": "ok",
+  "size": 2950855
+ },
+ {
+  "key": "C019",
+  "file": "公司LOGO.dwg",
+  "status": "ok",
+  "size": 144879
+ },
+ {
+  "key": "C020",
+  "file": "加蓋溝(0.4x0.6M)(@5M清潔孔)完整圖面.dwg",
+  "status": "ok",
+  "size": 1992092
+ },
+ {
+  "key": "C021",
+  "file": "加蓋溝(0.4x0.6M)(S20)(@3M清潔孔).dwg",
+  "status": "ok",
+  "size": 1135844
+ },
+ {
+  "key": "C022",
+  "file": "加蓋溝(0.4x0.6M)(S20).dwg",
+  "status": "ok",
+  "size": 964646
+ },
+ {
+  "key": "C023",
+  "file": "加蓋溝(0.4x0.8M)(S20).dwg",
+  "status": "ok",
+  "size": 1023843
+ },
+ {
+  "key": "C024",
+  "file": "加蓋溝(0.6x0.6M)(S20).dwg",
+  "status": "ok",
+  "size": 987293
+ },
+ {
+  "key": "C025",
+  "file": "加蓋溝(0.6x1.0M)(S20).dwg",
+  "status": "ok",
+  "size": 1063559
+ },
+ {
+  "key": "C026",
+  "file": "加蓋溝含清潔孔共同圖面.dwg",
+  "status": "ok",
+  "size": 1171455
+ },
+ {
+  "key": "C027",
+  "file": "半重力式擋土牆(H=4m)(下邊坡).dwg",
+  "status": "ok",
+  "size": 961575
+ },
+ {
+  "key": "C028",
+  "file": "半重力式擋土牆(H=4m、鋼軌樁)+塊狀護欄+反光導標.dwg",
+  "status": "ok",
+  "size": 1004677
+ },
+ {
+  "key": "C029",
+  "file": "反光導標.dwg",
+  "status": "ok",
+  "size": 898193
+ },
+ {
+  "key": "C030",
+  "file": "和豐道路 P.C.路面標準圖.dwg",
+  "status": "ok",
+  "size": 1101046
+ },
+ {
+  "key": "C031",
+  "file": "噴漿縱溝、噴漿橫溝.dwg",
+  "status": "ok",
+  "size": 1283812
+ },
+ {
+  "key": "C032",
+  "file": "圓柱護欄詳圖.dwg",
+  "status": "ok",
+  "size": 925211
+ },
+ {
+  "key": "C033",
+  "file": "坡面溝(100x100cm).dwg",
+  "status": "ok",
+  "size": 1067670
+ },
+ {
+  "key": "C034",
+  "file": "坡面跌水工+消能卵石.dwg",
+  "status": "ok",
+  "size": 1331713
+ },
+ {
+  "key": "C035",
+  "file": "型框植生護坡.dwg",
+  "status": "ok",
+  "size": 1218827
+ },
+ {
+  "key": "C036",
+  "file": "塊狀護欄(B=30、40)(新設擋土牆上)設計圖.dwg",
+  "status": "ok",
+  "size": 914780
+ },
+ {
+  "key": "C037",
+  "file": "塊狀護欄設計圖(公路局標準圖).dwg",
+  "status": "ok",
+  "size": 1448829
+ },
+ {
+  "key": "C038",
+  "file": "壓花地坪(濕式).dwg",
+  "status": "ok",
+  "size": 1191865
+ },
+ {
+  "key": "C039",
+  "file": "外牆防水施工.dwg",
+  "status": "ok",
+  "size": 974376
+ },
+ {
+  "key": "C040",
+  "file": "密級配瀝青混凝土規格表 + A.C.路面加封標準圖.dwg",
+  "status": "ok",
+  "size": 1009435
+ },
+ {
+  "key": "C041",
+  "file": "山溝修復.dwg",
+  "status": "ok",
+  "size": 1056145
+ },
+ {
+  "key": "C042",
+  "file": "工區平面圖+路工表.dwg",
+  "status": "ok",
+  "size": 894186
+ },
+ {
+  "key": "C043",
+  "file": "工地交通安全措施.dwg",
+  "status": "ok",
+  "size": 589827
+ },
+ {
+  "key": "C044",
+  "file": "工程告示牌(201710版，20190619更新).dwg",
+  "status": "ok",
+  "size": 6030929
+ },
+ {
+  "key": "C045",
+  "file": "工程告示牌(有QRCode + 臺中市 市民專線、市長信箱).dwg",
+  "status": "ok",
+  "size": 889191
+ },
+ {
+  "key": "C046",
+  "file": "工程告示牌(有QRCode + 臺中市 市民專線、市長信箱、空污專線).dwg",
+  "status": "ok",
+  "size": 901244
+ },
+ {
+  "key": "C047",
+  "file": "工程告示牌(有QRCode).dwg",
+  "status": "ok",
+  "size": 888483
+ },
+ {
+  "key": "C048",
+  "file": "懸臂式擋土牆(H=4.5m) (下邊坡)(鋼軌樁+塊狀護欄)(M作圖).dwg",
+  "status": "ok",
+  "size": 1031922
+ },
+ {
+  "key": "C049",
+  "file": "懸臂式擋土牆(H=4.5m) (下邊坡).dwg",
+  "status": "ok",
+  "size": 1166502
+ },
+ {
+  "key": "C050",
+  "file": "懸臂式擋土牆(H=4.5m) (下邊坡+塊狀護欄)(M作圖).dwg",
+  "status": "ok",
+  "size": 1038182
+ },
+ {
+  "key": "C051",
+  "file": "懸臂式擋土牆(H=5.0m) (下邊坡)(cm作圖).dwg",
+  "status": "ok",
+  "size": 1003342
+ },
+ {
+  "key": "C052",
+  "file": "懸臂式擋土牆(H=5.0m) (下邊坡+塊狀護欄)(M作圖).dwg",
+  "status": "ok",
+  "size": 1075201
+ },
+ {
+  "key": "C053",
+  "file": "懸臂式擋土牆(H=5.0m) (下邊坡+紐澤西護欄)(cm作圖).dwg",
+  "status": "ok",
+  "size": 1109670
+ },
+ {
+  "key": "C054",
+  "file": "懸臂式擋土牆(H=5.7m) (下邊坡)(cm作圖).dwg",
+  "status": "ok",
+  "size": 1002059
+ },
+ {
+  "key": "C055",
+  "file": "懸臂式擋土牆(H=5.9m) (下邊坡)(鋼軌樁+塊狀護欄+L溝)(M作圖).dwg",
+  "status": "ok",
+  "size": 1131060
+ },
+ {
+  "key": "C056",
+  "file": "懸臂式擋土牆(H=6.5m) (下邊坡)(cm作圖).dwg",
+  "status": "ok",
+  "size": 1042703
+ },
+ {
+  "key": "C057",
+  "file": "懸臂式擋土牆(H=7.4m) (下邊坡)(鋼軌樁+塊狀護欄+臨時支撐)(M作圖).dwg",
+  "status": "ok",
+  "size": 1050881
+ },
+ {
+  "key": "C058",
+  "file": "懸臂式擋土牆(h=3-5m,平均4m) (下邊坡)(M作圖).dwg",
+  "status": "ok",
+  "size": 1086152
+ },
+ {
+  "key": "C059",
+  "file": "截水溝(0.4x0.6M)(S20.dwg",
+  "status": "ok",
+  "size": 1046137
+ },
+ {
+  "key": "C060",
+  "file": "截水溝(B=30,H=40).dwg",
+  "status": "ok",
+  "size": 1333982
+ },
+ {
+  "key": "C061",
+  "file": "截水溝(B=30,H=40)溝蓋換新.dwg",
+  "status": "ok",
+  "size": 1314616
+ },
+ {
+  "key": "C062",
+  "file": "截水溝(B=40,H=40~60).dwg",
+  "status": "ok",
+  "size": 2323932
+ },
+ {
+  "key": "C063",
+  "file": "截水溝(B=40、60,H=40~60)2.dwg",
+  "status": "ok",
+  "size": 2042035
+ },
+ {
+  "key": "C064",
+  "file": "拍漿溝詳圖 (1).dwg",
+  "status": "ok",
+  "size": 1010373
+ },
+ {
+  "key": "C065",
+  "file": "拍漿溝詳圖.dwg",
+  "status": "ok",
+  "size": 1081844
+ },
+ {
+  "key": "C066",
+  "file": "排水明溝(0.4x0.6M)(S20).dwg",
+  "status": "ok",
+  "size": 1269908
+ },
+ {
+  "key": "C067",
+  "file": "排水明溝(0.5x0.6M)(S20)(內側溝壁加高1.5M).dwg",
+  "status": "ok",
+  "size": 996130
+ },
+ {
+  "key": "C068",
+  "file": "排水明溝(0.6x0.6M)(S20)(既有溝內側溝壁保留).dwg",
+  "status": "ok",
+  "size": 1078257
+ },
+ {
+  "key": "C069",
+  "file": "排水明溝(0.6x0.6M)(S20)(既有溝打除).dwg",
+  "status": "ok",
+  "size": 1117441
+ },
+ {
+  "key": "C070",
+  "file": "排水明溝(100x125).dwg",
+  "status": "ok",
+  "size": 1068878
+ },
+ {
+  "key": "C071",
+  "file": "排水明溝(150x150)(梯形)+截水牆.dwg",
+  "status": "ok",
+  "size": 1722094
+ },
+ {
+  "key": "C072",
+  "file": "排水明溝(150x150).dwg",
+  "status": "ok",
+  "size": 1113505
+ },
+ {
+  "key": "C073",
+  "file": "排水明溝(45x45)(S40).dwg",
+  "status": "ok",
+  "size": 1016706
+ },
+ {
+  "key": "C074",
+  "file": "排水明溝、暗溝(40x60).dwg",
+  "status": "ok",
+  "size": 1237013
+ },
+ {
+  "key": "C075",
+  "file": "掛網植生標準圖.dwg",
+  "status": "ok",
+  "size": 1719669
+ },
+ {
+  "key": "C076",
+  "file": "擋土牆封牆詳圖(M作圖).dwg",
+  "status": "ok",
+  "size": 888822
+ },
+ {
+  "key": "C077",
+  "file": "擋土牆封牆詳圖(cm作圖).dwg",
+  "status": "ok",
+  "size": 871545
+ },
+ {
+  "key": "C078",
+  "file": "擋水牆.dwg",
+  "status": "ok",
+  "size": 966357
+ },
+ {
+  "key": "C079",
+  "file": "既有溝增設跌水工.dwg",
+  "status": "ok",
+  "size": 903712
+ },
+ {
+  "key": "C080",
+  "file": "暗溝(0.6x0.6M)(S20)(農機出入口).dwg",
+  "status": "ok",
+  "size": 1019082
+ },
+ {
+  "key": "C081",
+  "file": "標線.dwg",
+  "status": "ok",
+  "size": 1483051
+ },
+ {
+  "key": "C082",
+  "file": "橡膠減速墊.dwg",
+  "status": "ok",
+  "size": 7005329
+ },
+ {
+  "key": "C083",
+  "file": "水溝清淤並加設護欄.dwg",
+  "status": "ok",
+  "size": 1028576
+ },
+ {
+  "key": "C084",
+  "file": "混凝土砌卵石護岸標準斷面圖.dwg",
+  "status": "ok",
+  "size": 1356769
+ },
+ {
+  "key": "C085",
+  "file": "濕式紙模地坪.dwg",
+  "status": "ok",
+  "size": 1313845
+ },
+ {
+  "key": "C086",
+  "file": "熱浸鍍鋅格柵蓋板各部尺寸及重量表.dwg",
+  "status": "ok",
+  "size": 1161692
+ },
+ {
+  "key": "C087",
+  "file": "碎石排水袋.dwg",
+  "status": "ok",
+  "size": 1078069
+ },
+ {
+  "key": "C088",
+  "file": "空白框(公分).dwg",
+  "status": "ok",
+  "size": 2920366
+ },
+ {
+  "key": "C089",
+  "file": "空白框(公分,1：100).dwg",
+  "status": "ok",
+  "size": 977532
+ },
+ {
+  "key": "C090",
+  "file": "空白框(公分,1：20).dwg",
+  "status": "ok",
+  "size": 986458
+ },
+ {
+  "key": "C091",
+  "file": "空白框(公分,1：40).dwg",
+  "status": "ok",
+  "size": 893758
+ },
+ {
+  "key": "C092",
+  "file": "空白框(公分,1：50).dwg",
+  "status": "ok",
+  "size": 984843
+ },
+ {
+  "key": "C093",
+  "file": "空白框(公尺).dwg",
+  "status": "ok",
+  "size": 1029965
+ },
+ {
+  "key": "C094",
+  "file": "空白框(公尺,1：100).dwg",
+  "status": "ok",
+  "size": 976241
+ },
+ {
+  "key": "C095",
+  "file": "空白框(公尺,1：20).dwg",
+  "status": "ok",
+  "size": 877490
+ },
+ {
+  "key": "C096",
+  "file": "空白框(公尺,1：200).dwg",
+  "status": "ok",
+  "size": 971930
+ },
+ {
+  "key": "C097",
+  "file": "空白框(公尺,1：30).dwg",
+  "status": "ok",
+  "size": 986285
+ },
+ {
+  "key": "C098",
+  "file": "空白框(公尺,1：50).dwg",
+  "status": "ok",
+  "size": 882146
+ },
+ {
+  "key": "C099",
+  "file": "空白框(公尺,1：500).dwg",
+  "status": "ok",
+  "size": 971914
+ },
+ {
+  "key": "C100",
+  "file": "管涵埋設D60cm(CLSM).dwg",
+  "status": "ok",
+  "size": 2696844
+ },
+ {
+  "key": "C101",
+  "file": "箱型石籠 標準圖(待確認).dwg",
+  "status": "ok",
+  "size": 4364298
+ },
+ {
+  "key": "C102",
+  "file": "箱型石籠(H=2、3M)標準斷面圖.dwg",
+  "status": "ok",
+  "size": 1099557
+ },
+ {
+  "key": "C103",
+  "file": "箱涵(120x120、150x150、200x200、250x250) v2.dwg",
+  "status": "ok",
+  "size": 1924585
+ },
+ {
+  "key": "C104",
+  "file": "箱涵(120x120、150x150、200x200、250x250).dwg",
+  "status": "ok",
+  "size": 1760324
+ },
+ {
+  "key": "C105",
+  "file": "箱涵(200x120).dwg",
+  "status": "ok",
+  "size": 1413196
+ },
+ {
+  "key": "C106",
+  "file": "箱涵(250x200).dwg",
+  "status": "ok",
+  "size": 1231595
+ },
+ {
+  "key": "C107",
+  "file": "箱涵(2x1.5)，L=3M.dwg",
+  "status": "ok",
+  "size": 1490252
+ },
+ {
+  "key": "C108",
+  "file": "箱涵(2x1.5)，L=5.5M.dwg",
+  "status": "ok",
+  "size": 1513088
+ },
+ {
+  "key": "C109",
+  "file": "箱涵(2x1.5)，L=6.5M.dwg",
+  "status": "ok",
+  "size": 1218743
+ },
+ {
+  "key": "C110",
+  "file": "箱涵(300x200).dwg",
+  "status": "ok",
+  "size": 1163232
+ },
+ {
+  "key": "C111",
+  "file": "箱涵(400x300).dwg",
+  "status": "ok",
+  "size": 1299560
+ },
+ {
+  "key": "C112",
+  "file": "箱涵(570x135).dwg",
+  "status": "ok",
+  "size": 1350532
+ },
+ {
+  "key": "C113",
+  "file": "箱涵前新設集水井.dwg",
+  "status": "ok",
+  "size": 1080791
+ },
+ {
+  "key": "C114",
+  "file": "紐澤西護欄(新設基礎)+ABS吸震反光板 (1).dwg",
+  "status": "ok",
+  "size": 965844
+ },
+ {
+  "key": "C115",
+  "file": "紐澤西護欄(新設基礎)+ABS吸震反光板.dwg",
+  "status": "ok",
+  "size": 973539
+ },
+ {
+  "key": "C116",
+  "file": "紐澤西護欄(新設基礎)+微型樁.dwg",
+  "status": "ok",
+  "size": 1203403
+ },
+ {
+  "key": "C117",
+  "file": "紐澤西護欄(新設基礎、新設擋土牆上)、鋼管式護欄.dwg",
+  "status": "ok",
+  "size": 2893378
+ },
+ {
+  "key": "C118",
+  "file": "紙模乾式.dwg",
+  "status": "ok",
+  "size": 648348
+ },
+ {
+  "key": "C119",
+  "file": "臨時防減災措施.dwg",
+  "status": "ok",
+  "size": 1579492
+ },
+ {
+  "key": "C120",
+  "file": "視埠(M,S100).dwg",
+  "status": "ok",
+  "size": 637242
+ },
+ {
+  "key": "C121",
+  "file": "視埠(M,S20).dwg",
+  "status": "ok",
+  "size": 348274
+ },
+ {
+  "key": "C122",
+  "file": "視埠(M,S50).dwg",
+  "status": "ok",
+  "size": 2491862
+ },
+ {
+  "key": "C123",
+  "file": "跌水工(2M箱型石籠).dwg",
+  "status": "ok",
+  "size": 1073062
+ },
+ {
+  "key": "C124",
+  "file": "路基改良詳圖.dwg",
+  "status": "ok",
+  "size": 876915
+ },
+ {
+  "key": "C125",
+  "file": "重力式擋土牆(H=0.6m)(上邊坡).dwg",
+  "status": "ok",
+  "size": 1003884
+ },
+ {
+  "key": "C126",
+  "file": "重力式擋土牆(H=1.2-3.2，平均高2.2m)(下邊坡)(單位M).dwg",
+  "status": "ok",
+  "size": 1012927
+ },
+ {
+  "key": "C127",
+  "file": "重力式擋土牆(H=1.2m)(上邊坡).dwg",
+  "status": "ok",
+  "size": 1082150
+ },
+ {
+  "key": "C128",
+  "file": "重力式擋土牆(H=1.5-2.5m)(上邊坡,單位M).dwg",
+  "status": "ok",
+  "size": 933853
+ },
+ {
+  "key": "C129",
+  "file": "重力式擋土牆(H=1m)(上邊坡).dwg",
+  "status": "ok",
+  "size": 1019112
+ },
+ {
+  "key": "C130",
+  "file": "重力式擋土牆(H=2.0m)(上邊坡,單位M).dwg",
+  "status": "ok",
+  "size": 933399
+ },
+ {
+  "key": "C131",
+  "file": "重力式擋土牆(H=2.0m)(上邊坡,單位cm).dwg",
+  "status": "ok",
+  "size": 1030234
+ },
+ {
+  "key": "C132",
+  "file": "重力式擋土牆(H=2.0m)(下邊坡).dwg",
+  "status": "ok",
+  "size": 1284433
+ },
+ {
+  "key": "C133",
+  "file": "重力式擋土牆(H=2.0m)(鄰房側).dwg",
+  "status": "ok",
+  "size": 1170278
+ },
+ {
+  "key": "C134",
+  "file": "重力式擋土牆(H=2.5m)(下邊坡)(單位M).dwg",
+  "status": "ok",
+  "size": 1020763
+ },
+ {
+  "key": "C135",
+  "file": "重力式擋土牆(H=2.5m)(下邊坡).dwg",
+  "status": "ok",
+  "size": 1003984
+ },
+ {
+  "key": "C136",
+  "file": "重力式擋土牆(H=2m)(上邊坡)(單位：cm 1：50).dwg",
+  "status": "ok",
+  "size": 943984
+ },
+ {
+  "key": "C137",
+  "file": "重力式擋土牆(H=3.5m)(下邊坡)(單位M).dwg",
+  "status": "ok",
+  "size": 1413841
+ },
+ {
+  "key": "C138",
+  "file": "重力式擋土牆(H=3.5m)(配防裂筋)(下邊坡)(單位M).dwg",
+  "status": "ok",
+  "size": 1280733
+ },
+ {
+  "key": "C139",
+  "file": "重力式擋土牆(H=3m)(配防裂筋)(30cm寬連續護欄)(下邊坡)(單位M).dwg",
+  "status": "ok",
+  "size": 1240405
+ },
+ {
+  "key": "C140",
+  "file": "重力式擋土牆(H=5.0m)(上邊坡+石籠).dwg",
+  "status": "ok",
+  "size": 1183957
+ },
+ {
+  "key": "C141",
+  "file": "重力式擋土牆+鋼軌樁(H=2.0m)(上邊坡,單位M).dwg",
+  "status": "ok",
+  "size": 934460
+ },
+ {
+  "key": "C142",
+  "file": "重力式護岸(H=2.5m).dwg",
+  "status": "ok",
+  "size": 1155458
+ },
+ {
+  "key": "C143",
+  "file": "鍍鋅鋼管欄杆(h=120cm)詳圖.dwg",
+  "status": "ok",
+  "size": 922415
+ },
+ {
+  "key": "C144",
+  "file": "防落石柵(H1.8m+斜面1.5m)(洗孔 or 新基礎) (1).dwg",
+  "status": "ok",
+  "size": 1499574
+ },
+ {
+  "key": "C145",
+  "file": "防落石柵(H1.8m+斜面1.5m)(洗孔 or 新基礎).dwg",
+  "status": "ok",
+  "size": 1503712
+ },
+ {
+  "key": "C146",
+  "file": "防落石柵(H1.8m+斜面1.5m)(洗孔)(茂林二派誤用苗62-1圖).dwg",
+  "status": "ok",
+  "size": 2940516
+ },
+ {
+  "key": "C147",
+  "file": "防落石柵(H1.8m+斜面1.5m)(洗孔).dwg",
+  "status": "ok",
+  "size": 1366989
+ },
+ {
+  "key": "C148",
+  "file": "防落石柵(H2m+斜面0.5m)(新設擋土牆)(誤用苗62-1圖).DWG",
+  "status": "ok",
+  "size": 2012156
+ },
+ {
+  "key": "C149",
+  "file": "集水井(0.6x0.6x1M)及消能流末工(NTS).dwg",
+  "status": "ok",
+  "size": 1039453
+ },
+ {
+  "key": "C150",
+  "file": "集水井(100x100x100)(有格柵蓋)-01.dwg",
+  "status": "ok",
+  "size": 1652398
+ },
+ {
+  "key": "C151",
+  "file": "集水井(100x100x100)(有格柵蓋).dwg",
+  "status": "ok",
+  "size": 1100146
+ },
+ {
+  "key": "C152",
+  "file": "集水井(100x100x100)(無格柵蓋).dwg",
+  "status": "ok",
+  "size": 1091350
+ },
+ {
+  "key": "C153",
+  "file": "集水井(120x120x100)(無格柵蓋).dwg",
+  "status": "ok",
+  "size": 1127565
+ },
+ {
+  "key": "C154",
+  "file": "集水井(120x120x120)(有攔汙柵).dwg",
+  "status": "ok",
+  "size": 1154548
+ },
+ {
+  "key": "C155",
+  "file": "集水井(120x120x140).dwg",
+  "status": "ok",
+  "size": 1130042
+ },
+ {
+  "key": "C156",
+  "file": "集水井(150x100x100)(有格柵蓋).dwg",
+  "status": "ok",
+  "size": 1723750
+ },
+ {
+  "key": "C157",
+  "file": "集水井(150x200x220).dwg",
+  "status": "ok",
+  "size": 1252708
+ },
+ {
+  "key": "C158",
+  "file": "集水井(160x160x180).dwg",
+  "status": "ok",
+  "size": 1138590
+ },
+ {
+  "key": "C159",
+  "file": "集水井(160x260x245).dwg",
+  "status": "ok",
+  "size": 1215509
+ },
+ {
+  "key": "C160",
+  "file": "集水井(200x200x200)(無格柵蓋).dwg",
+  "status": "ok",
+  "size": 1225398
+ },
+ {
+  "key": "C161",
+  "file": "集水井(60x60x70)及消能流末工.dwg",
+  "status": "ok",
+  "size": 2939432
+ },
+ {
+  "key": "C162",
+  "file": "集水井(70x70x80).dwg",
+  "status": "ok",
+  "size": 2738800
+ },
+ {
+  "key": "C163",
+  "file": "集水井格柵蓋板(60~100cm).dwg",
+  "status": "ok",
+  "size": 1618448
+ },
+ {
+  "key": "C164",
+  "file": "預置式集水器(PP)標準圖.dwg",
+  "status": "ok",
+  "size": 3677149
+ },
+ {
+  "key": "C165",
+  "file": "預置式集水器標準圖(OLD).dwg",
+  "status": "ok",
+  "size": 1017090
+ },
+ {
+  "key": "C166",
+  "file": "鳶揚-屋頂防水隔熱詳圖-106.8.21.dwg",
+  "status": "ok",
+  "size": 24282395
+ }
+]

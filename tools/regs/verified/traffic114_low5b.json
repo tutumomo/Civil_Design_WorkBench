@@ -1,0 +1,117 @@
+{
+ "formulas": [
+  {
+   "id": "traffic114_parking_turnover_21",
+   "title": "平均車位周轉率（交通工程規範 114 年版 第21 條）",
+   "src": "traffic114",
+   "clause": "21",
+   "page": 10,
+   "keywords": "交通工程 停車 平均車位周轉率 Average Turnover Rate 實際總停車輛數 停車容量 調查時間",
+   "unit": "1/h",
+   "output": "turnover",
+   "latex": "\\text{周轉率}=\\frac{\\text{實際總停車輛數}}{\\text{停車容量（車位數）}\\times\\text{調查時間（小時）}}",
+   "vars": {
+    "N": {
+     "desc": "實際總停車輛數 N（輛）",
+     "unit": "veh",
+     "min": 0
+    },
+    "C": {
+     "desc": "停車容量（車位數）C",
+     "unit": "veh",
+     "min": 1
+    },
+    "T": {
+     "desc": "調查時間 T（小時）",
+     "unit": "h",
+     "min": 1e-09,
+     "default": 8.0
+    }
+   },
+   "expr": "N/(C*T)",
+   "tests": [
+    {
+     "in": {
+      "N": 240.0,
+      "C": 60.0,
+      "T": 8.0
+     },
+     "out": 0.5
+    },
+    {
+     "in": {
+      "N": 500.0,
+      "C": 100.0,
+      "T": 10.0
+     },
+     "out": 0.5
+    }
+   ],
+   "notes": "交通工程規範（114.07 版）**第21 條：平均車位周轉率（Average Turnover Rate）——在單位時間內，每一車位被不同車輛停用之平均使用次數，可提供停車管理措施實施（如費率）之用。其計算公式為：平均車位周轉率＝實際總停車輛數／[停車容量（即車位數）×調查時間（小時）]。** **合理性：60 車位、8 小時內停放 240 車次，周轉率 0.5 次/（位·小時），即每車位平均約 2 小時周轉一次，量級合理 ✓；量綱 輛/(位·小時)＝1/小時 ✓。**",
+   "status": "verified",
+   "_file": "payload_low5b.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "traffic114_SFR_12",
+   "title": "服務流率 SFR 與小時交通量之關係（交通工程規範 114 年版 第12 條）",
+   "src": "traffic114",
+   "clause": "12",
+   "page": 10,
+   "keywords": "交通工程 服務流率 SFR Service Flow Rate 小時交通量 V 尖峰小時係數 PHF",
+   "unit": "veh/h",
+   "output": "SFR",
+   "latex": "SFR=\\frac{V}{PHF}",
+   "vars": {
+    "V": {
+     "desc": "小時交通量 V（輛/小時）",
+     "unit": "veh/h",
+     "min": 0
+    },
+    "PHF": {
+     "desc": "尖峰小時係數 PHF（0.7~1.0）",
+     "unit": "-",
+     "min": 0.1,
+     "max": 1.0,
+     "default": 0.9
+    }
+   },
+   "expr": "V/PHF",
+   "tests": [
+    {
+     "in": {
+      "V": 1800.0,
+      "PHF": 0.9
+     },
+     "out": 2000.0
+    },
+    {
+     "in": {
+      "V": 2000.0,
+      "PHF": 0.85
+     },
+     "out": 2352.9411764705883
+    }
+   ],
+   "notes": "交通工程規範（114.07 版）**第12 條：服務流率（Service Flow Rate, SFR）——在現有之道路幾何狀況、交通組成、管制設施及某特定服務水準等級下，單位時間內可以通過道路上某一定點之最大交通量；其與小時交通量 V、尖峰小時係數 PHF 之關係式為 SFR＝V/PHF。** **合理性：PHF≤1，故 SFR≥V（把尖峰小時交通量換算為 15 分鐘尖峰流率之年化值）✓；PHF＝0.9、V＝1800 得 2000 輛/小時，符合市區道路單車道容量量級。**",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "PHF>0",
+     "msg": "PHF 須為正（分母）"
+    }
+   ],
+   "_file": "payload_low5b.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

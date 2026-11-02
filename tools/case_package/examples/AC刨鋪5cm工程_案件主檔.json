@@ -1,0 +1,8 @@
+{
+ "_note": "案件主檔（示範）：AC刨鋪5cm工程。本主檔示範「預算書＋設計報告」兩軸一鍵產出。設計圖軸刻意不啟用，原因見 drawing_note：該案 A3 圖為 1:700，非出圖規定的標準比例尺（E16 會擋），重出圖需改成 1:600 後再啟用。",
+ "title": "AC刨鋪5cm工程",
+ "out_dir": "AC刨鋪5cm工程\\交付包",
+ "boq_path": "tools/boq/examples/AC刨鋪5cm工程.json",
+ "report_path": "tools/report/examples/AC刨鋪5cm工程.json",
+ "drawing_note": "已交付之平面配置圖為 S=1/700（舊版），`tools\\drawing_rules.py` 的標準比例清單不含 700 → check_delivery.py E16 會判不合格。若要納入交付包，先以 --scale 600 重出 A3。"
+}

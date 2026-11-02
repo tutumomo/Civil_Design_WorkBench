@@ -1,0 +1,228 @@
+{
+ "formulas": [
+  {
+   "id": "flexpave91_MR_from_CBR",
+   "title": "由 CBR 換算回彈模數 MR＝10.3·CBR（MPa）／1500·CBR（psi）（公式3.1.(1)(2)）",
+   "src": "flexpave91",
+   "clause": "4.3.3",
+   "page": 5,
+   "keywords": "柔性鋪面 路基土壤 MR 回彈模數 CBR 換算 10.3 1500 細顆粒土壤 小於10 AASHTO T292",
+   "unit": "MPa",
+   "output": "MR_MPa",
+   "latex": "MR(\\mathrm{MPa})=10.3\\times CBR;\\qquad MR(\\mathrm{psi})=1500\\times CBR",
+   "vars": {
+    "CBR": {
+     "desc": "加州承載比 CBR（**須為細顆粒土壤且 CBR < 10**）",
+     "unit": "%",
+     "min": 0,
+     "max": 10
+    }
+   },
+   "expr": "10.3*CBR",
+   "conditions": [
+    {
+     "expr": "CBR>=0 and CBR<10",
+     "msg": "公式3.1.(1)(2) 僅適用於細顆粒土壤且 CBR < 10"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "CBR": 5
+     },
+     "out": 51.5
+    },
+    {
+     "in": {
+      "CBR": 8
+     },
+     "out": 82.4
+    }
+   ],
+   "notes": "4.3.3（設計手冊-CH4）：路基土壤強度以 MR（回彈模數，Resilient Modulus）表示，設計圖必須註明設計值；MR 試驗依 AASHTO T292。**無 MR 試驗資料時，CBR 或 R 值之換算建議公式**——(A) CBR：**MR(MPa)＝10.3×CBR（公式3.1.(1)）**、**MR(psi)＝1500×CBR（公式3.1.(2)）**；**使用時必須為細顆粒土壤且 CBR < 10**。(B) R 值：MR(MPa)＝8.0＋3.8×R、MR(psi)＝1155＋555×R（見 flexpave91_MR_from_R）。本式回傳 MPa 值；psi 版＝1500×CBR。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照設計手冊-CH4 p.5 §4.3.3 公式3.1.(1)(2)",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "payload_b30.json"
+  },
+  {
+   "id": "flexpave91_MR_from_R",
+   "title": "由 R 值換算回彈模數 MR＝8.0＋3.8·R（MPa）／1155＋555·R（psi）（公式3.1.(3)(4)）",
+   "src": "flexpave91",
+   "clause": "4.3.3",
+   "page": 5,
+   "keywords": "柔性鋪面 路基土壤 MR 回彈模數 R值 換算 8.0 3.8 1155 555 適用範圍",
+   "unit": "MPa",
+   "output": "MR_MPa",
+   "latex": "MR(\\mathrm{MPa})=8.0+3.8R;\\qquad MR(\\mathrm{psi})=1155+555R",
+   "vars": {
+    "R": {
+     "desc": "路基土壤 R 值（CNS 12383／AASHTO T190）",
+     "unit": "-",
+     "min": 0,
+     "max": 100
+    }
+   },
+   "expr": "8.0+3.8*R",
+   "conditions": [
+    {
+     "expr": "R>=0",
+     "msg": "R 值須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "R": 20
+     },
+     "out": 84.0
+    },
+    {
+     "in": {
+      "R": 50
+     },
+     "out": 198.0
+    }
+   ],
+   "notes": "4.3.3（設計手冊-CH4）：由 R 值換算 MR——**MR(MPa)＝8.0＋3.8×R（公式3.1.(3)）**、**MR(psi)＝1155＋555×R（公式3.1.(4)）**。原條文對公式3.1.(3)(4) 之適用限制續文未完整擷取（公式3.1.(1)(2) 已明訂須細顆粒土壤且 CBR<10），使用前請回原條文核對 R 值之適用範圍。本式回傳 MPa 值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照設計手冊-CH4 p.5 §4.3.3 公式3.1.(3)(4)",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "payload_b30.json"
+  },
+  {
+   "id": "flexpave91_D1_from_SN1",
+   "title": "瀝青混凝土最少厚度 D1*＝SN1/a1（公式4.4.(3)）",
+   "src": "flexpave91",
+   "clause": "12.5",
+   "page": 21,
+   "keywords": "柔性鋪面 AASHTO 面層最少厚度 D1 SN1 a1 厚度求法 各層厚度",
+   "unit": "吋",
+   "output": "D1_min",
+   "latex": "D_1^{*}=\\frac{SN_1}{a_1}",
+   "vars": {
+    "SN1": {
+     "desc": "由基底層 a2 或 a3 之 MR、W18、So 及 ΔPSI 求得之瀝青混凝土結構強度值 SN1",
+     "unit": "-",
+     "min": 0
+    },
+    "a1": {
+     "desc": "面層材料強度係數 a1（4.3.6 節）",
+     "unit": "1/吋",
+     "min": 1e-09
+    }
+   },
+   "expr": "SN1/a1",
+   "conditions": [
+    {
+     "expr": "a1>0",
+     "msg": "a1 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "SN1": 2.4,
+      "a1": 0.4
+     },
+     "out": 5.999999999999999
+    },
+    {
+     "in": {
+      "SN1": 1.8,
+      "a1": 0.36
+     },
+     "out": 5.0
+    }
+   ],
+   "notes": "設計手冊-CH4（各層厚度求法）：**瀝青混凝土最少厚度 D1*＝SN1/a1（公式4.4.(3)）**，SN1 為由基底層 a2 或 a3 之 MR、W18、So 及 ΔPSI 求得之瀝青混凝土結構強度值（詳圖4.4.(2)）。同節步驟：**D1* ≥ SN1/a1**、**D2* ≥ (SN2－SN1*)/(a2m2)**、**D3* ≥ [SN3－(SN1*＋SN2*)]/(a3m3)**，且 D 或 SN 之實際使用值必須大於或等於需求值（本式僅收 D1* 一式，其餘以 notes 記錄幾何關係）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照設計手冊-CH4 p.21 公式4.4.(3) 及圖4.4.(2) 步驟說明",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "payload_b30.json"
+  }
+ ],
+ "tables": [
+  {
+   "id": "flexpave91_PSI_T422",
+   "title": "路面現況服務指數 PSI 之等級、Po／Pt 建議值與不舒適百分率（柔性鋪面設計手冊 4.2.2）",
+   "src": "flexpave91",
+   "clause": "4.2.2",
+   "page": 3,
+   "keywords": "柔性鋪面 PSI 服務指數 Po Pt ΔPSI 3.8 4.0 2.0 2.5 不舒適百分率 12% 55% 85% AASHTO",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "項目",
+    "數值／規定"
+   ],
+   "rows": [
+    {
+     "key": "PSI 等級",
+     "values": {
+      "項目": "PSI 範圍",
+      "數值／規定": "路面分為 **0~5 五個等級**，以 **5 代表優良路面**"
+     }
+    },
+    {
+     "key": "不舒適-3.0",
+     "values": {
+      "項目": "終期服務指數 3.0 時之不舒適百分率",
+      "數值／規定": "**12%**"
+     }
+    },
+    {
+     "key": "不舒適-2.5",
+     "values": {
+      "項目": "終期服務指數 2.5 時之不舒適百分率",
+      "數值／規定": "**55%**"
+     }
+    },
+    {
+     "key": "不舒適-2.0",
+     "values": {
+      "項目": "終期服務指數 2.0 時之不舒適百分率",
+      "數值／規定": "**85%**"
+     }
+    },
+    {
+     "key": "Po",
+     "values": {
+      "項目": "初期路面現況服務指數 Po（台灣建議）",
+      "數值／規定": "**3.8~4.0**"
+     }
+    },
+    {
+     "key": "Pt",
+     "values": {
+      "項目": "終期路面現況服務指數 Pt（台灣建議）",
+      "數值／規定": "**國道、省道及四車道以上：2.0~2.5；其他道路：2.0**"
+     }
+    },
+    {
+     "key": "ΔPSI",
+     "values": {
+      "項目": "服務指數損失量 ΔPSI",
+      "數值／規定": "**ΔPSI＝Po－Pt**"
+     }
+    }
+   ],
+   "notes": "柔性鋪面設計手冊**4.2.2**：**路面現況服務指數 PSI 分 0~5 五級（5＝優良）**；**不舒適百分率**：PSI 3.0 → 12%、2.5 → 55%、2.0 → 85%。**台灣地區建議值**：**Po＝3.8~4.0**；**Pt：國道／省道／四車道以上 2.0~2.5，其他道路 2.0**；**ΔPSI＝Po－Pt**。**ΔPSI 是 AASHTO 主式（已入庫 flexpave91_AASHTO_W18）的必要輸入**——以 Po=4.0、Pt=2.0 計 ΔPSI＝2.0，即常見之設計值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照柔性鋪面設計手冊 p.3 §4.2.2 及表4.2.(1)",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "_note": "案件主檔（示範）：驗證「設計圖」軸的接線。用 tools/a3_sheet/_selftest_rules 內以現行 make_sheet.py＋drawing_rules.py 產出的 A3 成果跑 check_delivery.py（E1~E18），這份是現行規則下的合格樣本（1:600）。",
+ "title": "A3出圖品管驗證",
+ "out_dir": "_case_package_test\\圖面軸",
+ "drawing": {
+  "dxf": "tools/a3_sheet/_selftest_rules/規定測試_現況平面圖_A3.dxf",
+  "scale": 600,
+  "require_dwg": true,
+  "require_layers": [
+   "10_道路邊線_現況",
+   "20_建物"
+  ]
+ }
+}

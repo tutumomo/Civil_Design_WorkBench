@@ -1,0 +1,737 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_Ec_normal",
+   "title": "常重混凝土彈性模數 Ec=3750√fc′（式19.2.2.1.b）",
+   "src": "rc112",
+   "clause": "19.2.2.1",
+   "page": 334,
+   "keywords": "Ec 彈性模數 混凝土 modulus 常重",
+   "unit": "MPa",
+   "output": "Ec",
+   "latex": "E_c=3750\\sqrt{f'_c}\\quad(\\text{MPa})",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    }
+   },
+   "expr": "3750*sqrt(fc)",
+   "notes": "台灣 112 版係數 3750（ACI 為 4700），依國內試驗修正；常重混凝土 wc 約 2300 kg/m3。輕質或 wc 介於 1440~2560 者用 rc112_Ec_wc。",
+   "tests": [
+    {
+     "in": {
+      "fc": 28
+     },
+     "out": 19843.13483298443,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.334（括號 MPa 版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_Ec_wc",
+   "title": "混凝土彈性模數 Ec=wc^1.5·0.034√fc′（式19.2.2.1.a）",
+   "src": "rc112",
+   "clause": "19.2.2.1",
+   "page": 334,
+   "keywords": "Ec 彈性模數 單位重 輕質",
+   "unit": "MPa",
+   "output": "Ec",
+   "latex": "E_c=w_c^{1.5}\\,0.034\\sqrt{f'_c}\\quad(w_c\\;\\text{kg/m}^3,\\;\\text{MPa})",
+   "vars": {
+    "wc": {
+     "desc": "混凝土單位重",
+     "unit": "kg/m3",
+     "min": 1440,
+     "max": 2560
+    },
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    }
+   },
+   "expr": "wc**1.5*0.034*sqrt(fc)",
+   "tests": [
+    {
+     "in": {
+      "wc": 2400,
+      "fc": 28
+     },
+     "out": 21153.137639603257,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.334（括號 MPa 版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_fr",
+   "title": "混凝土破裂模數 fr=0.62λ√fc′（式19.2.3.1）",
+   "src": "rc112",
+   "clause": "19.2.3.1",
+   "page": 335,
+   "keywords": "fr 破裂模數 開裂 彎曲拉應力",
+   "unit": "MPa",
+   "output": "fr",
+   "latex": "f_r=0.62\\lambda\\sqrt{f'_c}\\quad(\\text{MPa})",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    },
+    "lam": {
+     "desc": "輕質混凝土修正係數 λ",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.4,
+     "max": 1.0
+    }
+   },
+   "expr": "0.62*lam*sqrt(fc)",
+   "tests": [
+    {
+     "in": {
+      "fc": 28
+     },
+     "out": 3.2807316257200925,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.335（括號 MPa 版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_lambda_density",
+   "title": "輕質混凝土 λ（依穩定後密度，表19.2.4.1(a)）",
+   "src": "rc112",
+   "clause": "19.2.4.1",
+   "page": 335,
+   "keywords": "lambda λ 輕質 單位重",
+   "unit": "-",
+   "output": "lambda",
+   "latex": "\\lambda=0.75\\;(w_c\\le1600);\\;0.0075w_c\\le1.0\\;(1600<w_c\\le2160);\\;1.0\\;(w_c>2160)",
+   "vars": {
+    "wc": {
+     "desc": "穩定後密度 wc",
+     "unit": "kg/m3",
+     "min": 800,
+     "max": 2600
+    }
+   },
+   "expr": "0.75 if wc<=1600 else (1.0 if wc>2160 else min(0.0075*wc,1.0))",
+   "notes": "常重混凝土 λ=1.0（19.2.4.3）；輕質混凝土未做詳細判定時得取 0.75（19.2.4.2）；亦可依表19.2.4.1(b)以粒料組成決定（未收錄）。",
+   "tests": [
+    {
+     "in": {
+      "wc": 1500
+     },
+     "out": 0.75
+    },
+    {
+     "in": {
+      "wc": 2000
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "wc": 1800
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "wc": 2300
+     },
+     "out": 1.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.335 表19.2.4.1(a)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_bar_spacing_max",
+   "title": "握裹鋼筋最大間距 s（表24.3.2，竹節鋼筋，裂縫控制）",
+   "src": "rc112",
+   "clause": "24.3.2",
+   "page": 434,
+   "keywords": "鋼筋間距 最大間距 裂縫控制 spacing 保護層",
+   "unit": "mm",
+   "output": "s_max",
+   "latex": "s=\\min\\left(380\\left(\\frac{280}{f_s}\\right)-2.5c_c,\\;300\\left(\\frac{280}{f_s}\\right)\\right)",
+   "vars": {
+    "fs": {
+     "desc": "使用載重下鋼筋應力（可用 (2/3)fy 代替，24.3.2.1）",
+     "unit": "MPa",
+     "min": 100,
+     "max": 460
+    },
+    "cc": {
+     "desc": "自鋼筋至最近受拉面之淨保護層厚度",
+     "unit": "mm",
+     "min": 0,
+     "max": 200
+    }
+   },
+   "expr": "min(380*(280/fs)-2.5*cc,300*(280/fs))",
+   "notes": "非預力及 C 類預力單向板與梁；預力握裹鋼筋、組合者未收錄。條文解說：fy=420、保護層 50 mm、fs=280 時最大間距 255 mm（約 25 cm）。24.3.3：僅有單根鋼筋靠近最外受拉面時，最外受拉面寬度不得超過 s。",
+   "tests": [
+    {
+     "in": {
+      "fs": 280,
+      "cc": 50
+     },
+     "out": 255.0
+    },
+    {
+     "in": {
+      "fs": 280,
+      "cc": 30
+     },
+     "out": 300.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.434-435（括號 MPa 版）＋解說範例＋與 rc_design.spacing_limit_mm 比對",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_psi_c_hook",
+   "title": "標準彎鉤混凝土強度修正係數 ψc（表25.4.3.2）",
+   "src": "rc112",
+   "clause": "25.4.3.2",
+   "page": 451,
+   "keywords": "psi_c ψc 彎鉤 混凝土強度",
+   "unit": "-",
+   "output": "psi_c",
+   "latex": "\\psi_c=\\frac{f'_c}{105}+0.6\\;(f'_c<42\\text{ MPa});\\;1.0\\;(f'_c\\ge42)",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    }
+   },
+   "expr": "fc/105+0.6 if fc<42 else 1.0",
+   "tests": [
+    {
+     "in": {
+      "fc": 28
+     },
+     "out": 0.8666666666666667,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fc": 50
+     },
+     "out": 1.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.451（括號 MPa 版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_ldh_hook",
+   "title": "受拉標準彎鉤伸展長度 ldh（式25.4.3.1）",
+   "src": "rc112",
+   "clause": "25.4.3.1",
+   "page": 451,
+   "keywords": "ldh 彎鉤 伸展長度 標準彎鉤 錨定",
+   "unit": "mm",
+   "output": "ldh",
+   "latex": "\\ell_{dh}=\\max\\left(\\frac{f_y\\psi_e\\psi_r\\psi_o\\psi_c}{23\\lambda\\sqrt{f'_c}}d_b^{1.5},\\;8d_b,\\;150\\right)",
+   "vars": {
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "MPa",
+     "min": 240,
+     "max": 690
+    },
+    "fc": {
+     "desc": "混凝土抗壓強度 fc'",
+     "unit": "MPa",
+     "min": 17,
+     "max": 100
+    },
+    "db": {
+     "desc": "鋼筋標稱直徑（適用 ≤D57，彎鉤規定限標準彎鉤）",
+     "unit": "mm",
+     "min": 6,
+     "max": 60
+    },
+    "psi_e": {
+     "desc": "塗布係數：環氧樹脂 1.2、其他 1.0",
+     "unit": "-",
+     "default": 1.0,
+     "min": 1.0,
+     "max": 1.2
+    },
+    "psi_r": {
+     "desc": "圍束鋼筋係數：≤D36 且 Ath≥0.4Ahs 或 s≥6db 取 1.0，其他 1.6",
+     "unit": "-",
+     "default": 1.6,
+     "min": 1.0,
+     "max": 1.6
+    },
+    "psi_o": {
+     "desc": "位置係數：柱核心內終止或側向保護層≥65 mm 或≥6db 取 1.0，其他 1.25",
+     "unit": "-",
+     "default": 1.25,
+     "min": 1.0,
+     "max": 1.25
+    },
+    "psi_c": {
+     "desc": "混凝土強度係數 ψc（用 rc112_psi_c_hook）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.6,
+     "max": 1.0
+    },
+    "lam": {
+     "desc": "輕質混凝土修正係數 λ",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.4,
+     "max": 1.0
+    }
+   },
+   "defs": [
+    [
+     "rf",
+     "min(sqrt(fc),8.3)"
+    ]
+   ],
+   "expr": "max(fy*psi_e*psi_r*psi_o*psi_c/(23*lam*rf)*db**1.5,8*db,150)",
+   "notes": "SI（MPa、mm）。注意：原書 kgf/cm² 版公式印成與 [MPa] 版同為 23，疑似排版錯誤，本庫只採 [MPa] 版。ldh 自臨界斷面量至彎鉤最外緣；位於構材不連續端使用 25.4.3.4（未收錄）；25.4.3.8 折減因數（超量鋼筋等）未收錄；預設 ψr、ψo 取保守值（1.6、1.25）。√fc′ 上限 8.3 MPa（25.4.1.4）。",
+   "tests": [
+    {
+     "in": {
+      "fy": 420,
+      "fc": 28,
+      "db": 19,
+      "psi_r": 1.0,
+      "psi_o": 1.0,
+      "psi_c": 1.0,
+      "psi_e": 1.0
+     },
+     "out": 285.8069860418414,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fy": 420,
+      "fc": 28,
+      "db": 25,
+      "psi_r": 1.6,
+      "psi_o": 1.0,
+      "psi_c": 1.0
+     },
+     "out": 690.1959941907627,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "fy": 420,
+      "fc": 28,
+      "db": 6,
+      "psi_r": 1.0,
+      "psi_o": 1.0,
+      "psi_c": 1.0
+     },
+     "out": 150.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.451（放大 200dpi）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_ls_tension_lap",
+   "title": "受拉竹節鋼筋搭接長度 lst（表25.5.2.1）",
+   "src": "rc112",
+   "clause": "25.5.2.1",
+   "page": 468,
+   "keywords": "搭接長度 搭接 lap splice 甲級 乙級",
+   "unit": "mm",
+   "output": "lst",
+   "latex": "\\ell_{st}=\\max(k\\,\\psi_g\\,\\ell_d,\\;300),\\;k=1.0\\,(\\text{甲級}),\\;1.3\\,(\\text{乙級})",
+   "vars": {
+    "ld": {
+     "desc": "伸展長度 ld（依 25.4.2.1(a) 算出之值，不含 300 mm 下限；取 rc112_ld_tension 的 steps.ld_a）",
+     "unit": "mm",
+     "min": 1
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "MPa",
+     "min": 240,
+     "max": 690
+    },
+    "ratio": {
+     "desc": "搭接長度內鋼筋比 (使用As)/(需求As)",
+     "unit": "-",
+     "min": 0
+    },
+    "pct": {
+     "desc": "搭接長度內被搭接鋼筋面積占全部鋼筋之百分比",
+     "unit": "%",
+     "min": 0,
+     "max": 100
+    }
+   },
+   "defs": [
+    [
+     "psi_g",
+     "1.0 if fy<=420 else (1.08 if fy<=490 else (1.15 if fy<=550 else 1.30))"
+    ],
+    [
+     "k",
+     "1.0 if (ratio>=2 and pct<=50) else 1.3"
+    ]
+   ],
+   "expr": "max(k*psi_g*ld,300)",
+   "notes": "甲級搭接僅當 (使用As/需求As)≥2 且搭接比例≤50% 才可用，否則乙級（1.3ψg·ld）。ψg：fy≤420→1.0；490→1.08；550→1.15；690→1.30，條文未規定內插，fy 介於其間時本庫取上一檔（保守）。不適用束筋、受壓搭接、銲接網。",
+   "tests": [
+    {
+     "in": {
+      "ld": 1167.2432254696723,
+      "fy": 420,
+      "ratio": 2.5,
+      "pct": 50
+     },
+     "out": 1167.2432254696723,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "ld": 1167.2432254696723,
+      "fy": 420,
+      "ratio": 1.5,
+      "pct": 100
+     },
+     "out": 1517.416193110574,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "ld": 604.7431568147634,
+      "fy": 420,
+      "ratio": 1.0,
+      "pct": 100
+     },
+     "out": 786.1661038591925,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.468 表25.5.2.1＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_Mcr",
+   "title": "開裂彎矩 Mcr=fr·Ig/yt（式24.2.3.5）",
+   "src": "rc112",
+   "clause": "24.2.3.5",
+   "page": 430,
+   "keywords": "Mcr 開裂彎矩 fr Ig yt 有效慣性矩",
+   "unit": "N·mm",
+   "output": "Mcr",
+   "latex": "M_{cr}=\\frac{f_r I_g}{y_t}",
+   "vars": {
+    "fr": {
+     "desc": "破裂模數（rc112_fr）",
+     "unit": "MPa",
+     "min": 0.5,
+     "max": 10
+    },
+    "Ig": {
+     "desc": "未開裂（全斷面）慣性矩",
+     "unit": "mm4",
+     "min": 1
+    },
+    "yt": {
+     "desc": "自斷面形心至最外受拉纖維距離",
+     "unit": "mm",
+     "min": 1
+    }
+   },
+   "expr": "fr*Ig/yt",
+   "tests": [
+    {
+     "in": {
+      "fr": 3.2807316257200925,
+      "Ig": 1000000000.0,
+      "yt": 200
+     },
+     "out": 16403658.128600461,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.430（式24.2.3.5）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_Ie",
+   "title": "非預力構材有效慣性矩 Ie（表24.2.3.5，Bischoff）",
+   "src": "rc112",
+   "clause": "24.2.3.5",
+   "page": 430,
+   "keywords": "Ie 有效慣性矩 撓度 deflection 開裂 Bischoff",
+   "unit": "mm4",
+   "output": "Ie",
+   "latex": "I_e=I_g\\;(M_a\\le\\tfrac23M_{cr});\\quad I_e=\\frac{I_{cr}}{1-\\left(\\frac{(2/3)M_{cr}}{M_a}\right)^2\\left(1-\\frac{I_{cr}}{I_g}\right)}\\;(M_a>\\tfrac23M_{cr})",
+   "vars": {
+    "Ma": {
+     "desc": "使用載重階段計算撓度所用之最大彎矩",
+     "unit": "N·mm",
+     "min": 0
+    },
+    "Mcr": {
+     "desc": "開裂彎矩（rc112_Mcr）",
+     "unit": "N·mm",
+     "min": 0.001
+    },
+    "Ig": {
+     "desc": "全斷面慣性矩",
+     "unit": "mm4",
+     "min": 1
+    },
+    "Icr": {
+     "desc": "開裂斷面換算慣性矩",
+     "unit": "mm4",
+     "min": 0.001
+    }
+   },
+   "expr": "Ig if Ma<=2/3*Mcr else Icr/(1-((2/3)*Mcr/Ma)**2*(1-Icr/Ig))",
+   "notes": "24.2.3.6：連續單向板及梁取正負臨界彎矩斷面處 Ie 之平均值（且不得大於 Ig）；24.2.3.7：均勻斷面者以跨度中央（懸臂以支承處）計算；24.2.3.8：U 類預力板梁得以 Ig 計算。即時撓度另依 24.2.3.1（未收錄）；長期撓度增量依 24.2.4.1（未收錄）。",
+   "tests": [
+    {
+     "in": {
+      "Ma": 10.0,
+      "Mcr": 16.403658128600462,
+      "Ig": 1.0,
+      "Icr": 0.4
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "Ma": 30.0,
+      "Mcr": 16.403658128600462,
+      "Ig": 1.0,
+      "Icr": 0.4
+     },
+     "out": 0.43465382237791056,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.429-430（表24.2.3.5）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": [
+  {
+   "id": "rc112_ld_modifiers",
+   "title": "受拉鋼筋伸展長度修正因數（表25.4.2.5）",
+   "src": "rc112",
+   "clause": "25.4.2.5",
+   "page": 450,
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "因數值"
+   ],
+   "rows": [
+    {
+     "key": "λ 輕質混凝土",
+     "values": {
+      "因數值": 0.75
+     }
+    },
+    {
+     "key": "λ 常重混凝土",
+     "values": {
+      "因數值": 1.0
+     }
+    },
+    {
+     "key": "ψe 環氧樹脂塗布或鋅與環氧雙層塗布，淨保護層<3db 或淨間距<6db",
+     "values": {
+      "因數值": 1.5
+     }
+    },
+    {
+     "key": "ψe 其他情況之環氧樹脂塗布或鋅與環氧雙層塗布",
+     "values": {
+      "因數值": 1.2
+     }
+    },
+    {
+     "key": "ψe 未塗布或鋅塗布（鍍鋅）",
+     "values": {
+      "因數值": 1.0
+     }
+    },
+    {
+     "key": "ψs D22 及較大",
+     "values": {
+      "因數值": 1.0
+     }
+    },
+    {
+     "key": "ψs D19 及較小及麻面鋼線",
+     "values": {
+      "因數值": 0.8
+     }
+    },
+    {
+     "key": "ψt 水平鋼筋下新拌混凝土澆置厚度大於 30 cm",
+     "values": {
+      "因數值": 1.3
+     }
+    },
+    {
+     "key": "ψt 其他",
+     "values": {
+      "因數值": 1.0
+     }
+    }
+   ],
+   "notes": "ψt·ψe 乘積不須超過 1.7。使用表25.4.2.3 簡化式時 ψs 已含於係數（D19 以下之 2.1/1.4 即 1.7/1.4÷0.8 之取整）。25.4.1.4：√fc′ 不得超過 8.3 MPa；25.4.2.1(b)：ld 不得小於 30 cm。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 p.450",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_ldh_modifiers",
+   "title": "標準彎鉤伸展長度修正因數（表25.4.3.2）",
+   "src": "rc112",
+   "clause": "25.4.3.2",
+   "page": 451,
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "因數值"
+   ],
+   "rows": [
+    {
+     "key": "λ 輕質混凝土",
+     "values": {
+      "因數值": 0.75
+     }
+    },
+    {
+     "key": "λ 常重混凝土",
+     "values": {
+      "因數值": 1.0
+     }
+    },
+    {
+     "key": "ψe 環氧樹脂塗布或鋅與環氧雙層塗布",
+     "values": {
+      "因數值": 1.2
+     }
+    },
+    {
+     "key": "ψe 無塗布或鋅塗布（鍍鋅）",
+     "values": {
+      "因數值": 1.0
+     }
+    },
+    {
+     "key": "ψr ≤D36，Ath≥0.4Ahs 或 s≥6db",
+     "values": {
+      "因數值": 1.0
+     }
+    },
+    {
+     "key": "ψr 其他",
+     "values": {
+      "因數值": 1.6
+     }
+    },
+    {
+     "key": "ψo D36以下，在柱核心內終止或垂直彎鉤平面側向保護層≥6.5cm 或≥6db",
+     "values": {
+      "因數值": 1.0
+     }
+    },
+    {
+     "key": "ψo 其他",
+     "values": {
+      "因數值": 1.25
+     }
+    },
+    {
+     "key": "ψc fc′<42 MPa",
+     "values": {
+      "因數值": "fc'/105+0.6"
+     }
+    },
+    {
+     "key": "ψc fc′≥42 MPa",
+     "values": {
+      "因數值": 1.0
+     }
+    }
+   ],
+   "notes": "s 為具彎鉤鋼筋之最小中心距，db 為具彎鉤鋼筋之標稱直徑。ψc 之數值式請用公式 rc112_psi_c_hook 計算。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 p.451",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

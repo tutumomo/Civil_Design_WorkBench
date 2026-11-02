@@ -1,0 +1,69 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_torsion_min_transverse_96",
+   "title": "需扭力鋼筋時之最少橫向鋼筋 (Av＋2At)min/s（混凝土結構設計規範 112 年版 9.6.4.1／9.6.4.2）",
+   "src": "rc112",
+   "clause": "9.6.4.1",
+   "page": 100,
+   "keywords": "混凝土 梁 扭力 最少橫向鋼筋 Av+2At 0.2√fc bw/fyt 3.5bw/fyt 9.6.4.1 φTth 閉合肋筋",
+   "unit": "cm2/cm",
+   "output": "result",
+   "latex": "\\frac{(A_v+2A_t)_{min}}{s}=\\max\\left\\{0.2\\sqrt{f'_c}\\frac{b_w}{f_{yt}},\\ 3.5\\frac{b_w}{f_{yt}}\\right\\}\\quad\\left([0.062\\sqrt{f'_c}b_w/f_{yt},\\ 0.35b_w/f_{yt}]\\ \\text{SI}\\right)",
+   "vars": {
+    "fc": {
+     "desc": "混凝土抗壓強度 f'c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 280.0
+    },
+    "fyt": {
+     "desc": "橫向鋼筋降伏強度 fyt（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 2800.0
+    },
+    "bw": {
+     "desc": "梁腹寬度 bw（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 40.0
+    }
+   },
+   "expr": "max(0.2*sqrt(fc)*bw/fyt, 3.5*bw/fyt)",
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "fyt": 2800.0,
+      "bw": 40.0
+     },
+     "out": 0.05
+    },
+    {
+     "in": {
+      "fc": 700.0,
+      "fyt": 4200.0,
+      "bw": 50.0
+     },
+     "out": 0.06299407883487121
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**9.6.4.1：扭力臨界斷面 Tu≥φTth 之區域應配置依 22.7 節規定之最少扭力鋼筋量。9.6.4.2：若需扭力鋼筋時，最少橫向鋼筋 (Av＋2At)min/s 應為 (a) 0.2√f′c·bw/fyt [0.062√f′c·bw/fyt] 與 (b) 3.5·bw/fyt [0.35·bw/fyt] 之大者。** 解說：**Av 與 At 符號定義不同——Av 為閉合肋筋二肢之面積，At 僅為閉合肋筋單肢之面積；若剪力所需之肋筋組超過二肢，僅可考慮靠近梁側之二肢。** 高強度鋼筋混凝土梁試驗（Roller 與 Russell 1990）指出為避免斜拉開裂之剪力失敗需增加最少剪力鋼筋量，扭力閉合肋筋量公式與計算最少剪力鋼筋量一致。**單位驗證（強證據）：0.2／0.062＝3.2＝√10.2 ✓；3.5／0.35＝10 ✓（kgf/cm² ↔ MPa）。** **對照 ACI 318-19 §9.6.4.2：(Av＋2At)min/s＝max{0.062√f′c·bw/fyt, 0.35bw/fyt}（SI）完全相同 ✓。** 量綱：bw/fyt 為 cm/(kgf/cm²)，乘以 √f′c(kgf/cm²)^½ 之係數後為鋼筋面積／間距 (cm²/cm)，係數 0.2 與 3.5 內含單位 ✓。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "fc>0 and fyt>0 and bw>0",
+     "msg": "尺寸與強度須為正"
+    }
+   ],
+   "_file": "payload_phase2g.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

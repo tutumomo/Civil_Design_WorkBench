@@ -1,0 +1,72 @@
+# 土木小型工程設計工作區 — 版本控制排除清單
+#
+# 入庫原則
+#   納入：tools/（含已驗證公式庫 verified/）、data/法規/（規範全文與 PDF、索引）、
+#         標準圖圖庫/、_ref/（含 components_dxf/）、cases/ 的案件主檔、docs/、templates/
+#   排除：暫存、交付物、可重建的中間檔、公司內部參考資料、個人化設定
+#
+# 注意：gitignore 不支援行尾註解，註解一律獨立一行。
+
+# ---------------- 暫存與交付物 ----------------
+_temp/
+out/
+# 舊案的就地產出（AGENTS.md §1.1 舊案原地不動，但屬交付物、可重跑產生）
+cases/*/out/
+*.log
+*_log*.txt
+
+# ---------------- 規範資料：只排除下載暫存區 ----------------
+# _dl_20261029/ 內 116 個 PDF 與正式目錄內容完全相同（無獨有檔），另含 HTML 暫存與日誌，共 219 MB
+data/法規/_dl_20261029/
+
+# 圖資：體積過大且屬政府開放資料，請自行下載（見 docs/環境需求與自動配置.md §6）
+data/臺中市建物/
+
+# ---------------- 公司內部資料（不上傳） ----------------
+完整案例(參考用)/
+g:\我的雲端硬碟/
+
+# ---------------- 評估／審查產物（暫存性質） ----------------
+_cad_assess/
+_boq_assess/
+_ref/review_崙背/case.dxf
+_ref/review_崙背/case.dwg
+
+# ---------------- Python ----------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ---------------- 編輯器與作業系統 ----------------
+.vscode/
+.idea/
+.claude/
+.codex/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------- 機密與個人化設定 ----------------
+claude_desktop_config.json
+.mcp.json
+*.secrets.json
+.env
+.env.*
+!.env.example
+
+# ---------------- CAD／Office 中間檔 ----------------
+*.bak
+*.dwl
+*.dwl2
+*.tmp
+~$*

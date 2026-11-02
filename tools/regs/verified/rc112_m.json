@@ -1,0 +1,727 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_anchor_Nsa",
+   "title": "錨栓鋼材標稱拉力強度 Nsa＝Ase,N·futa（式17.6.1.2）",
+   "src": "rc112",
+   "clause": "17.6.1.2",
+   "page": 232,
+   "keywords": "錨栓 鋼材拉力強度 Nsa Ase futa 降伏強度 上限 860 MPa",
+   "unit": "N",
+   "output": "Nsa",
+   "latex": "N_{sa}=A_{se,N}\\,f_{uta}",
+   "vars": {
+    "Ase": {
+     "desc": "受拉錨栓之有效斷面積 Ase,N",
+     "unit": "mm2",
+     "min": 0
+    },
+    "futa": {
+     "desc": "錨栓鋼材標稱抗拉強度 futa（不得超過 min(1.9fya, 860 MPa)）",
+     "unit": "MPa",
+     "min": 0
+    }
+   },
+   "expr": "Ase*futa",
+   "conditions": [
+    {
+     "expr": "Ase>=0 and futa>=0",
+     "msg": "Ase,N、futa 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Ase": 100,
+      "futa": 800
+     },
+     "out": 80000.0
+    },
+    {
+     "in": {
+      "Ase": 250,
+      "futa": 620
+     },
+     "out": 155000.0
+    }
+   ],
+   "notes": "17.6.1.2：單根錨栓鋼材之標稱拉力強度 Nsa＝Ase,N·futa；其中 Ase,N 為受拉錨栓之有效斷面積（cm²），**futa 應不超過 1.9fya 與 8,750 kgf/cm²[860 MPa] 之較小值**（本式以 mm²、MPa 計）。解說：錨栓鋼材強度宜以 futa（而非 fya）計算，因多數錨栓鋼材無明確降伏點；AISC 自 1986 版起即以 Ase,N·futa 計算。futa 上限 1.9fya 係為確保使用載重下不致降伏。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.232 式(17.6.1.2)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_Ncb_single",
+   "title": "單根錨栓混凝土拉破強度 Ncb＝(ANc/ANco)ψed,Nψc,Nψcp,N·Nb（式17.6.2.1a）",
+   "src": "rc112",
+   "clause": "17.6.2.1",
+   "page": 233,
+   "keywords": "錨栓 混凝土拉破 Ncb ANc ANco ψed ψc ψcp Nb 單根",
+   "unit": "N",
+   "output": "Ncb",
+   "latex": "N_{cb}=\\frac{A_{Nc}}{A_{Nco}}\\psi_{ed,N}\\psi_{c,N}\\psi_{cp,N}N_b",
+   "vars": {
+    "ANc": {
+     "desc": "單根錨栓之混凝土破壞投影面積 ANc",
+     "unit": "mm2",
+     "min": 0
+    },
+    "ANco": {
+     "desc": "單根錨栓最大投影面積 ANco（式17.6.2.1.4＝9hef²）",
+     "unit": "mm2",
+     "min": 1
+    },
+    "psiEdN": {
+     "desc": "邊距效應修正因數 ψed,N（17.6.2.4.1）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0
+    },
+    "psiCN": {
+     "desc": "開裂修正因數 ψc,N（17.6.2.5.1）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0
+    },
+    "psiCpN": {
+     "desc": "劈裂修正因數 ψcp,N（17.6.2.6）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0
+    },
+    "Nb": {
+     "desc": "基本混凝土拉破強度 Nb（17.6.2.2）",
+     "unit": "N",
+     "min": 0
+    }
+   },
+   "expr": "ANc/ANco*psiEdN*psiCN*psiCpN*Nb",
+   "conditions": [
+    {
+     "expr": "ANco>0",
+     "msg": "ANco 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "ANc": 90000,
+      "ANco": 22500,
+      "Nb": 20000
+     },
+     "out": 80000.0
+    },
+    {
+     "in": {
+      "ANc": 45000,
+      "ANco": 22500,
+      "psiEdN": 0.9,
+      "Nb": 20000
+     },
+     "out": 36000.0
+    }
+   ],
+   "notes": "式(17.6.2.1a)：單根錨栓之 Ncb 依本式，ANc 應不大於 n·ANco（n 為受拉錨栓支數）。ψec,N、ψed,N、ψc,N、ψcp,N 分別定義於 17.6.2.3、17.6.2.4、17.6.2.5、17.6.2.6 節。群錨栓見 rc112_anchor_Ncbg_group。當錨栓群有三邊或更多邊之邊距 <1.5hef 時，CCD 公式過於保守，可將 hef 限制為不超過 ca,max/1.5（ca,max 為受影響之最大邊距）修正之。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.233 式(17.6.2.1a)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_Ncbg_group",
+   "title": "錨栓群混凝土拉破強度 Ncbg＝(ANc/ANco)ψec,Nψed,Nψc,Nψcp,N·Nb（式17.6.2.1b）",
+   "src": "rc112",
+   "clause": "17.6.2.1",
+   "page": 233,
+   "keywords": "錨栓群 混凝土拉破 Ncbg ANc ANco ψec ψed ψc ψcp Nb 群效應",
+   "unit": "N",
+   "output": "Ncbg",
+   "latex": "N_{cbg}=\\frac{A_{Nc}}{A_{Nco}}\\psi_{ec,N}\\psi_{ed,N}\\psi_{c,N}\\psi_{cp,N}N_b",
+   "vars": {
+    "ANc": {
+     "desc": "錨栓群之混凝土破壞投影總面積 ANc",
+     "unit": "mm2",
+     "min": 0
+    },
+    "ANco": {
+     "desc": "單根錨栓最大投影面積 ANco（9hef²）",
+     "unit": "mm2",
+     "min": 1
+    },
+    "psiEcN": {
+     "desc": "偏心修正因數 ψec,N（17.6.2.3）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0
+    },
+    "psiEdN": {
+     "desc": "邊距效應修正因數 ψed,N",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0
+    },
+    "psiCN": {
+     "desc": "開裂修正因數 ψc,N",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0
+    },
+    "psiCpN": {
+     "desc": "劈裂修正因數 ψcp,N",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0
+    },
+    "Nb": {
+     "desc": "基本混凝土拉破強度 Nb",
+     "unit": "N",
+     "min": 0
+    }
+   },
+   "expr": "ANc/ANco*psiEcN*psiEdN*psiCN*psiCpN*Nb",
+   "conditions": [
+    {
+     "expr": "ANco>0",
+     "msg": "ANco 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "ANc": 45000,
+      "ANco": 22500,
+      "Nb": 20000
+     },
+     "out": 40000.0
+    },
+    {
+     "in": {
+      "ANc": 45000,
+      "ANco": 22500,
+      "psiEcN": 0.9,
+      "Nb": 20000
+     },
+     "out": 36000.0
+    }
+   ],
+   "notes": "式(17.6.2.1b)：錨栓群（滿足 17.5.1.3.1）之 Ncbg 依本式，較單根式多一個偏心因數 ψec,N。因 ANc 已是群之投影總面積、ANco 為單根投影面積，故式中不必再乘錨栓支數。錨栓群效應之判定見表17.5.1.3.1（臨界間距：混凝土拉破 3hef、拉力握裹 2cNa、混凝土剪破 3ca1）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.233 式(17.6.2.1b)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_ANco",
+   "title": "單根錨栓最大投影面積 ANco＝9·hef²（式17.6.2.1.4）",
+   "src": "rc112",
+   "clause": "17.6.2.1.4",
+   "page": 235,
+   "keywords": "錨栓 投影面積 ANco hef 混凝土拉破 邊距 1.5hef",
+   "unit": "mm2",
+   "output": "ANco",
+   "latex": "A_{Nco}=9\\,h_{ef}^{2}",
+   "vars": {
+    "hef": {
+     "desc": "有效埋設深度 hef",
+     "unit": "mm",
+     "min": 0
+    }
+   },
+   "expr": "9*hef**2",
+   "conditions": [
+    {
+     "expr": "hef>0",
+     "msg": "hef 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "hef": 50
+     },
+     "out": 22500.0
+    },
+    {
+     "in": {
+      "hef": 40
+     },
+     "out": 14400.0
+    }
+   ],
+   "notes": "17.6.2.1.4：ANco 為單根錨栓其邊距 ≥1.5hef 所形成之混凝土破壞投影面積＝9hef²。解說：ANco 是單根錨栓之最大投影面積（3hef × 3hef）；錨栓群之投影面積 ANc 應不大於 n·ANco。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.235 式(17.6.2.1.4)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_Nb_deep",
+   "title": "深埋擴頭錨栓基本拉破強度 Nb＝3.9λa√fc′·hef^(5/3)（式17.6.2.2.3，SI）",
+   "src": "rc112",
+   "clause": "17.6.2.2.3",
+   "page": 237,
+   "keywords": "擴頭錨栓 深埋 hef 28 63.5 Nb 5/3 次方 拉破強度 預埋",
+   "unit": "N",
+   "output": "Nb",
+   "latex": "N_b=3.9\\lambda_a\\sqrt{f_c'}\\,h_{ef}^{5/3}\\ (\\mathrm{MPa},\\mathrm{mm})",
+   "vars": {
+    "fc": {
+     "desc": "混凝土 fc′",
+     "unit": "MPa",
+     "min": 10
+    },
+    "hef": {
+     "desc": "有效埋設深度 hef（本式適用 28 cm ≤ hef ≤ 63.5 cm）",
+     "unit": "mm",
+     "min": 280,
+     "max": 635
+    },
+    "lama": {
+     "desc": "輕質混凝土修正係數 λa（常重 1.0；見表17.2.4.1）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.5
+    }
+   },
+   "expr": "3.9*lama*sqrt(fc)*hef**(5/3)",
+   "conditions": [
+    {
+     "expr": "fc>0 and hef>0",
+     "msg": "fc′、hef 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "hef<280 or hef>635",
+     "msg": "本式適用 28 cm ≤ hef ≤ 63.5 cm；較淺者回歸式(17.6.2.2.1) 之 hef^1.5"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc": 28,
+      "hef": 300
+     },
+     "out": 277446.4,
+     "tol": 1.0
+    },
+    {
+     "in": {
+      "fc": 28,
+      "hef": 400
+     },
+     "out": 448136.5,
+     "tol": 1.0
+    }
+   ],
+   "notes": "17.6.2.2.3：單根預埋式擴頭錨釘和擴頭螺栓，其 28 cm ≤ hef ≤ 63.5 cm 者，Nb＝5.8λa√fc′hef^(5/3)（kgf/cm²、cm、kgf）[SI：3.9λa√fc′hef^(5/3)，本式]。解說：深埋（hef>28 cm）時以 hef^1.5 過份保守，故改用 hef^(5/3)。該公式亦可用於某些擴底後置式錨栓。較淺之錨栓見 rc112_anchor_Nb（式17.6.2.2.1，hef^1.5）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.237 式(17.6.2.2.3)（kgf 5.8 與 SI 3.9 兩版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_psi_edN",
+   "title": "拉力邊距效應修正因數 ψed,N（式17.6.2.4.1a/b）",
+   "src": "rc112",
+   "clause": "17.6.2.4.1",
+   "page": 238,
+   "keywords": "錨栓 拉力 邊距效應 ψed,N ca,min hef 拉破錐 修正因數",
+   "unit": "-",
+   "output": "psi_edN",
+   "latex": "\\psi_{ed,N}=\\begin{cases}1.0 & c_{a,min}\\ge 1.5h_{ef}\\\\ 0.7+0.3\\dfrac{c_{a,min}}{1.5h_{ef}} & c_{a,min}<1.5h_{ef}\\end{cases}",
+   "vars": {
+    "camin": {
+     "desc": "最小邊距 ca,min",
+     "unit": "mm",
+     "min": 0
+    },
+    "hef": {
+     "desc": "有效埋設深度 hef",
+     "unit": "mm",
+     "min": 0
+    }
+   },
+   "expr": "1.0 if camin>=1.5*hef else 0.7+0.3*camin/(1.5*hef)",
+   "conditions": [
+    {
+     "expr": "hef>0",
+     "msg": "hef 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "camin": 75,
+      "hef": 50
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "camin": 50,
+      "hef": 50
+     },
+     "out": 0.9
+    },
+    {
+     "in": {
+      "camin": 0,
+      "hef": 50
+     },
+     "out": 0.7
+    }
+   ],
+   "notes": "17.6.2.4.1：承受拉力之單根錨栓或錨栓群，邊距效應修正因數 ψed,N 依 (a) ca,min ≥ 1.5hef 時取 1.0、(b) ca,min < 1.5hef 時取 0.7＋0.3·ca,min/(1.5hef)。解說：最小邊距 ≥1.5hef 時完整拉破錐可形成故不折減；小於時須做邊距效應修正（Fuchs et al）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.238 式(17.6.2.4.1a/b)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": [
+  {
+   "id": "rc112_anchor_psi_cN_T176251",
+   "title": "開裂修正因數 ψc,N（17.6.2.5.1）",
+   "src": "rc112",
+   "clause": "17.6.2.5.1",
+   "page": 238,
+   "keywords": "錨栓 開裂修正 ψc,N 預埋 後置 1.25 1.4 未開裂 產品評估",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "情況",
+    "ψc,N"
+   ],
+   "rows": [
+    {
+     "key": "預埋式錨栓群-未開裂",
+     "values": {
+      "情況": "經分析顯示使用載重等級下構材未開裂（預埋式錨栓群）",
+      "ψc,N": 1.25
+     }
+    },
+    {
+     "key": "後置式錨栓群-未開裂",
+     "values": {
+      "情況": "同上（後置式錨栓群，且式(17.6.2.2) 之 kc 取 7）",
+      "ψc,N": 1.4
+     }
+    },
+    {
+     "key": "產品評估報告認可開裂與未開裂",
+     "values": {
+      "情況": "kc 取自機械式或黏結式錨栓評估準則之產品評估報告，且經認可同時適用於開裂與未開裂混凝土",
+      "ψc,N": "依產品評估報告"
+     }
+    },
+    {
+     "key": "產品評估報告僅認可未開裂",
+     "values": {
+      "情況": "經認可僅適用於未開裂混凝土之錨栓",
+      "ψc,N": 1.0
+     }
+    }
+   ],
+   "notes": "17.6.2.5.1：使用載重等級下錨栓區域受開裂影響之修正因數 ψc,N 依本表。17.6.2.5.2：混凝土開裂應由符合 24.3.2 節配置之撓曲鋼筋控制，或配置圍束鋼筋以提供等值裂縫控制；解說指出評估準則係要求錨栓在裂縫寬度 0.03 cm 時仍表現良好，裂縫可能較預期大時宜設圍束鋼筋控制至約 0.03 cm（ACI 224R）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照混凝土結構設計規範(112年版) p.238 §17.6.2.5.1",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_critical_spacing_T175131",
+   "title": "錨栓群效應之臨界間距（表17.5.1.3.1）",
+   "src": "rc112",
+   "clause": "17.5.1.3.1",
+   "page": 225,
+   "keywords": "錨栓群 臨界間距 3hef 2cNa 3ca1 混凝土拉破 握裹 剪破",
+   "kind": "lookup",
+   "unit": "mm",
+   "columns": [
+    "考量之破壞模式",
+    "臨界間距"
+   ],
+   "rows": [
+    {
+     "key": "混凝土拉破",
+     "values": {
+      "考量之破壞模式": "混凝土拉破",
+      "臨界間距": "3hef"
+     }
+    },
+    {
+     "key": "拉力握裹強度",
+     "values": {
+      "考量之破壞模式": "拉力握裹強度",
+      "臨界間距": "2cNa"
+     }
+    },
+    {
+     "key": "混凝土剪破",
+     "values": {
+      "考量之破壞模式": "混凝土剪破",
+      "臨界間距": "3ca1"
+     }
+    }
+   ],
+   "notes": "17.5.1.3.1：當兩根或多根錨栓之間距小於本表之臨界間距時，須考量錨栓群效應；受檢視之錨栓，只有易受特定破壞模式影響者需納入錨栓群。混凝土拉破之設計方法係發展自 CCD（Concrete Capacity Design）方法（Fuchs et al 1995；Eligehausen & Balogh 1995）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照混凝土結構設計規範(112年版) p.225 表17.5.1.3.1",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_phi_T1753a",
+   "title": "錨栓強度由鋼材控制時之強度折減因數 φ（表17.5.3a）",
+   "src": "rc112",
+   "clause": "17.5.3",
+   "page": 231,
+   "keywords": "錨栓 強度折減因數 φ 鋼材控制 韌性 脆性 拉力 剪力 0.75 0.65 0.60",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "鋼材種類",
+    "拉力載重(鋼材) φ",
+    "剪力載重(鋼材) φ"
+   ],
+   "rows": [
+    {
+     "key": "韌性",
+     "values": {
+      "鋼材種類": "韌性",
+      "拉力載重(鋼材) φ": 0.75,
+      "剪力載重(鋼材) φ": 0.65
+     }
+    },
+    {
+     "key": "脆性",
+     "values": {
+      "鋼材種類": "脆性",
+      "拉力載重(鋼材) φ": 0.65,
+      "剪力載重(鋼材) φ": 0.6
+     }
+    }
+   ],
+   "notes": "17.5.3：除錨栓錨定鋼筋之強度折減因數為 0.75 外，其他種類混凝土內錨栓之 φ 依表17.5.3a（鋼材控制）、17.5.3b（混凝土拉破／握裹／邊緣脹破控制）、17.5.3c。本條目僅收 a 表；b、c 表含「有無輔助鋼筋 × 錨栓安裝種類 × 錨栓分類」之多維合併儲存格，文字層無法逐格確認，暫未收錄。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照混凝土結構設計規範(112年版) p.231 表17.5.3a",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_lambda_a_T17241",
+   "title": "輕質混凝土修正係數 λa（表17.2.4.1）",
+   "src": "rc112",
+   "clause": "17.2.4.1",
+   "page": 221,
+   "keywords": "錨栓 輕質混凝土 λa 1.0 0.8 0.6 預埋 擴底 膨脹 螺紋 黏結式",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "破壞條件",
+    "λa"
+   ],
+   "rows": [
+    {
+     "key": "預埋和擴底錨栓之混凝土破壞",
+     "values": {
+      "破壞條件": "預埋和擴底錨栓之混凝土破壞",
+      "λa": "1.0λ"
+     }
+    },
+    {
+     "key": "膨脹、螺紋和黏結式錨栓之混凝土破壞",
+     "values": {
+      "破壞條件": "膨脹、螺紋和黏結式錨栓之混凝土破壞",
+      "λa": "0.8λ"
+     }
+    },
+    {
+     "key": "黏結式錨栓按式(17.6.5.2.1)之握裹破壞",
+     "values": {
+      "破壞條件": "黏結式錨栓按式(17.6.5.2.1) 之握裹破壞",
+      "λa": "0.6λ"
+     }
+    }
+   ],
+   "notes": "17.2.4.1：輕質混凝土修正係數 λa 依本表；λ 按第19.2.4節規定決定（rc112_lambda_density）。當使用機械式錨栓評估準則或黏結式錨栓評估準則之實驗評估時，得採用試驗結果替代 λa。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照混凝土結構設計規範(112年版) p.221 表17.2.4.1",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_footing_Vn_T14551",
+   "title": "純混凝土基腳標稱剪力強度 Vn（表14.5.5.1）",
+   "src": "rc112",
+   "clause": "14.5.5.1",
+   "page": 195,
+   "keywords": "純混凝土 基腳 剪力強度 Vn 單向 雙向 β 0.35 0.71 0.11 0.22",
+   "kind": "lookup",
+   "unit": "N",
+   "columns": [
+    "剪力作用",
+    "標稱剪力強度 Vn"
+   ],
+   "rows": [
+    {
+     "key": "單向",
+     "values": {
+      "剪力作用": "單向",
+      "標稱剪力強度 Vn": "Vn = 0.35λ√fc′·bw·h [SI 0.11λ√fc′·bw·h]"
+     }
+    },
+    {
+     "key": "雙向-b",
+     "values": {
+      "剪力作用": "雙向（取小值之一）",
+      "標稱剪力強度 Vn": "Vn = 0.35(1 + 2/β)λ√fc′·bo·h [SI 0.11(1 + 2/β)λ√fc′·bo·h]"
+     }
+    },
+    {
+     "key": "雙向-c",
+     "values": {
+      "剪力作用": "雙向（取小值之二）",
+      "標稱剪力強度 Vn": "Vn = 0.71λ√fc′·bo·h [SI 0.22λ√fc′·bo·h]"
+     }
+    }
+   ],
+   "notes": "14.5.5.1：Vn 依本表計算，[ ] 內為 SI 之等效係數（0.35 kgf/cm² ↔ 0.11 MPa）。β 為集中載重或反力區之長短邊比（[1] 註）。純混凝土撓曲與軸壓力組合另見表14.5.4.1、承載強度見表14.5.6.1（rc112_footing_Bn_T14561）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照混凝土結構設計規範(112年版) p.195 表14.5.5.1（kgf 與 SI 兩組係數）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_demand_T1752",
+   "title": "錨栓需求強度之檢核項目（表17.5.2）",
+   "src": "rc112",
+   "clause": "17.5.2",
+   "page": 226,
+   "keywords": "錨栓 需求強度 檢核 鋼材拉力 混凝土拉破 拔出 邊緣脹破 握裹 剪力",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "破壞模式",
+    "單根錨栓",
+    "錨栓群",
+    "錨栓群之任一根錨栓"
+   ],
+   "rows": [
+    {
+     "key": "鋼材拉力強度(17.6.1)",
+     "values": {
+      "破壞模式": "鋼材拉力強度（17.6.1）",
+      "單根錨栓": "φNsa ≥ Nua",
+      "錨栓群": "－",
+      "錨栓群之任一根錨栓": "φNsa ≥ Nua,i"
+     }
+    },
+    {
+     "key": "混凝土拉破強度(17.6.2)",
+     "values": {
+      "破壞模式": "混凝土拉破強度（17.6.2）",
+      "單根錨栓": "φNcb ≥ Nua",
+      "錨栓群": "φNcbg ≥ Nua,g",
+      "錨栓群之任一根錨栓": "－"
+     }
+    },
+    {
+     "key": "拔出強度(17.6.3)",
+     "values": {
+      "破壞模式": "拔出強度（17.6.3）",
+      "單根錨栓": "φNpn ≥ Nua",
+      "錨栓群": "－",
+      "錨栓群之任一根錨栓": "φNpn ≥ Nua,i"
+     }
+    },
+    {
+     "key": "混凝土邊緣脹破強度(17.6.4)",
+     "values": {
+      "破壞模式": "混凝土邊緣脹破強度（17.6.4）",
+      "單根錨栓": "φNsb ≥ Nua",
+      "錨栓群": "φNsbg ≥ Nua,g",
+      "錨栓群之任一根錨栓": "－"
+     }
+    },
+    {
+     "key": "黏結式錨栓握裹強度(17.6.5)",
+     "values": {
+      "破壞模式": "黏結式錨栓抗拉之握裹強度（17.6.5）",
+      "單根錨栓": "φNna ≥ Nua",
+      "錨栓群": "φNag ≥ Nua,g",
+      "錨栓群之任一根錨栓": "－"
+     }
+    }
+   ],
+   "notes": "17.5.2：每一合用之因數化載重組合，錨栓之設計強度須符合本表要求。註[1]：錨栓群之任一根錨栓須另檢核；多根錨栓視為一個錨栓群。註[2]~[3]：鋼材拉力強度與混凝土拉破強度之 φ 值分別見表17.5.3a 與 17.5.3b（見 rc112_anchor_phi_T1753a）。剪力方向之需求強度表（表17.5.2 下半）未完整擷取，未收錄。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照混凝土結構設計規範(112年版) p.226 表17.5.2（拉力部分）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_wall_Ds_T11841",
+   "title": "牆面外撓度 Δs 之計算（表11.8.4.1）",
+   "src": "rc112",
+   "clause": "11.8.4.1",
+   "page": 161,
+   "keywords": "牆 面外撓度 Δs Ma Mcr Δcr Δn 開裂 未開裂 使用載重",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "Ma 範圍",
+    "Δs"
+   ],
+   "rows": [
+    {
+     "key": "Ma≤(2/3)Mcr",
+     "values": {
+      "Ma 範圍": "Ma ≤ (2/3)Mcr",
+      "Δs": "Δs = Δcr·(Ma/Mcr)"
+     }
+    },
+    {
+     "key": "Ma>(2/3)Mcr",
+     "values": {
+      "Ma 範圍": "Ma > (2/3)Mcr",
+      "Δs": "Δs = Δcr·(Ma/Mcr) + (Δn − Δcr)·[Ma − (2/3)Mcr] / [Mcr − (2/3)Mcr]"
+     }
+    }
+   ],
+   "notes": "11.8.4.1：因使用載重所造成之面外撓度 Δs 依本表計算，其中 Ma 由 11.8.4.2 節（rc112_wall_Ma_iteration）以撓度迭代求得：Ma＝Msa＋PsΔs。11.8.4.3：Δcr＝5Mcr·ℓc²/(48EcIcr)（式11.8.4.3a）、Δn＝5Mn·ℓc²/(48EcIcr)（式11.8.4.3b）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照混凝土結構設計規範(112年版) p.161 表11.8.4.1 及 11.8.4.3 兩式",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

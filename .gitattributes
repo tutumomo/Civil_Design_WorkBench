@@ -1,0 +1,51 @@
+# 跨平台換行與二進位檔處理
+#
+# 目的：Windows／macOS／Linux 取同一份 repo 時行為一致，避免整檔換行差異造成 diff 噪音。
+# 文字檔統一存 LF（checkout 時也維持 LF）；Windows 專用的 .bat／.ps1 存 CRLF。
+
+* text=auto eol=lf
+
+# ---------------- 文字 ----------------
+*.py       text eol=lf
+*.md       text eol=lf
+*.json     text eol=lf
+*.txt      text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.toml     text eol=lf
+*.csv      text eol=lf
+*.css      text eol=lf
+*.html     text eol=lf
+*.js       text eol=lf
+*.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# Windows 專用腳本維持 CRLF
+*.bat      text eol=crlf
+*.cmd      text eol=crlf
+*.ps1      text eol=crlf
+
+# ---------------- 二進位（不做換行轉換、不做 diff） ----------------
+*.dxf      binary
+*.dwg      binary
+*.dwt      binary
+*.pdf      binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.webp     binary
+*.xls      binary
+*.xlsx     binary
+*.xlsm     binary
+*.docx     binary
+*.pptx     binary
+*.shp      binary
+*.shx      binary
+*.dbf      binary
+*.prj      binary
+*.sqlite   binary
+*.zip      binary
+*.7z       binary
+*.ttf      binary
+*.shx      binary

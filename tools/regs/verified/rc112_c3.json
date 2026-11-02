@@ -1,0 +1,334 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_psi_cp_Na_176551",
+   "title": "控制劈裂時黏結式錨栓之修正係數 ψcp,Na（混凝土結構設計規範 112 年版 17.6.5.5.1 式17.6.5.5.1a、b）",
+   "src": "rc112",
+   "clause": "17.6.5.5.1",
+   "page": 255,
+   "keywords": "混凝土 黏結式錨栓 劈裂 修正係數 ψcp,Na ca,min cac cNa 17.6.5.5.1 17.9.5",
+   "unit": "-",
+   "output": "psi",
+   "latex": "\\psi_{cp,Na}=1.0\\ (c_{a,min}\\ge c_{ac});\\qquad \\psi_{cp,Na}=\\frac{c_{a,min}}{c_{ac}}\\ge\\frac{c_{Na}}{c_{ac}}\\ (c_{a,min}<c_{ac})",
+   "vars": {
+    "ca_min": {
+     "desc": "最小邊距 ca,min（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 10.0
+    },
+    "cac": {
+     "desc": "控制劈裂之臨界邊距 cac（cm，依 17.9.5）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 30.0
+    },
+    "cNa": {
+     "desc": "cNa＝10·da·√(τuncr/76)（依 17.9.5，cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 8.0
+    }
+   },
+   "expr": "1.0 if ca_min>=cac else max(ca_min/cac, cNa/cac)",
+   "tests": [
+    {
+     "in": {
+      "ca_min": 40.0,
+      "cac": 30.0,
+      "cNa": 8.0
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "ca_min": 15.0,
+      "cac": 30.0,
+      "cNa": 8.0
+     },
+     "out": 0.5
+    },
+    {
+     "in": {
+      "ca_min": 5.0,
+      "cac": 30.0,
+      "cNa": 8.0
+     },
+     "out": 0.26666666666666666
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**17.6.5.5.1：控制劈裂時，修正係數 ψcp,Na 依式(a) 或 (b) 計算，cNa 定義如 17.9.5——(a) 當 ca,min≥cac 時 ψcp,Na＝1.0**（式17.6.5.5.1a）；**(b) 當 ca,min<cac 時 ψcp,Na＝ca,min/cac，且不得小於 cNa/cac**（式17.6.5.5.1b）。**邊界：ca,min＝cac 時兩式連續（皆為 1.0）；ψ 下限 cNa/cac 避免邊距過小時修正係數趨近 0。** 與 ACI 318-19 §17.6.5.5.1 同式 ✓。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "cac>0",
+     "msg": "cac 須為正"
+    }
+   ],
+   "_file": "payload_phase3c.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "rc112_hef_limit_three_edges_176212",
+   "title": "錨栓群三邊或以上邊距小於 1.5hef 時之 hef 取值（混凝土結構設計規範 112 年版 17.6.2.1.2）",
+   "src": "rc112",
+   "clause": "17.6.2.1.2",
+   "page": 250,
+   "keywords": "混凝土 錨栓 混凝土拉破 三邊 邊距 小於 1.5hef ca,max/1.5 s/3 hef 限制 17.6.2.1.2",
+   "unit": "cm",
+   "output": "hef_eff",
+   "latex": "h'_{ef}=\\max\\left\\{\\frac{c_{a,max}}{1.5},\\ \\frac{s}{3}\\right\\}",
+   "vars": {
+    "ca_max": {
+     "desc": "最大邊距 ca,max（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 20.0
+    },
+    "s": {
+     "desc": "錨栓群之錨栓最大間距 s（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 15.0
+    }
+   },
+   "expr": "max(ca_max/1.5, s/3.0)",
+   "tests": [
+    {
+     "in": {
+      "ca_max": 20.0,
+      "s": 15.0
+     },
+     "out": 13.333333333333334
+    },
+    {
+     "in": {
+      "ca_max": 10.0,
+      "s": 30.0
+     },
+     "out": 10.0
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**17.6.2.1.2：若錨栓群有三邊或更多邊之邊距小於 1.5hef，依據 17.6.2.1.1 節及 17.6.2.1 至 17.6.2.4 節之公式計算 ANc 時，hef 應取 (a) ca,max/1.5 與 (b) s/3 之大值，其中 s 為錨栓群之錨栓最大間距。** 與 ACI 318-19 §17.6.2.1.2 同式（hef 的折減使用以避免窄構件中過度保守）✓。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "ca_max>=0 and s>=0",
+     "msg": "距離須非負"
+    }
+   ],
+   "_file": "payload_phase3c.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "rc112_beam_hoop_spacing_183347",
+   "title": "高軸壓梁其餘長度閉合箍筋最大間距（混凝土結構設計規範 112 年版 18.3.4.7）",
+   "src": "rc112",
+   "clause": "18.3.4.7",
+   "page": 120,
+   "keywords": "混凝土 耐震 特殊抗彎矩構架梁 因數化軸壓力 Ag fc'/10 閉合箍筋 間距 15cm 6db 5.5db 5db fy 4200 5000 5600 18.3.4.7",
+   "unit": "cm",
+   "output": "s_max",
+   "latex": "s\\le\\min\\left\\{15\\ \\text{cm},\\ k\\,d_b\\right\\},\\ k=6\\ (f_y=4200),\\ 5.5\\ (f_y=5000),\\ 5\\ (f_y=5600)",
+   "vars": {
+    "fy": {
+     "desc": "縱向梁筋降伏強度 fy（kgf/cm²，取 4200／5000／5600 三級；中間值取較大級之係數保守）",
+     "unit": "kgf/cm2",
+     "min": 4200.0,
+     "max": 5600.0,
+     "default": 4200.0
+    },
+    "db": {
+     "desc": "受圍繞縱向梁筋直徑 db（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 3.2
+    }
+   },
+   "expr": "min(15.0, (6.0 if fy<=4200.0 else (5.5 if fy<=5000.0 else 5.0))*db)",
+   "tests": [
+    {
+     "in": {
+      "fy": 4200.0,
+      "db": 3.2
+     },
+     "out": 15.0
+    },
+    {
+     "in": {
+      "fy": 5000.0,
+      "db": 3.2
+     },
+     "out": 15.0
+    },
+    {
+     "in": {
+      "fy": 5600.0,
+      "db": 2.5
+     },
+     "out": 12.5
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**18.3.4.7：於因數化軸壓力超過 Ag·f′c/10 之梁，符合 18.4.5.2~18.4.5.4 規定之閉合箍筋應沿 18.3.4.1 規定之長度設置；沿其餘長度上應設置符合 18.4.5.2 規定之閉合箍筋，其間距 s 不應超過 15 cm、最小 fy＝4,200 kgf/cm² 受圍繞縱向梁筋直徑之 6 倍、最小 fy＝5,000 kgf/cm² 者之 5.5 倍與最小 fy＝5,600 kgf/cm² 者之 5 倍之最小值。當橫向鋼筋之混凝土保護層超過 10 cm，應額外設置橫向鋼筋，其保護層不超過 10 cm 且間距不超過 30 cm。** 解說：舊版上限為 d/4、8db、24 倍箍筋直徑與 30 cm 之最小值；本版修改以改善大形梁中箍筋對縱向鋼筋挫曲之束制。**單調性：fy 愈高，倍數愈小（6→5.5→5）✓。** ⚠ 規範僅列 4200／5000／5600 三級，本條目對中間值取其所屬較高級之係數（偏保守）。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "db>0",
+     "msg": "db 須為正"
+    }
+   ],
+   "_file": "payload_phase3c.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "rc112_column_min_dims_184221",
+   "title": "特殊耐震柱斷面最小尺度與長寬比（混凝土結構設計規範 112 年版 18.4.2.1）",
+   "src": "rc112",
+   "clause": "18.4.2.1",
+   "page": 340,
+   "keywords": "混凝土 耐震 柱 斷面最小尺度 30 cm 最小尺度與垂直尺度比 0.4 18.4.2.1",
+   "unit": "-",
+   "output": "result",
+   "latex": "\\min(b,h)\\ge30\\ \\text{cm};\\qquad \\frac{\\min(b,h)}{\\max(b,h)}\\ge0.4",
+   "vars": {
+    "b": {
+     "desc": "斷面尺度 b（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 50.0
+    },
+    "h": {
+     "desc": "斷面垂直尺度 h（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 60.0
+    },
+    "mode": {
+     "desc": "1＝最小尺度 min(b,h)（須≥30）；2＝尺度比 min/max（須≥0.4）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "min(b,h) if mode==1 else min(b,h)/max(b,h)",
+   "tests": [
+    {
+     "in": {
+      "b": 50.0,
+      "h": 60.0,
+      "mode": 1
+     },
+     "out": 50.0
+    },
+    {
+     "in": {
+      "b": 50.0,
+      "h": 60.0,
+      "mode": 2
+     },
+     "out": 0.8333333333333334
+    },
+    {
+     "in": {
+      "b": 25.0,
+      "h": 100.0,
+      "mode": 2
+     },
+     "out": 0.25
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**18.4.2.1：柱應符合 (a) 以一通過幾何形心之直線量測，斷面之最小尺度應至少為 30 cm；(b) 斷面最小尺度與其垂直尺度之比例應至少為 0.4。** 解說：本條文之幾何限制遵循過去實務經驗（SEAOC 1996）。**本式回傳最小尺度或尺度比，使用者與 30 cm、0.4 比較。**",
+   "status": "verified",
+   "warn_if": [
+    {
+     "expr": "mode==1 and min(b,h)<30.0",
+     "msg": "最小尺度<30 cm：不符 18.4.2.1(a)"
+    },
+    {
+     "expr": "mode==2 and min(b,h)/max(b,h)<0.4",
+     "msg": "尺度比<0.4：不符 18.4.2.1(b)"
+    }
+   ],
+   "_file": "payload_phase3c.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "rc112_dfps_limit_24322",
+   "title": "握裹預力鋼筋之 Δfps 上限與免間距限制門檻（混凝土結構設計規範 112 年版 24.3.2.2）",
+   "src": "rc112",
+   "clause": "24.3.2.2",
+   "page": 360,
+   "keywords": "混凝土 預力 開裂控制 Δfps 2500 1400 解壓應力 fdc fse 間距 表24.3.2 24.3.2.2",
+   "unit": "kgf/cm2",
+   "output": "result",
+   "latex": "\\Delta f_{ps}=f_{ps}-f_{dc}\\le2500\\ \\text{kgf/cm}^{2},\\ f_{dc}=f_{se};\\quad \\Delta f_{ps}\\le1400\\Rightarrow\\text{免表24.3.2 間距限制}",
+   "vars": {
+    "fps": {
+     "desc": "使用載重下預力鋼筋之應力 fps（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 12000.0
+    },
+    "fse": {
+     "desc": "預力鋼筋之有效應力 fse（kgf/cm²；fdc 可取等於 fse）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 10500.0
+    }
+   },
+   "expr": "fps-fse",
+   "tests": [
+    {
+     "in": {
+      "fps": 12000.0,
+      "fse": 10500.0
+     },
+     "out": 1500.0
+    },
+    {
+     "in": {
+      "fps": 13500.0,
+      "fse": 10500.0
+     },
+     "out": 3000.0
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**24.3.2.2：解壓應力 fdc 得等於預力鋼筋中之有效應力 fse。Δfps（＝fps－fdc）應不超過 2,500 kgf/cm² [250 MPa]；若 Δfps 不超過 1,400 kgf/cm² [140 MPa]，則不受表24.3.2 所列之間距限制。** 解說：以 fdc 等同 fse 是保守的；設定最大 2,500 之目的為近似 fy＝4,200 kgf/cm² 鋼筋之最大容許應力 fs＝2,800 kgf/cm²；Δfps 小於 1,400 之構材反映許多低鋼筋應力結構在發揮預定功能時僅有非常有限之撓曲開裂。**本式回傳 Δfps，使用者與 2,500／1,400 比較。**",
+   "status": "verified",
+   "warn_if": [
+    {
+     "expr": "fps-fse>2500.0",
+     "msg": "Δfps>2,500 kgf/cm²：超過 24.3.2.2 上限"
+    },
+    {
+     "expr": "fps-fse<=1400.0",
+     "msg": "Δfps≤1,400：免表24.3.2 間距限制"
+    }
+   ],
+   "_file": "payload_phase3c.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

@@ -1,0 +1,33 @@
+{
+ "name": "v3測試",
+ "lat": 24.124736542844435,
+ "lon": 120.66010997304573,
+ "crs": "EPSG:3826",
+ "center_E": 215452.32231401984,
+ "center_N": 2668879.3363198014,
+ "E0": 215334.82231401984,
+ "N0": 2668791.8363198014,
+ "E1": 215569.82231401984,
+ "N1": 2668966.8363198014,
+ "res_m": 0.1,
+ "scale": 600,
+ "osm_ok": true,
+ "bldg_source": "國土測繪中心 通用電子地圖 EMAPX99 向量化並正交化（連棟合併為建物群）",
+ "road_smooth_max_dev_m": 0.2,
+ "admin": {
+  "ctyName": "臺中市",
+  "townName": "南區",
+  "villageName": "福順里",
+  "sectName": "半平厝段",
+  "officeName": "中山"
+ },
+ "counts": {
+  "road_edges": 7,
+  "road_lots": 3,
+  "parcels": 31,
+  "buildings": 14,
+  "water": 2,
+  "osm_roads": 24
+ },
+ "dxf": "v3測試_現況平面圖_TWD97.dxf"
+}

@@ -1,0 +1,1203 @@
+{
+ "formulas": [
+  {
+   "id": "steel99_weak_axis_Fb_732",
+   "title": "弱軸彎曲之容許撓曲應力（鋼結構容許應力設計法 7.3.2 式7.3-2、7.3-3）",
+   "src": "steel99",
+   "clause": "7.3.2",
+   "page": 5,
+   "keywords": "鋼結構 ASD 弱軸彎曲 容許撓曲應力 Fb 0.60Fy 1.075 0.019 bf/2tf 半結實 7.3-2 7.3-3",
+   "unit": "tf/cm2",
+   "output": "Fb",
+   "latex": "F_b=0.60F_y\\ (7.3\\text{-}2);\\qquad F_b=F_y\\left[1.075-0.019\\frac{b_f}{2t_f}\\sqrt{F_y}\\right]\\ (7.3\\text{-}3)",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材降伏強度 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0
+    },
+    "bf2tf": {
+     "desc": "翼板寬厚比 bf/2tf",
+     "unit": "-",
+     "min": 1.0,
+     "default": 13.0
+    },
+    "mode": {
+     "desc": "1＝非結實斷面（7.3-2）；2＝雙對稱 I 型半結實且翼板與腹板連續連接（7.3-3，Fy≤4.55）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "0.60*Fy if mode==1 else Fy*(1.075-0.019*bf2tf*sqrt(Fy))",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "bf2tf": 13.0,
+      "mode": 1
+     },
+     "out": 1.5
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "bf2tf": 13.0,
+      "mode": 2
+     },
+     "out": 1.711146772423013
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "bf2tf": 15.0,
+      "mode": 2
+     },
+     "out": 1.5609385835650147
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**7.3.2**：**(1) 受弱軸彎曲之構材若斷面未符合 4.5 節結實斷面且未符合 7.4 節者，拉力外緣與壓力外緣之容許撓曲應力 Fb＝0.60Fy**（式7.3-2）；**(2) 受弱軸彎曲之雙對稱工型構材（不含 Fy>4.55 tf/cm² 之鋼材），其翼板符合 4.5 節半結實要求且與腹板全部連續連接時，Fb＝Fy[1.075－0.019(bf/2tf)√Fy]**（式7.3-3）。**邊界驗證（強證據）：解說稱 bf/2tf 介於 17/√Fy 與 25/√Fy 時 Fb 由 0.75Fy 遞減至 0.6Fy——代入式7.3-3：bf/2tf＝17/√Fy 得 1.075－0.323＝0.752Fy ✓；25/√Fy 得 1.075－0.475＝0.600Fy ✓，與式7.3-2 連續。**",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Fy>0",
+     "msg": "Fy 須為正"
+    },
+    {
+     "expr": "mode!=2 or Fy<=4.55",
+     "msg": "式7.3-3 不適用於 Fy>4.55 tf/cm² 之鋼材"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "mode==2 and (bf2tf*sqrt(Fy)<17 or bf2tf*sqrt(Fy)>25)",
+     "msg": "bf/2tf 不在 17/√Fy~25/√Fy 半結實範圍內，式7.3-3 不適用"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_box_Fb_Lc_741",
+   "title": "箱型斷面之容許撓曲應力與側向支撐間距 Lc（鋼結構容許應力設計法 7.4.1、7.4.2 式7.4-1~7.4-3）",
+   "src": "steel99",
+   "clause": "7.4.1",
+   "page": 5,
+   "keywords": "鋼結構 ASD 箱型斷面 撓曲 Fb 0.66Fy 0.60Fy Lc 側向支撐 137 84 M1/M2 7.4-1 7.4-2 7.4-3",
+   "unit": "tf/cm2",
+   "output": "result",
+   "latex": "F_b=0.66F_y\\ (7.4\\text{-}1);\\quad L_c=\\left[137+84\\frac{M_1}{M_2}\\right]\\frac{b}{F_y}\\ge84\\frac{b}{F_y}\\ (7.4\\text{-}2);\\quad F_b=0.60F_y\\ (7.4\\text{-}3)",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材降伏強度 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0
+    },
+    "b": {
+     "desc": "箱型斷面寬度 b（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 30.0
+    },
+    "M1M2": {
+     "desc": "M1/M2（單曲率為負、雙曲率為正；與 7.2.3 節規定相同）",
+     "unit": "-",
+     "min": -1.0,
+     "max": 1.0,
+     "default": 0.0
+    },
+    "mode": {
+     "desc": "1＝結實箱型 Fb＝0.66Fy（7.4-1）；2＝側向未支撐長度上限 Lc（cm，7.4-2）；3＝半結實箱型 Fb＝0.60Fy（7.4-3）",
+     "unit": "-",
+     "min": 1,
+     "max": 3,
+     "default": 1
+    }
+   },
+   "expr": "0.66*Fy if mode==1 else (max((137.0+84.0*M1M2)*b/Fy, 84.0*b/Fy) if mode==2 else 0.60*Fy)",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "b": 30.0,
+      "M1M2": 0.0,
+      "mode": 1
+     },
+     "out": 1.6500000000000001
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "b": 30.0,
+      "M1M2": 0.5,
+      "mode": 2
+     },
+     "out": 2148.0
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "b": 30.0,
+      "M1M2": -1.0,
+      "mode": 2
+     },
+     "out": 1008.0
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "b": 30.0,
+      "M1M2": 0.0,
+      "mode": 3
+     },
+     "out": 1.5
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**7.4.1、7.4.2**：**符合 (1)~(5) 全部條件（4.5 節結實斷面、翼板腹板全連續、箱深≤6 倍寬、翼板厚≤2 倍腹板厚、側向未支撐間距 Lb≤Lc）時，Fb＝0.66Fy**（式7.4-1）；**Lc＝[137＋84(M1/M2)]b/Fy，且不須小於 84b/Fy**（式7.4-2；M1 為較小端、M2 為較大端強軸端點力矩）；**半結實箱型或鋼管 Fb＝0.60Fy**（式7.4-3），**箱型斷面深度小於 6 倍寬度時無須側向支撐**。**單位換算驗證：AISC ASD 之 1950＋1200(M1/M2)（ksi）÷14.223 ＝137.1＋84.4(M1/M2)（tf/cm²）✓。** M1/M2＝-1 時 137－84＝53<84，由下限 84b/Fy 控制。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Fy>0",
+     "msg": "Fy 須為正"
+    },
+    {
+     "expr": "b>0",
+     "msg": "b 須為正"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_web_shear_Fv_75",
+   "title": "梁腹板之容許剪應力 Fv（鋼結構容許應力設計法 7.5 式7.5-1~7.5-6）",
+   "src": "steel99",
+   "clause": "7.5",
+   "page": 6,
+   "keywords": "鋼結構 ASD 腹板 容許剪應力 Fv 0.40Fy Cv Kv 剪力挫屈 3100 2.89 加勁板 a/h 7.5-1 7.5-6",
+   "unit": "tf/cm2",
+   "output": "Fv",
+   "latex": "F_v=0.40F_y\\ (h/t_w\\le100/\\sqrt{F_y});\\quad F_v=\\frac{F_yC_v}{2.89}\\le0.40F_y;\\quad C_v=\\frac{3100K_v}{F_y(h/t_w)^{2}}\\ (\\le0.8)\\ \\text{或}\\ \\frac{50\\sqrt{K_v/F_y}}{h/t_w}",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材降伏強度 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0
+    },
+    "hw": {
+     "desc": "腹板深厚比 h/tw",
+     "unit": "-",
+     "min": 1.0
+    },
+    "a_h": {
+     "desc": "垂直加勁板淨距與腹板淨深之比 a/h（無加勁板可填大值如 10）",
+     "unit": "-",
+     "min": 0.05,
+     "default": 10.0
+    }
+   },
+   "expr": "0.40*Fy if hw*sqrt(Fy)<=100.0 else min(Fy*_Cv/2.89, 0.40*Fy)",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "hw": 50.0,
+      "a_h": 10.0
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "hw": 120.0,
+      "a_h": 1.5
+     },
+     "out": 0.5302073988636848
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "hw": 250.0,
+      "a_h": 1.0
+     },
+     "out": 0.16029896193771623
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**7.5**：**(1) h/tw/√Fy≤100 時 Fv＝0.40Fy**（式7.5-1，受剪面積取全深×腹板厚）；**(2) h/tw/√Fy>100 時 Fv＝Fy·Cv/2.89≤0.40Fy**（式7.5-2，受剪面積取兩翼板間淨深×腹板厚）；**Cv≤0.8 時 Cv＝3100Kv/[Fy(h/tw)²]**（式7.5-3）；**Cv>0.8 時 Cv＝50√(Kv/Fy)/(h/tw)**（式7.5-4）；**a/h≤1.0 時 Kv＝4.00＋5.34/(a/h)²**（式7.5-5）；**a/h>1.0 時 Kv＝5.34＋4.00/(a/h)²**（式7.5-6）；a 為垂直加勁板間淨距、h 為腹板在兩翼板間淨深減 2 倍趾部或角隅半徑。**連續性驗證（強證據）：在 (h/tw)√Fy＝100、Kv＝5.34 處，式7.5-4 得 Cv＝1.155，Fy·Cv/2.89＝0.3997Fy≈0.40Fy，與式7.5-1 銜接 ✓。** **梁深厚比 h/tw≤260 且平均剪應力小於式7.5-2 時無需中間加勁板，亦無需考慮張力場。** ⚠ 文字層『h/tw/√Fy≤100』解讀為 (h/tw)·√Fy≤100（對應 AISC 380/√Fy(ksi)），上式連續性已驗證。",
+   "status": "verified",
+   "defs": [
+    [
+     "_Kv",
+     "(4.00+5.34/a_h**2) if a_h<=1.0 else (5.34+4.00/a_h**2)"
+    ],
+    [
+     "_Cv",
+     "(3100.0*_Kv/(Fy*hw**2)) if (3100.0*_Kv/(Fy*hw**2))<=0.8 else (50.0*sqrt(_Kv/Fy)/hw)"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "Fy>0 and hw>0 and a_h>0",
+     "msg": "Fy、h/tw、a/h 須為正"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_tension_field_Fv_782",
+   "title": "考慮張力場作用之板梁容許剪應力（鋼結構容許應力設計法 7.8.2 式7.8-6）",
+   "src": "steel99",
+   "clause": "7.8.2",
+   "page": 9,
+   "keywords": "鋼結構 ASD 板梁 張力場 容許剪應力 7.8-6 Cv 1.15 2.89 a/h 橫向加勁板",
+   "unit": "tf/cm2",
+   "output": "Fv",
+   "latex": "F_v=\\frac{F_y}{2.89}\\left[C_v+\\frac{1-C_v}{1.15\\sqrt{1+(a/h)^{2}}}\\right]\\le0.40F_y",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材降伏強度 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0
+    },
+    "hw": {
+     "desc": "腹板深厚比 h/tw",
+     "unit": "-",
+     "min": 1.0
+    },
+    "a_h": {
+     "desc": "加勁板間距比 a/h（≤3.0）",
+     "unit": "-",
+     "min": 0.05,
+     "max": 3.0,
+     "default": 1.5
+    }
+   },
+   "expr": "min(Fy/2.89*(_Cv+(1.0-_Cv)/(1.15*sqrt(1.0+a_h**2))), 0.40*Fy)",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "hw": 200.0,
+      "a_h": 1.5
+     },
+     "out": 0.5160627045075663
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "hw": 250.0,
+      "a_h": 2.0
+     },
+     "out": 0.4028990560116131
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**7.8.2(2)**：**考慮張力場作用時，板梁滿足 7.8.3 橫向加勁板規定且為非混合梁，當 Cv≤1 時，容許剪應力可以式7.8-6 取代式7.5-2：Fv＝(Fy/2.89)[Cv＋(1－Cv)/(1.15√(1＋(a/h)²))]≤0.40Fy**。Cv 依式7.5-3、7.5-4（見 steel99_web_shear_Fv_75）。**解說：此公式不適用於 (0.6Fy/√3)≤Fv≤0.4Fy 之情形，亦不可用於 a/h>3.0 之板梁，且暫不適用於混合梁。** **合理性檢查：Cv＝1 時括號為 1，Fv＝Fy/2.89＝0.346Fy（不計張力場）✓；Cv<1 時括號內第二項為挫屈後強度之貢獻，使 Fv 增大。**",
+   "status": "verified",
+   "defs": [
+    [
+     "_Kv",
+     "(4.00+5.34/a_h**2) if a_h<=1.0 else (5.34+4.00/a_h**2)"
+    ],
+    [
+     "_Cv",
+     "(3100.0*_Kv/(Fy*hw**2)) if (3100.0*_Kv/(Fy*hw**2))<=0.8 else (50.0*sqrt(_Kv/Fy)/hw)"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "Fy>0 and hw>0 and a_h>0",
+     "msg": "Fy、h/tw、a/h 須為正"
+    },
+    {
+     "expr": "a_h<=3.0",
+     "msg": "a/h>3.0 不適用張力場公式"
+    },
+    {
+     "expr": "_Cv<=1.0",
+     "msg": "本式適用於 Cv≤1"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_tension_field_interaction_784",
+   "title": "張力場板梁腹板彎剪合併之撓曲張應力上限（鋼結構容許應力設計法 7.8.4 式7.8-10）",
+   "src": "steel99",
+   "clause": "7.8.4",
+   "page": 11,
+   "keywords": "鋼結構 ASD 板梁 張力場 腹板 剪應力 撓曲張應力 互制 0.825 0.375 fv Fv 7.8-10",
+   "unit": "tf/cm2",
+   "output": "ft_max",
+   "latex": "f_t\\le\\min\\left\\{0.60F_y,\\ \\left(0.825-0.375\\frac{f_v}{F_v}\\right)F_y\\right\\}",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材降伏強度 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0
+    },
+    "fv": {
+     "desc": "腹板平均剪應力 fv（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "Fv": {
+     "desc": "式7.8-6 之容許剪應力 Fv（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09
+    }
+   },
+   "expr": "min(0.60*Fy, (0.825-0.375*fv/Fv)*Fy)",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "fv": 0.3,
+      "Fv": 0.9
+     },
+     "out": 1.5
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "fv": 0.8,
+      "Fv": 0.9
+     },
+     "out": 1.2291666666666665
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**7.8.4**：**考慮張力場作用之板梁，腹板受剪應力與張應力組合作用時，作用於腹板平面內所引起之撓曲張應力不得大於 0.60Fy，亦不得大於 (0.825－0.375·fv/Fv)·Fy**（式7.8-10）；fv 為腹板平均剪應力（剪力÷腹板面積）、Fv 為式7.8-6 之容許剪應力。**連續性驗證（強證據）：解說稱 fv≤0.6Fv 時可僅依 Fb 設計——代入 fv/Fv＝0.6 得 0.825－0.225＝0.600，恰與 0.60Fy 銜接 ✓。** 另：**翼板與腹板降伏應力>4.55 tf/cm² 且翼板撓曲應力>0.75Fb 時，腹板容許剪應力不得大於式7.5-2 之值。** 設計者未考慮張力場時無須受本式限制。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Fy>0 and Fv>0",
+     "msg": "Fy、Fv 須為正"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_tapered_depth_46",
+   "title": "腹板深度漸變構材之深度線性變化（鋼結構容許應力設計法 4.6 式4.6-1）",
+   "src": "steel99",
+   "clause": "4.6",
+   "page": 9,
+   "keywords": "鋼結構 ASD 腹板變深構材 漸變 深度 線性變化 α 0.268 L/do 6.0 4.6-1",
+   "unit": "cm",
+   "output": "d",
+   "latex": "d=d_o\\left(1+\\alpha\\frac{z}{L}\\right),\\quad \\alpha=\\frac{d_L-d_o}{d_o}\\le\\min\\left\\{0.268\\frac{L}{d_o},\\ 6.0\\right\\}",
+   "vars": {
+    "do": {
+     "desc": "構材較小端深度 do（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "dL": {
+     "desc": "構材較大端深度 dL（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "L": {
+     "desc": "構材無支撐段長度 L（cm，側撐構材重心間距離）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "z": {
+     "desc": "距構材較小端之距離 z（cm）",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "do*(1.0+((dL-do)/do)*z/L)",
+   "tests": [
+    {
+     "in": {
+      "do": 30.0,
+      "dL": 60.0,
+      "L": 600.0,
+      "z": 300.0
+     },
+     "out": 45.0
+    },
+    {
+     "in": {
+      "do": 40.0,
+      "dL": 40.0,
+      "L": 400.0,
+      "z": 100.0
+     },
+     "out": 40.0
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**4.6 腹板深度漸變之構材**：**(1) 至少具一對稱軸，受彎矩時撓曲平面垂直於對稱軸；(2) 上、下翼板具相等且固定之斷面積；(3) 深度須依 d＝do(1＋α·z/L) 線性變化**（式4.6-1）。符號：**do 構材較小端深度、dL 較大端深度、α＝(dL－do)/do 且不得大於 0.268(L/do) 與 6.0 之較小者、z 距較小端之距離、L 構材無支撐段長度（側撐構材重心間距離）**。**恆等性檢查：z＝0 得 d＝do，z＝L 得 d＝dL ✓。**",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "do>0 and dL>0 and L>0",
+     "msg": "尺寸須為正"
+    },
+    {
+     "expr": "z<=L",
+     "msg": "z 不得超過 L"
+    },
+    {
+     "expr": "(dL-do)/do<=min(0.268*L/do, 6.0)",
+     "msg": "α 超過 min(0.268L/do, 6.0)：不符 4.6 之漸變限制"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_composite_column_931",
+   "title": "軸向受力合成柱之修正降伏應力 Fmy 與修正彈性模數 Em（鋼結構極限設計法 9.3.1 式9.3-2、9.3-3）",
+   "src": "steel99",
+   "clause": "9.3.1",
+   "page": 4,
+   "keywords": "鋼結構 LRFD 合成柱 鋼管混凝土 混凝土包覆 修正降伏應力 Fmy 修正彈性模數 Em c1 c2 c3 9.3-2 9.3-3",
+   "unit": "tf/cm2",
+   "output": "result",
+   "latex": "F_{my}=F_y+c_1F_{yr}\\frac{A_r}{A_s}+c_2f'_c\\frac{A_c}{A_s};\\qquad E_m=E+c_3E_c\\frac{A_c}{A_s}",
+   "vars": {
+    "Fy": {
+     "desc": "型鋼或鋼管標稱降伏應力 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09
+    },
+    "Fyr": {
+     "desc": "縱向鋼筋標稱降伏應力 Fyr（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 0,
+     "default": 0.0
+    },
+    "fc": {
+     "desc": "混凝土標稱抗壓強度 f'c（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "E": {
+     "desc": "鋼材彈性模數 E（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "default": 2040.0
+    },
+    "Ec": {
+     "desc": "混凝土彈性模數 Ec（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 0
+    },
+    "As": {
+     "desc": "鋼骨斷面積 As（cm²）",
+     "unit": "cm2",
+     "min": 1e-09
+    },
+    "Ar": {
+     "desc": "縱向鋼筋斷面積 Ar（cm²）",
+     "unit": "cm2",
+     "min": 0,
+     "default": 0.0
+    },
+    "Ac": {
+     "desc": "混凝土斷面積 Ac（cm²）",
+     "unit": "cm2",
+     "min": 0
+    },
+    "kind": {
+     "desc": "1＝圓形或矩形鋼管混凝土（c1=1.0, c2=0.85, c3=0.4）；2＝混凝土包覆型鋼（c1=0.7, c2=0.6, c3=0.2）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    },
+    "mode": {
+     "desc": "1＝Fmy（式9.3-2）；2＝Em（式9.3-3）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "(Fy+_c1*Fyr*Ar/As+_c2*fc*Ac/As) if mode==1 else (E+_c3*Ec*Ac/As)",
+   "tests": [
+    {
+     "in": {
+      "Fy": 3.5,
+      "Fyr": 0.0,
+      "fc": 0.28,
+      "E": 2040.0,
+      "Ec": 250.0,
+      "As": 100.0,
+      "Ar": 0.0,
+      "Ac": 600.0,
+      "kind": 1,
+      "mode": 1
+     },
+     "out": 4.928
+    },
+    {
+     "in": {
+      "Fy": 3.5,
+      "Fyr": 4.2,
+      "fc": 0.28,
+      "E": 2040.0,
+      "Ec": 250.0,
+      "As": 100.0,
+      "Ar": 20.0,
+      "Ac": 900.0,
+      "kind": 2,
+      "mode": 1
+     },
+     "out": 5.6000000000000005
+    },
+    {
+     "in": {
+      "Fy": 3.5,
+      "Fyr": 0.0,
+      "fc": 0.28,
+      "E": 2040.0,
+      "Ec": 250.0,
+      "As": 100.0,
+      "Ar": 0.0,
+      "Ac": 600.0,
+      "kind": 1,
+      "mode": 2
+     },
+     "out": 2640.0
+    }
+   ],
+   "notes": "鋼結構極限設計法（(二)）**9.3.1**：**承受軸力之合成柱設計強度 φcPn，φc＝0.85；Pn 由式(6.2-1)~(6.2-4) 經下列修正計算：(1) 以 As 取代 Ag；(2) 以 rm 取代 r（型鋼不應小於沿挫屈平面上合成斷面全厚度之 30%）；(3) 以 Fmy 取代 Fy：Fmy＝Fy＋c1·Fyr·(Ar/As)＋c2·f′c·(Ac/As)**（式9.3-2）；**(4) 以 Em 取代 E：Em＝E＋c3·Ec·(Ac/As)**（式9.3-3）。**係數：圓形或矩形鋼管混凝土 c1＝1.0、c2＝0.85、c3＝0.4；混凝土包覆斷面 c1＝0.7、c2＝0.6、c3＝0.2。** 此即 AISC LRFD I2 之 Galambos–Chapuis 方法。**量綱檢查：Fyr·Ar/As、f′c·Ac/As 皆為應力 ✓。**",
+   "status": "verified",
+   "defs": [
+    [
+     "_c1",
+     "1.0 if kind==1 else 0.7"
+    ],
+    [
+     "_c2",
+     "0.85 if kind==1 else 0.6"
+    ],
+    [
+     "_c3",
+     "0.4 if kind==1 else 0.2"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "As>0",
+     "msg": "As 須為正（分母）"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_composite_shear_transfer_933",
+   "title": "包覆型合成柱之剪力釘傳遞力 Vu'（鋼結構極限設計法 9.3.3 式9.3-4~9.3-6）",
+   "src": "steel99",
+   "clause": "9.3.3",
+   "page": 5,
+   "keywords": "鋼結構 LRFD 合成柱 剪力釘 傳遞 Vu' 鋼骨 鋼筋混凝土 As Fy Pn 9.3-4 9.3-5 9.3-6",
+   "unit": "tf",
+   "output": "Vu_prime",
+   "latex": "V'_u=V_u\\left(1-\\frac{A_sF_y}{P_n}\\right);\\quad V'_u=V_u\\frac{A_sF_y}{P_n};\\quad V'_u=A_sF_y",
+   "vars": {
+    "Vu": {
+     "desc": "柱所承擔之軸力 Vu（tf）",
+     "unit": "tf",
+     "min": 0,
+     "default": 0.0
+    },
+    "As": {
+     "desc": "鋼骨斷面積 As（cm²）",
+     "unit": "cm2",
+     "min": 1e-09
+    },
+    "Fy": {
+     "desc": "鋼骨材料降伏應力 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09
+    },
+    "Pn": {
+     "desc": "合成柱標稱壓力強度 Pn（不計長細效應，tf）",
+     "unit": "tf",
+     "min": 1e-09
+    },
+    "mode": {
+     "desc": "1＝外力直接施加於鋼骨（9.3-4）；2＝外力直接施加於鋼筋混凝土（9.3-5）；3＝鋼骨柱將所有力傳至鋼筋混凝土柱（9.3-6）",
+     "unit": "-",
+     "min": 1,
+     "max": 3,
+     "default": 1
+    }
+   },
+   "expr": "Vu*(1.0-As*Fy/Pn) if mode==1 else (Vu*As*Fy/Pn if mode==2 else As*Fy)",
+   "tests": [
+    {
+     "in": {
+      "Vu": 400.0,
+      "As": 100.0,
+      "Fy": 3.5,
+      "Pn": 800.0,
+      "mode": 1
+     },
+     "out": 225.0
+    },
+    {
+     "in": {
+      "Vu": 400.0,
+      "As": 100.0,
+      "Fy": 3.5,
+      "Pn": 800.0,
+      "mode": 2
+     },
+     "out": 175.0
+    },
+    {
+     "in": {
+      "Vu": 0.0,
+      "As": 100.0,
+      "Fy": 3.5,
+      "Pn": 800.0,
+      "mode": 3
+     },
+     "out": 350.0
+    }
+   ],
+   "notes": "鋼結構極限設計法（(二)）**9.3.3**：**受軸力之包覆型合成柱，載重需在鋼骨與鋼筋混凝土間傳遞時，剪力釘需足以傳遞：1. 外力直接施加於鋼骨斷面：V′u＝Vu(1－AsFy/Pn)**（式9.3-4）；**2. 外力直接施加於鋼筋混凝土部分：V′u＝Vu(AsFy/Pn)**（式9.3-5）；**3. 鋼骨柱將所有力量傳遞至鋼筋混凝土柱：V′u＝AsFy**（式9.3-6）。**剪力釘間距不得大於 40 cm，且須排列於至少兩個鋼骨表面並對稱於鋼骨斷面軸線。** **互補性檢查：式9.3-4 與 9.3-5 之和＝Vu，即鋼骨與混凝土各承擔之比例相加為 100% ✓。** 鋼骨直接承壓於混凝土時，承壓強度依 10.9 節。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Pn>0 and As>0 and Fy>0",
+     "msg": "Pn、As、Fy 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "mode!=3 and As*Fy>Pn",
+     "msg": "AsFy>Pn：鋼骨強度大於整柱標稱強度，式9.3-4 為負，請檢查輸入"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_stiffener_area_1128",
+   "title": "集中載重處成對橫向加勁板所需面積與寬度（鋼結構容許應力設計法 11.2.8 解說）",
+   "src": "steel99",
+   "clause": "11.2.8",
+   "page": 8,
+   "keywords": "鋼結構 ASD 橫向加勁板 集中載重 腹板局部降伏 加勁板面積 Ast Pbf Fyc twc tbf k bst 1/3 bfb",
+   "unit": "cm2",
+   "output": "result",
+   "latex": "A_{st}\\ge\\frac{P_{bf}-F_{yc}t_{wc}(t_{bf}+5k)}{F_{yst}};\\qquad b_{st}+\\frac{t_{wc}}{2}\\ge\\frac{b_{fb}}{3}",
+   "vars": {
+    "Pbf": {
+     "desc": "因數化載重 Pbf（tf）",
+     "unit": "tf",
+     "min": 0
+    },
+    "Fyc": {
+     "desc": "柱翼板標稱降伏應力 Fyc（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09,
+     "default": 2.5
+    },
+    "Fyst": {
+     "desc": "加勁板標稱降伏應力 Fyst（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09,
+     "default": 2.5
+    },
+    "twc": {
+     "desc": "柱腹板厚度 twc（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 1.0
+    },
+    "tbf": {
+     "desc": "梁翼板厚度 tbf（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 1.5
+    },
+    "k": {
+     "desc": "翼板外側至腹板角趾端之距離 k（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 3.0
+    },
+    "bfb": {
+     "desc": "梁翼板寬度 bfb（cm）；mode=2 使用",
+     "unit": "cm",
+     "min": 0,
+     "default": 20.0
+    },
+    "mode": {
+     "desc": "1＝所需成對加勁板面積 Ast（cm²）；2＝加勁板最小寬度 bst（cm）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "max(0.0,(Pbf-Fyc*twc*(tbf+5.0*k))/Fyst) if mode==1 else max(0.0,bfb/3.0-twc/2.0)",
+   "tests": [
+    {
+     "in": {
+      "Pbf": 200.0,
+      "Fyc": 2.5,
+      "Fyst": 2.5,
+      "twc": 1.0,
+      "tbf": 1.5,
+      "k": 3.0,
+      "bfb": 20.0,
+      "mode": 1
+     },
+     "out": 63.5
+    },
+    {
+     "in": {
+      "Pbf": 0.0,
+      "Fyc": 2.5,
+      "Fyst": 2.5,
+      "twc": 1.0,
+      "tbf": 1.5,
+      "k": 3.0,
+      "bfb": 24.0,
+      "mode": 2
+     },
+     "out": 7.5
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**11.2.8 及解說**：**當腹板壓皺（11.2.4）或腹板受壓挫屈（11.2.6）檢核顯示需加勁板時，須依 6.3 節以軸向壓力構材設計（有效柱長取 0.75h；構材中間時受壓面積取兩加勁板及 25 倍腹板厚度之面積，構材端部取 12 倍腹板厚度）。** 解說：**當腹板局部降伏（11.2.3）控制時，所需成對加勁板面積 Ast≥[Pbf－Fyc·twc·(tbf＋5k)]/Fyst**（Pbf 因數化載重 tf、Fyc 柱翼板降伏應力、Fyst 加勁板降伏應力、twc 柱腹板厚度、tbf 梁翼板厚度、k 翼板外側至腹板角趾端距離）；**橫向加勁板寬度 bst 加柱腹板厚度之一半不得少於 1/3 梁翼板寬度 bfb：bst＋twc/2≥bfb/3，即 bst≥bfb/3－0.5twc。** **此即 AISC K1.8 局部降伏加勁板面積公式（Fyc·twc·(tbf＋5k) 為腹板局部降伏強度）。** ⚠ 文字層『A P F t k t F st bf yc bf wc yst ≥ − + ( ) 5』括號分組由 AISC 對照確認。",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Fyst>0",
+     "msg": "Fyst 須為正"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_brace_net_area_1382",
+   "title": "斜撐接頭有效淨斷面積與總斷面積之比下限（鋼結構容許應力設計法 13.8.2 第2 項）",
+   "src": "steel99",
+   "clause": "13.8.2",
+   "page": 23,
+   "keywords": "鋼結構 ASD 耐震 同心斜撐 接頭 螺栓 有效淨斷面積 Ae Ag 1.2 Fy Fu 塊狀撕裂",
+   "unit": "-",
+   "output": "Ae_over_Ag_min",
+   "latex": "\\frac{A_e}{A_g}\\ge1.2\\frac{F_y}{F_u}",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材標稱降伏強度 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09
+    },
+    "Fu": {
+     "desc": "鋼材標稱抗拉強度 Fu（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09
+    }
+   },
+   "expr": "1.2*Fy/Fu",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "Fu": 4.1
+     },
+     "out": 0.7317073170731708
+    },
+    {
+     "in": {
+      "Fy": 3.5,
+      "Fu": 4.9
+     },
+     "out": 0.8571428571428571
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**13.8.2 第2 項 淨斷面積**：**以螺栓接合之斜撐接頭，其有效淨斷面積與總斷面積需滿足 Ae/Ag≥1.2·Fy/Fu**（Ae 為 4.3 節所定義之有效淨斷面積、Fy 標稱降伏強度、Fu 標稱抗拉強度）。**解說：為使斜撐構材產生塑性變形以發揮其消能能力，本條文規定斜撐接合處之淨斷面積斷裂強度須為其全斷面積降伏強度之 1.2 倍（即 Ae·Fu≥1.2·Ag·Fy）。** 第1 項：斜撐接頭設計強度須大於斜撐軸向拉力強度 Pst 與結構系統能傳至斜撐最大力量二者之小者；斜撐構材及接合處之塊狀撕裂強度亦須滿足。**若 Fu≤1.2Fy 本式回傳>1，表示無法以淨斷面達成，須補強。**",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "Fy>0 and Fu>0",
+     "msg": "Fy、Fu 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "1.2*Fy/Fu>1.0",
+     "msg": "1.2Fy/Fu>1：淨斷面無法大於總斷面，須加勁補強"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_plategirder_flexure_761",
+   "title": "板梁之設計撓曲強度參數 Rpg、Re 與受壓翼板臨界應力 Fcr（側向扭轉挫屈）（鋼結構極限設計法 7.6.1 式7.6-5~7.6-12）",
+   "src": "steel99",
+   "clause": "7.6.1",
+   "page": 9,
+   "keywords": "鋼結構 LRFD 板梁 撓曲強度 Rpg Re 混合梁因子 Fcr 側向扭轉挫屈 λp λr Cpg Cb 7.6-5 7.6-8 7.6-12",
+   "unit": "tf/cm2",
+   "output": "result",
+   "latex": "R_{pg}=1-\\frac{a_r}{1200+300a_r}\\left(\\frac{h_c}{t_w}-\\frac{260}{\\sqrt{F_{yf}}}\\right)\\le1;\\ R_e=\\frac{12+a_r(3m-m^{3})}{12+2a_r}\\le1;\\ F_{cr}=\\begin{cases}F_{yf}&\\lambda\\le\\lambda_p\\\\C_bF_{yf}\\left[1-0.5\\frac{\\lambda-\\lambda_p}{\\lambda_r-\\lambda_p}\\right]&\\lambda_p<\\lambda\\le\\lambda_r\\\\C_{pg}/\\lambda^{2}&\\lambda>\\lambda_r\\end{cases}",
+   "vars": {
+    "Fyf": {
+     "desc": "受壓翼板降伏應力 Fyf（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09,
+     "default": 2.5
+    },
+    "hc_tw": {
+     "desc": "腹板深厚比 hc/tw",
+     "unit": "-",
+     "min": 1.0,
+     "default": 300.0
+    },
+    "ar": {
+     "desc": "腹板面積與受壓翼板面積之比 ar（≤10）",
+     "unit": "-",
+     "min": 0,
+     "max": 10,
+     "default": 1.0
+    },
+    "m": {
+     "desc": "腹板降伏應力與翼板降伏應力（或 Fcr）之比 m（非混合梁 =1）",
+     "unit": "-",
+     "min": 0,
+     "default": 1.0
+    },
+    "lam": {
+     "desc": "λ＝Lb/rT（側向扭轉挫屈長細比）",
+     "unit": "-",
+     "min": 0,
+     "default": 80.0
+    },
+    "Cb": {
+     "desc": "彎矩梯度係數 Cb（依 7.2.2 節）",
+     "unit": "-",
+     "min": 1.0,
+     "max": 3.0,
+     "default": 1.0
+    },
+    "mode": {
+     "desc": "1＝Rpg（7.6-5）；2＝Re（7.6-5 後）；3＝Fcr（7.6-6~7.6-8，LTB）",
+     "unit": "-",
+     "min": 1,
+     "max": 3,
+     "default": 1
+    }
+   },
+   "expr": "min(1.0, 1.0-ar/(1200.0+300.0*ar)*(hc_tw-260.0/sqrt(Fyf))) if mode==1 else (min(1.0,(12.0+ar*(3.0*m-m**3))/(12.0+2.0*ar)) if mode==2 else (Fyf if lam<=80.0/sqrt(Fyf) else (min(Fyf, Cb*Fyf*(1.0-0.5*(lam-80.0/sqrt(Fyf))/(200.0/sqrt(Fyf)-80.0/sqrt(Fyf)))) if lam<=200.0/sqrt(Fyf) else 20100.0*Cb/lam**2)))",
+   "tests": [
+    {
+     "in": {
+      "Fyf": 2.5,
+      "hc_tw": 300.0,
+      "ar": 1.0,
+      "m": 1.0,
+      "lam": 60.0,
+      "Cb": 1.0,
+      "mode": 1
+     },
+     "out": 0.9096256255525038
+    },
+    {
+     "in": {
+      "Fyf": 2.5,
+      "hc_tw": 300.0,
+      "ar": 1.0,
+      "m": 0.9,
+      "lam": 60.0,
+      "Cb": 1.0,
+      "mode": 2
+     },
+     "out": 0.9979285714285714
+    },
+    {
+     "in": {
+      "Fyf": 2.5,
+      "hc_tw": 300.0,
+      "ar": 1.0,
+      "m": 1.0,
+      "lam": 100.0,
+      "Cb": 1.0,
+      "mode": 3
+     },
+     "out": 1.6863137186623023
+    },
+    {
+     "in": {
+      "Fyf": 2.5,
+      "hc_tw": 300.0,
+      "ar": 1.0,
+      "m": 1.0,
+      "lam": 150.0,
+      "Cb": 1.0,
+      "mode": 3
+     },
+     "out": 0.8933333333333333
+    }
+   ],
+   "notes": "鋼結構極限設計法（(二)）**7.6.1**：**腹板深厚比 hc/tw>260/√Fyf 之板梁，設計撓曲強度 φbMn，φb＝0.9，Mn 取翼板降伏（Mn＝Sxt·Re·Fyt，式7.6-3）或受壓翼板挫屈（Mn＝Sxc·Rpg·Re·Fcr，式7.6-4）之較小值。** **Rpg＝1－ar/(1200＋300ar)·(hc/tw－260/√Fyf)≤1.0**（式7.6-5）；**混合梁因子 Re＝[12＋ar(3m－m³)]/(12＋2ar)≤1.0**（非混合梁 Re＝1.0；ar≤10）；**Fcr：λ≤λp 時 Fyf；λp<λ≤λr 時 Cb·Fyf[1－0.5(λ－λp)/(λr－λp)]≤Fyf；λ>λr 時 Cpg/λ²**（式7.6-6~7.6-8）；**側向扭轉挫屈：λ＝Lb/rT、λp＝80/√Fyf、λr＝200/√Fyf、Cpg＝20100Cb**（式7.6-9~7.6-12）。**單位換算驗證（強證據）：AISC LRFD 之 λp＝300/√Fyf、λr＝756/√Fyf、Cpg＝286000Cb（ksi）÷√14.223 / ÷14.223 ＝79.5／200.4／20108 ✓ 與 80／200／20100 相符；λ＝λr 處兩段 Fcr 值 0.5Cb·Fyf 與 20100Cb/200²＝0.5025Cb·Fyf 連續 ✓。** ⚠ **未納入：翼板局部挫屈極限狀態之 λp＝17/√Fyf、λr（式7.6-15，文字層『60/√(Fyf/kc)』與 AISC 換算值 43 不符，待原頁確認）、Cpg＝1840kc（式7.6-16）、kc＝4/√(h/tw)（0.35≤kc≤0.763）。**",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  },
+  {
+   "id": "steel99_flex_torsional_A2",
+   "title": "撓曲扭轉挫屈臨界應力 Fcr（鋼結構極限設計法 附錄2 式A-2-1~A-2-12）",
+   "src": "steel99",
+   "clause": "附錄2",
+   "page": 1,
+   "keywords": "鋼結構 LRFD 附錄2 撓曲扭轉挫屈 扭轉挫屈 單軸對稱柱 雙對稱 Fe Fcr Fey Fez H ro 翹曲常數 Cw 扭轉常數 J",
+   "unit": "tf/cm2",
+   "output": "Fcr",
+   "latex": "F_{cr}=\\begin{cases}Q\\left(0.658^{Q\\lambda_e^{2}}\\right)F_y&\\lambda_e\\sqrt{Q}\\le1.5\\\\\\dfrac{0.877}{\\lambda_e^{2}}F_y&\\lambda_e\\sqrt{Q}>1.5\\end{cases},\\ \\lambda_e=\\sqrt{F_y/F_e}",
+   "vars": {
+    "Fy": {
+     "desc": "標稱降伏應力 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09,
+     "default": 2.5
+    },
+    "E": {
+     "desc": "彈性模數 E（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "default": 2040.0
+    },
+    "G": {
+     "desc": "剪力模數 G（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "default": 785.0
+    },
+    "J": {
+     "desc": "扭轉常數 J（cm⁴）",
+     "unit": "cm4",
+     "min": 0
+    },
+    "Cw": {
+     "desc": "翹曲常數 Cw（cm⁶）",
+     "unit": "cm6",
+     "min": 0
+    },
+    "Ix": {
+     "desc": "對 x 軸慣性矩 Ix（cm⁴）",
+     "unit": "cm4",
+     "min": 1e-09
+    },
+    "Iy": {
+     "desc": "對 y 軸慣性矩 Iy（cm⁴）",
+     "unit": "cm4",
+     "min": 1e-09
+    },
+    "A": {
+     "desc": "構材斷面積 A（cm²）",
+     "unit": "cm2",
+     "min": 1e-09
+    },
+    "L": {
+     "desc": "無支撐長度 L（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "Kz": {
+     "desc": "扭轉挫屈有效長度係數 Kz",
+     "unit": "-",
+     "min": 0.5,
+     "max": 2.5,
+     "default": 1.0
+    },
+    "Ky": {
+     "desc": "對 y 軸有效長度係數 Ky（sym=2 使用）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 2.5,
+     "default": 1.0
+    },
+    "ry": {
+     "desc": "對 y 軸迴轉半徑 ry（cm；sym=2 使用）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 5.0
+    },
+    "x0": {
+     "desc": "剪力中心對形心之 x 座標 x0（cm）",
+     "unit": "cm",
+     "default": 0.0
+    },
+    "y0": {
+     "desc": "剪力中心對形心之 y 座標 y0（cm；sym=2 時 y 軸為對稱軸，x0=0）",
+     "unit": "cm",
+     "default": 0.0
+    },
+    "Q": {
+     "desc": "局部挫屈折減因數 Q（寬厚比小於 λr 時 =1.0）",
+     "unit": "-",
+     "min": 0.1,
+     "max": 1.0,
+     "default": 1.0
+    },
+    "sym": {
+     "desc": "1＝雙軸對稱斷面扭轉挫屈（A-2-5）；2＝以 Y 軸為對稱軸之撓曲扭轉挫屈（A-2-6）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "(Q*0.658**(Q*_lam2)*Fy) if Q*_lam2<=2.25 else (0.877/_lam2*Fy)",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "E": 2040.0,
+      "G": 785.0,
+      "J": 10.0,
+      "Cw": 50000.0,
+      "Ix": 5000.0,
+      "Iy": 1500.0,
+      "A": 60.0,
+      "L": 300.0,
+      "Kz": 1.0,
+      "Ky": 1.0,
+      "ry": 5.0,
+      "x0": 0.0,
+      "y0": 0.0,
+      "Q": 1.0,
+      "sym": 1
+     },
+     "out": 1.7489027687406402
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "E": 2040.0,
+      "G": 785.0,
+      "J": 10.0,
+      "Cw": 50000.0,
+      "Ix": 5000.0,
+      "Iy": 1500.0,
+      "A": 60.0,
+      "L": 300.0,
+      "Kz": 1.0,
+      "Ky": 1.0,
+      "ry": 5.0,
+      "x0": 0.0,
+      "y0": -3.0,
+      "Q": 1.0,
+      "sym": 2
+     },
+     "out": 1.6562899393830008
+    }
+   ],
+   "notes": "鋼結構極限設計法（(二)）**附錄2 撓曲扭轉挫屈**：**適用於單軸對稱柱及非對稱柱在撓曲-扭轉挫屈及扭轉挫屈極限狀態；設計強度 φcPn，φc＝0.85，Pn＝Fcr·Ag**（式A-2-1）。**Fcr：λe√Q≤1.5 時 Fcr＝Q[exp(－0.419Qλe²)]Fy**（式A-2-2，exp(－0.419)＝0.658）；**λe√Q>1.5 時 Fcr＝(0.877/λe²)Fy**（式A-2-3）；**λe＝√(Fy/Fe)**（式A-2-4）。**Fe：1. 雙軸對稱斷面扭轉挫屈 Fe＝[π²E·Cw/(Kz·L)²＋GJ]/(Ix＋Iy)**（式A-2-5）；**2. 以 Y 軸為對稱軸之撓曲-扭轉挫屈 Fe＝(Fey＋Fez)/(2H)·[1－√(1－4Fey·Fez·H/(Fey＋Fez)²)]**（式A-2-6）。**輔助：ro²＝x0²＋y0²＋(Ix＋Iy)/A（A-2-8）；H＝1－(x0²＋y0²)/ro²（A-2-9）；Fey＝π²E/(Ky·L/ry)²（A-2-11）；Fez＝[π²E·Cw/(Kz·L)²＋GJ]/(A·ro²)（A-2-12）。** **一致性檢查：x0＝y0＝0 時 ro²＝(Ix＋Iy)/A，Fez 與式A-2-5 相同 ✓；H→1 且 Fey≫Fez 時 Fe→Fez ✓。** 非對稱斷面之三次方程式（A-2-7）未納入。",
+   "status": "verified",
+   "defs": [
+    [
+     "_ro2",
+     "x0**2+y0**2+(Ix+Iy)/A"
+    ],
+    [
+     "_H",
+     "1.0-(x0**2+y0**2)/_ro2"
+    ],
+    [
+     "_Fey",
+     "pi**2*E/((Ky*L/ry)**2)"
+    ],
+    [
+     "_Fez",
+     "(pi**2*E*Cw/(Kz*L)**2+G*J)/(A*_ro2)"
+    ],
+    [
+     "_Fe5",
+     "(pi**2*E*Cw/(Kz*L)**2+G*J)/(Ix+Iy)"
+    ],
+    [
+     "_Fe6",
+     "(_Fey+_Fez)/(2.0*_H)*(1.0-sqrt(1.0-4.0*_Fey*_Fez*_H/(_Fey+_Fez)**2))"
+    ],
+    [
+     "_Fe",
+     "_Fe5 if sym==1 else _Fe6"
+    ],
+    [
+     "_lam2",
+     "Fy/_Fe"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "_H>0",
+     "msg": "H 須為正（剪力中心偏離過大）"
+    },
+    {
+     "expr": "_Fe>0",
+     "msg": "Fe 須為正"
+    }
+   ],
+   "verified": {
+    "method": "unit 文字層逐式轉錄＋量綱／連續性／跨標準對照檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2c.json"
+  }
+ ],
+ "tables": []
+}

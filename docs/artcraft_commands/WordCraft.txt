@@ -1,0 +1,643 @@
+text.insert                      Type Text                                                     Editing
+text.newParagraph                New Paragraph                        Enter                    Editing
+text.lineBreak                   Line Break                           Shift+Enter              Editing
+text.pageBreak                   Page Break                           Mod+Enter                Insert › Pages
+text.columnBreak                 Column Break                         Mod+Shift+Enter          Layout › Breaks
+text.tab                         Tab                                  Tab                      Editing
+text.backTab                     Shift+Tab                            Shift+Tab                Editing
+text.insertTab                   Tab Character                        Mod+Tab                  Editing
+text.backspace                   Backspace                            Backspace                Editing
+text.delete                      Delete                               Delete                   Editing
+text.deleteWordBack              Delete Previous Word                 Mod+Backspace / Alt+Backspace Editing
+text.deleteWordForward           Delete Next Word                     Mod+Delete / Alt+Delete  Editing
+text.nbsp                        Nonbreaking Space                    Mod+Shift+Space          Insert › Symbols
+text.nbHyphen                    Nonbreaking Hyphen                   Mod+Shift+-              Insert › Symbols
+text.optionalHyphen              Optional Hyphen                      Mod+-                    Insert › Symbols
+text.toggleUnicode               Toggle Unicode Character             Alt+X                    Editing
+text.typeCode                    Type Character Code                                           Editing
+text.emDash                      Em Dash                              Mod+Alt+-                Insert › Symbols
+text.copyright                   Copyright Sign                       Mod+Alt+C                Insert › Symbols
+text.registered                  Registered Sign                      Mod+Alt+R                Insert › Symbols
+text.trademark                   Trademark Sign                       Mod+Alt+T                Insert › Symbols
+text.ellipsis                    Ellipsis                             Mod+Alt+.                Insert › Symbols
+caret.left                       Left                                 Left                     Navigation
+caret.right                      Right                                Right                    Navigation
+caret.up                         Up                                   Up                       Navigation
+caret.down                       Down                                 Down                     Navigation
+caret.wordLeft                   Word Left                            Mod+Left / Alt+Left      Navigation
+caret.wordRight                  Word Right                           Mod+Right / Alt+Right    Navigation
+caret.home                       Line Start                           Home                     Navigation
+caret.end                        Line End                             End                      Navigation
+caret.paraUp                     Paragraph Up                         Mod+Up / Alt+Up          Navigation
+caret.paraDown                   Paragraph Down                       Mod+Down / Alt+Down      Navigation
+caret.docStart                   Document Start                       Mod+Home                 Navigation
+caret.docEnd                     Document End                         Mod+End                  Navigation
+caret.pageUp                     Page Up                              PageUp                   Navigation
+caret.pageDown                   Page Down                            PageDown                 Navigation
+caret.set                        Set Caret                                                     Navigation
+select.all                       Select All                           Mod+A                    Home › Editing › Select
+select.range                     Select Range                                                  Navigation
+select.word                      Select Word                                                   Navigation
+select.sentence                  Select Sentence                                               Navigation
+select.paragraph                 Select Paragraph                                              Navigation
+select.dragUnit                  Extend Selection by Units                                     Navigation
+select.line                      Select Line                                                   Navigation
+select.text                      Select Text                                                   Navigation
+select.collapse                  Collapse Selection                   Escape                   Navigation
+select.column                    Column Selection                     Mod+Shift+F8             Editing › Selection
+edit.undo                        Undo                                 Mod+Z                    Quick Access Toolbar
+edit.undoTo                      Undo Actions                                                  Quick Access Toolbar
+edit.undoHistory                 Undo History                                                  Quick Access Toolbar
+edit.redo                        Redo                                 Mod+Y / Mod+Shift+Z      Quick Access Toolbar
+edit.cut                         Cut                                  Mod+X                    Home › Clipboard
+edit.copy                        Copy                                 Mod+C / Mod+Insert       Home › Clipboard
+edit.spike                       Spike                                Mod+F3                   Editing
+edit.insertSpike                 Insert Spike                         Mod+Shift+F3             Editing
+edit.paste                       Paste                                Mod+V / Shift+Insert     Home › Clipboard
+edit.pasteText                   Paste: Keep Text Only                Mod+Shift+Alt+V          Home › Clipboard › Paste
+edit.pasteMerge                  Paste: Merge Formatting                                       Home › Clipboard › Paste
+edit.clipboardPane               Clipboard Pane                                                Home › Clipboard
+edit.clipboardItems              Clipboard Items                                               Home › Clipboard › Clipboard Pane
+edit.pasteClipboardItem          Paste Clipboard Item                                          Home › Clipboard › Clipboard Pane
+edit.pasteAllClipboard           Paste All                                                     Home › Clipboard › Clipboard Pane
+edit.deleteClipboardItem         Delete Clipboard Item                                         Home › Clipboard › Clipboard Pane
+edit.clearClipboard              Clear All                                                     Home › Clipboard › Clipboard Pane
+edit.find                        Find                                 Mod+F                    Home › Editing
+edit.advancedFind                Advanced Find                                                 Home › Editing › Find
+edit.findNext                    Find Next                            Mod+G / F3 / Shift+F4 / Mod+PageDown Home › Editing › Find
+edit.findPrevious                Find Previous                        Mod+PageUp               Home › Editing › Find
+edit.replace                     Replace                                                       Home › Editing
+edit.findReplace                 Find and Replace                     Mod+H                    Home › Editing
+edit.replaceAll                  Replace All                                                   Home › Editing › Replace
+edit.goto                        Go To                                Mod+Alt+G / F5           Home › Editing › Find
+edit.goBack                      Go Back                              Shift+F5 / Mod+Alt+Z     Navigation
+edit.formatPainter               Format Painter                                                Home › Clipboard
+edit.copyFormat                  Copy Formatting                      Mod+Shift+C              Home › Clipboard
+edit.pasteFormat                 Paste Formatting                     Mod+Shift+V              Home › Clipboard
+edit.pasteSpecial                Paste Special                        Mod+Alt+V                Home › Clipboard › Paste
+format.bold                      Bold                                 Mod+B                    Home › Font
+format.italic                    Italic                               Mod+I                    Home › Font
+format.underline                 Underline                            Mod+U                    Home › Font
+format.doubleUnderline           Double Underline                     Mod+Shift+D              Home › Font › Underline
+format.wordUnderline             Underline Words Only                 Mod+Shift+W              Home › Font › Underline
+format.strikethrough             Strikethrough                        Mod+Shift+X              Home › Font
+format.border                    Character Border                                              Home › Font
+format.doubleStrikethrough       Double Strikethrough                                          Home › Font › Font
+format.subscript                 Subscript                            Mod+=                    Home › Font
+format.superscript               Superscript                          Mod+Shift+=              Home › Font
+format.allCaps                   All Caps                             Mod+Shift+A              Home › Font › Font
+format.smallCaps                 Small Caps                           Mod+Shift+K              Home › Font › Font
+format.hidden                    Hidden                               Mod+Shift+H              Home › Font › Font
+format.outline                   Outline                                                       Home › Font › Text Effects
+format.shadow                    Shadow                                                        Home › Font › Text Effects
+format.emboss                    Emboss                                                        Home › Font › Font
+format.engrave                   Engrave                                                       Home › Font › Font
+format.font                      Font                                 Mod+Shift+F              Home › Font
+format.size                      Font Size                            Mod+Shift+P              Home › Font
+format.growFont                  Increase Font Size                   Mod+Shift+. / Mod+Shift+> Home › Font
+format.shrinkFont                Decrease Font Size                   Mod+Shift+, / Mod+Shift+< Home › Font
+format.growFont1                 Grow Font 1 Point                    Mod+]                    Home › Font
+format.shrinkFont1               Shrink Font 1 Point                  Mod+[                    Home › Font
+format.color                     Font Color                                                    Home › Font
+format.underlineColor            Underline Color                                               Home › Font › Underline
+format.highlight                 Text Highlight Color                 Mod+Alt+H                Home › Font
+format.shading                   Character Shading                                             Home › Font
+format.changeCase                Change Case                          Shift+F3                 Home › Font
+format.clear                     Clear All Formatting                                          Home › Font
+format.resetChar                 Reset Character Formatting           Mod+Space                Home › Font
+format.spacing                   Character Spacing                                             Home › Font › Font › Advanced
+format.scale                     Character Scale                                               Home › Font › Font › Advanced
+format.position                  Character Position                                            Home › Font › Font › Advanced
+format.charStyle                 Apply Character Style                                         Home › Styles
+format.set                       Set Character Formatting                                      Home › Font › Font
+format.fontDialog                Font Dialog                          Mod+D                    Home › Font
+format.enclose                   Enclose Characters                                            Home › Font
+format.state                     Formatting at Selection                                       Home › Font
+font.add                         Add Font…                                                     Home › Font
+font.list                        Added Fonts                                                   Home › Font
+font.remove                      Remove Added Font                                             Home › Font
+font.loadSystem                  Load System Installed Fonts…                                  Home › Font
+format.phonetic                  Phonetic Guide                                                Home › Font
+para.alignLeft                   Align Left                           Mod+L                    Home › Paragraph
+para.alignCenter                 Center                               Mod+E                    Home › Paragraph
+para.alignRight                  Align Right                          Mod+R                    Home › Paragraph
+para.justify                     Justify                              Mod+J                    Home › Paragraph
+para.distribute                  Distributed                          Mod+Shift+J              Home › Paragraph
+para.align                       Alignment                                                     Home › Paragraph
+para.rtl                         Right-to-Left Text Direction                                  Home › Paragraph
+para.ltr                         Left-to-Right Text Direction                                  Home › Paragraph
+para.indent                      Increase Indent                      Mod+M                    Home › Paragraph
+para.outdent                     Decrease Indent                      Mod+Shift+M              Home › Paragraph
+para.hangingIndent               Hanging Indent                       Mod+T                    Home › Paragraph › Paragraph
+para.removeHanging               Reduce Hanging Indent                Mod+Shift+T              Home › Paragraph › Paragraph
+para.indents                     Indents                                                       Layout › Paragraph
+para.lineSpacing                 Line and Paragraph Spacing                                    Home › Paragraph
+para.single                      Single Spacing                       Mod+1                    Home › Paragraph › Line Spacing
+para.double                      Double Spacing                       Mod+2                    Home › Paragraph › Line Spacing
+para.oneAndHalf                  1.5 Line Spacing                     Mod+5                    Home › Paragraph › Line Spacing
+para.spacing                     Paragraph Spacing                                             Layout › Paragraph
+para.addSpaceBefore              Add Space Before Paragraph           Mod+0                    Home › Paragraph › Line Spacing
+para.removeSpaceAfter            Remove Space After Paragraph                                  Home › Paragraph › Line Spacing
+para.reset                       Reset Paragraph Formatting           Mod+Q                    Home › Paragraph
+para.style                       Apply Style                                                   Home › Styles
+para.normal                      Normal Style                         Mod+Shift+N              Home › Styles
+para.heading1                    Heading 1                            Mod+Alt+1                Home › Styles
+para.heading2                    Heading 2                            Mod+Alt+2                Home › Styles
+para.heading3                    Heading 3                            Mod+Alt+3                Home › Styles
+para.bullets                     Bullets                              Mod+Shift+L              Home › Paragraph
+para.numbering                   Numbering                                                     Home › Paragraph
+para.multilevel                  Multilevel List                                               Home › Paragraph
+para.listLevel                   Change List Level                                             Home › Paragraph › Bullets
+para.restartNumbering            Restart at 1                                                  Home › Paragraph › Numbering
+para.moveUp                      Move Paragraph Up                    Alt+Shift+Up             Home › Paragraph
+para.moveDown                    Move Paragraph Down                  Alt+Shift+Down           Home › Paragraph
+para.promote                     Promote                              Alt+Shift+Left           Home › Paragraph
+para.demote                      Demote                               Alt+Shift+Right          Home › Paragraph
+para.shading                     Shading                                                       Home › Paragraph
+para.borders                     Borders                                                       Home › Paragraph
+para.sort                        Sort                                                          Home › Paragraph
+para.keepNext                    Keep with Next                                                Home › Paragraph › Line and Page Breaks
+para.keepLines                   Keep Lines Together                                           Home › Paragraph › Line and Page Breaks
+para.pageBreakBefore             Page Break Before                                             Home › Paragraph › Line and Page Breaks
+para.widowControl                Widow/Orphan Control                                          Home › Paragraph › Line and Page Breaks
+para.asianTypography             Asian Typography                                              Home › Paragraph › Asian Typography
+para.tabs                        Tabs                                                          Home › Paragraph › Paragraph
+para.outlineLevel                Outline Level                                                 Home › Paragraph › Paragraph
+para.set                         Set Paragraph Formatting                                      Home › Paragraph › Paragraph
+para.dialog                      Paragraph Settings                                            Home › Paragraph
+styles.create                    Create a Style                                                Home › Styles
+styles.modify                    Modify Style                                                  Home › Styles
+styles.updateToMatch             Update Style to Match Selection                               Home › Styles
+styles.delete                    Delete Style                                                  Home › Styles
+styles.manage                    Manage Styles                                                 Home › Styles
+styles.setVisibility             Show or Hide Style                                            Home › Styles
+styles.list                      Styles                                                        Home › Styles
+styles.pane                      Styles Pane                          Mod+Alt+Shift+S          Home › Styles
+styles.apply                     Apply Styles                         Mod+Shift+S              Home › Styles
+styles.addToGallery              Add to Style Gallery                                          Home › Styles
+list.define                      Define New Multilevel List                                    Home › Paragraph › Multilevel List
+list.get                         List Definition                                               Home › Paragraph › Multilevel List
+list.multilevelPreset            Multilevel List Library                                       Home › Paragraph › Multilevel List
+styles.inspector                 Style Inspector                      Shift+F1                 Home › Styles
+styles.inspect                   Inspect Styles at Selection                                   Home › Styles › Style Inspector
+styles.inspectorClear            Clear Formatting Level                                        Home › Styles › Style Inspector
+view.marks                       Show/Hide ¶                          Mod+Shift+8 / Mod+8      Home › Paragraph
+view.printLayout                 Print Layout                         Mod+Alt+P                View › Views
+view.webLayout                   Web Layout                                                    View › Views
+view.draft                       Draft                                Mod+Alt+N                View › Views
+view.outline                     Outline                              Mod+Alt+O                View › Views
+view.readMode                    Read Mode                                                     View › Views
+view.readColumnWidth             Reading Column Width                                          Reading › Layout
+view.readTextSize                Reading Text Size                                             Reading › Layout
+view.readLineSpacing             Reading Line Spacing                                          Reading › Layout
+view.readPageColor               Reading Page Color                                            Reading › Layout
+view.hideWhiteSpace              Hide White Space                                              View › Show
+view.focus                       Focus                                                         View › Immersive
+view.fullScreenView              Full Screen View                                              View › Immersive
+view.ruler                       Ruler                                                         View › Show
+view.gridlines                   Gridlines                                                     View › Show
+table.viewGridlines              View Gridlines                                                Table Layout › Table
+view.navigationPane              Navigation Pane                                               View › Show
+view.zoom                        Zoom                                                          View › Zoom
+view.zoom100                     100%                                                          View › Zoom
+view.zoomIn                      Zoom In                                                       View › Zoom
+view.zoomOut                     Zoom Out                                                      View › Zoom
+view.onePage                     One Page                                                      View › Zoom
+view.multiplePages               Multiple Pages                                                View › Zoom
+view.pageWidth                   Page Width                                                    View › Zoom
+view.darkMode                    Switch Modes                                                  View › Dark Mode
+view.interfaceTheme              Interface Theme                                               View › Dark Mode
+view.stylesPane                  Styles Pane                                                   Home › Styles
+view.commentsPane                Comments Pane                                                 Review › Comments
+view.accessibilityPane           Accessibility Pane                                            Review › Accessibility
+view.altTextPane                 Alt Text Pane                                                 Review › Accessibility
+view.formatShapePane             Format Shape Pane                                             Shape Format › Shape Styles
+view.newWindow                   New Window                                                    View › Window
+view.split                       Split                                Mod+Alt+S                View › Window
+view.fullScreen                  Full Screen                          F11                      View › Window
+view.state                       View State                                                    View
+view.numeral                     Numerals                                                      File › Options › Advanced
+outline.promoteToHeading1        Promote to Heading 1                                          Outlining › Outline Tools
+outline.promote                  Promote                                                       Outlining › Outline Tools
+outline.demote                   Demote                                                        Outlining › Outline Tools
+outline.demoteToBody             Demote to Body Text                                           Outlining › Outline Tools
+outline.level                    Outline Level                                                 Outlining › Outline Tools
+outline.moveUp                   Move Up                                                       Outlining › Outline Tools
+outline.moveDown                 Move Down                                                     Outlining › Outline Tools
+outline.expand                   Expand                               Alt+Shift+=              Outlining › Outline Tools
+outline.collapse                 Collapse                             Alt+Shift+-              Outlining › Outline Tools
+outline.toggle                   Expand or Collapse Heading                                    Outlining › Outline Tools
+outline.selectSubtree            Select Heading and Content                                    Outlining › Outline Tools
+outline.showLevel                Show Level                                                    Outlining › Outline Tools
+outline.showLevel1               Show Level 1                         Alt+Shift+1              Outlining › Outline Tools
+outline.showLevel2               Show Level 2                         Alt+Shift+2              Outlining › Outline Tools
+outline.showLevel3               Show Level 3                         Alt+Shift+3              Outlining › Outline Tools
+outline.showLevel4               Show Level 4                         Alt+Shift+4              Outlining › Outline Tools
+outline.showLevel5               Show Level 5                         Alt+Shift+5              Outlining › Outline Tools
+outline.showLevel6               Show Level 6                         Alt+Shift+6              Outlining › Outline Tools
+outline.showLevel7               Show Level 7                         Alt+Shift+7              Outlining › Outline Tools
+outline.showLevel8               Show Level 8                         Alt+Shift+8              Outlining › Outline Tools
+outline.showLevel9               Show Level 9                         Alt+Shift+9              Outlining › Outline Tools
+outline.showAll                  Show All Levels                      Alt+Shift+A              Outlining › Outline Tools
+outline.firstLineOnly            Show First Line Only                 Alt+Shift+L              Outlining › Outline Tools
+outline.showFormatting           Show Text Formatting                                          Outlining › Outline Tools
+outline.close                    Close Outline View                                            Outlining › Close
+outline.state                    Outline State                                                 Outlining
+insert.pageBreak                 Page Break                                                    Insert › Pages
+insert.blankPage                 Blank Page                                                    Insert › Pages
+insert.coverPage                 Cover Page                                                    Insert › Pages
+insert.table                     Table                                                         Insert › Tables
+insert.picture                   Pictures                                                      Insert › Illustrations
+insert.icon                      Icons                                                         Insert › Illustrations
+insert.shape                     Shapes                                                        Insert › Illustrations
+insert.textBox                   Text Box                                                      Insert › Text
+insert.link                      Link                                 Mod+K                    Insert › Links
+link.targets                     Link                                                          Insert › Links
+insert.removeLink                Remove Hyperlink                                              Insert › Links
+insert.bookmark                  Bookmark                             Mod+Shift+F5             Insert › Links
+insert.deleteBookmark            Delete Bookmark                                               Insert › Links
+insert.header                    Header                                                        Insert › Header & Footer
+insert.footer                    Footer                                                        Insert › Header & Footer
+insert.pageNumber                Page Number                                                   Insert › Header & Footer
+insert.editHeader                Edit Header                                                   Insert › Header & Footer › Header
+insert.editFooter                Edit Footer                                                   Insert › Header & Footer › Footer
+insert.createHeader              Header                                                        Insert › Header & Footer
+insert.createFooter              Footer                                                        Insert › Header & Footer
+insert.closeHeader               Close Header and Footer                                       Header & Footer
+insert.removeEmptyHeaders        Close Header and Footer                                       Header & Footer
+insert.removeHeader              Remove Header                                                 Insert › Header & Footer › Header
+insert.removeFooter              Remove Footer                                                 Insert › Header & Footer › Footer
+insert.dateTime                  Date & Time                                                   Insert › Text
+insert.symbol                    Symbol                                                        Insert › Symbols
+insert.field                     Field                                Mod+F9                   Insert › Text › Quick Parts
+insert.dateField                 Insert Date Field                    Alt+Shift+D              Insert › Text › Quick Parts
+insert.timeField                 Insert Time Field                    Alt+Shift+T              Insert › Text › Quick Parts
+insert.pageField                 Insert Page Field                    Alt+Shift+P              Insert › Text › Quick Parts
+insert.dropCap                   Drop Cap                                                      Insert › Text
+insert.horizontalLine            Horizontal Line                                               Home › Paragraph › Borders
+insert.textFromFile              Text from File                                                Insert › Text › Object
+insert.equation                  Equation                             Alt+=                    Insert › Symbols
+equation.edit                    Edit Equation                                                 Equation
+equation.exit                    Leave Equation                                                Equation
+equation.type                    Type in Equation                                              Equation
+equation.insertStructure         Insert Structure                                              Equation › Structures
+equation.insertSymbol            Insert Symbol                                                 Equation › Symbols
+equation.move                    Move in Equation                                              Equation
+equation.backspace               Delete Back in Equation                                       Equation
+equation.delete                  Delete in Equation                                            Equation
+equation.enter                   Enter in Equation                                             Equation
+equation.convert                 Convert                                                       Equation › Conversions
+equation.inputFormat             Input Format                                                  Equation › Conversions
+equation.normalText              Normal Text                                                   Equation › Tools
+equation.display                 Change to Display                                             Equation
+equation.justify                 Justification                                                 Equation
+equation.number                  Equation Number                                               Equation
+equation.set                     Set Equation                                                  Equation
+equation.get                     Equation Info                                                 Equation
+equation.gallery                 Equation Gallery                                              Equation › Structures
+equation.structureActions        Structure Actions                                             Equation
+equation.structure               Change Structure                                              Equation
+layout.margins                   Margins                                                       Layout › Page Setup
+layout.orientation               Orientation                                                   Layout › Page Setup
+layout.size                      Size                                                          Layout › Page Setup
+layout.columns                   Columns                                                       Layout › Page Setup
+layout.break                     Breaks                                                        Layout › Page Setup
+layout.lineNumbers               Line Numbers                                                  Layout › Page Setup
+layout.hyphenation               Hyphenation                                                   Layout › Page Setup
+layout.manualHyphenation         Manual Hyphenation                                            Layout › Page Setup › Hyphenation
+layout.pageSetup                 Page Setup                                                    Layout › Page Setup
+layout.verticalAlign             Vertical Alignment                                            Layout › Page Setup › Layout
+layout.sectionRtl                Right-to-Left Section                                         Layout › Page Setup
+layout.textDirection             Text Direction                                                Layout › Page Setup
+layout.differentFirstPage        Different First Page                                          Header & Footer › Options
+layout.differentOddEven          Different Odd & Even Pages                                    Header & Footer › Options
+layout.pageNumberFormat          Format Page Numbers                                           Insert › Header & Footer › Page Number
+layout.documentGrid              Document Grid                                                 Layout › Page Setup › Document Grid
+layout.section                   Section Properties                                            Layout › Page Setup
+table.insertRowAbove             Insert Above                                                  Table Layout › Rows & Columns
+table.insertRowBelow             Insert Below                                                  Table Layout › Rows & Columns
+table.insertColumnLeft           Insert Left                                                   Table Layout › Rows & Columns
+table.insertColumnRight          Insert Right                                                  Table Layout › Rows & Columns
+table.deleteRow                  Delete Rows                                                   Table Layout › Rows & Columns › Delete
+table.deleteColumn               Delete Columns                                                Table Layout › Rows & Columns › Delete
+table.deleteTable                Delete Table                                                  Table Layout › Rows & Columns › Delete
+table.deleteCells                Delete Cells                                                  Table Layout › Rows & Columns › Delete
+table.merge                      Merge Cells                                                   Table Layout › Merge
+table.split                      Split Cells                                                   Table Layout › Merge
+table.splitTable                 Split Table                                                   Table Layout › Merge
+table.style                      Table Styles                                                  Table Design › Table Styles
+table.look                       Table Style Options                                           Table Design › Table Style Options
+table.shading                    Shading                                                       Table Design › Table Styles
+table.borders                    Borders                                                       Table Design › Borders
+table.cellAlign                  Alignment                                                     Table Layout › Alignment
+table.textDirection              Text Direction                                                Table Layout › Alignment
+table.autofit                    AutoFit                                                       Table Layout › Cell Size
+table.distributeColumns          Distribute Columns                                            Table Layout › Cell Size
+table.distributeRows             Distribute Rows                                               Table Layout › Cell Size
+table.columnWidth                Table Column Width                                            Table Layout › Cell Size
+table.rowHeight                  Table Row Height                                              Table Layout › Cell Size
+table.repeatHeader               Repeat Header Rows                                            Table Layout › Data
+table.altText                    Alt Text                                                      Table Layout › Table › Properties
+table.sort                       Sort                                                          Table Layout › Data
+table.toText                     Convert to Text                                               Table Layout › Data
+table.formula                    Formula                                                       Table Layout › Data
+table.selectTable                Select Table                                                  Table Layout › Table › Select
+table.selectRow                  Select Row                                                    Table Layout › Table › Select
+table.selectColumn               Select Column                                                 Table Layout › Table › Select
+table.selectCell                 Select Cell                                                   Table Layout › Table › Select
+table.rtl                        Right-to-Left Table                                           Table Layout › Table
+table.properties                 Properties                                                    Table Layout › Table
+table.fromText                   Convert Text to Table                                         Insert › Tables
+table.quick                      Quick Tables                                                  Insert › Tables
+table.newStyle                   New Table Style                                               Table Design › Table Styles
+table.modifyStyle                Modify Table Style                                            Table Design › Table Styles
+table.deleteStyle                Delete Table Style                                            Table Design › Table Styles
+table.draw                       Draw Table                                                    Insert › Tables
+table.eraser                     Eraser                                                        Table Layout › Draw
+table.resizeDrag                 Resize Table by Dragging                                      Table Layout › Cell Size
+table.selectAt                   Select Table Cells by Clicking                                Table Layout › Table › Select
+table.insertAt                   Insert Row or Column by Clicking                              Table Layout › Rows & Columns
+table.moveDrag                   Move Table by Dragging                                        Table Layout › Table
+table.fitColumn                  AutoFit Column by Double-Clicking                             Table Layout › Cell Size
+review.newComment                New Comment                          Mod+Alt+M                Review › Comments
+review.reply                     Reply                                                         Review › Comments
+review.editComment               Edit Comment                                                  Review › Comments
+review.deleteComment             Delete                                                        Review › Comments
+review.resolveComment            Resolve                                                       Review › Comments
+review.nextComment               Next                                                          Review › Comments
+review.previousComment           Previous                                                      Review › Comments
+review.comments                  Show Comments                                                 Review › Comments
+review.trackChanges              Track Changes                        Mod+Shift+E              Review › Tracking
+review.acceptAll                 Accept All Changes                                            Review › Changes
+review.rejectAll                 Reject All Changes                                            Review › Changes
+review.accept                    Accept                                                        Review › Changes
+review.reject                    Reject                                                        Review › Changes
+review.nextChange                Next Change                                                   Review › Changes
+review.previousChange            Previous Change                                               Review › Changes
+review.markup                    Display for Review                                            Review › Tracking
+review.trackingOptions           Track Changes Options                                         Review › Tracking
+review.wordCount                 Word Count                           Mod+Shift+G              Review › Proofing
+review.changes                   Reviewing Pane                                                Review › Tracking
+review.spelling                  Spelling & Grammar                   F7 / Alt+F7              Review › Proofing
+review.issues                    Proofing Issues                                               Review › Proofing
+review.suggestions               Spelling Suggestions                                          Review › Proofing
+review.addToDictionary           Add to Dictionary                                             Review › Proofing
+review.ignoreAll                 Ignore All                                                    Review › Proofing
+review.applySuggestion           Change                                                        Review › Proofing
+review.proofing                  Check Spelling as You Type                                    File › Options › Proofing
+review.thesaurus                 Thesaurus                            Shift+F7                 Review › Proofing
+file.rename                      Rename Document                                               File › Info
+file.new                         New                                  Mod+N                    File
+file.open                        Open                                 Mod+O / Mod+F12 / Mod+Alt+F2 File
+file.save                        Save                                 Mod+S / Shift+F12 / Alt+Shift+F2 File
+file.saveAs                      Save As                              F12 / Alt+F2             File
+file.encrypt                     Encrypt with Password                                         File › Info › Protect Document
+file.exportPdf                   Export PDF                                                    File › Export
+file.exportPng                   Export Page as PNG                                            File › Export
+file.printMarkup                 Print Markup                                                  File › Print
+file.printPdf                    Print to PDF                                                  File › Print
+file.print                       Print                                Mod+P / Mod+Shift+F12 / Mod+F2 / Mod+Alt+I File
+file.close                       Close                                Mod+W / Mod+F4           File
+file.properties                  Properties                                                    File › Info
+file.info                        Info                                                          File
+file.setAuthor                   User Name                                                     File › Options › General
+file.privacyOptions              Privacy Options                                               File › Options › Save
+file.privacy                     Privacy Settings                                              File › Options › Save
+document.inspect                 Inspect Document                                              Agents
+document.text                    Document Text                                                 Agents
+document.paragraph               Paragraph Details                                             Agents
+document.selection               Selection                                                     Agents
+document.layout                  Layout Summary                                                Agents
+document.setText                 Replace Document Text                                         Agents
+file.options                     Options                                                       File
+text.overtype                    Overtype                                                      File › Options › Advanced
+design.theme                     Themes                                                        Design › Document Formatting
+design.themeFonts                Fonts                                                         Design › Document Formatting
+design.themeColors               Colors                                                        Design › Document Formatting
+design.styleSet                  Style Set                                                     Design › Document Formatting
+design.paragraphSpacing          Paragraph Spacing                                             Design › Document Formatting
+design.watermark                 Watermark                                                     Design › Page Background
+design.pageColor                 Page Color                                                    Design › Page Background
+design.pageBorders               Page Borders                                                  Design › Page Background
+design.setDefault                Set as Default                                                Design › Document Formatting
+design.themes                    Theme List                                                    Design › Document Formatting
+references.toc                   Table of Contents                                             References › Table of Contents
+references.updateToc             Update Table                                                  References › Table of Contents
+references.removeToc             Remove Table of Contents                                      References › Table of Contents
+references.addText               Add Text                                                      References › Table of Contents
+references.footnote              Insert Footnote                      Mod+Alt+F                References › Footnotes
+references.endnote               Insert Endnote                       Mod+Alt+D                References › Footnotes
+references.convertNotes          Convert Notes                                                 References › Footnotes
+references.nextFootnote          Next Footnote                        Alt+Shift+> / Alt+Shift+. References › Footnotes
+references.notes                 Show Notes                                                    References › Footnotes
+references.caption               Insert Caption                                                References › Captions
+references.updateFields          Update Field                         F9                       References
+view.fieldCodes                  Field Codes                          Alt+F9                   View › Show
+fields.toggleCode                Toggle Field Codes                   Shift+F9                 Insert › Text › Quick Parts
+fields.setCode                   Edit Field Code                                               Insert › Text › Quick Parts
+fields.unlink                    Unlink Fields                        Mod+Shift+F9             Insert › Text › Quick Parts
+fields.lock                      Lock Fields                          Mod+F11                  Insert › Text › Quick Parts
+fields.unlock                    Unlock Fields                        Mod+Shift+F11            Insert › Text › Quick Parts
+fields.next                      Next Field                           Alt+F1                   Insert › Text › Quick Parts
+fields.previous                  Previous Field                       Shift+F11 / Alt+Shift+F1 Insert › Text › Quick Parts
+fields.selected                  Selected Fields                                               Insert › Text › Quick Parts
+mailings.start                   Start Mail Merge                                              Mailings › Start Mail Merge
+mailings.recipients              Select Recipients                                             Mailings › Start Mail Merge
+mailings.editRecipients          Edit Recipient List                  Alt+Shift+E              Mailings › Start Mail Merge
+mailings.filterRecipients        Filter Recipients                                             Mailings › Start Mail Merge › Edit Recipient List
+mailings.sortRecipients          Sort Recipients                                               Mailings › Start Mail Merge › Edit Recipient List
+mailings.insertField             Insert Merge Field                   Alt+Shift+F              Mailings › Write & Insert Fields
+mailings.addressBlock            Address Block                                                 Mailings › Write & Insert Fields
+mailings.greetingLine            Greeting Line                                                 Mailings › Write & Insert Fields
+mailings.rules                   Rules                                                         Mailings › Write & Insert Fields
+mailings.matchFields             Match Fields                                                  Mailings › Write & Insert Fields
+mailings.highlightFields         Highlight Merge Fields                                        Mailings › Write & Insert Fields
+mailings.preview                 Preview Results                      Alt+Shift+K              Mailings › Preview Results
+mailings.next                    Next Record                                                   Mailings › Preview Results
+mailings.previous                Previous Record                                               Mailings › Preview Results
+mailings.first                   First Record                                                  Mailings › Preview Results
+mailings.last                    Last Record                                                   Mailings › Preview Results
+mailings.goToRecord              Go to Record                                                  Mailings › Preview Results
+mailings.findRecipient           Find Recipient                                                Mailings › Preview Results
+mailings.checkErrors             Check for Errors                                              Mailings › Finish
+mailings.finish                  Finish & Merge                       Alt+Shift+N              Mailings › Finish
+mailings.printDocuments          Print Documents                      Alt+Shift+M              Mailings › Finish › Finish & Merge
+mailings.envelopes               Envelopes                                                     Mailings › Create
+mailings.labels                  Labels                                                        Mailings › Create
+references.sources               Manage Sources                                                References › Citations & Bibliography
+references.citation              Insert Citation                                               References › Citations & Bibliography
+references.citationStyle         Style                                                         References › Citations & Bibliography
+references.bibliography          Bibliography                                                  References › Citations & Bibliography
+references.tableOfFigures        Insert Table of Figures                                       References › Captions
+references.updateFigures         Update Table                                                  References › Captions
+references.markCitation          Mark Citation                        Alt+Shift+I              References › Table of Authorities
+references.tableOfAuthorities    Insert Table of Authorities                                   References › Table of Authorities
+references.updateAuthorities     Update Table                                                  References › Table of Authorities
+insert.crossReference            Cross-reference                                               Insert › Links
+references.noteOptions           Footnote and Endnote                                          References › Footnotes
+references.researcher            Researcher                                                    References › Research
+references.markEntry             Mark Entry                           Alt+Shift+X              References › Index
+references.index                 Insert Index                                                  References › Index
+references.updateIndex           Update Index                                                  References › Index
+picture.size                     Size                                                          Picture Format › Size
+picture.crop                     Crop                                                          Picture Format › Size
+picture.altText                  Alt Text                                                      Picture Format › Accessibility
+object.altText                   Alt Text                                                      Shape Format › Accessibility
+picture.corrections              Corrections                                                   Picture Format › Adjust
+picture.color                    Color                                                         Picture Format › Adjust
+picture.iconColor                Icon Color                                                    Picture Format › Adjust
+picture.effects                  Artistic Effects                                              Picture Format › Adjust
+picture.transparency             Transparency                                                  Picture Format › Adjust
+picture.removeBackground         Remove Background                                             Picture Format › Adjust
+picture.compress                 Compress Pictures                                             Picture Format › Adjust
+picture.reset                    Reset Picture                                                 Picture Format › Adjust
+picture.change                   Change Picture                                                Picture Format › Adjust
+picture.style                    Picture Styles                                                Picture Format › Picture Styles
+picture.border                   Picture Border                                                Picture Format › Picture Styles
+arrange.rotate                   Rotate                                                        Layout › Arrange
+arrange.rotation                 Rotation                                                      Layout › Arrange
+arrange.wrap                     Wrap Text                                                     Layout › Arrange
+arrange.wrapText                 Wrap Text Sides                                               Layout › Arrange
+arrange.moveWithText             Move with Text                                                Layout › Arrange › Wrap Text
+arrange.position                 Position                                                      Layout › Arrange
+arrange.bringForward             Bring Forward                                                 Layout › Arrange
+arrange.sendBackward             Send Backward                                                 Layout › Arrange
+arrange.align                    Align                                                         Layout › Arrange
+arrange.selectionPane            Selection Pane                                                Layout › Arrange
+arrange.bounds                   Move or Resize                                                Layout › Arrange
+arrange.copyTo                   Copy to                                                       Layout › Arrange
+arrange.nudge                    Nudge                                                         Layout › Arrange
+arrange.group                    Group                                                         Layout › Arrange
+arrange.ungroup                  Ungroup                                                       Layout › Arrange
+select.addObject                 Add Object to Selection                                       Home › Editing › Select
+select.objects                   Select Objects                                                Home › Editing › Select
+shape.outline                    Shape Outline                                                 Shape Format › Shape Styles
+shape.effects                    Shape Effects                                                 Shape Format › Shape Styles
+shape.change                     Change Shape                                                  Shape Format › Insert Shapes
+shape.textDirection              Text Direction                                                Shape Format › Text
+shape.alignText                  Align Text                                                    Shape Format › Text
+shape.link                       Create Link                                                   Shape Format › Text
+shape.breakLink                  Break Link                                                    Shape Format › Text
+shape.fill                       Shape Fill                                                    Shape Format › Shape Styles
+insert.smartArt                  SmartArt                                                      Insert › Illustrations
+smartArt.items                   Edit Items                                                    SmartArt Design › Create Graphic
+smartArt.textPane                Text Pane                                                     SmartArt Design › Create Graphic
+smartArt.addShape                Add Shape                                                     SmartArt Design › Create Graphic
+smartArt.promote                 Promote                                                       SmartArt Design › Create Graphic
+smartArt.demote                  Demote                                                        SmartArt Design › Create Graphic
+smartArt.layout                  Change Layout                                                 SmartArt Design › Layouts
+smartArt.colors                  Change Colors                                                 SmartArt Design › SmartArt Styles
+smartArt.reset                   Reset Graphic                                                 SmartArt Design › Reset
+insert.chart                     Chart                                                         Insert › Illustrations
+chart.type                       Change Chart Type                                             Chart Design › Type
+chart.editData                   Edit Data                                                     Chart Design › Data
+chart.title                      Chart Title                                                   Chart Design › Chart Layouts › Add Chart Element
+chart.legend                     Legend                                                        Chart Design › Chart Layouts › Add Chart Element
+chart.dataLabels                 Data Labels                                                   Chart Design › Chart Layouts › Add Chart Element
+draw.select                      Select                                                        Draw › Tools
+draw.lasso                       Lasso Select                                                  Draw › Tools
+draw.lassoMove                   Move Selected Ink                                             Draw › Tools
+draw.lassoDelete                 Delete Selected Ink                                           Draw › Tools
+draw.lassoColor                  Recolor Selected Ink                                          Draw › Tools
+draw.eraser                      Eraser                                                        Draw › Tools
+draw.pen                         Pen                                                           Draw › Pens
+draw.pencil                      Pencil                                                        Draw › Pens
+draw.highlighter                 Highlighter                                                   Draw › Pens
+draw.addPen                      Add Pen                                                       Draw › Pens
+draw.removePen                   Remove Pen                                                    Draw › Pens
+draw.stroke                      Draw Ink                                                      Draw › Pens
+draw.erase                       Erase Ink                                                     Draw › Tools
+draw.inkToShape                  Ink to Shape                                                  Draw › Convert
+draw.convertInk                  Convert to Shapes                                             Draw › Convert
+draw.replay                      Ink Replay                                                    Draw › Replay
+review.hideInk                   Hide Ink                                                      Review › Ink
+insert.canvas                    Drawing Canvas                                                Insert › Illustrations
+canvas.fit                       Fit                                                           Shape Format › Drawing Canvas
+canvas.expand                    Expand                                                        Shape Format › Drawing Canvas
+canvas.scale                     Scale Drawing                                                 Shape Format › Drawing Canvas
+canvas.member                    Canvas Member                                                 Shape Format › Drawing Canvas
+insert.wordArt                   WordArt                                                       Insert › Text
+format.textEffects               Text Effects                                                  Home › Font
+wordArt.style                    WordArt Styles                                                Shape Format › WordArt Styles
+wordArt.textFill                 Text Fill                                                     Shape Format › WordArt Styles
+wordArt.textOutline              Text Outline                                                  Shape Format › WordArt Styles
+wordArt.transform                Transform                                                     Shape Format › WordArt Styles
+shape.connect                    Connect Shapes                                                Shape Format › Insert Shapes
+edit.repeat                      Repeat                               F4                       Quick Access Toolbar
+tools.recordMacro                Record Macro                                                  View › Macros
+tools.macros                     Macros                               Alt+F8                   View › Macros
+tools.autocorrect                AutoCorrect Options                                           File › Options › Proofing
+tools.customizeKeyboard          Customize Keyboard                                            File › Options
+tools.customizeRibbon            Customize Ribbon                                              File › Options
+tools.search                     Search                               Alt+Q                    Title Bar
+review.compare                   Compare                                                       Review › Compare
+review.combine                   Combine                                                       Review › Compare
+file.accessibility               Check Accessibility                                           Review › Accessibility
+file.inspect                     Inspect Document                                              File › Info
+file.protect                     Protect Document                                              File › Info
+file.versions                    Version History                                               File › Info
+file.recover                     Recover Unsaved Documents                                     File › Info
+file.newFromTemplate             New from Template                                             File › New
+file.saveTemplate                Save as Template                                              File › Save As
+file.autosave                    AutoSave                                                      Quick Access Toolbar
+file.compatibility               Check Compatibility                                           File › Info
+file.share                       Share                                                         File
+insert.quickParts                Quick Parts                                                   Insert › Text
+insert.autoText                  AutoText                             Alt+F3                   Insert › Text › Quick Parts
+insert.docProperty               Document Property                                             Insert › Text › Quick Parts
+insert.signatureLine             Signature Line                                                Insert › Text
+insert.object                    Object                                                        Insert › Text
+insert.spreadsheet               Spreadsheet Table                                             Insert › Tables
+layout.linkToPrevious            Link to Previous                     Alt+Shift+R              Header & Footer › Navigation
+hf.next                          Next Section                                                  Header & Footer › Navigation
+hf.previous                      Previous Section                                              Header & Footer › Navigation
+hf.position                      Header/Footer Position                                        Header & Footer › Position
+table.cellMargins                Cell Margins                                                  Table Layout › Alignment
+table.borderPainter              Border Painter                                                Table Design › Borders
+para.setNumberingValue           Set Numbering Value                                           Home › Paragraph › Numbering
+para.defineBullet                Define New Bullet                                             Home › Paragraph › Bullets
+para.defineNumber                Define New Number Format                                      Home › Paragraph › Numbering
+review.language                  Language                                                      Review › Language
+review.showMarkup                Show Markup                                                   Review › Tracking
+review.editor                    Editor                                                        Home › Editor
+select.similar                   Select Text with Similar Formatting                           Home › Editing › Select
+select.extend                    Extend Selection                     F8                       Editing › Selection
+design.effects                   Effects                                                       Design › Document Formatting
+view.immersive                   Immersive Reader                                              View › Immersive
+view.vertical                    Vertical                                                      View › Page Movement
+view.sideToSide                  Side to Side                                                  View › Page Movement
+tools.templates                  Templates and Add-ins                                         View › Templates
+tools.attachTemplate             Attach Template                                               View › Templates › Templates and Add-ins
+tools.detachTemplate             Detach Template                                               View › Templates › Templates and Add-ins
+tools.linkStyles                 Automatically Update Document Styles                          View › Templates › Templates and Add-ins
+tools.updateStyles               Update Styles from Template                                   View › Templates › Templates and Add-ins
+styles.organizer                 Organizer                                                     View › Templates › Organizer
+styles.copyFrom                  Copy Styles                                                   View › Templates › Organizer
+styles.rename                    Rename Style                                                  View › Templates › Organizer
+file.listTemplates               Personal Templates                                            File › New
+review.restrict                  Restrict Editing                                              Review › Protect
+review.readAloud                 Read Aloud                           Mod+Alt+Space            Review › Speech
+readAloud.playPause              Play/Pause                                                    Review › Speech
+readAloud.next                   Next Sentence                                                 Review › Speech
+readAloud.previous               Previous Sentence                                             Review › Speech
+readAloud.stop                   Stop Reading                                                  Review › Speech
+readAloud.speed                  Reading Speed                                                 Review › Speech
+readAloud.skipCitations          Skip Citations and Bibliography                               Review › Speech
+readAloud.status                 Read Aloud Status                                             Review › Speech
+caret.pastCitation               Move Past Citation                                            Zotero › Citations
+developer.richText               Rich Text Content Control                                     Developer › Controls
+developer.plainText              Plain Text Content Control                                    Developer › Controls
+developer.picture                Picture Content Control                                       Developer › Controls
+developer.buildingBlock          Building Block Gallery Content Control                          Developer › Controls
+developer.checkBox               Check Box Content Control                                     Developer › Controls
+developer.comboBox               Combo Box Content Control                                     Developer › Controls
+developer.dropDown               Drop-Down List Content Control                                Developer › Controls
+developer.datePicker             Date Picker Content Control                                   Developer › Controls
+developer.repeatingSection       Repeating Section Content Control                             Developer › Controls
+developer.designMode             Design Mode                                                   Developer › Controls
+developer.properties             Properties                                                    Developer › Controls
+developer.control                Content Control at Selection                                  Developer › Controls
+developer.toggleCheckBox         Toggle Check Box                                              Developer › Controls
+developer.chooseItem             Choose List Item                                              Developer › Controls
+developer.setDate                Set Date                                                      Developer › Controls
+developer.removeControl          Remove Content Control                                        Developer › Controls

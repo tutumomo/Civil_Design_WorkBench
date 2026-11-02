@@ -1,0 +1,85 @@
+{
+ "commands": [
+  {
+   "command": "parameters.add",
+   "params": {
+    "name": "B",
+    "expression": "300 mm",
+    "comment": "溝內寬"
+   }
+  },
+  {
+   "command": "parameters.add",
+   "params": {
+    "name": "H",
+    "expression": "300 mm",
+    "comment": "溝內深"
+   }
+  },
+  {
+   "command": "parameters.add",
+   "params": {
+    "name": "t",
+    "expression": "80 mm",
+    "comment": "側牆厚"
+   }
+  },
+  {
+   "command": "parameters.add",
+   "params": {
+    "name": "tb",
+    "expression": "100 mm",
+    "comment": "底版厚"
+   }
+  },
+  {
+   "command": "parameters.add",
+   "params": {
+    "name": "Lg",
+    "expression": "1000 mm",
+    "comment": "單節長度"
+   }
+  },
+  {
+   "command": "solid.box",
+   "params": {
+    "length": "B + 2*t",
+    "width": "Lg",
+    "height": "H + tb",
+    "center": [
+     0,
+     0,
+     "(H + tb)/2"
+    ],
+    "operation": "new",
+    "body_name": "U型溝",
+    "name": "外形"
+   }
+  },
+  {
+   "command": "solid.box",
+   "params": {
+    "length": "B",
+    "width": "Lg + 20 mm",
+    "height": "H + 10 mm",
+    "center": [
+     0,
+     0,
+     "tb + (H + 10 mm)/2"
+    ],
+    "operation": "cut",
+    "targets": [
+     "U型溝"
+    ],
+    "name": "溝槽"
+   }
+  },
+  {
+   "command": "parameters.change",
+   "params": {
+    "name": "B",
+    "expression": "400 mm"
+   }
+  }
+ ]
+}

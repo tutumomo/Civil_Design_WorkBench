@@ -1,0 +1,735 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_two_way_vn_no_reinf",
+   "title": "不配置剪力鋼筋之雙向構材標稱剪力強度 vn＝vc（式22.6.1.2）",
+   "src": "rc112",
+   "clause": "22.6.1.2",
+   "page": 386,
+   "keywords": "雙向剪力  punching 板柱 vn vc 不配置剪力鋼筋 臨界斷面 bo",
+   "unit": "MPa",
+   "output": "vn",
+   "latex": "v_n=v_c",
+   "vars": {
+    "vc": {
+     "desc": "混凝土提供之標稱雙向剪應力 vc（依 22.6.5 節）",
+     "unit": "MPa",
+     "min": 0
+    }
+   },
+   "expr": "vc",
+   "conditions": [
+    {
+     "expr": "vc>=0",
+     "msg": "vc 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "vc": 0.9
+     },
+     "out": 0.9
+    },
+    {
+     "in": {
+      "vc": 1.25
+     },
+     "out": 1.25
+    }
+   ],
+   "notes": "22.6.1.2：不配置剪力鋼筋之雙向構材標稱剪力強度 vn＝vc。22.6.1.4：雙向剪力應由一深度 d 及依 22.6.4 節定義之臨界周長 bo 之斷面承受。22.6.1.5：vc 依 22.6.5 節計算（本庫已收 rc112_punching_vc＝22.6.5.2）。總強度 Vn＝vn·bo·d。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.385-386 式(22.6.1.2)＋相關條次",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_two_way_vn_with_reinf",
+   "title": "配置剪力鋼筋之雙向構材標稱剪力強度 vn＝vc＋vs（式22.6.1.3）",
+   "src": "rc112",
+   "clause": "22.6.1.3",
+   "page": 386,
+   "keywords": "雙向剪力 vn vc vs 剪力鋼筋 肋筋 剪力釘 板柱",
+   "unit": "MPa",
+   "output": "vn",
+   "latex": "v_n=v_c+v_s",
+   "vars": {
+    "vc": {
+     "desc": "混凝土標稱雙向剪應力 vc（22.6.6.1）",
+     "unit": "MPa",
+     "min": 0
+    },
+    "vs": {
+     "desc": "剪力鋼筋標稱雙向剪應力 vs（22.6.7.2）",
+     "unit": "MPa",
+     "min": 0
+    }
+   },
+   "expr": "vc+vs",
+   "conditions": [
+    {
+     "expr": "vc>=0 and vs>=0",
+     "msg": "vc、vs 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "vc": 0.9,
+      "vs": 0.6
+     },
+     "out": 1.5
+    },
+    {
+     "in": {
+      "vc": 1.1,
+      "vs": 0.0
+     },
+     "out": 1.1
+    }
+   ],
+   "notes": "22.6.1.3：配置剪力鋼筋之雙向構材標稱剪力強度 vn＝vc＋vs。vc 見 rc112_two_way_vc_with_reinf（22.6.6.1），vs 見 rc112_two_way_vs_stirrup（22.6.7.2）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.386 式(22.6.1.3)",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_two_way_vc_with_reinf",
+   "title": "配置剪力鋼筋之雙向構材 vc＝0.17λsλ√fc′（式22.6.6.1，SI）",
+   "src": "rc112",
+   "clause": "22.6.6.1",
+   "page": 392,
+   "keywords": "雙向剪力 vc 尺寸效應 λs λ 剪力鋼筋 板柱 臨界斷面",
+   "unit": "MPa",
+   "output": "vc",
+   "latex": "v_c=0.17\\lambda_s\\lambda\\sqrt{f_c'}\\ (\\mathrm{MPa})\\quad[0.53\\lambda_s\\lambda\\sqrt{f_c'}\\ \\mathrm{kgf/cm^2}]",
+   "vars": {
+    "fc": {
+     "desc": "混凝土規定抗壓強度 fc′",
+     "unit": "MPa",
+     "min": 10
+    },
+    "lams": {
+     "desc": "尺寸效應修正因數 λs（22.5.5.1.3）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 1.0,
+     "default": 1.0
+    },
+    "lam": {
+     "desc": "混凝土密度修正係數 λ（常重 1.0）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.5
+    }
+   },
+   "expr": "0.17*lams*lam*sqrt(fc)",
+   "conditions": [
+    {
+     "expr": "fc>0",
+     "msg": "fc′ 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc": 28,
+      "lams": 1.0,
+      "lam": 1.0
+     },
+     "out": 0.899556,
+     "tol": 1e-05
+    },
+    {
+     "in": {
+      "fc": 28,
+      "lams": 0.85,
+      "lam": 1.0
+     },
+     "out": 0.764622,
+     "tol": 1e-05
+    }
+   ],
+   "notes": "22.6.6.1：配置剪力鋼筋之雙向構材，在臨界斷面所計算之 vc 依本式；λs 為尺寸效應修正因數，詳第22.5.5.1.3節（本庫 rc112_lambda_s）。公制版係數為 0.53λsλ√fc′（kgf/cm²），本式採 SI 之 0.17。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.392 式(22.6.6.1)（kgf 與 SI 兩版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_two_way_vs_stirrup",
+   "title": "配置肋筋之雙向構材 vs＝Av·fy／(b0·s)（式22.6.7.2）",
+   "src": "rc112",
+   "clause": "22.6.7.2",
+   "page": 393,
+   "keywords": "雙向剪力 肋筋 vs Av fy b0 s 板柱 剪力鋼筋",
+   "unit": "MPa",
+   "output": "vs",
+   "latex": "v_s=\\frac{A_v f_y}{b_0 s}",
+   "vars": {
+    "Av": {
+     "desc": "沿幾何類似柱斷面周長外圍線之所有剪力鋼筋截面積總和",
+     "unit": "mm2",
+     "min": 0
+    },
+    "fy": {
+     "desc": "剪力鋼筋降伏強度",
+     "unit": "MPa",
+     "min": 0
+    },
+    "b0": {
+     "desc": "臨界周長 bo（22.6.4）",
+     "unit": "mm",
+     "min": 0
+    },
+    "s": {
+     "desc": "剪力鋼筋在垂直柱面方向之間距",
+     "unit": "mm",
+     "min": 0
+    }
+   },
+   "expr": "Av*fy/(b0*s)",
+   "conditions": [
+    {
+     "expr": "b0>0 and s>0",
+     "msg": "b0、s 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Av": 200,
+      "fy": 420,
+      "b0": 1000,
+      "s": 100
+     },
+     "out": 0.84
+    },
+    {
+     "in": {
+      "Av": 400,
+      "fy": 420,
+      "b0": 1200,
+      "s": 75
+     },
+     "out": 1.8666666666666667,
+     "tol": 1e-09
+    }
+   ],
+   "notes": "22.6.7.2：配置肋筋之雙向構材 vs＝Av fy/(b0 s)。解說：因本章雙向剪力以剪應力表示，臨界斷面剪力鋼筋所提供之剪力強度係以臨界斷面積之平均值表示。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.393 式(22.6.7.2)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_bent_bar_Vs",
+   "title": "彎起縱向鋼筋之剪力強度 Vs＝min(Av fy sinα, 0.25√fc′bw d)（式22.5.8.6.2）",
+   "src": "rc112",
+   "clause": "22.5.8.6.2",
+   "page": 385,
+   "keywords": "彎起鋼筋 剪力強度 Vs Av fy sinα 上限 0.25 sqrt fc",
+   "unit": "N",
+   "output": "Vs",
+   "latex": "V_s=\\min\\left(A_v f_y\\sin\\alpha,\\ 0.25\\sqrt{f_c'}\\,b_w d\\right)\\ (\\mathrm{MPa})",
+   "vars": {
+    "Av": {
+     "desc": "同一斷面彎起鋼筋總面積 Av",
+     "unit": "mm2",
+     "min": 0
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度 fy",
+     "unit": "MPa",
+     "min": 0
+    },
+    "alpha": {
+     "desc": "彎起鋼筋與構材縱軸之交角 α（度，須 ≥30°）",
+     "unit": "度",
+     "min": 30,
+     "max": 90
+    },
+    "fc": {
+     "desc": "混凝土 fc′",
+     "unit": "MPa",
+     "min": 10
+    },
+    "bw": {
+     "desc": "腹板寬度 bw",
+     "unit": "mm",
+     "min": 0
+    },
+    "d": {
+     "desc": "有效深度 d",
+     "unit": "mm",
+     "min": 0
+    }
+   },
+   "expr": "min(Av*fy*sin(radians(alpha)), 0.25*sqrt(fc)*bw*d)",
+   "conditions": [
+    {
+     "expr": "alpha>=30",
+     "msg": "α 須 ≥30°（22.5.8.6.1）"
+    },
+    {
+     "expr": "bw>0 and d>0",
+     "msg": "bw、d 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Av": 300,
+      "fy": 420,
+      "alpha": 45,
+      "fc": 28,
+      "bw": 300,
+      "d": 400
+     },
+     "out": 89095.5,
+     "tol": 1.0
+    },
+    {
+     "in": {
+      "Av": 600,
+      "fy": 420,
+      "alpha": 45,
+      "fc": 28,
+      "bw": 300,
+      "d": 400
+     },
+     "out": 158745.0,
+     "tol": 1.0
+    }
+   ],
+   "notes": "22.5.8.6.2：若剪力鋼筋為單根或一組面積 Av 之平行鋼筋、均於距支承相同距離處彎起，Vs 取 (a) Vs＝Av fy sinα 與 (b) Vs＝0.8√fc′bw d [SI 0.25√fc′bw d] 之較小值。22.5.8.6.1：彎起鋼筋與構材縱軸交角 α 至少 30° 者，斜向彎起縱向鋼筋中央 3/4 部分得作為非預力構材之剪力鋼筋。第一組測試即達 (b) 之上限。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.385 式(22.5.8.6.2a/b)（kgf 與 SI 兩版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_corbel_Ah",
+   "title": "托架平行主拉力鋼筋之閉合肋筋總面積 Ah＝0.5(Asc－An)（式16.5.5.2）",
+   "src": "rc112",
+   "clause": "16.5.5.2",
+   "page": 216,
+   "keywords": "托架 梁托 閉合肋筋 Ah Asc An 斜拉破壞 支承",
+   "unit": "mm2",
+   "output": "Ah",
+   "latex": "A_h=0.5\\left(A_{sc}-A_n\\right)",
+   "vars": {
+    "Asc": {
+     "desc": "通過支承面之總鋼筋量 Asc（拉力鋼筋）",
+     "unit": "mm2",
+     "min": 0
+    },
+    "An": {
+     "desc": "抵抗直接拉力之鋼筋量 An（無直接拉力時取 0）",
+     "unit": "mm2",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "expr": "0.5*(Asc-An)",
+   "conditions": [
+    {
+     "expr": "Asc>=An",
+     "msg": "Asc 應不小於 An（否則 Ah 為負）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Asc": 2000,
+      "An": 1000
+     },
+     "out": 500.0
+    },
+    {
+     "in": {
+      "Asc": 2000
+     },
+     "out": 1000.0
+    }
+   ],
+   "notes": "16.5.5.2：平行於主拉力鋼筋之閉合肋筋或箍筋總面積 Ah 應不小於 0.5(Asc－An)。解說：配置此肋筋可避免梁托或托架早發斜拉破壞；Ah 之配置依 16.5.6.6 節；通過支承面的總鋼筋量為 Asc 與 Ah 之總和（圖R16.5.1b）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.216 式(16.5.5.2)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_Nb",
+   "title": "單根錨栓基本混凝土拉破強度 Nb＝kc·λa·√fc′·hef^1.5（式17.6.2.2.1）",
+   "src": "rc112",
+   "clause": "17.6.2.2.1",
+   "page": 236,
+   "keywords": "錨栓 混凝土拉破強度 Nb kc hef 預埋式 後置式 開裂混凝土",
+   "unit": "kgf",
+   "output": "Nb",
+   "latex": "N_b=k_c\\lambda_a\\sqrt{f_c'}\\,h_{ef}^{1.5}",
+   "vars": {
+    "kc": {
+     "desc": "錨栓類型係數 kc（預埋式 10、後置式 7；公制 kgf 單位）",
+     "unit": "-",
+     "min": 1,
+     "default": 10
+    },
+    "fc": {
+     "desc": "混凝土規定抗壓強度 fc′",
+     "unit": "kgf/cm2",
+     "min": 100
+    },
+    "hef": {
+     "desc": "有效埋設深度 hef",
+     "unit": "cm",
+     "min": 1
+    },
+    "lama": {
+     "desc": "輕質混凝土修正係數 λa（常重 1.0）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.5
+    }
+   },
+   "expr": "kc*lama*sqrt(fc)*hef**1.5",
+   "conditions": [
+    {
+     "expr": "fc>0 and hef>0",
+     "msg": "fc′、hef 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "kc": 10,
+      "fc": 210,
+      "hef": 10
+     },
+     "out": 4582.576,
+     "tol": 0.01
+    },
+    {
+     "in": {
+      "kc": 7,
+      "fc": 210,
+      "hef": 10
+     },
+     "out": 3207.803,
+     "tol": 0.01
+    }
+   ],
+   "notes": "17.6.2.2.1：在混凝土開裂區，單根錨栓之基本混凝土拉破強度 Nb 依本式計算（第17.6.2.2.3 節例外）；kc＝10 為預埋式錨栓、kc＝7 為後置式錨栓。**本式採公制（fc′ 以 kgf/cm²、hef 以 cm、Nb 以 kgf）**，與規範原式一致；SI 版之 kc 常數不同（原頁未列），使用 SI 單位時須另查原頁。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.236 式(17.6.2.2.1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_Npn",
+   "title": "單根錨栓標稱拔出強度 Npn＝ψc,P·Np（式17.6.3.1）",
+   "src": "rc112",
+   "clause": "17.6.3.1",
+   "page": 239,
+   "keywords": "錨栓 拔出強度 Npn ψc,P Np 預埋式 後置式膨脹 螺紋 擴底",
+   "unit": "N",
+   "output": "Npn",
+   "latex": "N_{pn}=\\psi_{c,P}N_p",
+   "vars": {
+    "psicP": {
+     "desc": "開裂修正因數 ψc,P（17.6.3.3）",
+     "unit": "-",
+     "min": 0,
+     "default": 1.0
+    },
+    "Np": {
+     "desc": "基本拔出強度 Np（17.6.3.2）",
+     "unit": "N",
+     "min": 0
+    }
+   },
+   "expr": "psicP*Np",
+   "conditions": [
+    {
+     "expr": "Np>=0",
+     "msg": "Np 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "psicP": 1.0,
+      "Np": 10000
+     },
+     "out": 10000.0
+    },
+    {
+     "in": {
+      "psicP": 0.7,
+      "Np": 20000
+     },
+     "out": 14000.0
+    }
+   ],
+   "notes": "17.6.3.1：單根預埋式、單根後置式膨脹、螺紋或擴底錨栓之標稱拔出強度 Npn＝ψc,P·Np；ψc,P 定義於 17.6.3.3。解說：拔出之設計要求適用於預埋式、後置式膨脹、螺紋和擴底錨栓；**不適用於黏結式錨栓**（黏結式之握裹破壞依 17.6.5 節）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.239 式(17.6.3.1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_Nsb",
+   "title": "擴頭錨栓邊緣脹破強度 Nsb＝13·ca1·√Abrg·λa·√fc′（式17.6.4.1，SI）",
+   "src": "rc112",
+   "clause": "17.6.4.1",
+   "page": 240,
+   "keywords": "擴頭錨栓 邊緣脹破 Nsb ca1 Abrg hef 2.5ca1 深埋",
+   "unit": "N",
+   "output": "Nsb",
+   "latex": "N_{sb}=13\\,c_{a1}\\sqrt{A_{brg}}\\,\\lambda_a\\sqrt{f_c'}\\ (\\mathrm{MPa},\\mathrm{mm})",
+   "vars": {
+    "ca1": {
+     "desc": "邊距 ca1（至自由邊之距離）",
+     "unit": "mm",
+     "min": 0
+    },
+    "Abrg": {
+     "desc": "擴頭承壓面積 Abrg",
+     "unit": "mm2",
+     "min": 0
+    },
+    "fc": {
+     "desc": "混凝土 fc′",
+     "unit": "MPa",
+     "min": 10
+    },
+    "lama": {
+     "desc": "輕質混凝土修正係數 λa（常重 1.0）",
+     "unit": "-",
+     "default": 1.0,
+     "min": 0.5
+    }
+   },
+   "expr": "13*ca1*sqrt(Abrg)*lama*sqrt(fc)",
+   "conditions": [
+    {
+     "expr": "ca1>0 and Abrg>0 and fc>0",
+     "msg": "ca1、Abrg、fc′ 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "ca1": 100,
+      "Abrg": 1000,
+      "fc": 28
+     },
+     "out": 217531.6,
+     "tol": 2.0
+    },
+    {
+     "in": {
+      "ca1": 150,
+      "Abrg": 2000,
+      "fc": 28
+     },
+     "out": 461454.2,
+     "tol": 3.0
+    }
+   ],
+   "notes": "17.6.4.1：單根擴頭錨栓具較深埋設長度且靠近邊緣（**hef > 2.5ca1**）時，標稱邊緣脹破強度 Nsb 依本式計算。公制版係數為 42.44（kgf），SI 版為 13（MPa），本式採 SI（ca1、√Abrg 以 mm 計）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.240 式(17.6.4.1)（kgf 42.44 與 SI 13 兩版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_psi_edV",
+   "title": "剪力邊距效應修正因數 ψed,V（式17.7.2.4.1a/b）",
+   "src": "rc112",
+   "clause": "17.7.2.4.1",
+   "page": 254,
+   "keywords": "錨栓 剪力 邊距效應 ψed,V ca1 ca2 修正因數 混凝土拉破",
+   "unit": "-",
+   "output": "psi_edV",
+   "latex": "\\psi_{ed,V}=\\begin{cases}1.0 & c_{a2}\\ge 1.5c_{a1}\\\\ 0.7+0.3\\dfrac{c_{a2}}{1.5c_{a1}} & c_{a2}<1.5c_{a1}\\end{cases}",
+   "vars": {
+    "ca1": {
+     "desc": "剪力方向之邊距 ca1",
+     "unit": "mm",
+     "min": 0
+    },
+    "ca2": {
+     "desc": "垂直剪力方向之邊距 ca2",
+     "unit": "mm",
+     "min": 0
+    }
+   },
+   "expr": "1.0 if ca2>=1.5*ca1 else 0.7+0.3*ca2/(1.5*ca1)",
+   "conditions": [
+    {
+     "expr": "ca1>0 and ca2>=0",
+     "msg": "ca1 須為正、ca2 非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "ca1": 100,
+      "ca2": 300
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "ca1": 100,
+      "ca2": 100
+     },
+     "out": 0.9
+    },
+    {
+     "in": {
+      "ca1": 100,
+      "ca2": 0
+     },
+     "out": 0.7
+    }
+   ],
+   "notes": "17.7.2.4.1：單根錨栓或錨栓群在剪力載重下之邊距效應修正因數 ψed,V 依本式，其中 ca2 應取較小值。原式 (b)：ca2<1.5ca1 時 ψed,V＝0.7＋0.3·ca2/(1.5ca1)。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.254 式(17.7.2.4.1a/b)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_anchor_AVco",
+   "title": "單根錨栓剪力投影面積 AVco＝4.5(ca1)²（式17.7.2.1.3）",
+   "src": "rc112",
+   "clause": "17.7.2.1.2",
+   "page": 250,
+   "keywords": "錨栓 剪力 投影面積 AVco ca1 半角錐 邊距 深厚構件",
+   "unit": "mm2",
+   "output": "AVco",
+   "latex": "A_{Vco}=4.5\\left(c_{a1}\\right)^2",
+   "vars": {
+    "ca1": {
+     "desc": "剪力方向之邊距 ca1",
+     "unit": "mm",
+     "min": 0
+    }
+   },
+   "expr": "4.5*ca1**2",
+   "conditions": [
+    {
+     "expr": "ca1>0",
+     "msg": "ca1 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "ca1": 100
+     },
+     "out": 45000.0
+    },
+    {
+     "in": {
+      "ca1": 200
+     },
+     "out": 180000.0
+    }
+   ],
+   "notes": "17.7.2.1.2：AVco 為埋設於深厚構件且距垂直剪力方向邊緣 ≥1.5ca1 之單根錨栓之投影面積，其為平行邊緣之邊長 3ca1 與深度 1.5ca1 所構成之半角錐底面積，即 AVco＝4.5(ca1)²（式17.7.2.1.3）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.250 式(17.7.2.1.3)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_shear_friction_Vn",
+   "title": "剪力摩擦標稱強度 Vn＝μ·Avf·fy（式18.9.9.3）",
+   "src": "rc112",
+   "clause": "18.9.9.3",
+   "page": 321,
+   "keywords": "剪力摩擦 Avf fy 摩擦係數 μ 預鑄接縫 上覆板 耐震 界面剪力",
+   "unit": "N",
+   "output": "Vn",
+   "latex": "V_n=\\mu A_{vf}f_y",
+   "vars": {
+    "Avf": {
+     "desc": "上覆板內剪力摩擦鋼筋總斷面積 Avf",
+     "unit": "mm2",
+     "min": 0
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度 fy",
+     "unit": "MPa",
+     "min": 0
+    },
+    "mu": {
+     "desc": "摩擦係數 μ（本條為 1.0λ）",
+     "unit": "-",
+     "min": 0,
+     "default": 1.0
+    }
+   },
+   "expr": "mu*Avf*fy",
+   "conditions": [
+    {
+     "expr": "Avf>=0 and fy>=0",
+     "msg": "Avf、fy 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Avf": 1000,
+      "fy": 420,
+      "mu": 1.0
+     },
+     "out": 420000.0
+    },
+    {
+     "in": {
+      "Avf": 1000,
+      "fy": 420,
+      "mu": 0.75
+     },
+     "out": 315000.0
+    }
+   ],
+   "notes": "18.9.9.3：上覆板與相鄰預鑄構材間接縫之界面剪力，其 Vn＝μ Avf fy；式中 Avf 為上覆板內剪力摩擦鋼筋之總斷面積（含垂直預鑄系統接縫之分布與邊界鋼筋），**摩擦係數 μ 取 1.0λ**（λ 依第19.2.4節，見 rc112_lambda_density）。至少應有半數以上之 Avf 鋼筋須均勻分布在潛在剪力面之長度內；上覆板內任一方向之分布鋼筋面積應符合 24.4.3.2 節。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.321 式(18.9.9.3)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

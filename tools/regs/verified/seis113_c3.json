@@ -1,0 +1,65 @@
+{
+ "formulas": [
+  {
+   "id": "seis113_isolator_cycle_uniformity_954",
+   "title": "隔震元件各循環有效勁度與平均值之差異（建築物耐震設計規範 113 年版 9.5.4.4 式9-14）",
+   "src": "seis113",
+   "clause": "9.5.4.4",
+   "page": 132,
+   "keywords": "耐震 隔震元件 試驗 每一種試驗位移 任一循環 有效勁度 平均有效勁度 差異 10% 9-14",
+   "unit": "-",
+   "output": "diff_ratio",
+   "latex": "\\frac{\\left|k_{e,i}-k_e\\right|}{k_e}\\le10\\%",
+   "vars": {
+    "kei": {
+     "desc": "任一個循環的有效勁度 ke,i",
+     "unit": "tf/cm",
+     "min": 1e-09
+    },
+    "ke": {
+     "desc": "三個循環的平均有效勁度 ke",
+     "unit": "tf/cm",
+     "min": 1e-09
+    }
+   },
+   "expr": "abs(kei-ke)/ke",
+   "tests": [
+    {
+     "in": {
+      "kei": 10.2,
+      "ke": 10.0
+     },
+     "out": 0.019999999999999928
+    },
+    {
+     "in": {
+      "kei": 11.5,
+      "ke": 10.0
+     },
+     "out": 0.15
+    }
+   ],
+   "notes": "建築物耐震設計規範（113 年版）**9.5.4.4：依 9.5.2.1.3 節或 9.5.2.2.3 節之試驗，每一種試驗位移下任一循環的有效勁度與其三個循環的平均有效勁度差異須在 ±10% 以內，即 |ke,i－ke|/ke≤10%**（式9-14）；ke,i 為任一個循環的有效勁度值，ke 為平均有效勁度。（兩試體間之一致性判據見 seis113_isolator_keff_uniformity，式9-15。）",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "ke>0",
+     "msg": "ke 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "abs(kei-ke)/ke>0.10",
+     "msg": "差異超過 10%：不合 9.5.4.4"
+    }
+   ],
+   "_file": "payload_phase3c.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

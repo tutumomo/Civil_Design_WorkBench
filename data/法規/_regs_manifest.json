@@ -1,0 +1,1147 @@
+{
+ "rc112": {
+  "id": "rc112",
+  "name": "建築物混凝土結構設計規範_1120810",
+  "authority": "內政部",
+  "version": "112.08.10 台內營字第1120809921號令修正，113.01.01 生效",
+  "url": "https://www.nlma.gov.tw/filesys/file/EMMA/c1130219-1.pdf",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 6953056,
+  "sha256": "b381dc0626226ebbb17b3d6627b3d321927fdf21ca6e7aef47547f3599c82eb4",
+  "server_filename": "",
+  "type": "pdf",
+  "pages": 591,
+  "text_chars": 690601,
+  "files": {
+   "original": "建築物混凝土結構設計規範_1120810.pdf",
+   "text": "建築物混凝土結構設計規範_1120810_全文.txt"
+  }
+ },
+ "found112": {
+  "id": "found112",
+  "name": "建築物基礎構造設計規範_1120620",
+  "authority": "內政部",
+  "version": "112.06.20 台內營字第1120807974號令修正，113.01.01 生效",
+  "url": "https://www.nlma.gov.tw/uploads/files/53651dae74223e6599e20838bb8c4f2a.pdf",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 5063374,
+  "sha256": "2f3ce37fb7e4ceefb7a0e77dfc7983cdfdd7b748ed16a377aa93f90067119d4e",
+  "server_filename": "",
+  "type": "pdf",
+  "pages": 354,
+  "text_chars": 266050,
+  "files": {
+   "original": "建築物基礎構造設計規範_1120620.pdf",
+   "text": "建築物基礎構造設計規範_1120620_全文.txt"
+  }
+ },
+ "seis111": {
+  "id": "seis111",
+  "name": "建築物耐震設計規範及解說_111年版",
+  "authority": "內政部（國震中心轉載）",
+  "version": "111 年版全文；113.03.01 部分修正須另核",
+  "url": "https://seaport.ncree.org/static/pdf/sederes/20220614_111年版建築物耐震設計規範及解說.pdf",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 4273277,
+  "sha256": "35eac44c4da9856906e4c64acc599c320b6a7030e1d8e72b714907b17402bef4",
+  "server_filename": "",
+  "type": "pdf",
+  "pages": 200,
+  "text_chars": 196038,
+  "files": {
+   "original": "建築物耐震設計規範及解說_111年版.pdf",
+   "text": "建築物耐震設計規範及解說_111年版_全文.txt"
+  }
+ },
+ "urbanroad113": {
+  "id": "urbanroad113",
+  "name": "市區道路及附屬工程設計規範_1130912",
+  "authority": "內政部",
+  "version": "113.09.12 修正",
+  "url": "https://www.nlma.gov.tw/filesys/file/chinese/law/c1130912-1.pdf",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 10294963,
+  "sha256": "ae9171ae97966ff7568899ded0cc94e3170fdb9d12a47b8f44613df66939a1dd",
+  "server_filename": "",
+  "type": "pdf",
+  "pages": 181,
+  "text_chars": 114554,
+  "files": {
+   "original": "市區道路及附屬工程設計規範_1130912.pdf",
+   "text": "市區道路及附屬工程設計規範_1130912_全文.txt"
+  }
+ },
+ "hwroute115": {
+  "id": "hwroute115",
+  "name": "公路路線設計規範_11507版",
+  "authority": "交通部",
+  "version": "115.07.28 交綜(一)字第11586004125號",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=447&detailNo=1534440204138450944",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 5749402,
+  "sha256": "ef7367500d8728e8fee243aadd9c98d1f60ae4acf97306b6c415790430b0e8b1",
+  "server_filename": "1534440204138450944.pdf",
+  "type": "pdf",
+  "pages": 93,
+  "text_chars": 65654,
+  "files": {
+   "original": "公路路線設計規範_11507版.pdf",
+   "text": "公路路線設計規範_11507版_全文.txt"
+  }
+ },
+ "hwdrain107": {
+  "id": "hwdrain107",
+  "name": "公路排水設計規範_1070206",
+  "authority": "交通部",
+  "version": "107.02.06 修正版（附件標示）",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=414&detailNo=2",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 3556665,
+  "sha256": "fbfdbbc04a37d180a8f4b7e56da164f30135c56384a43a91ef59157c1939c691",
+  "server_filename": "201802061649160.rar",
+  "type": "archive",
+  "pages": 183,
+  "parts": [
+   {
+    "file": "公路排水設計規範_1070206/公路排水設計規範內文.pdf",
+    "pages": 182
+   },
+   {
+    "file": "公路排水設計規範_1070206/公路排水設計規範封面.pdf",
+    "pages": 1
+   }
+  ],
+  "text_chars": 121641,
+  "files": {
+   "folder": "公路排水設計規範_1070206",
+   "text": "公路排水設計規範_1070206_全文.txt"
+  }
+ },
+ "hwslope104": {
+  "id": "hwslope104",
+  "name": "公路邊坡工程設計規範_10412",
+  "authority": "交通部",
+  "version": "104.12 版全文",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=405&detailNo=1",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 2699331,
+  "sha256": "30fda62dc1332e39c4696c5705e1f42e140e1590da0c652206e1335640a89e86",
+  "server_filename": "201601041343190.rar",
+  "type": "archive",
+  "pages": 225,
+  "parts": [
+   {
+    "file": "公路邊坡工程設計規範_10412/00設計規範_封面.pdf",
+    "pages": 1
+   },
+   {
+    "file": "公路邊坡工程設計規範_10412/00設計規範_書背.pdf",
+    "pages": 1
+   },
+   {
+    "file": "公路邊坡工程設計規範_10412/01設計規範_書名頁版權頁.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路邊坡工程設計規範_10412/02設計規範_人員名單.pdf",
+    "pages": 1
+   },
+   {
+    "file": "公路邊坡工程設計規範_10412/03設計規範_前言.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路邊坡工程設計規範_10412/04設計規範_本文.pdf",
+    "pages": 102
+   },
+   {
+    "file": "公路邊坡工程設計規範_10412/05設計規範_封底.pdf",
+    "pages": 1
+   },
+   {
+    "file": "公路邊坡工程設計規範_10412/06設計規範-合併檔.pdf",
+    "pages": 115
+   }
+  ],
+  "text_chars": 184120,
+  "files": {
+   "folder": "公路邊坡工程設計規範_10412",
+   "text": "公路邊坡工程設計規範_10412_全文.txt"
+  }
+ },
+ "hwslope111": {
+  "id": "hwslope111",
+  "name": "公路邊坡工程設計規範_1110427_修正總說明及對照表",
+  "authority": "交通部",
+  "version": "111.04.27 修正條文對照表",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=405&detailNo=2",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 210935,
+  "sha256": "5abf936f4d691abc6214ca85ceeeb3ca0a232928bd5535b31b90742b8d63c470",
+  "server_filename": "202204291430540.pdf",
+  "type": "pdf",
+  "pages": 6,
+  "text_chars": 4490,
+  "files": {
+   "original": "公路邊坡工程設計規範_1110427_修正總說明及對照表.pdf",
+   "text": "公路邊坡工程設計規範_1110427_修正總說明及對照表_全文.txt"
+  }
+ },
+ "flexpave91": {
+  "id": "flexpave91",
+  "name": "柔性鋪面設計規範_910131",
+  "authority": "交通部",
+  "version": "91.01.31 版",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=353&detailNo=1194539920614494208",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 14948114,
+  "sha256": "9e1b940e9357dfd67112d045f5b0cee2fd4cba9ef1eb3638c5e0e3e5c067ff4d",
+  "server_filename": "1194539920614494208.7z",
+  "type": "archive",
+  "pages": 621,
+  "parts": [
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/90065-設計基準.pdf",
+    "pages": 16
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/90065-設計手冊目錄.pdf",
+    "pages": 17
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/APPEA-E.pdf",
+    "pages": 33
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/APPNF-G.pdf",
+    "pages": 42
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊-CH1-2.pdf",
+    "pages": 15
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊-CH3.pdf",
+    "pages": 43
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊-CH4.pdf",
+    "pages": 25
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊-CH5-1.pdf",
+    "pages": 16
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊-CH5-6.pdf",
+    "pages": 11
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊CH6.pdf",
+    "pages": 11
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊Ch7.pdf",
+    "pages": 16
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊CH8.pdf",
+    "pages": 3
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊CH9-1.pdf",
+    "pages": 29
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/WORD/REPORT/設計手冊CH9-2.pdf",
+    "pages": 11
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/柔性鋪面設計規範(設計基準).pdf",
+    "pages": 16
+   },
+   {
+    "file": "柔性鋪面設計規範_910131/柔性鋪面設計規範(設計手冊).pdf",
+    "pages": 317
+   }
+  ],
+  "text_chars": 357876,
+  "files": {
+   "folder": "柔性鋪面設計規範_910131",
+   "text": "柔性鋪面設計規範_910131_全文.txt"
+  }
+ },
+ "traffic114": {
+  "id": "traffic114",
+  "name": "交通工程規範_11407",
+  "authority": "交通部",
+  "version": "114.07 部分條文修正",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=434&detailNo=1417794078568878080",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 7243875,
+  "sha256": "c811edd4e0c0fcc1ad3ce92652b851a658b91b4aab8de597de3a0cc82b7c9836",
+  "server_filename": "1417794078568878080.zip",
+  "type": "archive",
+  "pages": 270,
+  "parts": [
+   {
+    "file": "交通工程規範_11407/01封面.pdf",
+    "pages": 2
+   },
+   {
+    "file": "交通工程規範_11407/02前言.pdf",
+    "pages": 1
+   },
+   {
+    "file": "交通工程規範_11407/03目錄.pdf",
+    "pages": 12
+   },
+   {
+    "file": "交通工程規範_11407/04條文.pdf",
+    "pages": 31
+   },
+   {
+    "file": "交通工程規範_11407/05解說.pdf",
+    "pages": 215
+   },
+   {
+    "file": "交通工程規範_11407/06附錄.pdf",
+    "pages": 7
+   },
+   {
+    "file": "交通工程規範_11407/07參考文獻.pdf",
+    "pages": 2
+   }
+  ],
+  "text_chars": 144289,
+  "files": {
+   "folder": "交通工程規範_11407",
+   "text": "交通工程規範_11407_全文.txt"
+  }
+ },
+ "hwconst112": {
+  "id": "hwconst112",
+  "name": "公路工程施工規範_1120222",
+  "authority": "交通部",
+  "version": "112.02.22",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=439&detailNo=1077840993601982464",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 19751336,
+  "sha256": "d40edade8ca39c820e81484117f43363f0761136dd0a6b052632c92ef13117ed",
+  "server_filename": "1077840993601982464.rar",
+  "type": "archive",
+  "pages": 681,
+  "parts": [
+   {
+    "file": "公路工程施工規範_1120222/(02)書名頁及版權頁.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路工程施工規範_1120222/(03)人員名單.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路工程施工規範_1120222/(04)前言.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路工程施工規範_1120222/(05)目錄.pdf",
+    "pages": 4
+   },
+   {
+    "file": "公路工程施工規範_1120222/(06) 第一篇    總則.pdf",
+    "pages": 19
+   },
+   {
+    "file": "公路工程施工規範_1120222/(07) 第二篇    路基工程.pdf",
+    "pages": 48
+   },
+   {
+    "file": "公路工程施工規範_1120222/(08) 第三篇    路面工程.pdf",
+    "pages": 116
+   },
+   {
+    "file": "公路工程施工規範_1120222/(09) 第四篇    橋梁工程.pdf",
+    "pages": 208
+   },
+   {
+    "file": "公路工程施工規範_1120222/(10) 第五篇   隧道工程.pdf",
+    "pages": 70
+   },
+   {
+    "file": "公路工程施工規範_1120222/(11) 第六篇  混凝土工程.pdf",
+    "pages": 58
+   },
+   {
+    "file": "公路工程施工規範_1120222/(12) 第七篇   排水工程.pdf",
+    "pages": 28
+   },
+   {
+    "file": "公路工程施工規範_1120222/(13) 第八篇  邊坡工程.pdf",
+    "pages": 72
+   },
+   {
+    "file": "公路工程施工規範_1120222/(14) 第九篇  交通設施及其他工程.pdf",
+    "pages": 30
+   },
+   {
+    "file": "公路工程施工規範_1120222/(15) 第十篇  工程安全環境衛生措施.pdf",
+    "pages": 16
+   },
+   {
+    "file": "公路工程施工規範_1120222/(16) 第十一篇   環境保護措施.pdf",
+    "pages": 6
+   }
+  ],
+  "text_chars": 482052,
+  "files": {
+   "folder": "公路工程施工規範_1120222",
+   "text": "公路工程施工規範_1120222_全文.txt"
+  }
+ },
+ "btr_general": {
+  "id": "btr_general",
+  "name": "建築技術規則總則編_1091019",
+  "authority": "內政部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070114",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 59655,
+  "sha256": "783698166f3e312d081ea33059829b75d5259e531f3138df142520bc63d4be2a",
+  "server_filename": "",
+  "title": "建築技術規則總則編",
+  "amended": "民國 109 年 10 月 19 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 5524,
+  "files": {
+   "text": "建築技術規則總則編_1091019_全文.txt"
+  }
+ },
+ "btr_design": {
+  "id": "btr_design",
+  "name": "建築技術規則建築設計施工編_1150223",
+  "authority": "內政部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070115",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 439112,
+  "sha256": "fc68fc8312a94138578c596b334722bfc4437b4081baca458d2390d0875e5607",
+  "server_filename": "",
+  "title": "建築技術規則建築設計施工編",
+  "amended": "民國 115 年 02 月 23 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 100069,
+  "files": {
+   "text": "建築技術規則建築設計施工編_1150223_全文.txt"
+  }
+ },
+ "btr_struct": {
+  "id": "btr_struct",
+  "name": "建築技術規則建築構造編_1120510",
+  "authority": "內政部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070116",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 283576,
+  "sha256": "2cadb880652aabd27bf1c4e91ee5b58d992d32979d408d8b75326276fcb51aa2",
+  "server_filename": "",
+  "title": "建築技術規則建築構造編",
+  "amended": "民國 112 年 05 月 10 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 39367,
+  "files": {
+   "text": "建築技術規則建築構造編_1120510_全文.txt"
+  }
+ },
+ "btr_equip": {
+  "id": "btr_equip",
+  "name": "建築技術規則建築設備編_1111229",
+  "authority": "內政部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070117",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 172553,
+  "sha256": "fe393a118cc073575ef308b592449a83ec0a48e48bdfb4a195c77a63ed29a6ad",
+  "server_filename": "",
+  "title": "建築技術規則建築設備編",
+  "amended": "民國 111 年 12 月 29 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 33957,
+  "files": {
+   "text": "建築技術規則建築設備編_1111229_全文.txt"
+  }
+ },
+ "swc_act": {
+  "id": "swc_act",
+  "name": "水土保持法_1051130",
+  "authority": "農業部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=M0110001",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 75006,
+  "sha256": "cd3f9d1fb1864c52df2f5b7f31bdd4975f34d9dc2c5a8446e6f69c2f7f0b25c5",
+  "server_filename": "",
+  "title": "水土保持法",
+  "amended": "民國 105 年 11 月 30 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 6808,
+  "files": {
+   "text": "水土保持法_1051130_全文.txt"
+  }
+ },
+ "swc_rule": {
+  "id": "swc_rule",
+  "name": "水土保持法施行細則_1091202",
+  "authority": "農業部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=M0110002",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 66538,
+  "sha256": "68ed520023443533fba23fe8e6e3fb2ffa5c9b7616b9a68eab7fb8208ba77f6e",
+  "server_filename": "",
+  "title": "水土保持法施行細則",
+  "amended": "民國 109 年 12 月 02 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 4399,
+  "files": {
+   "text": "水土保持法施行細則_1091202_全文.txt"
+  }
+ },
+ "swc_review": {
+  "id": "swc_review",
+  "name": "水土保持計畫審核監督辦法_1140909",
+  "authority": "農業部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=M0110012",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 77511,
+  "sha256": "61e05c542053263fdcc506ea4b4bc93e700cbd27141a01de875eab20a3062b26",
+  "server_filename": "",
+  "title": "水土保持計畫審核監督辦法",
+  "amended": "民國 114 年 09 月 09 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 7454,
+  "files": {
+   "text": "水土保持計畫審核監督辦法_1140909_全文.txt"
+  }
+ },
+ "slopeland_act": {
+  "id": "slopeland_act",
+  "name": "山坡地保育利用條例_1080109",
+  "authority": "農業部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=M0110006",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 70373,
+  "sha256": "620d22b5f632deeccd83b6fef97d91163d9cfd995c0ec2bd1283580a2e545f9e",
+  "server_filename": "",
+  "title": "山坡地保育利用條例",
+  "amended": "民國 108 年 01 月 09 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 5385,
+  "files": {
+   "text": "山坡地保育利用條例_1080109_全文.txt"
+  }
+ },
+ "slopeland_rule": {
+  "id": "slopeland_rule",
+  "name": "山坡地保育利用條例施行細則_1090513",
+  "authority": "農業部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=M0110007",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 54441,
+  "sha256": "2a46a69a4e116a808092ba576fce828d6e6f7fb948c3abe77694719fe4de8a9a",
+  "server_filename": "",
+  "title": "山坡地保育利用條例施行細則",
+  "amended": "民國 109 年 05 月 13 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 2178,
+  "files": {
+   "text": "山坡地保育利用條例施行細則_1090513_全文.txt"
+  }
+ },
+ "urbanroad_act": {
+  "id": "urbanroad_act",
+  "name": "市區道路條例_1150701",
+  "authority": "內政部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070007",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 61646,
+  "sha256": "1dcf14aaf40b831fe8e73f2be8fe1c178e4eab64163a1a75aacf36c7967fa9e7",
+  "server_filename": "",
+  "title": "市區道路條例",
+  "amended": "民國 115 年 07 月 01 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 3465,
+  "files": {
+   "text": "市區道路條例_1150701_全文.txt"
+  }
+ },
+ "sewer_std": {
+  "id": "sewer_std",
+  "name": "下水道工程設施標準_1141104",
+  "authority": "內政部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070071",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 165358,
+  "sha256": "fd807a4376f39ffaf5d803c2fae185922df8e03a9a9316d6ad65d913a13b4c89",
+  "server_filename": "",
+  "title": "下水道工程設施標準",
+  "amended": "民國 114 年 11 月 04 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 35083,
+  "files": {
+   "text": "下水道工程設施標準_1141104_全文.txt"
+  }
+ },
+ "traffic_sign": {
+  "id": "traffic_sign",
+  "name": "道路交通標誌標線號誌設置規則_1150311",
+  "authority": "交通部、內政部",
+  "version": "",
+  "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=K0040014",
+  "fetched": "2026-10-29T13:40:09",
+  "bytes": 302666,
+  "sha256": "195d0695eebdea756f61c92f0b93e887be0ec2d2de28a56b24bb5edafd127153",
+  "server_filename": "",
+  "title": "道路交通標誌標線號誌設置規則",
+  "amended": "民國 115 年 03 月 11 日",
+  "history": "",
+  "type": "html",
+  "text_chars": 55571,
+  "files": {
+   "text": "道路交通標誌標線號誌設置規則_1150311_全文.txt"
+  }
+ },
+ "seis113": {
+  "id": "seis113",
+  "name": "建築物耐震設計規範及解說_1130301",
+  "authority": "內政部",
+  "version": "113.03.01 台內國字第1130801422號令修正",
+  "url": "https://glrs.moi.gov.tw/Download.ashx?FileID=23265&id=GL000180&type=LAW",
+  "fetched": "2026-10-29T13:43:32",
+  "bytes": 7944487,
+  "sha256": "2bb2a7b82c187c676a51ced44c63ab53d7c7ffa90c0c018c20fa91dc78cdf595",
+  "server_filename": "01å»ºç¯ç©èéè¨­è¨è¦ç¯åè§£èªª_1130301.pdf",
+  "page": "https://glrs.moi.gov.tw/LawContent.aspx?id=GL000180",
+  "amended": "113.03.01",
+  "type": "pdf",
+  "pages": 201,
+  "text_chars": 194095,
+  "files": {
+   "original": "建築物耐震設計規範及解說_1130301.pdf",
+   "text": "建築物耐震設計規範及解說_1130301_全文.txt"
+  }
+ },
+ "wind103": {
+  "id": "wind103",
+  "name": "建築物耐風設計規範及解說_1031203",
+  "authority": "內政部",
+  "version": "103.12.03 修正，104.01.01 生效",
+  "url": "https://glrs.moi.gov.tw/Download.ashx?FileID=5520&id=GL000670&type=LAW",
+  "fetched": "2026-10-29T13:43:32",
+  "bytes": 532634,
+  "sha256": "8695ec0159dc29f9433e26095305399c251993b3f8b065367f4fe139c3d7acd1",
+  "server_filename": "ç¬¬ä¸ç« ãç¸½å.pdf",
+  "page": "https://glrs.moi.gov.tw/LawContent.aspx?id=GL000670",
+  "amended": "103.12.03",
+  "type": "pdf",
+  "pages": 6,
+  "text_chars": 4214,
+  "files": {
+   "original": "建築物耐風設計規範及解說_1031203.pdf",
+   "text": "建築物耐風設計規範及解說_1031203_全文.txt"
+  }
+ },
+ "wind103full": {
+  "id": "wind103full",
+  "name": "建築物耐風設計規範及解說_1031203_全文",
+  "authority": "內政部（淡江大學風工程研究中心轉載）",
+  "version": "103.12.03 修正版全文（glrs 附件僅 6 頁公告）",
+  "url": "https://windexpert.ce.tku.edu.tw/newcode/Dfiles/New_wind_code.pdf",
+  "fetched": "2026-10-29T13:46:48",
+  "bytes": 1543314,
+  "sha256": "590e76864812ff2505a19075d621b4e8350e6690582ad118d013446ac811c612",
+  "server_filename": "",
+  "type": "pdf",
+  "pages": 92,
+  "text_chars": 84745,
+  "files": {
+   "original": "建築物耐風設計規範及解說_1031203_全文.pdf",
+   "text": "建築物耐風設計規範及解說_1031203_全文_全文.txt"
+  }
+ },
+ "steel99": {
+  "id": "steel99",
+  "name": "鋼構造建築物鋼結構設計技術規範_990916",
+  "authority": "內政部",
+  "version": "96.06 發布，99.09.16 修正第十三．二點（含容許應力法與極限設計法兩冊）",
+  "url": "https://glrs.moi.gov.tw/LawContent.aspx?id=GL000143",
+  "fetched": "2026-10-29T13:46:48",
+  "type": "multi",
+  "attachments": 41,
+  "bytes": 10240703,
+  "sha256": "3405e3adef994ba608115dc6ec63d1bfa846725d76f126516dfc53cb94f6efd4",
+  "pages": 410,
+  "parts": [
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/01_(一)第一章_總則.pdf",
+    "pages": 5
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/02_(一)第二章_載重.pdf",
+    "pages": 3
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/03_(一)第三章_材料.pdf",
+    "pages": 5
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/04_(一)第四章_一般要求.pdf",
+    "pages": 14
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/05_(一)第五章_受拉構材.pdf",
+    "pages": 2
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/06_(一)第六章_受壓構材.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/07_(一)第七章_撓曲構材.pdf",
+    "pages": 12
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/08_(一)第八章_受軸力與彎矩共同作用之構材.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/09_(一)第九章_合成構材.pdf",
+    "pages": 18
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/10_(一)第十章_接合設計.pdf",
+    "pages": 34
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/11_(一)第十一章_其它考慮事項.pdf",
+    "pages": 13
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/12_(一)第十二章_製作、安裝及品管.pdf",
+    "pages": 1
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/13_(一)第十三章_耐震設計.pdf",
+    "pages": 38
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/14_(一)參考文獻.pdf",
+    "pages": 10
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/15_(一)附錄1_細長受壓肢材之局部挫屈.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/16_(一)附錄2_腹板變深之構材.pdf",
+    "pages": 8
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/17_(一)附錄3_積水載重之設計.pdf",
+    "pages": 2
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/18_(一)附錄4_疲勞應力設計.pdf",
+    "pages": 10
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/19_(一)附錄5_專有名詞中英對照.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/20_(二)第一章_總則.pdf",
+    "pages": 9
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/21_(二)第二章_載重.pdf",
+    "pages": 6
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/22_(二)第三章_材料.pdf",
+    "pages": 5
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/23_(二)第四章_一般要求.pdf",
+    "pages": 14
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/24_(二)第五章_受拉構材.pdf",
+    "pages": 3
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/25_(二)第六章_受壓構材.pdf",
+    "pages": 6
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/26_(二)第七章_撓曲構材.pdf",
+    "pages": 13
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/27_(二)第八章_構材承受組合力及扭矩.pdf",
+    "pages": 9
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/28_(二)第九章_合成構材.pdf",
+    "pages": 21
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/29_(二)第十章_接合設計.pdf",
+    "pages": 36
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/30_(二)第十一章_其它考慮事項.pdf",
+    "pages": 14
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/31_(二)第十二章_製作、安裝及品管.pdf",
+    "pages": 1
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/32_(二)第十三章_耐震設計.pdf",
+    "pages": 38
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/33_(二)參考文獻.pdf",
+    "pages": 10
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/34_(二)附錄_1_細長受壓肢材之局部挫屈.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/35_(二)附錄_2_撓曲扭轉挫屈.pdf",
+    "pages": 2
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/36_(二)附錄_3_撓曲構材補充規定.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/37_(二)附錄_4_積水載重之設計.pdf",
+    "pages": 2
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/38_(二)附錄_5_疲勞應力設計.pdf",
+    "pages": 10
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/39_(二)附錄_6_專有名詞中英對照.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/40_（一）鋼結構容許應力設計法規範及解說第十三．二點修正規定.pdf",
+    "pages": 4
+   },
+   {
+    "file": "鋼構造建築物鋼結構設計技術規範_990916/41_（二）鋼結構極限設計法規範及解說第十三．二點修正規定.pdf",
+    "pages": 4
+   }
+  ],
+  "text_chars": 410059,
+  "files": {
+   "folder": "鋼構造建築物鋼結構設計技術規範_990916",
+   "text": "鋼構造建築物鋼結構設計技術規範_990916_全文.txt"
+  }
+ },
+ "hwbridge": {
+  "id": "hwbridge",
+  "name": "公路橋梁設計規範_全文",
+  "authority": "交通部",
+  "version": "本文（版次見封面）",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=424&detailNo=1",
+  "fetched": "2026-10-29T13:46:48",
+  "bytes": 20444160,
+  "sha256": "69e9cd0854953486e427eab87a9b9e2518f60c64354b12f9ed6dd2b40a3eaf90",
+  "server_filename": "201201061825320.zip",
+  "type": "archive",
+  "pages": 867,
+  "parts": [
+   {
+    "file": "公路橋梁設計規範_全文/01_公路橋梁設計規範前三頁.pdf",
+    "pages": 6
+   },
+   {
+    "file": "公路橋梁設計規範_全文/981223 封面(Final).pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路橋梁設計規範_全文/981223 書背(Final).pdf",
+    "pages": 1
+   },
+   {
+    "file": "公路橋梁設計規範_全文/981223 本文(Final).pdf",
+    "pages": 429
+   },
+   {
+    "file": "公路橋梁設計規範_全文/公路橋梁設計規範光碟封面.pdf",
+    "pages": 1
+   },
+   {
+    "file": "公路橋梁設計規範_全文/前言+目錄.pdf",
+    "pages": 24
+   },
+   {
+    "file": "公路橋梁設計規範_全文/封面.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路橋梁設計規範_全文/書背.pdf",
+    "pages": 1
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第一章 總則.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第七章 鋼筋混凝土設計.pdf",
+    "pages": 56
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第三章 載重.pdf",
+    "pages": 22
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第九章 鋼結構.pdf",
+    "pages": 128
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第二章 設計概要.pdf",
+    "pages": 12
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第五章 基礎.pdf",
+    "pages": 26
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第八章 預力混凝土設計.pdf",
+    "pages": 38
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第六章 下部結構、箱涵及擋土牆.pdf",
+    "pages": 6
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第十一章 橋面防水.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第十二章 海洋環境下防蝕設計.pdf",
+    "pages": 4
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第十章 支承.pdf",
+    "pages": 28
+   },
+   {
+    "file": "公路橋梁設計規範_全文/第四章 載重之分佈.pdf",
+    "pages": 18
+   },
+   {
+    "file": "公路橋梁設計規範_全文/規範表頭.pdf",
+    "pages": 2
+   },
+   {
+    "file": "公路橋梁設計規範_全文/附錄.pdf",
+    "pages": 55
+   },
+   {
+    "file": "公路橋梁設計規範_全文/附錄表頭.pdf",
+    "pages": 2
+   }
+  ],
+  "text_chars": 726744,
+  "files": {
+   "folder": "公路橋梁設計規範_全文",
+   "text": "公路橋梁設計規範_全文_全文.txt"
+  }
+ },
+ "hwbridge104": {
+  "id": "hwbridge104",
+  "name": "公路橋梁設計規範_1040413_修訂",
+  "authority": "交通部",
+  "version": "104.04.13 規範修訂",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=424&detailNo=2",
+  "fetched": "2026-10-29T13:46:48",
+  "bytes": 1015808,
+  "sha256": "449f11ffd9de1ff8f2777b2a5866cc49bc11a415785aee10c65f48fcb8504af8",
+  "server_filename": "201504131044220.rar",
+  "type": "archive",
+  "pages": 79,
+  "parts": [
+   {
+    "file": "公路橋梁設計規範_1040413_修訂/公路橋梁耐久性設計規範修訂對照表0413.pdf",
+    "pages": 13
+   },
+   {
+    "file": "公路橋梁設計規範_1040413_修訂/第七章_鋼筋混凝土設計1040319.pdf",
+    "pages": 56
+   },
+   {
+    "file": "公路橋梁設計規範_1040413_修訂/第十二章耐久性設計1040319.pdf",
+    "pages": 9
+   },
+   {
+    "file": "公路橋梁設計規範_1040413_修訂/規範修訂說明.pdf",
+    "pages": 1
+   }
+  ],
+  "text_chars": 64244,
+  "files": {
+   "folder": "公路橋梁設計規範_1040413_修訂",
+   "text": "公路橋梁設計規範_1040413_修訂_全文.txt"
+  }
+ },
+ "hwbridge109": {
+  "id": "hwbridge109",
+  "name": "公路橋梁設計規範_1090103_修訂總說明及對照表",
+  "authority": "交通部",
+  "version": "109.01.03 修訂總說明及對照表",
+  "url": "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn=&serno=424&detailNo=3",
+  "fetched": "2026-10-29T13:46:48",
+  "bytes": 262367,
+  "sha256": "eb9a77a67e4a395a07492775c0e1070fd984da8bfc3585e17a9b1157d5d32942",
+  "server_filename": "202001030911290.pdf",
+  "type": "pdf",
+  "pages": 5,
+  "text_chars": 2170,
+  "files": {
+   "original": "公路橋梁設計規範_1090103_修訂總說明及對照表.pdf",
+   "text": "公路橋梁設計規範_1090103_修訂總說明及對照表_全文.txt"
+  }
+ },
+ "farmroad108": {
+  "id": "farmroad108",
+  "name": "農路設計規範_1081028",
+  "authority": "農業部",
+  "version": "108.10.28 農授水保字第1081861522A號令修正",
+  "url": "https://law.moa.gov.tw/LawContent.aspx?id=GL000744",
+  "fetched": "2026-10-29T15:39:06",
+  "type": "multi",
+  "kind": "law_point",
+  "attachments": 5,
+  "page": "https://law.moa.gov.tw/LawContent.aspx?id=GL000744",
+  "bytes": 1074226,
+  "sha256": "fe1aa9fd851b3d0e8c6fb9ee7d905af51e8f1733fde4c0c1836dfde142ff8e89",
+  "pages": 2,
+  "parts": [
+   {
+    "file": "01_農路設計規範附表一.odt",
+    "pages": null,
+    "text_chars": 1253,
+    "label": "農路設計規範附表一.odt"
+   },
+   {
+    "file": "02_農路設計規範附表二.odt",
+    "pages": null,
+    "text_chars": 1286,
+    "label": "農路設計規範附表二.odt"
+   },
+   {
+    "file": "03_農路設計規範附表三.odt",
+    "pages": null,
+    "text_chars": 1295,
+    "label": "農路設計規範附表三.odt"
+   },
+   {
+    "file": "04_農路設計規範附表四.odt",
+    "pages": null,
+    "text_chars": 1368,
+    "label": "農路設計規範附表四.odt"
+   },
+   {
+    "file": "05_「農路設計規範」規定附圖.pdf",
+    "pages": 2,
+    "text_chars": 1380,
+    "label": "「農路設計規範」規定附圖.pdf"
+   }
+  ],
+  "title": "農路設計規範",
+  "amended": "民國 108 年 10 月 28 日",
+  "splitter": "point",
+  "text_chars": 9859,
+  "files": {
+   "folder": "農路設計規範_1081028",
+   "text": "農路設計規範_1081028_全文.txt"
+  }
+ },
+ "airconst110": {
+  "id": "airconst110",
+  "name": "營建工程空氣污染防制設施管理辦法_1101018",
+  "authority": "環境部",
+  "version": "110.10.18 環署空字第1101141194號令修正",
+  "url": "https://oaout.moenv.gov.tw/law/LawContent.aspx?id=FL024889",
+  "fetched": "2026-10-29T15:39:35",
+  "type": "multi",
+  "kind": "law",
+  "attachments": 5,
+  "page": "https://oaout.moenv.gov.tw/law/LawContent.aspx?id=FL024889",
+  "bytes": 623244,
+  "sha256": "a60d159a844a51c215e5768ad244e69ee9f3df32617255c7b3ff8d81256b46ed",
+  "pages": 6,
+  "parts": [
+   {
+    "file": "01_附表一_第一級營建工程施工規模.pdf",
+    "pages": 2,
+    "text_chars": 1340,
+    "label": "附表一 第一級營建工程施工規模.pdf"
+   },
+   {
+    "file": "02_附表二_圍籬高度規定.pdf",
+    "pages": 1,
+    "text_chars": 126,
+    "label": "附表二 圍籬高度規定.pdf"
+   },
+   {
+    "file": "03_附表三_自動洗車設備項目及規格.pdf",
+    "pages": 1,
+    "text_chars": 590,
+    "label": "附表三 自動洗車設備項目及規格.pdf"
+   },
+   {
+    "file": "04_附表四_空氣污染防制設施之監測儀表、記錄項目、記錄頻率及其他規定.pdf",
+    "pages": 1,
+    "text_chars": 498,
+    "label": "附表四 空氣污染防制設施之監測儀表、記錄項目、記錄頻率及其他規定.pdf"
+   },
+   {
+    "file": "05_附表五_攝錄影監視系統功能規範.pdf",
+    "pages": 1,
+    "text_chars": 322,
+    "label": "附表五 攝錄影監視系統功能規範.pdf"
+   }
+  ],
+  "title": "營建工程空氣污染防制設施管理辦法",
+  "amended": "民國 110 年 10 月 18 日",
+  "text_chars": 6074,
+  "files": {
+   "folder": "營建工程空氣污染防制設施管理辦法_1101018",
+   "text": "營建工程空氣污染防制設施管理辦法_1101018_全文.txt"
+  }
+ }
+}

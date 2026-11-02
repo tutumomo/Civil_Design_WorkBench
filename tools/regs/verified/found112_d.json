@@ -1,0 +1,682 @@
+{
+ "formulas": [
+  {
+   "id": "found112_Qu_pile",
+   "title": "單樁極限垂直支承力 Qu=fs·As+qb·Ab（式5.3-1）",
+   "src": "found112",
+   "clause": "5.3.1",
+   "page": 98,
+   "keywords": "基樁 單樁 極限垂直支承力 Qu 摩擦 端點",
+   "unit": "tf",
+   "output": "Qu",
+   "latex": "Q_u=Q_s+Q_b=f_sA_s+q_bA_b",
+   "vars": {
+    "fs": {
+     "desc": "樁表面摩擦阻力",
+     "unit": "tf/m2",
+     "min": 0
+    },
+    "As": {
+     "desc": "樁身表面積",
+     "unit": "m2",
+     "min": 0
+    },
+    "qb": {
+     "desc": "樁端極限支承壓力",
+     "unit": "tf/m2",
+     "min": 0
+    },
+    "Ab": {
+     "desc": "樁端斷面積",
+     "unit": "m2",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "Qs",
+     "fs*As"
+    ],
+    [
+     "Qb",
+     "qb*Ab"
+    ]
+   ],
+   "expr": "Qs+Qb",
+   "notes": "fs、qb 須由靜力學公式、貫入試驗公式、樁載重試驗或動態分析推估（本庫未收錄各推估法）。容許支承力見 found112_Qa_pile。單位 tf、m。",
+   "tests": [
+    {
+     "in": {
+      "fs": 10,
+      "As": 10,
+      "qb": 50,
+      "Ab": 3
+     },
+     "out": 250.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.98（式5.3-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "found112_Qa_pile",
+   "title": "單樁容許垂直支承力 Qa=Qs/FS1+Qb/FS2（式5.3-2）",
+   "src": "found112",
+   "clause": "5.3.1",
+   "page": 98,
+   "keywords": "基樁 容許支承力 Qa 安全係數 FS1 FS2",
+   "unit": "tf",
+   "output": "Qa",
+   "latex": "Q_a=\\frac{Q_s}{FS_1}+\\frac{Q_b}{FS_2}",
+   "vars": {
+    "Qs": {
+     "desc": "樁表面摩擦阻力",
+     "unit": "tf",
+     "min": 0
+    },
+    "Qb": {
+     "desc": "樁端點極限支承力",
+     "unit": "tf",
+     "min": 0
+    },
+    "FS1": {
+     "desc": "樁周摩擦阻力安全係數（表 found112_FS_pile_T531）",
+     "unit": "-",
+     "min": 1.0,
+     "max": 5
+    },
+    "FS2": {
+     "desc": "樁端支承力安全係數（表 found112_FS_pile_T531）",
+     "unit": "-",
+     "min": 1.0,
+     "max": 5
+    }
+   },
+   "expr": "Qs/FS1+Qb/FS2",
+   "notes": "表5.3-1：樁載重試驗／推估公式兩法，常時 FS1=1.8/2.5、FS2=2.5/3.5；短期 1.3/1.8、1.8/2.5；極限限界狀態 1.1/1.2、1.3/1.5。長樁或鑽掘樁之樁端支承力安全係數得視施工品質與樁底灌漿成效酌予調整。",
+   "tests": [
+    {
+     "in": {
+      "Qs": 100,
+      "Qb": 150,
+      "FS1": 2.5,
+      "FS2": 3.5
+     },
+     "out": 82.85714285714286,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "Qs": 100,
+      "Qb": 150,
+      "FS1": 1.8,
+      "FS2": 2.5
+     },
+     "out": 115.55555555555556,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.98（式5.3-2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_bridge_backwater",
+   "title": "橋梁壅水高度 h（附錄R R-1，d'Aubuisson 公式）",
+   "src": "hwdrain107",
+   "clause": "附錄R",
+   "page": 144,
+   "keywords": "橋梁 壅水 迴水 d'Aubuisson 束縮係數 Ka",
+   "unit": "m",
+   "output": "h",
+   "latex": "h=\\frac{1}{2g}\\left[\\left(\\frac{Q}{K_a b_2 y_3}\\right)^2-V_1^2\\right]",
+   "vars": {
+    "Q": {
+     "desc": "設計流量",
+     "unit": "m3/s",
+     "min": 0
+    },
+    "Ka": {
+     "desc": "束縮係數（表 hwdrain107_Ka_TR1）",
+     "unit": "-",
+     "min": 0.5,
+     "max": 2
+    },
+    "b2": {
+     "desc": "橋墩處淨通水寬度",
+     "unit": "m",
+     "min": 0.1
+    },
+    "y3": {
+     "desc": "橋梁下游側等速流水深",
+     "unit": "m",
+     "min": 0.01
+    },
+    "V1": {
+     "desc": "橋梁上游側橫斷面平均流速",
+     "unit": "m/s",
+     "min": 0
+    },
+    "g": {
+     "desc": "重力加速度",
+     "unit": "m/s2",
+     "default": 9.8
+    }
+   },
+   "expr": "((Q/(Ka*b2*y3))**2-V1**2)/(2*g)",
+   "warn_if": [
+    {
+     "expr": "Q/(Ka*b2*y3)<=V1",
+     "msg": "橋墩處流速不大於上游流速，壅水高度≤0（無壅水）"
+    }
+   ],
+   "notes": "附錄R 摘自 Ven Te Chow《Open-Channel Hydraulics》1959 與 HEC-2 手冊，適用於亂流程度較大之流況。相關章節 7.3.2。",
+   "tests": [
+    {
+     "in": {
+      "Q": 50,
+      "Ka": 0.9,
+      "b2": 8.0,
+      "y3": 1.5,
+      "V1": 1.0
+     },
+     "out": 1.0425240054869684,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.144（式R-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "found112_Ra_uplift",
+   "title": "單樁容許拉拔力 Ra（式5.3-5、5.3-6）",
+   "src": "found112",
+   "clause": "5.3.2",
+   "page": 113,
+   "keywords": "基樁 拉拔力 抗拉拔 上浮 uplift Ra 樁載重試驗",
+   "unit": "tf",
+   "output": "Ra",
+   "latex": "R_a=W_p+\\frac{1}{FS}f_sA_s;\\quad R_a=W_p+\\frac{Q_{ut}-W_p}{FS}",
+   "vars": {
+    "mode": {
+     "desc": "以摩擦阻力推估＝0；以樁載重試驗＝1",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    },
+    "Wp": {
+     "desc": "樁體重量（應考慮地下水之影響）",
+     "unit": "tf",
+     "min": 0
+    },
+    "fs": {
+     "desc": "樁表面摩擦阻力（依5.3.1推估）",
+     "unit": "tf/m2",
+     "default": 0.0,
+     "min": 0
+    },
+    "As": {
+     "desc": "樁之表面積",
+     "unit": "m2",
+     "default": 0.0,
+     "min": 0
+    },
+    "Qut": {
+     "desc": "單樁極限拉拔力（試驗值）",
+     "unit": "tf",
+     "default": 0.0,
+     "min": 0
+    },
+    "FS": {
+     "desc": "拉拔力安全係數（表 found112_FS_uplift_T533）",
+     "unit": "-",
+     "min": 1.0,
+     "max": 6
+    }
+   },
+   "defs": [
+    [
+     "Ra",
+     "Wp+(Qut-Wp)/FS if mode>0.5 else Wp+fs*As/FS"
+    ]
+   ],
+   "expr": "Ra",
+   "warn_if": [
+    {
+     "expr": "Wp<0 or As<0",
+     "msg": "Wp、As 不得為負"
+    }
+   ],
+   "notes": "樁底為擴座式者應依可能破壞模式分析，且**任何情況下容許拉拔力不得超過容許垂直支承力之 75%**（本式未自動換算，須另行比對 found112_Qa_pile）。表5.3-1 之拉拔力安全係數：常時 2.0／5.0、短期 1.5／3.0、極限 1.2／2.4（試驗值／推估公式）。",
+   "tests": [
+    {
+     "in": {
+      "mode": 0,
+      "Wp": 10,
+      "fs": 8,
+      "As": 20,
+      "FS": 5.0
+     },
+     "out": 42.0
+    },
+    {
+     "in": {
+      "mode": 1,
+      "Wp": 10,
+      "Qut": 120,
+      "FS": 2.0
+     },
+     "out": 65.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.113（式5.3-5、5.3-6）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "found112_negative_friction",
+   "title": "負摩擦力檢核（式5.3-7、5.3-8）",
+   "src": "found112",
+   "clause": "5.3.4",
+   "page": 125,
+   "keywords": "基樁 負摩擦力 中性點 下陷 群樁",
+   "unit": "-",
+   "output": "ratio1",
+   "latex": "(P+P_{fn})/A_p\\le\\sigma_{sa};\\quad (P+P_{fn})\\le(Q_p+R_f)/1.2",
+   "vars": {
+    "P": {
+     "desc": "樁頂部之長期軸向荷重",
+     "unit": "tf",
+     "min": 0
+    },
+    "Pfn": {
+     "desc": "中立點以上之負摩擦力總和",
+     "unit": "tf",
+     "min": 0
+    },
+    "Ap": {
+     "desc": "樁身斷面積",
+     "unit": "m2",
+     "min": 0.0001
+    },
+    "sigma_sa": {
+     "desc": "樁材料之短期容許應力強度",
+     "unit": "tf/m2",
+     "min": 0
+    },
+    "Qp": {
+     "desc": "樁端點之極限支承力",
+     "unit": "tf",
+     "min": 0
+    },
+    "Rf": {
+     "desc": "樁身中立點以下之正摩擦阻力",
+     "unit": "tf",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "ratio1",
+     "(P+Pfn)/Ap"
+    ],
+    [
+     "limit2",
+     "(Qp+Rf)/1.2"
+    ],
+    [
+     "ratio2",
+     "(P+Pfn)/limit2"
+    ]
+   ],
+   "expr": "ratio1",
+   "warn_if": [
+    {
+     "expr": "(P+Pfn)/Ap>sigma_sa",
+     "msg": "式(5.3-7) 不滿足：樁身應力超過短期容許應力"
+    },
+    {
+     "expr": "(P+Pfn)>(Qp+Rf)/1.2",
+     "msg": "式(5.3-8) 不滿足：軸力超過 (Qp+Rf)/1.2"
+    }
+   ],
+   "notes": "輸出為 ratio1=(P+Pfn)/Ap（tf/m2），須 ≤ σsa；steps.limit2、ratio2 為式(5.3-8) 之檢核。中立點位置依樁支承地層與樁四周壓縮地層之相對勁度定之。考慮地震、風力、衝擊力、車輛等短期載重時可不計負摩擦力；群樁得考慮相互影響折減；樁表面特殊處理者得依實測折減。",
+   "tests": [
+    {
+     "in": {
+      "P": 100,
+      "Pfn": 30,
+      "Ap": 1.0,
+      "sigma_sa": 200,
+      "Qp": 200,
+      "Rf": 80
+     },
+     "out": 130.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.125（式5.3-7、5.3-8）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "found112_Ra_group_uplift",
+   "title": "群樁容許抗拉力 Ra＝W+τ·L·UG/FS（式5.4-1）",
+   "src": "found112",
+   "clause": "5.4.2",
+   "page": 134,
+   "keywords": "群樁 拉拔 抗拉拔 周長 UG 容許抗拉力",
+   "unit": "tf",
+   "output": "Ra",
+   "latex": "R_a=W+\\frac{\\tau L U_G}{FS}",
+   "vars": {
+    "W": {
+     "desc": "群樁間土壤及樁體之總重量（應考慮地下水影響）",
+     "unit": "tf",
+     "min": 0
+    },
+    "tau": {
+     "desc": "土壤之抗剪強度",
+     "unit": "tf/m2",
+     "min": 0
+    },
+    "Lg": {
+     "desc": "樁長",
+     "unit": "m",
+     "min": 0
+    },
+    "UG": {
+     "desc": "群樁之外圍周邊長度",
+     "unit": "m",
+     "min": 0
+    },
+    "FS": {
+     "desc": "基樁抗拉拔安全係數（表 found112_FS_uplift_T533）",
+     "unit": "-",
+     "min": 1.0,
+     "max": 6
+    }
+   },
+   "expr": "W+tau*Lg*UG/FS",
+   "notes": "群樁容許拉拔力應取下列二結果之**較小者**：(1) 各單樁容許抗拉力之總和（found112_Ra_uplift×樁數）；(2) 本式之計算所得。本式只算第(2)項。",
+   "tests": [
+    {
+     "in": {
+      "W": 100,
+      "tau": 2,
+      "Lg": 10,
+      "UG": 8,
+      "FS": 2.5
+     },
+     "out": 164.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.134（式5.4-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "found112_Pfn_group",
+   "title": "群樁負摩擦力平均値 Pfn＝(UG·ΣLiτi＋AG·γs·Lfn)/np（式5.4-2）",
+   "src": "found112",
+   "clause": "5.4.2",
+   "page": 134,
+   "keywords": "群樁 負摩擦力 平均値 中立點",
+   "unit": "tf",
+   "output": "Pfn",
+   "latex": "P_{fn}=\\frac{U_G\\sum L_i\\tau_i+A_G\\gamma_s L_{fn}}{n_p}",
+   "vars": {
+    "UG": {
+     "desc": "群樁之外圍周邊長",
+     "unit": "m",
+     "min": 0
+    },
+    "sum_Ltau": {
+     "desc": "Σ Li·τi：基礎底面至中立點間各土層厚度×剪強度之總和",
+     "unit": "tf/m",
+     "min": 0
+    },
+    "AG": {
+     "desc": "扣除樁斷面積之群樁底面面積",
+     "unit": "m2",
+     "min": 0
+    },
+    "gamma_s": {
+     "desc": "土壤單位重（地下水位以下用有效單位重）",
+     "unit": "tf/m3",
+     "min": 0
+    },
+    "Lfn": {
+     "desc": "基礎底面至中立點之距離",
+     "unit": "m",
+     "min": 0
+    },
+    "np": {
+     "desc": "樁數",
+     "unit": "支",
+     "min": 1
+    }
+   },
+   "expr": "(UG*sum_Ltau+AG*gamma_s*Lfn)/np",
+   "notes": "群樁之負摩擦力可考慮各樁相互影響折減；群樁中單樁負摩擦力應取本式與單樁法（found112_negative_friction 之 Pfn）**較大者**。本式只算群樁平均値。",
+   "tests": [
+    {
+     "in": {
+      "UG": 8,
+      "sum_Ltau": 30,
+      "AG": 10,
+      "gamma_s": 1.8,
+      "Lfn": 5,
+      "np": 4
+     },
+     "out": 82.5
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 p.134（式5.4-2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": [
+  {
+   "id": "found112_FS_pile_T531",
+   "title": "樁垂直支承力安全係數（表5.3-1）",
+   "src": "found112",
+   "clause": "5.3.1",
+   "page": 98,
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "FS1",
+    "FS2"
+   ],
+   "rows": [
+    {
+     "key": "常時載重／樁載重試驗",
+     "values": {
+      "FS1": 1.8,
+      "FS2": 2.5
+     }
+    },
+    {
+     "key": "常時載重／支承力推估公式",
+     "values": {
+      "FS1": 2.5,
+      "FS2": 3.5
+     }
+    },
+    {
+     "key": "短期載重／樁載重試驗",
+     "values": {
+      "FS1": 1.3,
+      "FS2": 1.8
+     }
+    },
+    {
+     "key": "短期載重／支承力推估公式",
+     "values": {
+      "FS1": 1.8,
+      "FS2": 2.5
+     }
+    },
+    {
+     "key": "極限限界狀態／樁載重試驗",
+     "values": {
+      "FS1": 1.1,
+      "FS2": 1.3
+     }
+    },
+    {
+     "key": "極限限界狀態／支承力推估公式",
+     "values": {
+      "FS1": 1.2,
+      "FS2": 1.5
+     }
+    }
+   ],
+   "notes": "FS1 為樁周摩擦阻力、FS2 為樁端支承力之安全係數。長樁或鑽掘樁之 FS2 得視施工品質與樁底灌漿成效酌予調整。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 p.98 表5.3-1",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "hwdrain107_Ka_TR1",
+   "title": "橋墩束縮係數 Ka（表R-1）",
+   "src": "hwdrain107",
+   "clause": "附錄R",
+   "page": 144,
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "Ka"
+   ],
+   "rows": [
+    {
+     "key": "圓尖形墩鼻",
+     "values": {
+      "Ka": 0.9
+     }
+    },
+    {
+     "key": "半圓形墩鼻",
+     "values": {
+      "Ka": 0.9
+     }
+    },
+    {
+     "key": "連結梁雙圓柱橋墩",
+     "values": {
+      "Ka": 0.95
+     }
+    },
+    {
+     "key": "雙圓柱橋墩",
+     "values": {
+      "Ka": 1.05
+     }
+    },
+    {
+     "key": "90°三角形墩鼻",
+     "values": {
+      "Ka": 1.05
+     }
+    },
+    {
+     "key": "方形墩鼻",
+     "values": {
+      "Ka": 1.25
+     }
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 p.144 表R-1",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "found112_FS_uplift_T533",
+   "title": "拉拔力安全係數（表5.3-3）",
+   "src": "found112",
+   "clause": "5.3.2",
+   "page": 113,
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "FS"
+   ],
+   "rows": [
+    {
+     "key": "常時載重／樁載重試驗",
+     "values": {
+      "FS": 2.0
+     }
+    },
+    {
+     "key": "常時載重／支承力推估公式",
+     "values": {
+      "FS": 5.0
+     }
+    },
+    {
+     "key": "短期載重／樁載重試驗",
+     "values": {
+      "FS": 1.5
+     }
+    },
+    {
+     "key": "短期載重／支承力推估公式",
+     "values": {
+      "FS": 3.0
+     }
+    },
+    {
+     "key": "極限限界狀態／樁載重試驗",
+     "values": {
+      "FS": 1.2
+     }
+    },
+    {
+     "key": "極限限界狀態／支承力推估公式",
+     "values": {
+      "FS": 2.4
+     }
+    }
+   ],
+   "notes": "容許拉拔力任何情況下不得超過容許垂直支承力之 75%。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 p.113 表5.3-3",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "note": "設計報告排版規範。所有數值由 tools/report/docx_build.py 讀取；修改此檔即可改變全篇版面，不需改程式。",
+  "page": {
+    "width_cm": 21.0,
+    "height_cm": 29.7,
+    "margin_cm": {
+      "top": 2.54,
+      "bottom": 2.54,
+      "left": 3.0,
+      "right": 2.5
+    },
+    "header_distance_cm": 1.5,
+    "footer_distance_cm": 1.5,
+    "different_first_page": true
+  },
+  "fonts": {
+    "title": {"east_asia": "標楷體", "latin": "Times New Roman"},
+    "subtitle": {"east_asia": "標楷體", "latin": "Times New Roman"},
+    "heading1": {"east_asia": "標楷體", "latin": "Times New Roman"},
+    "heading2": {"east_asia": "標楷體", "latin": "Times New Roman"},
+    "heading3": {"east_asia": "標楷體", "latin": "Times New Roman"},
+    "body": {"east_asia": "新細明體", "latin": "Times New Roman"},
+    "table": {"east_asia": "新細明體", "latin": "Times New Roman"},
+    "caption": {"east_asia": "標楷體", "latin": "Times New Roman"},
+    "header_footer": {"east_asia": "新細明體", "latin": "Times New Roman"},
+    "note": {"east_asia": "新細明體", "latin": "Times New Roman"}
+  },
+  "sizes_pt": {
+    "title": 28,
+    "subtitle": 20,
+    "project_line": 16,
+    "heading1": 18,
+    "heading2": 14,
+    "heading3": 12,
+    "body": 12,
+    "table": 10.5,
+    "caption": 10.5,
+    "header_footer": 9,
+    "note": 10
+  },
+  "spacing": {
+    "body_line_spacing": 1.5,
+    "body_before_pt": 0,
+    "body_after_pt": 6,
+    "heading1_before_pt": 0,
+    "heading1_after_pt": 14,
+    "heading2_before_pt": 12,
+    "heading2_after_pt": 6,
+    "heading3_before_pt": 8,
+    "heading3_after_pt": 4,
+    "caption_before_pt": 8,
+    "caption_after_pt": 3,
+    "table_line_spacing": 1.1
+  },
+  "indent": {
+    "body_first_line_chars": 2,
+    "bullet_hanging_chars": 1.5
+  },
+  "numbering": {
+    "chapter": "第 {n} 章　{title}",
+    "section": "{c}.{s}　{title}",
+    "subsection": "{c}.{s}.{t}　{title}",
+    "appendix": "附錄 {letter}　{title}",
+    "bullet_prefix": "{i}. "
+  },
+  "captions": {
+    "table_prefix": "表",
+    "figure_prefix": "圖",
+    "separator": "　",
+    "table_caption_position": "above",
+    "figure_caption_position": "below",
+    "align": "center"
+  },
+  "table": {
+    "width_cm": 15.5,
+    "header_fill": "D9D9D9",
+    "header_bold": true,
+    "body_fill": "FFFFFF",
+    "repeat_header_row": true,
+    "border": "Table Grid",
+    "first_col_align": "left",
+    "body_align": "left",
+    "numeric_align": "center"
+  },
+  "placeholder": {
+    "prefix": "【需人工補｜{chapter}】",
+    "fill": "FFF2CC",
+    "hint_prefix": "說明：",
+    "status_labels": {
+      "auto": "自動填入",
+      "partial": "部分自動",
+      "manual": "需人工補",
+      "na": "不適用"
+    }
+  },
+  "header": {
+    "pattern": "{project}｜{report_title}",
+    "align": "center",
+    "border_bottom": true
+  },
+  "cover": {
+    "note": "封面版式（使用者指定，參考 完整案例(參考用)/報告書 封面 v01.docx）：案名大字居中，主辦單位／設計監造單位並列於下半，日期墊底。改此檔即可換版，不需動程式。",
+    "font": {"east_asia": "標楷體", "latin": "Times New Roman"},
+    "title_size_pt": 36,
+    "report_title_size_pt": 24,
+    "report_title_text": "設 計 報 告 書",
+    "show_report_title": true,
+    "info_size_pt": 20,
+    "date_size_pt": 18,
+    "agency_label": "主辦單位：",
+    "design_unit_label": "設計監造單位：",
+    "design_unit": "穀山技術顧問有限公司",
+    "date_pattern": "中 華 民 國 {year} 年 {month} 月",
+    "spacer_line_pt": 20,
+    "spacers_top": 2,
+    "spacers_after_title": 1,
+    "spacers_before_info": 11,
+    "spacers_before_date": 4,
+    "title_space_before_pt": 18,
+    "info_space_before_pt": 6,
+    "info_space_after_pt": 6
+  },
+  "footer": {
+    "pattern": "第 {page} 頁／共 {pages} 頁",
+    "align": "center"
+  }
+}

@@ -1,0 +1,2623 @@
+{
+ "_說明": "設計項目 → 規範條文對照表。src 為 docs\\法規庫總目錄.md 的 ID；clause 為 regq.py --clause 用的條號（法規＝條號，技術規範＝節號）。條號已逐條於 _regs_index.sqlite 核對；新增主題後跑 tools\\regs\\regq_selftest.py。notes 只寫原文有載明的內容。",
+ "topics": [
+  {
+   "name": "沉砂池",
+   "aliases": [
+    "沉砂設施",
+    "滯洪沉砂",
+    "沉砂",
+    "泥砂生產量",
+    "土壤流失量"
+   ],
+   "scope": "山坡地開發、堆積土石、農地排水之沉砂設施（臨時性／永久性）",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "91",
+     "note": "設置目的"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "93",
+     "note": "設計容量、深度、清淤"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "165",
+     "note": "滯洪與沉砂設施之設計及維護"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "166",
+     "note": "設置位置、可與滯洪池共構"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "12",
+     "note": "沉砂量估算（每公頃 30 m³；山坡地施工期臨時沉砂 20～150 m³/ha）"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "92",
+     "note": "泥砂生產量估算（USLE）→ 決定容量"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "35",
+     "note": "山坡地土壤流失量之估算"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "53",
+     "note": "農地沉砂池"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "54",
+     "note": "農地沉砂池種類與適用範圍"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "140",
+     "note": "臨時沖淤控制設施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "189",
+     "note": "堆積土石之沉砂設施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "207",
+     "note": "施工應先完成滯洪、沉砂設施"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "13",
+     "note": "雨水井底部沉砂池（市區雨水下水道）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\sediment_basin.py"
+   ],
+   "notes": [
+    "第 93 條：深度以 1.5～3.5 m 為宜；臨時性沉砂設施容量以泥砂生產量 1.5 倍計算；永久性每年至少清除一次。",
+    "下水道工程設施標準第 12 條：沉砂量以計畫開發面積每公頃 30 m³ 估算；山坡地開發施工期間臨時沉砂池以每公頃 20～150 m³ 估算；無法設置處得以含沉砂容量之滯洪池代之。可作為 USLE 估算之快速複核下限。",
+    "容量改用 `tools\\design\\sediment_basin.py`：第 35 條 USLE → 第 92 條下限（臨時開挖 250 m³/ha、其他 30 m³/ha）→ 第 93 條臨時 ×1.5；Rm／Km／LS 須用當地參數。另可用 `--structure` 做池壁／底板初步配筋與浮力，並用 `--design-q` 做孔口／溢流堰檢核。"
+   ]
+  },
+  {
+   "name": "滯洪池",
+   "aliases": [
+    "滯洪設施",
+    "滯洪",
+    "滯洪量",
+    "滯洪壩",
+    "雨水貯集滯洪",
+    "調洪池",
+    "滯洪空間"
+   ],
+   "scope": "山坡地開發、建築基地之滯洪設施",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "94",
+     "note": "定義、型式"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "95",
+     "note": "規劃設計原則"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "96",
+     "note": "滯洪量之估算"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "97",
+     "note": "管理"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "166",
+     "note": "設置位置"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "16",
+     "note": "降雨強度"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "17",
+     "note": "逕流量（合理化公式）"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "18",
+     "note": "逕流係數"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "19",
+     "note": "集流時間"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "160",
+     "note": "洪峰流量之設計"
+    },
+    {
+     "src": "btr_design",
+     "clause": "4-3",
+     "note": "建築基地雨水貯集滯洪設施（建築技術規則）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\hydrology.py",
+    "tools\\design\\detention_basin.py"
+   ],
+   "notes": []
+  },
+  {
+   "name": "擋土牆",
+   "aliases": [
+    "重力式擋土牆",
+    "懸臂式擋土牆",
+    "擋土設施",
+    "土壓力",
+    "擋土工程",
+    "半重力式擋土牆",
+    "各種擋土牆"
+   ],
+   "scope": "道路、邊坡、基地之擋土牆（重力式／懸臂式）",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "117",
+     "note": "擋土牆"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "118",
+     "note": "種類及適用範圍"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "119",
+     "note": "作用力"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "120",
+     "note": "安定條件（滑動、傾倒、承載）"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "121",
+     "note": "排水孔及伸縮縫"
+    },
+    {
+     "src": "found112",
+     "clause": "7.4.1",
+     "note": "牆體滑動安全係數"
+    },
+    {
+     "src": "found112",
+     "clause": "7.4.2",
+     "note": "牆體傾覆"
+    },
+    {
+     "src": "found112",
+     "clause": "7.4.3",
+     "note": "基礎容許支承力"
+    },
+    {
+     "src": "found112",
+     "clause": "7.4.4",
+     "note": "整體穩定性"
+    },
+    {
+     "src": "rc112",
+     "clause": "20.5.1.3.1",
+     "note": "牆身保護層：曝大氣環境 D19↑ 50 mm、D16↓ 40 mm"
+    },
+    {
+     "src": "rc112",
+     "clause": "11.3.1.1",
+     "note": "最小牆厚（10 cm／l 的 1/25、1/30 取大；地下室外牆 20 cm）"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "found112",
+     "clause": "7.3.1",
+     "note": "靜止土壓力"
+    },
+    {
+     "src": "found112",
+     "clause": "7.3.2",
+     "note": "主動土壓力"
+    },
+    {
+     "src": "found112",
+     "clause": "7.3.3",
+     "note": "被動土壓力"
+    },
+    {
+     "src": "found112",
+     "clause": "7.3.4",
+     "note": "動態主動土壓力（地震）"
+    },
+    {
+     "src": "found112",
+     "clause": "7.5.3",
+     "note": "懸臂式擋土牆分析與設計"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "164",
+     "note": "擋土工程（背填、高度）"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "171",
+     "note": "擋土牆不得共構（開發建築用地）"
+    },
+    {
+     "src": "rc112",
+     "clause": "11.7.2.1",
+     "note": "牆縱向鋼筋間距（懸臂式）"
+    },
+    {
+     "src": "rc112",
+     "clause": "11.6.1",
+     "note": "牆最少鋼筋比"
+    }
+   ],
+   "tools": [
+    "tools\\design\\retaining_wall.py",
+    "tools\\design\\block_wall.py",
+    "tools\\design\\counterfort_wall.py",
+    "tools\\design\\mse_wall.py",
+    "tools\\design\\anchored_wall.py",
+    "tools\\design\\rc_design.py",
+    "tools\\wall_section\\make_wall_section.py",
+    "tools\\design\\wall_geometry.py",
+    "tools\\design\\earth_pressure.py"
+   ],
+   "notes": [
+    "水保規範第 120 條與基礎構造設計規範 7.4 節都規定安全係數，兩者都要檢核、取較嚴者。",
+    "基礎構造設計規範 7.4.1：滑動安全係數長期載重 > 1.5、地震時 > 1.2。"
+   ]
+  },
+  {
+   "name": "排水溝",
+   "aliases": [
+    "截水溝",
+    "側溝",
+    "L型側溝",
+    "U型溝",
+    "坡地排水",
+    "道路排水",
+    "明溝",
+    "排水設施",
+    "排水系統",
+    "排水網路",
+    "渠道系統",
+    "排水渠道"
+   ],
+   "scope": "坡地／道路／市區道路之明渠排水溝斷面與水理",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "82",
+     "note": "坡地排水系統"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "83",
+     "note": "設計洪水量"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "84",
+     "note": "平均流速（曼寧）"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "85",
+     "note": "最大容許流速"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "86",
+     "note": "出水高"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.3.4",
+     "note": "市區道路：最小出水高度"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.3.6",
+     "note": "市區道路：設計流速限制"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.4.1",
+     "note": "L 型側溝計算公式"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.3.1",
+     "note": "公路：容許流速"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.4.3",
+     "note": "公路：出水高度"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "16",
+     "note": "降雨強度"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "17",
+     "note": "逕流量"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "78",
+     "note": "道路排水設施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "158",
+     "note": "截水系統"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "159",
+     "note": "排水與道路側溝之配合"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "162",
+     "note": "排水消能設施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "163",
+     "note": "邊坡排水"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.2.3",
+     "note": "市區道路：逕流量公式"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.3.5",
+     "note": "粗糙係數"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.2.2",
+     "note": "曼寧公式"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "5.4.3",
+     "note": "淺溝斷面尺寸"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "3",
+     "note": "雨水下水道計畫下水量、曼寧公式、流速 0.8～3 m/s（公式表格見附件）"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "3.2",
+     "note": "設計重現期距研選（表3-1，國道/省縣道/鄉道分列）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\channel_hydraulics.py",
+    "tools\\design\\channel_profile.py",
+    "tools\\design\\hydrology.py",
+    "tools\\wall_section\\make_wall_section.py",
+    "tools\\design\\drainage_network.py"
+   ],
+   "notes": [
+    "山坡地依水保規範；市區道路依市區道路及附屬工程設計規範第七章；公路依公路排水設計規範。三者參數不同，先確認案件適用哪一套。",
+    "市區雨水下水道另依下水道工程設施標準第 3 條：最小流速 0.8 m/s、最大 3 m/s（較水保規範混凝土 4.57 m/s 嚴）。"
+   ]
+  },
+  {
+   "name": "集水區水文",
+   "aliases": [
+    "降雨強度",
+    "逕流量",
+    "逕流係數",
+    "集流時間",
+    "合理化公式",
+    "設計洪水量",
+    "洪峰流量",
+    "設計流量"
+   ],
+   "scope": "排水溝、滯洪、涵洞之設計流量推估",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "16",
+     "note": "降雨強度推估"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "17",
+     "note": "逕流量分析（Q=CIA/360）"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "18",
+     "note": "逕流係數推估"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "19",
+     "note": "集流時間"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "83",
+     "note": "坡地排水設計洪水量（重現期距）"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "160",
+     "note": "洪峰流量之設計"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "65",
+     "note": "野溪治理設計洪水量"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.2.2",
+     "note": "市區道路：設計再現期"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.2.5",
+     "note": "市區道路：降雨強度-延時公式"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "3.2",
+     "note": "公路：設計重現期距"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "3.4.4",
+     "note": "公路：降雨強度推算"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "3.5.2",
+     "note": "公路：利用設計雨量推算流量"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "3",
+     "note": "雨水下水道計畫下水量（以計畫逕流量設計）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\hydrology.py"
+   ],
+   "notes": []
+  },
+  {
+   "name": "邊坡",
+   "aliases": [
+    "邊坡穩定",
+    "邊坡保護",
+    "坡面保護",
+    "植生護坡",
+    "挖方邊坡",
+    "填方邊坡",
+    "邊坡穩定分析"
+   ],
+   "scope": "挖填方邊坡之穩定分析與保護",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "72",
+     "note": "邊坡穩定"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "73",
+     "note": "邊坡穩定分析（最小安全係數）"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "79",
+     "note": "道路邊坡穩定"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "152",
+     "note": "邊坡穩定之規劃設計"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "154",
+     "note": "邊坡高度限制"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "4.2",
+     "note": "公路：土壤邊坡穩定分析"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "4.6",
+     "note": "公路：邊坡穩定性評估"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "23",
+     "note": "坡度分級"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "25",
+     "note": "坡度分析"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "163",
+     "note": "邊坡排水"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "58",
+     "note": "植生綠化之規劃設計"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "7.3.2",
+     "note": "坡面排水設施配置"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "8.2",
+     "note": "坡面保護設施之選擇"
+    },
+    {
+     "src": "found112",
+     "clause": "8.4.2",
+     "note": "邊坡式開挖之穩定分析"
+    },
+    {
+     "src": "hwslope111",
+     "clause": "0",
+     "note": "111.04.27 修正對照表（須一併查閱）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\slope_stability.py"
+   ],
+   "notes": []
+  },
+  {
+   "name": "箱涵",
+   "aliases": [
+    "涵洞",
+    "涵管",
+    "管涵",
+    "蓋版暗溝",
+    "橫交排水",
+    "單孔箱涵",
+    "雙孔箱涵",
+    "三孔箱涵",
+    "多孔箱涵"
+   ],
+   "scope": "道路橫交排水之涵洞、箱涵",
+   "core": [
+    {
+     "src": "hwdrain107",
+     "clause": "6.1.3",
+     "note": "涵洞型式"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "6.1.4",
+     "note": "最小斷面"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "6.2.3",
+     "note": "進口控制通水能力（計算圖表見附錄 N）"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "6.2.4",
+     "note": "出口控制通水能力（公式見附錄 O 式 O-1／O-2、表 O-1）"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "6.8.2",
+     "note": "箱涵覆土厚"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "6.4.1",
+     "note": "箱涵設計載重"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "87",
+     "note": "涵管（水保）"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "hwdrain107",
+     "clause": "6.2.1",
+     "note": "上游水位"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "6.5.2",
+     "note": "翼牆"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "4.4",
+     "note": "透過填土之輪重分佈"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "6.4.3",
+     "note": "活載重輪重之考量"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "6.4.4",
+     "note": "分佈鋼筋"
+    },
+    {
+     "src": "hwbridge104",
+     "clause": "0",
+     "note": "104.04.13 修訂（保護層、耐久性）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\culvert_hydraulics.py",
+    "tools\\design\\rc_design.py",
+    "tools\\design\\box_culvert.py"
+   ],
+   "notes": [
+    "公路橋梁設計規範本文為 98.12 版，須搭配 104.04.13、109.01.03 兩次修訂。",
+    "§6.2.1 第4項「HW/D 宜儘量控制在1.5以上」依水理意義判讀為「以下」；程式列為提醒可調。",
+    "設計上游水位取進口控制與出口控制兩者較大值（§6.2.1 第3項）。"
+   ]
+  },
+  {
+   "name": "道路鋪面",
+   "aliases": [
+    "AC鋪面",
+    "瀝青混凝土鋪面",
+    "柔性鋪面",
+    "刨鋪",
+    "鋪面設計",
+    "水泥混凝土鋪面"
+   ],
+   "scope": "道路 AC／PC 鋪面結構設計與施工",
+   "core": [
+    {
+     "src": "urbanroad113",
+     "clause": "9.1",
+     "note": "鋪面種類"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "9.2",
+     "note": "瀝青混凝土鋪面結構"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "9.3",
+     "note": "瀝青混凝土鋪面設計規範"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "9.5",
+     "note": "水泥混凝土鋪面設計"
+    },
+    {
+     "src": "flexpave91",
+     "clause": "3.4",
+     "note": "低交通量設計方法"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02742章",
+     "note": "施工規範：瀝青混凝土鋪面"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "flexpave91",
+     "clause": "2.2.1",
+     "note": "設計當量軸次 ESAL"
+    },
+    {
+     "src": "flexpave91",
+     "clause": "4.4.3",
+     "note": "瀝青混凝土最少厚度（AASHTO 法）"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02714章",
+     "note": "瀝青處理底層"
+    }
+   ],
+   "tools": [
+    "tools\\takeoff\\paving_extent.py",
+    "tools\\boq\\boq_build.py"
+   ],
+   "notes": [
+    "柔性鋪面設計規範為 91 年版，引用時註明版次。"
+   ]
+  },
+  {
+   "name": "護欄",
+   "aliases": [
+    "道路護欄",
+    "防撞護欄",
+    "鋼板護欄",
+    "碰撞防護設施",
+    "防護設施"
+   ],
+   "scope": "道路護欄設置與型式",
+   "core": [
+    {
+     "src": "traffic114",
+     "clause": "8.2.1",
+     "note": "設置原則"
+    },
+    {
+     "src": "traffic114",
+     "clause": "8.3.1",
+     "note": "設計／型式"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "traffic114",
+     "clause": "8.2.2",
+     "note": "碰撞防護設施"
+    }
+   ],
+   "tools": [],
+   "notes": []
+  },
+  {
+   "name": "RC配筋",
+   "aliases": [
+    "鋼筋混凝土",
+    "配筋",
+    "強度折減因數",
+    "最少鋼筋量",
+    "保護層",
+    "鋼筋間距",
+    "混凝土結構"
+   ],
+   "scope": "擋土牆莖板、溝壁、底板等 RC 構材之強度設計與配筋細則",
+   "core": [
+    {
+     "src": "rc112",
+     "clause": "21.2.1",
+     "note": "強度折減因數 φ（剪力等）"
+    },
+    {
+     "src": "rc112",
+     "clause": "21.2.2",
+     "note": "撓曲 φ 依淨拉應變 εt（拉力控制 εt ≥ εty＋0.003）"
+    },
+    {
+     "src": "rc112",
+     "clause": "22.5.5.1",
+     "note": "非預力構材 Vc"
+    },
+    {
+     "src": "rc112",
+     "clause": "7.6.1.1",
+     "note": "板最少撓曲鋼筋 0.0018Ag"
+    },
+    {
+     "src": "rc112",
+     "clause": "11.6.1",
+     "note": "牆最少鋼筋比 ρl、ρt"
+    },
+    {
+     "src": "rc112",
+     "clause": "20.5.1.3.1",
+     "note": "場鑄構材保護層厚度"
+    },
+    {
+     "src": "rc112",
+     "clause": "11.3.1.1",
+     "note": "最小牆厚（10 cm／l 的 1/25、1/30 取大；地下室外牆 20 cm）"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "rc112",
+     "clause": "11.7.2.1",
+     "note": "牆縱向鋼筋間距 ≤ 3h、45 cm"
+    },
+    {
+     "src": "rc112",
+     "clause": "11.7.3.1",
+     "note": "牆橫向鋼筋間距 ≤ 3h、45 cm"
+    },
+    {
+     "src": "rc112",
+     "clause": "24.3.2",
+     "note": "撓曲鋼筋間距（裂縫控制）"
+    },
+    {
+     "src": "rc112",
+     "clause": "25.2.1",
+     "note": "鋼筋最小淨間距"
+    }
+   ],
+   "tools": [
+    "tools\\design\\rc_design.py"
+   ],
+   "notes": [
+    "tools\\design\\rc_design.py 目前引用 100 年版條號（§2.3.2、§3.4.4 等），新版條號以本卡為準；新舊對照尚未完成。"
+   ]
+  },
+  {
+   "name": "跌水與消能",
+   "aliases": [
+    "跌水",
+    "跌水工",
+    "消能",
+    "消能設施",
+    "消能池",
+    "靜水池",
+    "陡槽",
+    "陡槽溝",
+    "坡度調整"
+   ],
+   "scope": "排水溝縱坡過陡、流速超限或落差處之跌水、陡槽與消能設施",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "162",
+     "note": "排水消能設施"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.8",
+     "note": "坡度調整及消能設施總則"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.8.2",
+     "note": "垂直式跌水"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.8.3",
+     "note": "斜面式跌水"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.8.4",
+     "note": "齒坡式跌水"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.8.5",
+     "note": "衝擊式跌水"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.8.6",
+     "note": "靜水池"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.7",
+     "note": "陡槽溝：捲氣時糙度至少 +25%"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "85",
+     "note": "最大容許流速 → 判斷是否需消能"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "84",
+     "note": "平均流速"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.7",
+     "note": "陡槽溝"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.8.1",
+     "note": "低堰"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "5.6",
+     "note": "陡槽溝（豎溝）"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.3.6",
+     "note": "設計流速限制"
+    }
+   ],
+   "tools": [
+    "tools\\design\\channel_hydraulics.py"
+   ],
+   "notes": [
+    "先用 channel_hydraulics.py 算流速與福祿數；超過水保第 85 條最大容許流速（混凝土 4.57 m/s）或福祿數過大時，才設跌水或靜水池。",
+    "公路排水設計規範的跌水型式圖與尺寸表在 PDF 中，表格抽字會亂，請看原 PDF 頁面。"
+   ]
+  },
+  {
+   "name": "集水井與人孔",
+   "aliases": [
+    "集水井",
+    "進水井",
+    "匯流井",
+    "陰井",
+    "人孔",
+    "雨水井",
+    "沉砂井",
+    "落水井",
+    "連接管"
+   ],
+   "scope": "道路及坡地排水系統之集水井、匯流井、人孔、雨水井",
+   "core": [
+    {
+     "src": "hwdrain107",
+     "clause": "5.10",
+     "note": "集水井"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "5.11",
+     "note": "匯流井"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "5.12",
+     "note": "人孔"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "5.12.1",
+     "note": "人孔間距"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "13",
+     "note": "雨水井及連接管"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "8",
+     "note": "人孔設置"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.3.8",
+     "note": "人孔佈設"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "hwdrain107",
+     "clause": "5.8",
+     "note": "淺溝進水口"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "5.8.2",
+     "note": "進水口位置及間距"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "6.6",
+     "note": "落水井"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.4.3",
+     "note": "L型側溝進水口"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "14",
+     "note": "道路側溝"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02631章",
+     "note": "進水井、沉砂井及人孔施工"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "市區道路排水看市區道路規範 7.3.8 與下水道標準第 8、13 條；公路看公路排水設計規範 5.10~5.12。"
+   ]
+  },
+  {
+   "name": "野溪與防砂壩",
+   "aliases": [
+    "野溪",
+    "野溪治理",
+    "防砂壩",
+    "潛壩",
+    "固床工",
+    "節制壩",
+    "土石流",
+    "蝕溝",
+    "蝕溝治理",
+    "溪溝整治"
+   ],
+   "scope": "野溪、蝕溝與土石流之治理：防砂壩、節制壩、潛壩、固床工",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "64",
+     "note": "野溪治理"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "65",
+     "note": "野溪治理設計洪水量"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "98",
+     "note": "防砂壩"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "99",
+     "note": "設計淤砂坡度"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "100",
+     "note": "壩高"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "101",
+     "note": "壩翼"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "102",
+     "note": "壩體作用力"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "103",
+     "note": "下游面斜率"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "104",
+     "note": "安全檢討"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "49",
+     "note": "蝕溝治理"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "50",
+     "note": "蝕溝治理規劃設計"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "51",
+     "note": "節制壩"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "52",
+     "note": "節制壩規劃設計"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "69",
+     "note": "土石流"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "70",
+     "note": "土石流防治"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "71",
+     "note": "橋梁淨空"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "105",
+     "note": "生態環境考量"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "111",
+     "note": "整流工程"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "112",
+     "note": "整流工程縱斷面"
+    }
+   ],
+   "tools": [
+    "tools\\design\\hydrology.py"
+   ],
+   "notes": [
+    "設計洪水量依第 65 條（野溪）而非第 83 條（坡地排水）。",
+    "壩體穩定（第 104 條）本工作區尚無專用工具；retaining_wall.py 的重力式檢核可參考但作用力組合不同。"
+   ]
+  },
+  {
+   "name": "護岸與丁壩",
+   "aliases": [
+    "護岸",
+    "丁壩",
+    "堤防",
+    "整流工程",
+    "砌石",
+    "蛇籠",
+    "箱籠",
+    "石籠",
+    "護坦",
+    "基腳保護"
+   ],
+   "scope": "溪溝、河岸、排水路之護岸、丁壩、堤防及砌石、蛇籠、箱籠工",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "110",
+     "note": "護岸"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "106",
+     "note": "丁壩"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "107",
+     "note": "丁壩間距"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "108",
+     "note": "丁壩坡度"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "109",
+     "note": "堤防"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.12",
+     "note": "護岸"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.12.1",
+     "note": "基腳頂部高程"
+    },
+    {
+     "src": "hwdrain107",
+     "clause": "4.12.2",
+     "note": "護坦"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "85",
+     "note": "最大容許流速"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "111",
+     "note": "整流工程"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "125",
+     "note": "砌石工程"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "126",
+     "note": "蛇籠施工"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "127",
+     "note": "箱籠施工"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02373章",
+     "note": "蛇籠"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02374章",
+     "note": "石籠"
+    }
+   ],
+   "tools": [
+    "tools\\design\\channel_hydraulics.py",
+    "tools\\design\\retaining_wall.py",
+    "tools\\design\\block_wall.py"
+   ],
+   "notes": [
+    "護岸基腳須低於可能沖刷深度（公路排水 4.12.1）；重力式護岸穩定可用 retaining_wall.py 檢核，蛇籠／砌石護岸用 block_wall.py（逐層檢核）。"
+   ]
+  },
+  {
+   "name": "植生工法",
+   "aliases": [
+    "植生",
+    "植生綠化",
+    "植草",
+    "噴植",
+    "植生工程",
+    "植生導入",
+    "草皮",
+    "綠化",
+    "植生覆蓋"
+   ],
+   "scope": "坡面、裸露地、開發基地之植生綠化設計、施工與維護",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "57",
+     "note": "植生方法及作業程序"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "58",
+     "note": "植生綠化規劃設計"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "59",
+     "note": "植生前期作業"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "60",
+     "note": "植生導入"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "61",
+     "note": "植生工程檢查"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "62",
+     "note": "維護管理"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "63",
+     "note": "特殊地區植生"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "41",
+     "note": "植生調查"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "128",
+     "note": "植生之施工"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "129",
+     "note": "表土收集與復原"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "141",
+     "note": "施工中植生覆蓋"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "172",
+     "note": "開發建築用地植生綠化"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "180",
+     "note": "道路植生綠化"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "8.3",
+     "note": "植生保護設施"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02920章",
+     "note": "植草施工"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "坡度過陡無法植生時改用構造物保護（公路邊坡規範 8.4）。"
+   ]
+  },
+  {
+   "name": "開挖整地",
+   "aliases": [
+    "整地",
+    "挖填",
+    "挖方",
+    "填方",
+    "土方",
+    "挖填平衡",
+    "餘土",
+    "棄土",
+    "土石方"
+   ],
+   "scope": "開發基地、道路之開挖整地、挖填平衡與餘土處理",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "88",
+     "note": "開挖整地"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "89",
+     "note": "順應地形及挖填平衡"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "151",
+     "note": "開挖整地"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "154",
+     "note": "邊坡高度限制"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "77",
+     "note": "道路挖填與餘土"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "153",
+     "note": "填方之地下排水"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "170",
+     "note": "建築用地開挖整地"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "194",
+     "note": "廢棄土石處理"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "198",
+     "note": "農業使用挖方總量"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02321章",
+     "note": "基地及路幅開挖"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02331章",
+     "note": "基地及路堤填築"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02323章",
+     "note": "棄土"
+    }
+   ],
+   "tools": [
+    "tools\\design\\slope_stability.py"
+   ],
+   "notes": [
+    "挖填坡面高度與坡度受第 154 條限制，超過時要做邊坡穩定分析（第 72、73 條）。"
+   ]
+  },
+  {
+   "name": "施工中防災",
+   "aliases": [
+    "臨時防災",
+    "臨時排水",
+    "施工中水土保持",
+    "臨時性防災措施",
+    "防災措施",
+    "施工順序",
+    "臨時沖淤"
+   ],
+   "scope": "施工期間之臨時排水、沉砂、覆蓋、防災與施工順序",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "135",
+     "note": "施工中防災措施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "139",
+     "note": "臨時排水系統"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "140",
+     "note": "臨時沖淤控制"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "141",
+     "note": "植生覆蓋"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "206",
+     "note": "臨時性防災措施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "207",
+     "note": "施工順序"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "136",
+     "note": "排水系統維護"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "137",
+     "note": "施工區安全"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "138",
+     "note": "搶災應變"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "202",
+     "note": "分期施工"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "203",
+     "note": "分區實施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "123",
+     "note": "施工標示"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "124",
+     "note": "施工便道"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "12",
+     "note": "施工期臨時沉砂量 20～150 m³/ha"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "第 207 條：應先完成滯洪、沉砂等防災設施再開挖整地。"
+   ]
+  },
+  {
+   "name": "淺基礎與承載力",
+   "aliases": [
+    "基礎設計",
+    "淺基礎",
+    "承載力",
+    "支承力",
+    "容許支承力",
+    "基礎承載",
+    "沉陷",
+    "壓密沉陷",
+    "次壓縮",
+    "差異沉陷",
+    "角變量",
+    "地質鑽探",
+    "土壤液化",
+    "液化",
+    "獨立基腳",
+    "聯合基腳",
+    "筏式基礎",
+    "樁帽"
+   ],
+   "scope": "擋土牆、構造物、建築物淺基礎之承載力、沉陷與地質調查",
+   "core": [
+    {
+     "src": "found112",
+     "clause": "4.1",
+     "note": "淺基礎設計"
+    },
+    {
+     "src": "found112",
+     "clause": "4.3",
+     "note": "容許支承力"
+    },
+    {
+     "src": "found112",
+     "clause": "4.4",
+     "note": "地層沉陷量計算"
+    },
+    {
+     "src": "found112",
+     "clause": "4.5",
+     "note": "淺基礎沉陷分析"
+    },
+    {
+     "src": "found112",
+     "clause": "4.6",
+     "note": "承受水平力之淺基礎"
+    },
+    {
+     "src": "found112",
+     "clause": "1.5",
+     "note": "支承力與變位"
+    },
+    {
+     "src": "found112",
+     "clause": "4.4.6",
+     "note": "壓密沉陷量（式4.4-1 孔隙比式，逐層求和）"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "found112",
+     "clause": "3.1",
+     "note": "調查要求"
+    },
+    {
+     "src": "found112",
+     "clause": "3.2",
+     "note": "調查方法"
+    },
+    {
+     "src": "found112",
+     "clause": "10.1",
+     "note": "土壤液化"
+    },
+    {
+     "src": "found112",
+     "clause": "10.3",
+     "note": "液化潛能評估"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "27",
+     "note": "工程地質調查"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "32",
+     "note": "地質鑽探調查"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "5.2",
+     "note": "基礎承載力（橋梁）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\retaining_wall.py",
+    "tools\\design\\foundation_design.py"
+   ],
+   "notes": [
+    "retaining_wall.py 的承載檢核用的是假設容許承載力，有鑽探報告須以實測值替換。",
+    "foundation_design.py 的 settlement_assessment 已納入分層瞬時沉陷、壓密、次壓縮、差異沉陷與角變量；角變量會先扣除最小平方剛體轉動。"
+   ]
+  },
+  {
+   "name": "耐震",
+   "aliases": [
+    "耐震設計",
+    "地震力",
+    "地震係數",
+    "設計地震",
+    "震區",
+    "譜加速度",
+    "用途係數",
+    "雜項工作物"
+   ],
+   "scope": "建築物與雜項工作物（含擋土牆、水塔等）之設計地震力",
+   "core": [
+    {
+     "src": "seis113",
+     "clause": "2.2",
+     "note": "最小設計水平總橫力"
+    },
+    {
+     "src": "seis113",
+     "clause": "2.5",
+     "note": "工址譜加速度係數"
+    },
+    {
+     "src": "seis113",
+     "clause": "2.6",
+     "note": "工址設計與最大考量譜加速度"
+    },
+    {
+     "src": "seis113",
+     "clause": "2.8",
+     "note": "用途係數"
+    },
+    {
+     "src": "seis113",
+     "clause": "5.1",
+     "note": "雜項工作物適用範圍"
+    },
+    {
+     "src": "seis113",
+     "clause": "5.4",
+     "note": "非相似於建築結構之雜項工作物"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "seis113",
+     "clause": "1.1",
+     "note": "適用範圍"
+    },
+    {
+     "src": "seis113",
+     "clause": "2.3",
+     "note": "一般區域震區水平譜"
+    },
+    {
+     "src": "seis113",
+     "clause": "2.4",
+     "note": "近斷層區域"
+    },
+    {
+     "src": "seis113",
+     "clause": "11.1",
+     "note": "軟弱與可能液化地盤"
+    },
+    {
+     "src": "found112",
+     "clause": "2.4",
+     "note": "基礎設計地震力"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "119",
+     "note": "擋土牆作用力（含地震）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\retaining_wall.py"
+   ],
+   "notes": [
+    "震區係數依工址所在鄉鎮查表（耐震規範第 2.3 節附表，PDF 表格請看原檔）。",
+    "建築物耐震設計規範 111 年版已被 113 年版取代；查舊版用 --all。"
+   ]
+  },
+  {
+   "name": "標誌標線",
+   "aliases": [
+    "標線",
+    "標誌",
+    "交通標誌",
+    "道路標線",
+    "號誌",
+    "反光導標",
+    "減速標線",
+    "施工標誌",
+    "交通維持"
+   ],
+   "scope": "道路標誌、標線、號誌與施工期間交通維持",
+   "core": [
+    {
+     "src": "traffic_sign",
+     "clause": "146",
+     "note": "標線定義"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "147",
+     "note": "標線劃設方式分類"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "148",
+     "note": "標線功能分類"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "149",
+     "note": "標線型態"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "153",
+     "note": "反光材料"
+    },
+    {
+     "src": "traffic114",
+     "clause": "4.3",
+     "note": "標線分類"
+    },
+    {
+     "src": "traffic114",
+     "clause": "4.4",
+     "note": "標線設置與設計原則"
+    },
+    {
+     "src": "traffic114",
+     "clause": "3.5",
+     "note": "標誌設置與設計原則"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "traffic_sign",
+     "clause": "6",
+     "note": "開放通行前應設置"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "16",
+     "note": "標誌設置位置"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "18",
+     "note": "豎立式標誌淨距"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "142",
+     "note": "施工標誌"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "145",
+     "note": "施工路段交通管制"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "159",
+     "note": "減速標線"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "165",
+     "note": "分向限制線"
+    },
+    {
+     "src": "traffic114",
+     "clause": "10.2",
+     "note": "交通維持與管理計畫"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "20.1",
+     "note": "市區道路標誌標線號誌"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02898章",
+     "note": "標線施工"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02891章",
+     "note": "標誌施工"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "標線線寬、間距等尺寸多在設置規則附圖中（條文標「本條文有附件」），需看全國法規資料庫附件。"
+   ]
+  },
+  {
+   "name": "農塘",
+   "aliases": [
+    "蓄水池",
+    "農地蓄水",
+    "灌溉池塘"
+   ],
+   "scope": "農地蓄水、灌溉與滯洪之農塘（開挖式為主）",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "55",
+     "note": "農塘設置原則"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "56",
+     "note": "開挖式農塘"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "18",
+     "note": "逕流係數推估"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "96",
+     "note": "滯洪量之估算"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "94",
+     "note": "滯洪設施"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "農塘容量須依集水面積、逕流量與需求水量估算；本工作區hydrology.py可算逕流量"
+   ]
+  },
+  {
+   "name": "農路",
+   "aliases": [
+    "園內道",
+    "作業道",
+    "產業道路",
+    "農路設計"
+   ],
+   "scope": "山坡地農路、園內道、作業道之選線、排水與邊坡",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "74",
+     "note": "道路水土保持"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "75",
+     "note": "道路設計規範之選定"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "76",
+     "note": "道路選線"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "78",
+     "note": "道路排水設施"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "79",
+     "note": "道路邊坡穩定"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "7",
+     "note": "各級農路設計規範不得混合使用；超出單車道規範者改依道路主管機關規範"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "11",
+     "note": "農路一至四級：設計速率、路基寬度、最小曲線半徑與最大縱坡度"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "17",
+     "note": "迴頭彎、下坡面擋土牆等安全防護設施"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "18",
+     "note": "單車道避車道間距、寬度與長度"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "22",
+     "note": "農路路面處理原則與應採水泥混凝土路面的情形"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "23",
+     "note": "水泥混凝土路面厚度、伸縮縫、底層與鋼筋量"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "24",
+     "note": "瀝青混凝土路面厚度、級配底層與鋪設寬度"
+    },
+    {
+     "src": "farmroad108",
+     "clause": "25",
+     "note": "人行通行空間與無障礙、高齡友善動線"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "77",
+     "note": "挖填土石方及餘土處理"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "47",
+     "note": "農場水土保持規劃項目"
+    },
+    {
+     "src": "swc_review",
+     "clause": "3",
+     "note": "簡易水保規模（路基4m、長500m）"
+    },
+    {
+     "src": "flexpave91",
+     "clause": "7.2.3",
+     "note": "農路交通量等級"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "修築農路路基寬未滿4公尺且長度未滿500公尺者，得以簡易水土保持申報書代替（審核監督辦法第3條）。",
+    "《農路設計規範》已收錄 108.10.28 版；主文共 25 點，附表一至四及附圖另存於同資料夾。",
+    "引用時以「點」表示：例 `regq.py --clause farmroad108 11` 查各級農路的路基寬度與設計速率。"
+   ]
+  },
+  {
+   "name": "施工圍籬與工區安全",
+   "aliases": [
+    "圍籬",
+    "施工圍籬",
+    "甲種圍籬",
+    "乙種圍籬",
+    "工區安全",
+    "施工安全",
+    "安全防護網",
+    "工程告示牌"
+   ],
+   "scope": "施工期間之圍籬、安全防護、告示牌與交通維持",
+   "core": [
+    {
+     "src": "hwconst112",
+     "clause": "01564章",
+     "note": "施工圍籬"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "01564/2.1.5",
+     "note": "圍籬高度"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "01521章",
+     "note": "施工中安全防護網"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "01581章",
+     "note": "工程告示牌"
+    },
+    {
+     "src": "airconst110",
+     "clause": "6",
+     "note": "工地周界全阻隔式圍籬及防溢座；高度依附表二"
+    },
+    {
+     "src": "airconst110",
+     "clause": "10",
+     "note": "車行出入口洗車台、廢水收集坑及有效沉砂池"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "hwconst112",
+     "clause": "01523章",
+     "note": "施工安全衛生及管理"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "01556章",
+     "note": "交通維持"
+    },
+    {
+     "src": "traffic114",
+     "clause": "10.2",
+     "note": "交通維持與管理計畫"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "142",
+     "note": "施工標誌"
+    },
+    {
+     "src": "traffic_sign",
+     "clause": "145",
+     "note": "施工路段交通管制"
+    },
+    {
+     "src": "airconst110",
+     "clause": "4",
+     "note": "第一級／第二級營建工程之分級"
+    },
+    {
+     "src": "airconst110",
+     "clause": "18",
+     "note": "大規模或大量外運土石之監測儀表與攝錄影監視系統"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "《營建工程空氣污染防制設施管理辦法》已收錄 110.10.18 版；圍籬高度數值見附表二，洗車設備規格見附表三。",
+    "第 6 條是圍籬形式與高度的直接依據；第 10 條則要求洗車廢水收集與有效沉砂池。"
+   ]
+  },
+  {
+   "name": "路基與級配",
+   "aliases": [
+    "路基",
+    "級配",
+    "基層",
+    "底層",
+    "壓實度",
+    "土壤分類",
+    "路床",
+    "級配粒料"
+   ],
+   "scope": "道路路基、級配粒料基層與底層之材料與壓實",
+   "core": [
+    {
+     "src": "flexpave91",
+     "clause": "2.1",
+     "note": "路基土壤"
+    },
+    {
+     "src": "flexpave91",
+     "clause": "3.1",
+     "note": "路基土壤因子"
+    },
+    {
+     "src": "flexpave91",
+     "clause": "4.4",
+     "note": "設計計算公式及步驟"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "9.4.1",
+     "note": "級配粒底層規格及品質"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02722章",
+     "note": "級配粒料基層"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02726章",
+     "note": "級配粒料底層"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02336/3.2",
+     "note": "路基整理檢驗（壓實度 95%、平整度 3.0 cm／3 m 直規）"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02317/3.2",
+     "note": "構造物回填檢驗（75 cm 內 95%、其外 90%；最大粒徑 10 cm）"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02320/3.2",
+     "note": "不適用材料判定（PT/OH/OL、最大乾密度 <1.5 t/m³）"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "hwconst112",
+     "clause": "02336章",
+     "note": "路基整理"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02331章",
+     "note": "基地及路堤填築"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "34",
+     "note": "土壤調查與分析"
+    },
+    {
+     "src": "flexpave91",
+     "clause": "3.4",
+     "note": "低交通量設計方法"
+    }
+   ],
+   "tools": [],
+   "notes": [
+    "壓實度與 CBR 的檢驗頻率在各章「檢驗」節，PDF 表格抽字會亂，請看原檔。"
+   ]
+  },
+  {
+   "name": "溝蓋與格柵",
+   "aliases": [
+    "溝蓋",
+    "溝蓋板",
+    "格柵",
+    "格柵蓋",
+    "進水口蓋",
+    "人孔蓋",
+    "爬梯",
+    "RC溝蓋",
+    "明溝加蓋",
+    "路側溝加蓋",
+    "暗溝",
+    "植筋"
+   ],
+   "scope": "排水溝、集水井、人孔之蓋板、格柵與進水口；RC 明溝加蓋之溝蓋版與植筋結構設計",
+   "core": [
+    {
+     "src": "hwdrain107",
+     "clause": "5.10",
+     "note": "集水井（蓋板與格柵）"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.4.3",
+     "note": "L型側溝進水口"
+    },
+    {
+     "src": "sewer_std",
+     "clause": "14",
+     "note": "道路側溝（溝頂蓋板）"
+    },
+    {
+     "src": "hwconst112",
+     "clause": "02631/3.1.3",
+     "note": "格柵、格柵架及人孔格框蓋施工"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "4.3",
+     "note": "橋面板有效跨徑、輪重邊距與情況A車載彎矩（類推至溝蓋）"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "3.7",
+     "note": "最小載重：省市重要道路／重型貨車不得小於 HS20-44 的 1.25 倍"
+    },
+    {
+     "src": "rc112",
+     "clause": "17.6.5.2.5",
+     "note": "黏結式錨栓最小特徵握裹應力（植筋）"
+    },
+    {
+     "src": "rc112",
+     "clause": "17.9.2",
+     "note": "黏結式錨栓最小間距 6da、最小邊距 6da"
+    },
+    {
+     "src": "rc112",
+     "clause": "22.9.4.2",
+     "note": "新舊混凝土界面剪力摩擦 Vn＝μAvf fy"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "hwdrain107",
+     "clause": "5.8",
+     "note": "淺溝進水口"
+    },
+    {
+     "src": "urbanroad113",
+     "clause": "7.3.7",
+     "note": "最小斷面要求"
+    },
+    {
+     "src": "rc112",
+     "clause": "8.8.1.1",
+     "note": "混凝土格柵板"
+    },
+    {
+     "src": "hwbridge",
+     "clause": "9",
+     "note": "分佈鋼筋百分比 121/√S，上限 67%"
+    },
+    {
+     "src": "rc112",
+     "clause": "20.5.1.3",
+     "note": "鋼筋保護層"
+    }
+   ],
+   "tools": ["tools\\design\\channel_cover.py"],
+   "notes": [
+    "蓋板須便於清浚運搬；兼作進水口時依進水口規定（公路排水5.10、5.8）。",
+    "RC 明溝加蓋以簡支版承受正彎矩；20 cm 溝壁不作固接支承。",
+    "植筋拉力握裹用 RC 112 第17章；垂直剪力由溝壁頂承壓傳遞。"
+   ]
+  },
+  {
+   "name": "營建空污防制",
+   "aliases": [
+    "營建工程空氣污染防制",
+    "營建空污",
+    "工地空污",
+    "洗車台",
+    "空氣污染防制費",
+    "施工空污"
+   ],
+   "scope": "營建工程施工期間之圍籬、車行路徑、洗車、沉砂、監測與紀錄",
+   "core": [
+    {
+     "src": "airconst110",
+     "clause": "4",
+     "note": "第一級／第二級營建工程分級"
+    },
+    {
+     "src": "airconst110",
+     "clause": "6",
+     "note": "工地周界圍籬與防溢座"
+    },
+    {
+     "src": "airconst110",
+     "clause": "10",
+     "note": "車行出入口洗車台、廢水收集坑與沉砂池"
+    },
+    {
+     "src": "airconst110",
+     "clause": "18",
+     "note": "監測儀表及攝錄影監視系統設置門檻"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "airconst110",
+     "clause": "3",
+     "note": "適用對象與免適用情形"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "91",
+     "note": "山坡地沉砂設施設置目的"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "93",
+     "note": "沉砂設施容量、深度與清淤"
+    }
+   ],
+   "tools": [
+    "tools\\design\\sediment_basin.py"
+   ],
+   "notes": [
+    "附表一至五已納入索引（以「附件」單元呈現）；圍籬高度看附表二，自動洗車設備看附表三。",
+    "施工空污防制與水土保持沉砂池目的不同：前者處理洗車廢水，後者攔阻開發泥砂，必要時應分別設計。"
+   ]
+  },
+  {
+   "name": "建築樑柱與基礎",
+   "aliases": [
+    "建築構架",
+    "RC構架",
+    "建築樑柱",
+    "樑柱分析",
+    "柱樑分析",
+    "梁柱設計"
+   ],
+   "scope": "小型 RC 建築物之平面剛架、樑柱耐震初步分析與淺基礎檢核",
+   "core": [
+    {
+     "src": "rc112",
+     "clause": "10.4.2",
+     "note": "因數化軸力與彎矩"
+    },
+    {
+     "src": "rc112",
+     "clause": "10.5.2",
+     "note": "軸力與彎矩共同作用"
+    },
+    {
+     "src": "rc112",
+     "clause": "15.4",
+     "note": "梁柱接頭強度"
+    },
+    {
+     "src": "seis113",
+     "clause": "2.2",
+     "note": "最小設計水平總橫力"
+    },
+    {
+     "src": "found112",
+     "clause": "4.1",
+     "note": "淺基礎設計"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "rc112",
+     "clause": "21.2.2",
+     "note": "撓曲強度折減因數"
+    },
+    {
+     "src": "rc112",
+     "clause": "18.3.2.1",
+     "note": "特殊抗彎矩構架梁"
+    },
+    {
+     "src": "rc112",
+     "clause": "18.4.2.1",
+     "note": "特殊抗彎矩構架柱"
+    },
+    {
+     "src": "found112",
+     "clause": "4.3",
+     "note": "容許支承力"
+    },
+    {
+     "src": "seis113",
+     "clause": "2.8",
+     "note": "用途係數"
+    }
+   ],
+   "tools": [
+    "tools\\design\\building_frame.py",
+    "tools\\design\\rc_design.py",
+    "tools\\design\\foundation_design.py"
+   ],
+   "notes": [
+    "building_frame.py 目前採 2D 代表性平面剛架與等值靜力地震力；未計 3D 扭轉、雙向彎矩、二階效應、接頭剪力與錨定。",
+    "柱軸彎互制與樑撓曲、剪力、裂縫可先用 rc_design.py；基礎承載、沖剪、單向剪力與樁帽載重分配用 foundation_design.py。"
+   ]
+  },
+  {
+   "name": "錨定擋土牆",
+   "aliases": [
+    "地錨",
+    "錨定式擋土牆",
+    "地錨擋土牆",
+    "背拉式擋土牆",
+    "岩錨",
+    "邊坡地錨"
+   ],
+   "scope": "岩層破碎帶、節理發達、崩塌或地滑地區之地錨背拉 RC 牆面／格梁",
+   "core": [
+    {
+     "src": "swc_tech",
+     "clause": "118",
+     "note": "第八款 錨定擋土牆適用範圍"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "6.4",
+     "note": "單一地錨最小安全係數（解說表 C6.4-1）"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "6.7",
+     "note": "自由段穿過滑動面 ≥4 m、錨碇段 3～10 m"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "6.10",
+     "note": "容許荷重取抗張材與錨碇力之小值"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "6.12",
+     "note": "含地錨之整體穩定"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "swc_tech",
+     "clause": "119",
+     "note": "作用力"
+    },
+    {
+     "src": "swc_tech",
+     "clause": "120",
+     "note": "安定條件"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "6.9",
+     "note": "錨頭與基座（壓應力 < 0.3fc'）"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "6.11",
+     "note": "鎖定荷重較設計荷重高 10～20%"
+    },
+    {
+     "src": "hwslope104",
+     "clause": "6.13",
+     "note": "防蝕（長久性雙重防蝕）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\anchored_wall.py",
+    "tools\\design\\slope_stability.py"
+   ],
+   "notes": [
+    "表 C6.4-1：臨時性 抗張材 1.6／地層-漿體 2.0／抗張材-漿體 2.0；長久性（使用 2 年以上）2.0／3.0／3.0。",
+    "錨碇段握裹強度須以證明試驗確認；整體（深層）穩定須另做邊坡穩定分析。",
+    "計算用 tools\\design\\anchored_wall.py 或工作台「錨定擋土牆」（design_run anchored_wall）。"
+   ]
+  },
+  {
+   "name": "鋼構柱腳",
+   "aliases": [
+    "鋼柱",
+    "柱腳",
+    "基板",
+    "基礎螺栓",
+    "錨栓",
+    "鋼構柱",
+    "鋼結構柱",
+    "鋼構柱腳設計"
+   ],
+   "scope": "熱軋或銲接 H 型鋼柱、露出式柱腳基板、澆置前預埋基礎螺栓（不含埋入式柱腳、後置錨栓、SRC／CFT）",
+   "core": [
+    {
+     "src": "steel99",
+     "clause": "4.4",
+     "note": "受壓構材長細比 KL/r 不宜超過 200"
+    },
+    {
+     "src": "steel99",
+     "clause": "4.5",
+     "note": "構材斷面分類（塑性／結實／半結實／細長肢材）"
+    },
+    {
+     "src": "steel99",
+     "clause": "6.3",
+     "note": "容許壓應力 Fa（(一) 版 ASD，依 KL/r 與 Cc 分兩段）"
+    },
+    {
+     "src": "steel99",
+     "clause": "6.2",
+     "note": "受壓構材有效長度係數 K 與有效長細比（(二) 版 LRFD 第六(二)章）"
+    },
+    {
+     "src": "steel99",
+     "clause": "7.2",
+     "note": "容許撓曲應力（(一) 版 ASD，工型斷面強軸彎曲）"
+    },
+    {
+     "src": "steel99",
+     "clause": "7.2.2",
+     "note": "標稱撓曲強度（(二) 版 LRFD，側向扭轉挫屈）"
+    },
+    {
+     "src": "steel99",
+     "clause": "8.2",
+     "note": "軸向壓力與彎矩共同作用（梁柱互制）"
+    },
+    {
+     "src": "steel99",
+     "clause": "10.9",
+     "note": "混凝土容許承壓應力／設計承壓強度（基板承壓）"
+    },
+    {
+     "src": "steel99",
+     "clause": "10.10.1",
+     "note": "錨栓須抵抗柱端拉力與剪力（含彎矩引致之淨拉力）"
+    },
+    {
+     "src": "steel99",
+     "clause": "10.10.2",
+     "note": "錨栓埋入深度與混凝土拉破／摩擦力之安全係數"
+    },
+    {
+     "src": "steel99",
+     "clause": "10.3.1",
+     "note": "螺栓及螺牙桿件設計強度（表10.3-2）"
+    }
+   ],
+   "prereq": [
+    {
+     "src": "steel99",
+     "clause": "4.8",
+     "note": "有效長度係數 K 值之決定（構架穩定，側移構架不得逕取 1.0）"
+    },
+    {
+     "src": "steel99",
+     "clause": "3.4",
+     "note": "結構用螺栓、螺帽、墊圈之國家標準選用（錨栓材質依據）"
+    },
+    {
+     "src": "steel99",
+     "clause": "10.3.2",
+     "note": "螺栓有效承壓面積、剪力面積與張力面積之計算（以標稱直徑計）"
+    }
+   ],
+   "tools": [
+    "tools\\design\\steel_column.py",
+    "tools\\design\\design_api.py"
+   ],
+   "notes": [
+    "「(一) 版」容許應力設計法與「(二) 版」極限設計法條號不同，全案擇一；程式以 design_method 切換，不可混用。",
+    "基板厚度採 AISC DG1 簡化懸臂法、錨栓拉力採彈性錨栓群法，皆非我國規範明文公式，須由技師覆核。",
+    "ASD 表10.3-2 容許應力為轉錄值（尚未入 tools\\regs\\verified），輸出會附提醒；LRFD 之路徑全部來自已驗證庫。",
+    "計算用 tools\\design\\steel_column.py 或工作台「鋼構柱、柱腳基板與基礎螺栓」（design_run steel_column），SOP 見 docs\\鋼構柱與基礎螺栓計算SOP.md。"
+   ]
+  }
+ ]
+}

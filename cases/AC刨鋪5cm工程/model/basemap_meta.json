@@ -1,0 +1,33 @@
+{
+ "name": "AC刨鋪5cm工程",
+ "lat": 24.2418580148636,
+ "lon": 120.635993465,
+ "crs": "EPSG:3826",
+ "center_E": 213034.7696553055,
+ "center_N": 2681856.8452964644,
+ "E0": 212904.7696553055,
+ "N0": 2681769.3452964644,
+ "E1": 213164.7696553055,
+ "N1": 2681944.3452964644,
+ "res_m": 0.1,
+ "scale": 600,
+ "osm_ok": true,
+ "bldg_source": "臺中市政府 建物GIS圖資（114期末_B0001_1216n.shp）逐棟繪製，方位依原始圖資",
+ "road_smooth_max_dev_m": 0.094,
+ "admin": {
+  "ctyName": "臺中市",
+  "townName": "大雅區",
+  "villageName": "六寶里",
+  "sectName": "六寶段",
+  "officeName": "雅潭"
+ },
+ "counts": {
+  "road_edges": 2,
+  "road_lots": 4,
+  "parcels": 9,
+  "buildings": 26,
+  "water": 0,
+  "osm_roads": 3
+ },
+ "dxf": "AC刨鋪5cm工程_現況平面圖_TWD97.dxf"
+}

@@ -1,0 +1,488 @@
+{
+ "schema_version": "1.1",
+ "source": "docs/擋土牆改版_作業計畫.md §6「S7 分析報告書章節」（14 章）；本檔為其「任意案件可用」的參數化版本。",
+ "note": "章節編號與順序固定；每章的資料區塊由 sections 宣告，資料來自案件 JSON 的 `from` 路徑。JSON 沒填 → 產生『需人工補』佔位符並列入附錄 B。applies_to 宣告該章適用之工程類別（* 表全部）；不適用之章節不另起新頁。",
+ "sections_kinds": {
+  "paragraphs": "段落清單（字串或字串陣列）",
+  "bullets": "條列（自動加 1. 2. 3. 前綴）",
+  "tables": "一或多個表格；表號自動編（spec 需含 caption／columns／rows）",
+  "checks": "檢核判定表（項目／規範要求／實際值／判定）",
+  "figures": "圖檔清單；圖號自動編、自動嵌入",
+  "regulations": "引用法規條文庫（templates/report/regulations.json），自動附查證狀態",
+  "boilerplate": "固定聲明稿（templates/report/boilerplate.json）"
+ },
+ "chapters": [
+  {
+   "no": 1,
+   "id": "summary",
+   "title": "摘要與結論",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章摘要說明本工程之範圍、主要設計成果與工程數量，並列出後續應辦事項。",
+   "sections": [
+    {
+     "kind": "paragraphs",
+     "from": "summary.paragraphs",
+     "label": "工程摘要",
+     "hint": "本節應以 2～4 段說明工程範圍、採用方法與主要成果。"
+    },
+    {
+     "kind": "bullets",
+     "from": "summary.conclusions",
+     "heading": "結論",
+     "label": "結論條列",
+     "hint": "本節應條列結論：工程數量、圖說規格、品管結果、主要限制、覆核聲明。"
+    },
+    {
+     "kind": "boilerplate",
+     "ref": "disclaimer_short"
+    }
+   ],
+   "manual": []
+  },
+  {
+   "no": 2,
+   "id": "basis",
+   "title": "設計依據與適用規範",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章列明本報告所依據之委託文件、基礎資料與適用規範，並標示各規範之查證狀態。",
+   "sections": [
+    {
+     "kind": "paragraphs",
+     "from": "basis.notes",
+     "label": "設計依據說明",
+     "hint": "本節應說明委託依據、資料來源與引用規範之查證原則。"
+    },
+    {
+     "kind": "tables",
+     "from": "basis.standards",
+     "label": "設計依據文件一覽",
+     "hint": "本節應列明依據文件（名稱／來源／版本／用途）。"
+    },
+    {
+     "kind": "regulations",
+     "from": "basis.regulation_ids",
+     "label": "引用法規條文",
+     "hint": "本節應列明引用之法規名稱、版次與條號，並附條文原文或註明「版次待核」。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "建築系／公路系規範版次核對",
+     "hint": "引用之建築物基礎暨設計規範、建築物耐震設計規範、公路／市區道路設計規範，須以官方資料庫核對現行版次與條號；未核對前一律標「版次待核」，不得視為已查證。"
+    }
+   ]
+  },
+  {
+   "no": 3,
+   "id": "applicability",
+   "title": "規範適用性說明",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章就本工程之類別、規模與構造形式，逐項說明其是否落在適用規範之適用範圍內。",
+   "sections": [
+    {
+     "kind": "paragraphs",
+     "from": "applicability.notes",
+     "label": "適用性說明",
+     "hint": "本節應說明適用性判斷原則，並指明不引用之規範與原因。"
+    },
+    {
+     "kind": "checks",
+     "from": "applicability.items",
+     "heading": "適用性判定",
+     "caption": "規範適用性判定表",
+     "label": "適用性判定表",
+     "hint": "本節應逐項列明適用性判定（項目／規範要求／實際情形／判定）。"
+    }
+   ],
+   "manual": []
+  },
+  {
+   "no": 4,
+   "id": "survey",
+   "title": "原設計判讀結果與信心評級",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章說明原設計資料之來源與判讀方法，並逐項標示判讀結果之信心等級。",
+   "sections": [
+    {
+     "kind": "paragraphs",
+     "from": "survey.notes",
+     "label": "判讀方法說明",
+     "hint": "本節應說明資料來源（原始圖說／照片／量測）與判讀方法。"
+    },
+    {
+     "kind": "tables",
+     "from": "survey.readings",
+     "label": "判讀結果表",
+     "hint": "本節應列明判讀項目、判讀值、來源與信心評級。"
+    },
+    {
+     "kind": "tables",
+     "from": "survey.confidence",
+     "label": "判讀信心評級表",
+     "hint": "本節應以 1～10 級標示各項成果之信心並說明理由。"
+    },
+    {
+     "kind": "bullets",
+     "from": "survey.limitations",
+     "heading": "判讀侷限",
+     "label": "判讀侷限",
+     "hint": "本節應列出判讀方法之侷限與其對下游設計之影響。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "原始圖說或現況照片補件",
+     "hint": "若取得原始設計圖說、計算書或現場照片，應補入並重新核定判讀結果；本報告之判讀結果僅在現有資料下成立。"
+    }
+   ]
+  },
+  {
+   "no": 5,
+   "id": "assumptions",
+   "title": "設計假設與土工參數",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章列出設計所採用之假設條件與材料／土工參數，並說明其依據；屬假設值者應於後續正式設計前以試驗或地勘結果替換。",
+   "sections": [
+    {
+     "kind": "tables",
+     "from": "assumptions.items",
+     "label": "設計假設與參數一覽",
+     "hint": "本節應列明設計假設與參數（項目／採用值／單位／依據），並區分「實測值」與「假設值」。"
+    },
+    {
+     "kind": "tables",
+     "from": "assumptions.sensitivity",
+     "label": "敏感度分析",
+     "hint": "採用假設土工參數者，應補充參數變異（c、φ、γ、地下水位）對安全係數之敏感度分析；未辦理者須註明其影響。"
+    },
+    {
+     "kind": "paragraphs",
+     "from": "assumptions.notes",
+     "label": "假設說明",
+     "hint": "本節應說明假設條件之影響範圍與後續覆核方式。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "土工參數來源與試驗依據",
+     "hint": "土層參數（c、φ、γ、N 值、地下水位）須以地質鑽探或試驗結果為依據；未經試驗者應明確標示為「假設值」，並於正式設計前覆核。"
+    }
+   ]
+  },
+  {
+   "no": 6,
+   "id": "loads",
+   "title": "載重作用與土壓力計算",
+   "applies_to": [
+    "擋土牆",
+    "排水溝",
+    "箱涵"
+   ],
+   "intro": "本章依規範列舉作用於構造物之各種載重，並計算土壓力與水壓力之大小及作用位置。",
+   "sections": [
+    {
+     "kind": "tables",
+     "from": "loads.items",
+     "label": "載重與土壓力計算表",
+     "hint": "本節應列明各載重項（自重／超載／土壓力／水壓力／地震力）之大小、作用點與分項係數。"
+    },
+    {
+     "kind": "paragraphs",
+     "from": "loads.notes",
+     "label": "計算說明",
+     "hint": "本節應說明採用之土壓力理論、主動／被動土壓力係數與地震力係數之依據。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "土壓力理論與載重組合計算書",
+     "hint": "須附 Rankine／Coulomb 選用理由、主動土壓力係數計算、地震力（依水土保持技術規範第 119 條須列入作用力）與各載重組合之總表。",
+     "skip_if": "loads.items"
+    }
+   ]
+  },
+  {
+   "no": 7,
+   "id": "stability",
+   "title": "穩定檢核",
+   "applies_to": [
+    "擋土牆",
+    "邊坡",
+    "排水溝",
+    "箱涵"
+   ],
+   "intro": "本章依規範進行安定檢核：擋土牆檢核滑動、傾倒與基礎承載力並列出合力作用點；邊坡檢核最小安全係數（無限邊坡法與圓弧滑動）；排水溝檢核通水與流速。",
+   "sections": [
+    {
+     "kind": "checks",
+     "from": "stability.checks",
+     "heading": "安定檢核結果",
+     "caption": "安定檢核結果表",
+     "label": "安定檢核結果表",
+     "hint": "本節應逐項列明各項檢核之要求值、計算值與判定（擋土牆：滑動／傾倒／承載；邊坡：FS；排水溝：容量／流速／出水高）。"
+    },
+    {
+     "kind": "paragraphs",
+     "from": "stability.notes",
+     "label": "檢核說明",
+     "hint": "本節應說明控制工況、採較嚴規範之依據與不合格項之處理方式。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "各工況安全係數計算書",
+     "hint": "須分常時與地震兩工況，逐項列出 FS 計算式與數值。允許值依水土保持技術規範第 120 條：滑動常時 ≥1.5、地震 ≥1.2；傾倒常時 ≥2.0、地震 ≥1.5；合力作用點土層基礎須在 1/3 中段內；基礎承重 FS ≥3。",
+     "skip_if": "stability.checks"
+    }
+   ]
+  },
+  {
+   "no": 8,
+   "id": "reinforcement",
+   "title": "構材配筋設計",
+   "applies_to": [
+    "擋土牆",
+    "排水溝",
+    "箱涵"
+   ],
+   "intro": "本章說明主要構材（牆身、底板、趾板）之配筋設計結果與構造規定檢核。",
+   "sections": [
+    {
+     "kind": "tables",
+     "from": "reinforcement.items",
+     "label": "配筋一覽表",
+     "hint": "本節應列明構材、斷面、主筋、分布筋、間距與鋼筋量。"
+    },
+    {
+     "kind": "paragraphs",
+     "from": "reinforcement.notes",
+     "label": "配筋說明",
+     "hint": "本節應說明設計彎矩、保護層、裂縫控制與構造規定之檢核結果。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "配筋計算與構造規定檢核",
+     "hint": "須檢核最小配筋率、鋼筋間距、保護層、錨定長度與裂縫寬度；配筋不得僅按受力折減而低於構造規定。",
+     "skip_if": "reinforcement.items"
+    }
+   ]
+  },
+  {
+   "no": 9,
+   "id": "comparison",
+   "title": "斷面決定與新舊比較表",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章說明最終採用之斷面尺寸與其決定依據，並就修訂前後之尺寸、數量與檢核結果逐項對照。",
+   "sections": [
+    {
+     "kind": "tables",
+     "from": "comparison.items",
+     "label": "新舊比較表",
+     "hint": "本節應列明比較表（項目／修訂前／修訂後／差異／說明），並註明已作廢之數據。"
+    },
+    {
+     "kind": "paragraphs",
+     "from": "comparison.notes",
+     "label": "斷面決定說明",
+     "hint": "本節應說明斷面採用理由，區分「受力控制」與「構造規定控制」。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "斷面尺寸採用依據補充",
+     "hint": "若斷面尺寸係受構造規定（最小牆厚、最小鍵深）控制而非受力控制，應於本章明確註明，以免被誤解為可按比例縮減。",
+     "skip_if": "comparison.notes"
+    }
+   ]
+  },
+  {
+   "no": 10,
+   "id": "quantities",
+   "title": "數量表",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章列出本工程之主要工程數量及其計算依據，供預算編列與施工備料參考。",
+   "sections": [
+    {
+     "kind": "paragraphs",
+     "from": "quantities.notes",
+     "label": "數量計算說明",
+     "hint": "本節應說明量測方法、計算公式與誤差來源。"
+    },
+    {
+     "kind": "tables",
+     "from": "quantities.items",
+     "label": "工程數量表",
+     "hint": "本節應列明數量表（項目／數量／單位／計算依據）。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "損耗、鬆散係數與附加數量",
+     "hint": "本表數量為設計數量，未含拌合損耗、鬆散係數、試驗段用量與預備數量；預算編列時應依規範另行加成並註明加成率。"
+    }
+   ]
+  },
+  {
+   "no": 11,
+   "id": "drainage",
+   "title": "排水與伸縮縫配置",
+   "applies_to": [
+    "擋土牆",
+    "邊坡",
+    "排水溝",
+    "箱涵"
+   ],
+   "intro": "本章依規範配置排水孔、牆後排水設施與伸縮縫，並列出具體間距與數量。",
+   "sections": [
+    {
+     "kind": "checks",
+     "from": "drainage.checks",
+     "heading": "排水與伸縮縫檢核",
+     "caption": "排水與伸縮縫配置檢核表",
+     "label": "排水與伸縮縫檢核表",
+     "hint": "本節應列明排水孔直徑與密度、伸縮縫間距、背填透水性等檢核。"
+    },
+    {
+     "kind": "tables",
+     "from": "drainage.items",
+     "label": "配置數量表",
+     "hint": "本節應列明排水孔、伸縮縫、背填材料與反濾層之數量。"
+    },
+    {
+     "kind": "paragraphs",
+     "from": "drainage.notes",
+     "label": "配置說明",
+     "hint": "本節應說明排水路徑、防阻塞設施與出水口銜接。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "排水孔位置與伸縮縫配置圖",
+     "hint": "須於立面圖或展開圖標示排水孔位置、高程與伸縮縫位置。允許值依水土保持技術規範第 121 條：排水孔直徑 ≥5 cm、每 2 m² 至少 1 孔；伸縮縫每 20～40 m 一處。"
+    }
+   ]
+  },
+  {
+   "no": 12,
+   "id": "drawings",
+   "title": "圖說",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章彙整本工程之設計圖說，並列出圖名、圖號、比例與版本。",
+   "sections": [
+    {
+     "kind": "figures",
+     "from": "drawings.figures",
+     "label": "設計圖說",
+     "hint": "本節應置入設計圖說（建議以 tools/a3_sheet 產出之 PNG／PDF 為來源），並標示圖名與比例。"
+    },
+    {
+     "kind": "tables",
+     "from": "drawings.list",
+     "label": "圖說目錄",
+     "hint": "本節應列明圖說目錄（圖號／圖名／比例／版次／檔案）。"
+    }
+   ],
+   "manual": []
+  },
+  {
+   "no": 13,
+   "id": "risks",
+   "title": "風險與待確認事項",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章列明本報告之風險項目、影響程度與處置方式，並彙整尚待確認事項。",
+   "sections": [
+    {
+     "kind": "tables",
+     "from": "risks.items",
+     "label": "風險與處置表",
+     "hint": "本節應列明風險項目、影響與處置方式（須含資料精度、假設參數與規範版次三類風險）。"
+    },
+    {
+     "kind": "bullets",
+     "from": "risks.pending",
+     "heading": "待確認事項",
+     "label": "待確認事項",
+     "hint": "本節應列出尚待業主或設計者確認之事項。"
+    },
+    {
+     "kind": "boilerplate",
+     "ref": "disclaimer_long"
+    }
+   ],
+   "manual": [
+    {
+     "label": "待確認事項處理權責與期限",
+     "hint": "應指定每一待確認事項之處理權責（業主／設計／施工廠商）與預定完成時程。"
+    }
+   ]
+  },
+  {
+   "no": 14,
+   "id": "deliverables",
+   "title": "交件清單與檔案說明",
+   "applies_to": [
+    "*"
+   ],
+   "intro": "本章列出本次交付之全部檔案、格式與用途，作為交件與後續追蹤之依據。",
+   "sections": [
+    {
+     "kind": "tables",
+     "from": "deliverables.items",
+     "label": "交件清單",
+     "hint": "本節應列明交件清單（檔名／格式／用途／狀態）。"
+    },
+    {
+     "kind": "paragraphs",
+     "from": "deliverables.notes",
+     "label": "檔案說明",
+     "hint": "本節應說明檔案用途、版次關係與未來修訂之重產規則。"
+    }
+   ],
+   "manual": [
+    {
+     "label": "交付簽收與版次核定",
+     "hint": "交件時應由設計者、審核者簽章並註明版次與日期；本產線不產生簽證欄位，亦不代表任何專業簽證。"
+    }
+   ]
+  }
+ ],
+ "appendices": [
+  {
+   "letter": "A",
+   "id": "status",
+   "title": "章節資料狀態表",
+   "note": "本表由產生器自動統計：自動填入＝資料完整、無待補項；部分自動＝資料部分由案件資料提供、部分需人工補；需人工補＝本章無資料；不適用＝本章不適用於本工程類別。"
+  },
+  {
+   "letter": "B",
+   "id": "todo",
+   "title": "待補資料清單",
+   "note": "本清單彙整報告內所有「需人工補」佔位符；補齊後重新產製即可自動填入，並請同步更新報告版次。"
+  },
+  {
+   "letter": "C",
+   "id": "meta",
+   "title": "產製與版本資訊",
+   "note": "本附錄記錄產製工具、資料來源、數量一致性自我檢核結果與文件性質聲明。"
+  }
+ ]
+}

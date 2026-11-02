@@ -1,0 +1,1290 @@
+{
+ "formulas": [
+  {
+   "id": "steel99_Fa_asd",
+   "title": "受壓構材容許壓應力 Fa（ASD，式6.3-1、6.3-2）",
+   "src": "steel99",
+   "clause": "6.3",
+   "page": 1,
+   "keywords": "鋼構 受壓 柱 容許壓應力 Fa 挫屈 ASD Cc",
+   "unit": "tf/cm2",
+   "output": "Fa",
+   "latex": "F_a=\\frac{[1-\\frac{(KL/r)^2}{2C_c^2}]F_y}{\\frac53+\\frac38\\frac{KL/r}{C_c}-\\frac18\\left(\\frac{KL/r}{C_c}\\right)^3}\\;(KL/r<C_c);\\quad F_a=\\frac{12\\pi^2E}{23(KL/r)^2}\\;(KL/r\\ge C_c),\\quad C_c=\\sqrt{\\frac{2\\pi^2E}{F_y}}",
+   "vars": {
+    "Fy": {
+     "desc": "降伏應力",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 6.0
+    },
+    "E": {
+     "desc": "彈性模數",
+     "unit": "tf/cm2",
+     "default": 2100.0,
+     "min": 1500,
+     "max": 2500
+    },
+    "klr": {
+     "desc": "有效長細比 KL/r（K 依第4.8節）",
+     "unit": "-",
+     "min": 1,
+     "max": 400
+    }
+   },
+   "defs": [
+    [
+     "Cc",
+     "sqrt(2*pi**2*E/Fy)"
+    ]
+   ],
+   "expr": "(1-(klr**2)/(2*Cc**2))*Fy/(5/3+3/8*(klr/Cc)-1/8*(klr/Cc)**3) if klr<Cc else 12*pi**2*E/(23*klr**2)",
+   "conditions": [
+    {
+     "expr": "klr<=200 or True",
+     "msg": ""
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "klr>200",
+     "msg": "長細比 KL/r 超過 200，另受第4.4節最大長細比限制"
+    }
+   ],
+   "notes": "ASD（容許應力設計法，第六(一)章）。適用於肢材寬厚比符合結實或半結實斷面、且未受支撐部分最大有效長細比 KL/r<Cc 者。單位 tf、cm。C_c 為彈性與非彈性挫屈分界（挫屈應力=0.5Fy 之長細比）。",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "E": 2100,
+      "klr": 80
+     },
+     "out": 1.079077063727558,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "E": 2100,
+      "klr": 150
+     },
+     "out": 0.48060682300956875,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第六章(一) p.1（式6.3-1、6.3-2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Fcr_lrfd",
+   "title": "受壓構材標稱壓應力 Fcr 與設計強度 φcPn（LRFD，式6.2-1~6.2-4）",
+   "src": "steel99",
+   "clause": "6.2",
+   "page": 1,
+   "keywords": "鋼構 LRFD 柱 Fcr lambda_c φcPn 極限設計 受壓",
+   "unit": "tf",
+   "output": "phiPn",
+   "latex": "\\lambda_c=\\frac{KL}{\\pi r}\\sqrt{\\frac{F_y}{E}},\\;F_{cr}=e^{-0.419\\lambda_c^2}F_y\\;(\\lambda_c\\le1.5);\\;\\frac{0.877}{\\lambda_c^2}F_y\\;(\\lambda_c>1.5),\\;\\phi_c=0.85,\\;P_n=A_gF_{cr}",
+   "vars": {
+    "Fy": {
+     "desc": "標稱降伏應力",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 6.0
+    },
+    "E": {
+     "desc": "彈性模數",
+     "unit": "tf/cm2",
+     "default": 2100.0,
+     "min": 1500,
+     "max": 2500
+    },
+    "klr": {
+     "desc": "有效長細比 KL/r",
+     "unit": "-",
+     "min": 1,
+     "max": 400
+    },
+    "Ag": {
+     "desc": "構材全斷面積",
+     "unit": "cm2",
+     "min": 0.1
+    }
+   },
+   "defs": [
+    [
+     "lc",
+     "klr/pi*sqrt(Fy/E)"
+    ],
+    [
+     "Fcr",
+     "exp(-0.419*lc**2)*Fy if lc<=1.5 else 0.877/lc**2*Fy"
+    ]
+   ],
+   "expr": "0.85*Ag*Fcr",
+   "notes": "LRFD（鋼結構極限設計法，第六(二)章）。φc=0.85；輸出為 φcPn（tf），steps.Fcr 為標稱壓應力。肢材寬厚比大於 λr 者另依附錄1（未收錄）。",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "E": 2100,
+      "klr": 80,
+      "Ag": 100
+     },
+     "out": 153.77433516099862,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "Fy": 2.5,
+      "E": 2100,
+      "klr": 200,
+      "Ag": 100
+     },
+     "out": 38.62580715415832
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第六章(二) p.1（式6.2-1~6.2-4）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Fb_compact",
+   "title": "結實斷面受強軸彎曲之容許撓曲應力 Fb=0.66Fy（ASD，7.2.1）",
+   "src": "steel99",
+   "clause": "7.2.1",
+   "page": 1,
+   "keywords": "鋼構 撓曲 容許彎曲應力 Fb 0.66Fy 結實斷面 梁",
+   "unit": "tf/cm2",
+   "output": "Fb",
+   "latex": "F_b=0.66F_y",
+   "vars": {
+    "Fy": {
+     "desc": "降伏應力（不得大於 4.55 tf/cm2）",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 4.55
+    }
+   },
+   "expr": "0.66*Fy",
+   "notes": "須同時符合下列(1)~(3)：結實斷面（第4.5節，不含 Fy>4.55 tf/cm2 之構材或混合梁）；翼板與腹板全部連續連接；壓力翼板側向未支撐間距 Lb 不大於 Lc（steel99_Lc）。",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5
+     },
+     "out": 1.6500000000000001,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章(一) p.1（式7.2-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Lc",
+   "title": "側向未支撐間距上限 Lc（ASD 7.2.1 第(3)款）",
+   "src": "steel99",
+   "clause": "7.2.1",
+   "page": 1,
+   "keywords": "鋼構 Lc 側向未支撐 間距 梁 bf Af d",
+   "unit": "cm",
+   "output": "Lc",
+   "latex": "L_c=\\min\\left(\\frac{20b_f}{\\sqrt{F_y}},\\;\\frac{1400}{(d/A_f)F_y}\\right)",
+   "vars": {
+    "bf": {
+     "desc": "翼板寬",
+     "unit": "cm",
+     "min": 1
+    },
+    "d": {
+     "desc": "梁深",
+     "unit": "cm",
+     "min": 1
+    },
+    "Af": {
+     "desc": "壓力翼板斷面積",
+     "unit": "cm2",
+     "min": 0.1
+    },
+    "Fy": {
+     "desc": "降伏應力",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 6.0
+    }
+   },
+   "defs": [
+    [
+     "a",
+     "20*bf/sqrt(Fy)"
+    ],
+    [
+     "b",
+     "1400/((d/Af)*Fy)"
+    ]
+   ],
+   "expr": "min(a,b)",
+   "notes": "Lb≤Lc 且符合第4.5節結實斷面等條件時，Fb 得取 0.66Fy（steel99_Fb_compact）。Lb>Lc 者依 7.2.3（未收錄）。",
+   "tests": [
+    {
+     "in": {
+      "bf": 15,
+      "d": 40,
+      "Af": 60,
+      "Fy": 2.5
+     },
+     "out": 189.73665961010275,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章(一) p.1＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_hw_plate_girder",
+   "title": "板梁腹板深厚比門檻 h/tw>260/√Fy（ASD 7.1）",
+   "src": "steel99",
+   "clause": "7.1",
+   "page": 1,
+   "keywords": "鋼構 板梁 腹板 深厚比 plate girder",
+   "unit": "-",
+   "output": "ratio",
+   "latex": "\\frac{h}{t_w}>\\frac{260}{\\sqrt{F_y}}\\;\\Rightarrow\\;\\text{依7.8節板梁設計}",
+   "vars": {
+    "h": {
+     "desc": "腹板在兩翼板間之淨深度",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "tw": {
+     "desc": "腹板厚度",
+     "unit": "cm",
+     "min": 0.05
+    },
+    "Fy": {
+     "desc": "降伏應力",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 6.0
+    }
+   },
+   "defs": [
+    [
+     "limit",
+     "260/sqrt(Fy)"
+    ]
+   ],
+   "expr": "h/tw",
+   "warn_if": [
+    {
+     "expr": "result>260/sqrt(Fy)",
+     "msg": "h/tw 超過 260/√Fy：應依 7.8 節板梁規定設計"
+    }
+   ],
+   "notes": "輸出為 h/tw；steps.limit 為門檻值。",
+   "tests": [
+    {
+     "in": {
+      "h": 100,
+      "tw": 1.0,
+      "Fy": 2.5
+     },
+     "out": 100.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章(一) p.1＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Mp",
+   "title": "塑性彎矩 Mp=Fy·Z（LRFD 7.2.2）",
+   "src": "steel99",
+   "clause": "7.2.2",
+   "page": 1,
+   "keywords": "鋼構 LRFD Mp 塑性彎矩 Z 塑性模數",
+   "unit": "tf·cm",
+   "output": "Mp",
+   "latex": "M_p=F_yZ",
+   "vars": {
+    "Fy": {
+     "desc": "標稱降伏應力",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 6.0
+    },
+    "Z": {
+     "desc": "斷面之塑性模數",
+     "unit": "cm3",
+     "min": 1
+    }
+   },
+   "expr": "Fy*Z",
+   "notes": "LRFD（鋼結構極限設計法，第七(二)章）。設計撓曲強度 φbMn，φb=0.90（7.2.1）。",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "Z": 1000
+     },
+     "out": 2500.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第七章(二) p.1（7.2.2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Cb",
+   "title": "側向扭轉挫屈修正係數 Cb（LRFD 7.2.2）",
+   "src": "steel99",
+   "clause": "7.2.2",
+   "page": 1,
+   "keywords": "鋼構 Cb 側向扭轉挫屈 彎矩梯度",
+   "unit": "-",
+   "output": "Cb",
+   "latex": "C_b=1.75+1.05(M_1/M_2)+0.3(M_1/M_2)^2\\le2.3",
+   "vars": {
+    "M1": {
+     "desc": "側向無支撐段兩端彎矩較小者（單曲率時 M1/M2 為負）",
+     "unit": "tf·cm",
+     "min": -1000000000.0,
+     "max": 1000000000.0
+    },
+    "M2": {
+     "desc": "兩端彎矩較大者（非零）",
+     "unit": "tf·cm",
+     "min": -1000000000.0,
+     "max": 1000000000.0
+    },
+    "cantilever": {
+     "desc": "側向無支撐之懸臂梁＝1（Cb 取 1.0）",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "1.0 if cantilever>0.5 else min(2.3,1.75+1.05*(M1/M2)+0.3*(M1/M2)**2)",
+   "notes": "M1/M2 於雙曲率彎曲時為正值、單曲率時為負值。側向無支撐段內任一點彎矩大於或等於 M2 時，Cb 取 1.0。",
+   "tests": [
+    {
+     "in": {
+      "M1": 0,
+      "M2": 100
+     },
+     "out": 1.75
+    },
+    {
+     "in": {
+      "M1": 50,
+      "M2": 100
+     },
+     "out": 2.3
+    },
+    {
+     "in": {
+      "M1": -100,
+      "M2": 100
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "M1": 50,
+      "M2": 100,
+      "cantilever": 1
+     },
+     "out": 1.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章(二) p.1＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Lp_I",
+   "title": "側向無支撐段長度界限 Lp（I 型梁及槽型，式7.2-2）",
+   "src": "steel99",
+   "clause": "7.2.2",
+   "page": 1,
+   "keywords": "鋼構 Lp 側向無支撐 界限長度 I型梁",
+   "unit": "cm",
+   "output": "Lp",
+   "latex": "L_p=\\frac{80r_y}{\\sqrt{F_{yf}}}",
+   "vars": {
+    "ry": {
+     "desc": "對弱軸之迴轉半徑",
+     "unit": "cm",
+     "min": 0.5
+    },
+    "Fyf": {
+     "desc": "翼板之降伏應力",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 6.0
+    }
+   },
+   "expr": "80*ry/sqrt(Fyf)",
+   "notes": "實心矩形梁及箱形斷面梁之 Lp 用式(7.2-3)：Lp=260·ry·√(JA)/Mp。Lb≤Lp 時 Mn=Mp（7.2.2(1)）。",
+   "tests": [
+    {
+     "in": {
+      "ry": 5.0,
+      "Fyf": 2.5
+     },
+     "out": 252.98221281347034,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章(二) p.1（式7.2-2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Lr_I",
+   "title": "側向扭轉挫屈界限長度 Lr 與 Mr（式7.2-4、7.2-5，含 X1、X2）",
+   "src": "steel99",
+   "clause": "7.2.2",
+   "page": 2,
+   "keywords": "鋼構 Lr 側向扭轉挫屈 X1 X2 FL Mr",
+   "unit": "cm",
+   "output": "Lr",
+   "latex": "L_r=\\frac{r_yX_1}{F_L}\\sqrt{1+\\sqrt{1+X_2F_L^2}},\\;X_1=\\frac{\\pi}{S_x}\\sqrt{\\frac{EGJA}{2}},\\;X_2=4\\frac{C_w}{I_y}\\left(\\frac{S_x}{GJ}\\right)^2,\\;M_r=F_LS_x",
+   "vars": {
+    "ry": {
+     "desc": "對弱軸之迴轉半徑",
+     "unit": "cm",
+     "min": 0.5
+    },
+    "Sx": {
+     "desc": "對強軸之斷面模數",
+     "unit": "cm3",
+     "min": 10
+    },
+    "E": {
+     "desc": "鋼材彈性模數",
+     "unit": "tf/cm2",
+     "default": 2100,
+     "min": 1500,
+     "max": 2500
+    },
+    "G": {
+     "desc": "鋼材彈性剪力模數",
+     "unit": "tf/cm2",
+     "default": 810,
+     "min": 600,
+     "max": 1000
+    },
+    "J": {
+     "desc": "扭曲常數",
+     "unit": "cm4",
+     "min": 0.01
+    },
+    "A": {
+     "desc": "斷面積",
+     "unit": "cm2",
+     "min": 1
+    },
+    "Iy": {
+     "desc": "對弱軸之慣性矩",
+     "unit": "cm4",
+     "min": 0.01
+    },
+    "Cw": {
+     "desc": "斷面翹曲常數",
+     "unit": "cm6",
+     "min": 0.0001
+    },
+    "FL": {
+     "desc": "F_L＝(Fyf−Fr) 或 Fyw 取小值",
+     "unit": "tf/cm2",
+     "min": 0.5,
+     "max": 6
+    }
+   },
+   "defs": [
+    [
+     "X1",
+     "pi/Sx*sqrt(E*G*J*A/2)"
+    ],
+    [
+     "X2",
+     "4*Cw/Iy*(Sx/(G*J))**2"
+    ],
+    [
+     "Lr",
+     "ry*X1/FL*sqrt(1+sqrt(1+X2*FL**2))"
+    ],
+    [
+     "Mr",
+     "FL*Sx"
+    ]
+   ],
+   "expr": "Lr",
+   "notes": "Fr 為翼板殘留應力：熱軋型鋼 0.7 tf/cm2、銲接型鋼 1.16 tf/cm2。實心矩形與箱形斷面之 Lr 用式(7.2-8)：Lr=4000·ry√(JA)/Mr。單軸對稱壓力翼板較小者，式(7.2-5)~(7.2-7) 之 Sx 改用 Sxc。輸出 Lr（cm），steps 另含 X1、X2、Mr。",
+   "tests": [
+    {
+     "in": {
+      "ry": 5.0,
+      "Sx": 800,
+      "E": 2100,
+      "G": 810,
+      "J": 50,
+      "A": 50,
+      "Iy": 400,
+      "Cw": 100000,
+      "FL": 1.8
+     },
+     "out": 796.0577585466701,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章(二) p.2（式7.2-4~7.2-7）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Mn_lateral",
+   "title": "Lp<Lb≤Lr 之標稱撓曲強度 Mn=Cb[Mp−(Mp−Mr)(Lb−Lp)/(Lr−Lp)]（式7.2-1）",
+   "src": "steel99",
+   "clause": "7.2.2",
+   "page": 1,
+   "keywords": "鋼構 Mn 撓曲強度 側向扭轉挫屈 內插",
+   "unit": "tf·cm",
+   "output": "Mn",
+   "latex": "M_n=C_b\\left[M_p-(M_p-M_r)\\frac{L_b-L_p}{L_r-L_p}\\right]\\le M_p",
+   "vars": {
+    "Cb": {
+     "desc": "側向扭轉挫屈修正係數（steel99_Cb）",
+     "unit": "-",
+     "min": 1.0,
+     "max": 2.3
+    },
+    "Mp": {
+     "desc": "塑性彎矩",
+     "unit": "tf·cm",
+     "min": 1
+    },
+    "Mr": {
+     "desc": "側向扭轉挫屈界限彎矩",
+     "unit": "tf·cm",
+     "min": 1
+    },
+    "Lb": {
+     "desc": "側向無支撐段長度",
+     "unit": "cm",
+     "min": 1
+    },
+    "Lp": {
+     "desc": "Lp（steel99_Lp_I）",
+     "unit": "cm",
+     "min": 1
+    },
+    "Lr": {
+     "desc": "Lr（steel99_Lr_I）",
+     "unit": "cm",
+     "min": 1
+    }
+   },
+   "conditions": [
+    {
+     "expr": "Lr>Lp",
+     "msg": "Lr 必須大於 Lp"
+    },
+    {
+     "expr": "Lb>=Lp",
+     "msg": "Lb<Lp 時應直接用 Mn=Mp（7.2.2(1)）"
+    }
+   ],
+   "expr": "min(Mp,Cb*(Mp-(Mp-Mr)*(Lb-Lp)/(Lr-Lp)))",
+   "notes": "Lb>Lr 者依 7.2.3（彈性側向扭轉挫屈）設計，本庫未收錄。設計強度 φbMn，φb=0.90。",
+   "tests": [
+    {
+     "in": {
+      "Cb": 1.0,
+      "Mp": 2500,
+      "Mr": 1440,
+      "Lb": 300,
+      "Lp": 252.98221281347034,
+      "Lr": 796.0577585466701
+     },
+     "out": 2408.2285055747916,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第七章(二) p.1（式7.2-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Pn_tension_yield",
+   "title": "受拉構材全斷面降伏強度 φtPn=0.9·Fy·Ag（式5.2-1）",
+   "src": "steel99",
+   "clause": "5.2",
+   "page": 1,
+   "keywords": "鋼構 受拉 拉力 降伏 Ag 全斷面 LRFD",
+   "unit": "tf",
+   "output": "phiPn",
+   "latex": "\\varphi_tP_n=0.9F_yA_g",
+   "vars": {
+    "Fy": {
+     "desc": "標稱降伏應力",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "max": 6.0
+    },
+    "Ag": {
+     "desc": "構材全斷面積",
+     "unit": "cm2",
+     "min": 0.1
+    }
+   },
+   "expr": "0.9*Fy*Ag",
+   "notes": "受拉構材設計強度 φPn 取「全斷面降伏」（本式）與「淨斷面斷裂」（steel99_Pn_tension_rupture）兩者較低值（5.2）。φt=0.9。",
+   "tests": [
+    {
+     "in": {
+      "Fy": 2.5,
+      "Ag": 30
+     },
+     "out": 67.5
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第五章(二) p.1（式5.2-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_Pn_tension_rupture",
+   "title": "受拉構材淨斷面斷裂強度 φtPn=0.75·Fu·Ae（式5.2-2）",
+   "src": "steel99",
+   "clause": "5.2",
+   "page": 1,
+   "keywords": "鋼構 受拉 斷裂 淨斷面 Ae Fu LRFD",
+   "unit": "tf",
+   "output": "phiPn",
+   "latex": "\\varphi_tP_n=0.75F_uA_e",
+   "vars": {
+    "Fu": {
+     "desc": "標稱極限抗拉應力",
+     "unit": "tf/cm2",
+     "min": 1.5,
+     "max": 8.0
+    },
+    "Ae": {
+     "desc": "有效淨斷面積（無鑽孔且全銲接時依4.3節；有鑽孔或塞孔／塞槽銲接時取通過孔處之淨斷面積）",
+     "unit": "cm2",
+     "min": 0.1
+    }
+   },
+   "expr": "0.75*Fu*Ae",
+   "notes": "φt=0.75。Ae 之計算（U 折減、淨斷面積）見 4.3 節，本庫未收錄；一般 Ae=U·An。解說：Ae/Ag <(0.9Fy)/(0.75Fu) 或 Fy/(0.833Fu) 時由淨斷面斷裂控制。",
+   "tests": [
+    {
+     "in": {
+      "Fu": 4.0,
+      "Ae": 20
+     },
+     "out": 60.0
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第五章(二) p.1（式5.2-2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_pin_tension",
+   "title": "樞接（pin）構材有效淨面積拉力強度 φPn=0.75·2t·beff·Fu（式5.4-1）",
+   "src": "steel99",
+   "clause": "5.4",
+   "page": 2,
+   "keywords": "鋼構 樞接 pin 拉力 beff LRFD",
+   "unit": "tf",
+   "output": "phiPn",
+   "latex": "\\varphiP_n=0.75\\times2tb_{eff}F_u,\\quad b_{eff}=2t+1.6\\le\\text{孔邊至構材邊之距離}",
+   "vars": {
+    "t": {
+     "desc": "板厚",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "edge_dist": {
+     "desc": "垂直於作用力方向，樞孔邊至構材邊之距離",
+     "unit": "cm",
+     "min": 0.5
+    },
+    "Fu": {
+     "desc": "標稱極限抗拉應力",
+     "unit": "tf/cm2",
+     "min": 1.5,
+     "max": 8.0
+    }
+   },
+   "defs": [
+    [
+     "beff",
+     "min(2*t+1.6,edge_dist)"
+    ]
+   ],
+   "expr": "0.75*2*t*beff*Fu",
+   "notes": "樞接構材設計強度取下列最低值：①有效淨面積拉力（本式）②有效面積剪力 0.75·0.6·Asf·Fu，Asf=2t(a+d/2) ③樞柄投影面積承壓（10.8節）④全斷面降伏（式5.2-1）。本式只算第①項。",
+   "tests": [
+    {
+     "in": {
+      "t": 1.2,
+      "edge_dist": 6.0,
+      "Fu": 4.0
+     },
+     "out": 28.8,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第五章(二) p.2（式5.4-1）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_pin_shear",
+   "title": "樞接構材有效面積剪力強度 φPn=0.75·0.6·Asf·Fu（式5.4-2）",
+   "src": "steel99",
+   "clause": "5.4",
+   "page": 2,
+   "keywords": "鋼構 樞接 pin 剪力 Asf LRFD",
+   "unit": "tf",
+   "output": "phiPn",
+   "latex": "\\varphiP_n=0.75\\times0.6A_{sf}F_u,\\quad A_{sf}=2t(a+d/2)",
+   "vars": {
+    "t": {
+     "desc": "板厚",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "a": {
+     "desc": "平行於作用力方向，樞孔邊至構材邊之最短距離",
+     "unit": "cm",
+     "min": 0.5
+    },
+    "d": {
+     "desc": "樞柄直徑",
+     "unit": "cm",
+     "min": 0.5
+    },
+    "Fu": {
+     "desc": "標稱極限抗拉應力",
+     "unit": "tf/cm2",
+     "min": 1.5,
+     "max": 8.0
+    }
+   },
+   "defs": [
+    [
+     "Asf",
+     "2*t*(a+d/2)"
+    ]
+   ],
+   "expr": "0.75*0.6*Asf*Fu",
+   "notes": "須與 steel99_pin_tension、承壓（10.8節）、全斷面降伏（式5.2-1）取最低值。steps.Asf 為有效面積。",
+   "tests": [
+    {
+     "in": {
+      "t": 1.2,
+      "a": 4.0,
+      "d": 3.0,
+      "Fu": 4.0
+     },
+     "out": 23.759999999999998,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐式對照原頁圖 第五章(二) p.2（式5.4-2）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_bolt_preload_calc",
+   "title": "螺栓最小預拉力估算＝0.70×(淨斷面積×拉力強度)（表10.3-1 註）",
+   "src": "steel99",
+   "clause": "10.3.1",
+   "page": 13,
+   "keywords": "鋼構 螺栓 預拉力 鎖緊 torque 高強度螺栓",
+   "unit": "t",
+   "output": "T0",
+   "latex": "T_0=0.70\\times F_{u,b}\\times A_{b,net}",
+   "vars": {
+    "Fu_b": {
+     "desc": "螺栓之最小抗拉強度",
+     "unit": "tf/cm2",
+     "min": 3,
+     "max": 12
+    },
+    "Ab_net": {
+     "desc": "螺栓淨斷面積（一般約為不含螺牙面積之 75%）",
+     "unit": "cm2",
+     "min": 0.5
+    }
+   },
+   "expr": "0.70*Fu_b*Ab_net",
+   "notes": "本式為表10.3-1 之計算依據（表註：「等於最小抗拉強度之 0.7 倍」）。設計時應直接採用表 steel99_bolt_preload_T1031 之值；本式供其他規格螺栓估算。",
+   "tests": [
+    {
+     "in": {
+      "Fu_b": 10.0,
+      "Ab_net": 0.84
+     },
+     "out": 5.88,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "依表10.3-1 表註「最小抗拉強度之 0.7 倍」轉寫＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_fillet_weld_strength",
+   "title": "填角銲設計強度 φRn=0.75·0.6FExx·Awe（表10.2-5）",
+   "src": "steel99",
+   "clause": "10.2.4",
+   "page": 11,
+   "keywords": "鋼構 填角銲 銲道 設計強度 Fexx 有效喉厚 Awe",
+   "unit": "tf",
+   "output": "phiRn",
+   "latex": "\\varphi R_n=0.75\\times0.6F_{EXX}A_{we}",
+   "vars": {
+    "Fexx": {
+     "desc": "銲接金屬之標稱拉力強度 FExx",
+     "unit": "tf/cm2",
+     "min": 4.0,
+     "max": 8.0
+    },
+    "w": {
+     "desc": "填角銲尺寸（腳長）",
+     "unit": "cm",
+     "min": 0.3,
+     "max": 3.0
+    },
+    "L": {
+     "desc": "銲道有效長度（有效長度不得大於銲接尺寸之 70 倍，見 10.2.2(7)）",
+     "unit": "cm",
+     "min": 1
+    },
+    "throat_factor": {
+     "desc": "有效喉厚係數（一般填角銲 0.7；潛弧銲且腳長≤10 mm 得計部分滲透）",
+     "unit": "-",
+     "default": 0.7,
+     "min": 0.7,
+     "max": 0.8
+    },
+    "facer": {
+     "desc": "是否沿接合面剪力（母材面控制者 φ 由母材決定）＝1 時改用母材強度",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "Awe",
+     "throat_factor*w*L"
+    ]
+   ],
+   "expr": "0.75*0.6*Fexx*Awe",
+   "notes": "表10.2-5：填角銲「有效面積上之剪力」φ=0.75、Fw=0.6FExx（母材面 [f] 另依 10.4、10.5 計算）；平行於銲軸之拉應力或壓應力 φ=0.90、Fy（母材）。銲道設計強度應低於 φFBM 與 φFw 之較小值（10.2.4）。全滲透開槽銲之拉力 φ=0.90、Fy；部分滲透開槽銲垂直有效面積拉力 母材 0.90／銲材 0.80。輸出為 φRn（tf），steps.Awe 為有效面積。",
+   "tests": [
+    {
+     "in": {
+      "Fexx": 4.9,
+      "w": 1.0,
+      "L": 30
+     },
+     "out": 46.305,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "對照表10.2-5（第十章(二) p.11）＋10.2.4 規定＋手算；有效喉厚 0.7w 見 10.2.2 解說",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_fillet_weld_limits",
+   "title": "填角銲尺寸與長度限制（10.2.2 各款）",
+   "src": "steel99",
+   "clause": "10.2.2",
+   "page": 7,
+   "keywords": "鋼構 填角銲 最大尺寸 最小長度 搭接長度 限制",
+   "unit": "cm",
+   "output": "L_min",
+   "latex": "L_{min}=4w;\\;t_{max}=t\\;(t<0.6\\text{cm}),\\;t-0.15\\;(t>0.6\\text{cm});\\;L_{lap}=\\max(5t_{min},2.5)",
+   "vars": {
+    "w": {
+     "desc": "填角銲尺寸（腳長）",
+     "unit": "cm",
+     "min": 0.3,
+     "max": 3.0
+    },
+    "t": {
+     "desc": "較薄鋼板厚度（用於最大尺寸與搭接長度）",
+     "unit": "cm",
+     "min": 0.2,
+     "max": 10
+    }
+   },
+   "defs": [
+    [
+     "L_min",
+     "4*w"
+    ],
+    [
+     "t_max",
+     "t if t<0.6 else t-0.15"
+    ],
+    [
+     "L_lap",
+     "max(5*t,2.5)"
+    ]
+   ],
+   "expr": "L_min",
+   "notes": "輸出為最小有效長度 4w；steps 另含最大銲接尺寸 t_max 與最小搭接長度 L_lap。其他限制：斷續填角銲任一段有效長度 ≥4w 且 ≥4.0 cm；端部或側面終止應繼續圍繞轉角銲 ≥2w（轉角銲長度不得超過 4w）；搭接接頭承受軸力者應在兩端作填角銲；作用力平行銲道時有效長度不得大於 70w。",
+   "tests": [
+    {
+     "in": {
+      "w": 1.0,
+      "t": 0.8
+     },
+     "out": 4.0,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照原頁圖 第十章(二) p.7（10.2.2(1)~(7)）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": [
+  {
+   "id": "steel99_bolt_preload_T1031",
+   "title": "螺栓最小預拉力（表10.3-1，F10T/S10T）",
+   "src": "steel99",
+   "clause": "10.3.1",
+   "page": 13,
+   "kind": "lookup",
+   "unit": "t",
+   "columns": [
+    "預拉力t"
+   ],
+   "rows": [
+    {
+     "key": "M12",
+     "values": {
+      "預拉力t": 5.9
+     }
+    },
+    {
+     "key": "M16",
+     "values": {
+      "預拉力t": 10.6
+     }
+    },
+    {
+     "key": "M20",
+     "values": {
+      "預拉力t": 16.5
+     }
+    },
+    {
+     "key": "M22",
+     "values": {
+      "預拉力t": 19.9
+     }
+    },
+    {
+     "key": "M24",
+     "values": {
+      "預拉力t": 23.7
+     }
+    },
+    {
+     "key": "M27",
+     "values": {
+      "預拉力t": 30.0
+     }
+    },
+    {
+     "key": "M30",
+     "values": {
+      "預拉力t": 37.1
+     }
+    }
+   ],
+   "notes": "表註：等於最小抗拉強度之 0.7 倍（以螺栓淨斷面積乘拉力強度之 70%）。實際淨斷面積視螺牙數目而定，一般約為不含螺牙面積之 75%。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 第十章(二) p.13 表10.3-1",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_bolt_strength_T1032",
+   "title": "螺栓及螺牙桿件設計強度（表10.3-2）",
+   "src": "steel99",
+   "clause": "10.3.1",
+   "page": 14,
+   "kind": "lookup",
+   "unit": "tf/cm2",
+   "columns": [
+    "拉力強度Fnt",
+    "承壓式剪力強度Fnv"
+   ],
+   "rows": [
+    {
+     "key": "A307 螺栓",
+     "values": {
+      "拉力強度Fnt": "3.15[a]",
+      "承壓式剪力強度Fnv": "1.68[b][e]"
+     }
+    },
+    {
+     "key": "F10T(S10T) 螺栓、螺紋在剪力平面",
+     "values": {
+      "拉力強度Fnt": "7.50[d]",
+      "承壓式剪力強度Fnv": "4.00[e]"
+     }
+    },
+    {
+     "key": "F10T(S10T) 螺栓、螺紋不在剪力平面",
+     "values": {
+      "拉力強度Fnt": "7.50[d]",
+      "承壓式剪力強度Fnv": "5.00[e]"
+     }
+    },
+    {
+     "key": "螺牙桿件（符合3.4節）且螺紋在剪力平面",
+     "values": {
+      "拉力強度Fnt": "0.75Fu[a][c]",
+      "承壓式剪力強度Fnv": "0.40Fu"
+     }
+    },
+    {
+     "key": "螺牙桿件（符合3.4節）且螺紋不在剪力平面",
+     "values": {
+      "拉力強度Fnt": "0.75Fu[a][c]",
+      "承壓式剪力強度Fnv": "0.50Fu"
+     }
+    }
+   ],
+   "notes": "強度折減係數 φ＝0.75（拉力與承壓式剪力皆同）。表註：[a] 僅適用靜載重；[b] 允許螺紋在剪力平面內；[c] 擴頭螺紋部分之標稱拉力強度，依主螺紋直徑之斷面積 Ab 計，須大於未放大部份標稱桿身斷面積乘標稱降伏強度 Fy 值；[d] F10T 承受拉力疲勞載重時，疲勞強度為 A490 螺栓之 0.95 倍（另見附錄5）；[e] 銲接拉力構材以承壓式接合，螺栓排列在平行拉力方向長度超過 125 cm 時，表列值須減少 20%。數值後之 [x] 為原表註記，非乘號。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 第十章(二) p.14 表10.3-2",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "steel99_weld_strength_T1025",
+   "title": "銲道之設計強度（表10.2-5）",
+   "src": "steel99",
+   "clause": "10.2.4",
+   "page": 11,
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "材料",
+    "強度折減係數phi",
+    "標稱應力強度"
+   ],
+   "rows": [
+    {
+     "key": "全滲透開槽銲／垂直於有效面積之拉應力",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "Fy"
+     }
+    },
+    {
+     "key": "全滲透開槽銲／垂直於有效面積之壓應力",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "Fy"
+     }
+    },
+    {
+     "key": "全滲透開槽銲／平行於銲軸之拉應力或壓應力[d]",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "Fy"
+     }
+    },
+    {
+     "key": "全滲透開槽銲／有效面積上之剪應力（母材）",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "0.6Fy"
+     }
+    },
+    {
+     "key": "全滲透開槽銲／有效面積上之剪應力（銲材）",
+     "values": {
+      "材料": "銲材",
+      "強度折減係數phi": 0.8,
+      "標稱應力強度": "0.6FExx[e]"
+     }
+    },
+    {
+     "key": "部分滲透開槽銲／垂直於有效面積之壓應力",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "Fy"
+     }
+    },
+    {
+     "key": "部分滲透開槽銲／平行於銲軸之拉或壓應力[d]",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "Fy"
+     }
+    },
+    {
+     "key": "部分滲透開槽銲／平行於銲軸之剪應力（母材[f]）",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.75,
+      "標稱應力強度": "0.6FExx"
+     }
+    },
+    {
+     "key": "部分滲透開槽銲／平行於銲軸之剪應力（銲材）",
+     "values": {
+      "材料": "銲材",
+      "強度折減係數phi": 0.75,
+      "標稱應力強度": "0.6FExx"
+     }
+    },
+    {
+     "key": "部分滲透開槽銲／垂直於有效面積之拉應力（母材）",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "Fy"
+     }
+    },
+    {
+     "key": "部分滲透開槽銲／垂直於有效面積之拉應力（銲材）",
+     "values": {
+      "材料": "銲材",
+      "強度折減係數phi": 0.8,
+      "標稱應力強度": "0.6FExx"
+     }
+    },
+    {
+     "key": "填角銲／有效面積上之剪應力（母材[f]）",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.75,
+      "標稱應力強度": "0.6FExx"
+     }
+    },
+    {
+     "key": "填角銲／有效面積上之剪應力（銲材）",
+     "values": {
+      "材料": "銲材",
+      "強度折減係數phi": 0.75,
+      "標稱應力強度": "0.6FExx"
+     }
+    },
+    {
+     "key": "填角銲／平行於銲軸之拉應力或壓應力[d]",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.9,
+      "標稱應力強度": "Fy"
+     }
+    },
+    {
+     "key": "塞孔銲或塞槽銲／與接觸面平行之剪應力（母材[f]）",
+     "values": {
+      "材料": "母材",
+      "強度折減係數phi": 0.75,
+      "標稱應力強度": "0.6FExx"
+     }
+    },
+    {
+     "key": "塞孔銲或塞槽銲／與接觸面平行之剪應力（銲材）",
+     "values": {
+      "材料": "銲材",
+      "強度折減係數phi": 0.75,
+      "標稱應力強度": "0.6FExx"
+     }
+    }
+   ],
+   "notes": "表註：[a] 有效面積定義見 10.2 節；[b] 相稱銲材見 10.2.6；[c] 可允許較相稱銲材強度高一级之銲材；[d] 連結組合構材各構件之填角銲與部分滲透槽銲（如翼板與腹板接合），設計時可不考慮平行銲軸之拉／壓應力；[e] FExx 為銲接金屬之標稱拉力強度；[f] 接合母材之設計參考 10.2.4 解說，並依 10.4、10.5 節計算；[g] 除設計圖說另有說明外，以使用相稱銲材為原則。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格對照原頁圖 第十章(二) p.11 表10.2-5（含七項表註）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

@@ -1,0 +1,169 @@
+{
+  "schema": "legacy-retaining-wall-reference/1",
+  "source": {
+    "file": "D:\\公司案件.AI\\tools.excel\\擋土牆安定分析.mod.xls",
+    "file_size_bytes": 1293824,
+    "read_only": true,
+    "inspected_on": "2026-10-29",
+    "calculation_sheet": "半重力式擋土牆",
+    "result_sheet": "SGFS",
+    "input_sheet": "SGInput",
+    "warning": "Input 頁與計算頁不同步；本 fixture 以計算頁為準，不採用 SGInput 的預設值。"
+  },
+  "case_id": "legacy-semigravity-H4.5",
+  "wall_type": "semigravity",
+  "geometry_legacy": {
+    "H_m": 4.5,
+    "H0_m": 0.0,
+    "Hw_m": 0.0,
+    "n": 0.0,
+    "D_m": 1.5,
+    "d_m": 0.8,
+    "b_m": 0.0,
+    "B_m": 2.5,
+    "f_m": 0.5,
+    "a_m": 0.0,
+    "S1": 0.3,
+    "S2": 0.0,
+    "S3_m": 0.3,
+    "surcharge_t_m2": 0.0
+  },
+  "soil_legacy": {
+    "foundation": {
+      "c_t_m2": 0.0,
+      "phi_deg": 32.0,
+      "gamma_t_m3": 1.8
+    },
+    "backfill": {
+      "c_t_m2": 0.0,
+      "phi_deg": 38.0,
+      "gamma_t_m3": 1.7
+    },
+    "seismic": {
+      "kh": 0.15,
+      "kv": 0.0
+    }
+  },
+  "materials_legacy": {
+    "fc_kg_cm2": 280.0,
+    "fy_kg_cm2": 2800.0,
+    "concrete_unit_weight_t_m3": 2.4,
+    "cover_stem_cm": 5.0,
+    "cover_base_cm": 5.0
+  },
+  "geometry_si": {
+    "height_m": 4.5,
+    "extra_height_m": 0.0,
+    "back_headwater_m": 0.0,
+    "backfill_slope_n": 0.0,
+    "toe_soil_depth_m": 1.5,
+    "base_thickness_m": 0.8,
+    "shear_key_depth_m": 0.0,
+    "base_width_m": 2.5,
+    "toe_projection_m": 0.5,
+    "shear_key_width_m": 0.0,
+    "front_batter_ratio": 0.3,
+    "back_batter_ratio": 0.0,
+    "top_width_m": 0.3,
+    "surcharge_kpa": 0.0
+  },
+  "soil_si": {
+    "foundation": {
+      "c_kpa": 0.0,
+      "phi_deg": 32.0,
+      "gamma_kn_m3": 17.65197
+    },
+    "backfill": {
+      "c_kpa": 0.0,
+      "phi_deg": 38.0,
+      "gamma_kn_m3": 16.671305
+    },
+    "seismic": {
+      "kh": 0.15,
+      "kv": 0.0
+    }
+  },
+  "materials_si": {
+    "fc_mpa": 27.45862,
+    "fy_mpa": 274.5862,
+    "concrete_unit_weight_kn_m3": 23.53596,
+    "cover_stem_m": 0.05,
+    "cover_base_m": 0.05
+  },
+  "expected_legacy": {
+    "active_earth_pressure_t_m": 3.7310766,
+    "active_horizontal_t_m": 3.372273,
+    "active_vertical_t_m": 1.5964671,
+    "active_application_height_m": 1.5,
+    "seismic_active_increment_t_m": 1.5915655,
+    "passive_earth_pressure_t_m": 6.5905413,
+    "total_vertical_static_t_m": 14.618867,
+    "total_horizontal_static_t_m": 3.372273,
+    "total_vertical_seismic_t_m": 15.299872,
+    "total_horizontal_seismic_t_m": 6.7641437,
+    "concrete_weight_t_m": 12.3924,
+    "overturning_fs_static": 4.141326139089014,
+    "overturning_fs_seismic": 1.9032620566906242,
+    "sliding_fs_static": 3.6473913051765265,
+    "sliding_fs_seismic": 1.857732368224871,
+    "bearing_fs_static": 9.51384722686263,
+    "bearing_fs_seismic": 5.015422087452303,
+    "resultant_x_static_m": 1.0869593,
+    "resultant_x_seismic_m": 0.70261182,
+    "eccentricity_static_m": 0.16304066,
+    "eccentricity_seismic_m": 0.54738818,
+    "q_toe_static_t_m2": 8.1356777,
+    "q_heel_static_t_m2": 3.559416,
+    "q_toe_seismic_t_m2": 14.517141,
+    "q_heel_seismic_t_m2": 0.0,
+    "ultimate_bearing_static_t_m2": 77.401595,
+    "ultimate_bearing_seismic_t_m2": 72.809589,
+    "shear_check": {
+      "wall": "不需配剪力筋",
+      "toe": "不需配剪力筋",
+      "heel": "不需配剪力筋",
+      "shear_key": "O.K."
+    }
+  },
+  "expected_si_converted": {
+    "active_earth_pressure_kn_m": 36.589,
+    "active_horizontal_kn_m": 33.071,
+    "active_vertical_kn_m": 15.656,
+    "seismic_active_increment_kn_m": 15.608,
+    "passive_earth_pressure_kn_m": 64.631,
+    "concrete_weight_kn_m": 121.528,
+    "q_toe_static_kpa": 79.784,
+    "q_heel_static_kpa": 34.906,
+    "q_toe_seismic_kpa": 142.365,
+    "ultimate_bearing_static_kpa": 759.050,
+    "ultimate_bearing_seismic_kpa": 714.018
+  },
+  "notes": [
+    "舊工作簿使用 T、T/m、T/m2、kgf/cm2；本 fixture 同時保留原值與 SI 換算值。",
+    "半重力式計算頁 H=4.5 m，超過水土保持技術規範第 118 條『4 m 以下為原則』，僅作數值回歸基準，不代表可直接複製的標準圖。",
+    "SGInput 預設值 H=3.5 m、B=2.14 m、Hw=1.6 m、q=0.5 T/m2 與計算頁不同步，不得當作本案例輸入。",
+    "舊頁面的 -2146826281 代表 #DIV/0!，不得當成數值。",
+    "本 fixture 只涵蓋穩定與土壓力回歸；牆身、趾板、踵板鋼筋仍須依新版 rc_design.py 重算。"
+  ],
+  "legacy_cells": {
+    "height_m": "半重力式擋土牆!C31",
+    "top_width_m": "半重力式擋土牆!C30",
+    "toe_soil_depth_m": "半重力式擋土牆!C35",
+    "base_thickness_m": "半重力式擋土牆!C36",
+    "base_width_m": "半重力式擋土牆!C38",
+    "toe_projection_m": "半重力式擋土牆!C39",
+    "front_batter_ratio": "半重力式擋土牆!C41",
+    "back_batter_ratio": "半重力式擋土牆!C42",
+    "surcharge_t_m2": "半重力式擋土牆!C43",
+    "active_pressure": "半重力式擋土牆!D105",
+    "active_horizontal": "半重力式擋土牆!D107",
+    "active_vertical": "半重力式擋土牆!D108",
+    "passive_pressure": "半重力式擋土牆!D114",
+    "overturning_static": "SGFS!C1",
+    "overturning_seismic": "SGFS!C4",
+    "sliding_static": "SGFS!C7",
+    "sliding_seismic": "SGFS!C10",
+    "bearing_static": "SGFS!C13",
+    "bearing_seismic": "SGFS!C16"
+  }
+}

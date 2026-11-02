@@ -1,0 +1,119 @@
+# 經驗庫索引（Experience Library Index — Harness² 架構）
+
+> **使用原則**：本檔為 [`docs/踩坑紀錄.md`](踩坑紀錄.md) 的結構化去混淆索引（仿照 `google-research/harness2` 之 `INDEX.md` + `EXPERIENCE.md` 格式）。
+> 平時作業**不需預讀整份 `踩坑紀錄.md`**；僅當遇到下表所列之 **觸發情境（Cue）** 或需要修改 `tools/` 底層腳本時，才按 `Ref` 讀取對應段落。
+
+---
+
+## 1. 執行環境與指令迴圈（INV — Environment & Tool Loop）
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-A1** | Windows 結合影像與幾何處理時無預警閃退（`Exit code 1` / `libiomp5md.dll` 衝突） | Python 腳本第一行強制寫 `import matplotlib; matplotlib.use('Agg')`，接著依序載入 `shapely`、`pyproj`，最後才載入 `cv2` 與 `ezdxf`。 | 實測解決 OpenMP DLL 衝突閃退 | `§K` |
+| **EXP-A2** | PowerShell 噴 `profile.ps1` 未簽章紅字、或 `Get-Content` 讀寫中文檔變 Big5 亂碼 | 優先用 `cmd` 或 `powershell -NoProfile`；執行 Python 前設 `set PYTHONIOENCODING=utf-8`；嚴禁用 PowerShell 改中文檔，一律用 `edit_file`/`write_file` 或 Python `open(..., encoding="utf-8")`。 | `§J` 曾因 PS 改檔毀掉整支腳本 | `§A`, `§J`, `§N` |
+| **EXP-A3** | `cv2.imread` 讀取含中文路徑回傳 `None` | 改用 `PIL.Image.open(path).convert("RGB")` 再轉 `numpy.asarray()`。 | `tools/site_basemap/` 已內建 | `§J` |
+| **EXP-A4** | 抓圖磚、Overpass 或 `accoreconsole` 超過 60 秒逾時，或聊天端時間工具回傳快取舊值 | 長工作導向 `> _log.txt 2>&1` 並檢查檔案時間戳確認冪等後才重跑；系統時間一律用 `python -c "import datetime;print(datetime.datetime.now())"` 取得。 | 避免重複啟動與時間紀錄失真 | `§A`, `§G`, `§J` |
+| **EXP-A6** | 產出檔散落在根目錄、`cases\<案名>\out` 或 `docs`，越跑越亂 | 一律照 `AGENTS.md 1.1`：**暫存 → `_temp\<主題>`、交付 → `out\<案名>`**；批次作業前把 `$env:TEMP` 指到 `_temp`。`_temp` 可整批刪除，交付清單只列 `out`。 | `case_package.py` 預設輸出路徑已改為 `out\<案名>`（2026-10-30 實測） | `§1.1` |
+
+---
+
+## 2. CAD 轉檔、視口與出圖（INV — CAD & Plotting Mechanics）
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-B1** | 需將 DXF 轉為原生 DWG 或避免干擾共用 AutoCAD GUI 視窗（COM `接收者已拒絕呼叫`） | **禁止操作共用 GUI AutoCAD**；一律呼叫 `tools\acad\acc.py publish`（底層以純英文暫存路徑＋`cp950` `newline=""` `.scr` 執行 `accoreconsole.exe`）。注意：`cadcraft-cli convert` 產出的 DWG 僅 53 KB 且缺圖紙空間，DWG 必用 `accoreconsole`。 | [`acc.py`](../tools/acad/acc.py)（產出 135~141 KB 完整 DWG） | `§L`, `§N` |
+| **EXP-B2** | 需將 A3 圖紙空間（含 `VIEWPORT` 模型內容）渲染為 PDF 與 PNG 預覽 | 透過 Python `subprocess.run` 執行 `cadcraft-cli.exe run file.dxf --cmd 'plot {"path":"out.pdf","layout":"全區工程位置圖","landscape":true,"plotArea":"layout","fit":false,"scale":1.0}'`，再用 `fitz`（PyMuPDF）轉 PNG。**註：`§J` 稱 CADCraft 不畫視口內容僅限 `convert/publish`，`run --cmd plot` 完全正常。** | `§I`, `§K`, `§N` 三方獨立驗證（墨量 ~9.36%） | `§I`, `§K`, `§N` |
+| **EXP-B3** | `ezdxf` 建立圖紙空間 `VIEWPORT` 後，AutoCAD 開啟中心跑回 `(0,0)` 或比例錯亂 | 1. 必同時設定 `status=2`、`view_center_point=(cx, cy, 0)`、`view_target_point=(0, 0, 0)`。<br>2. 公尺模型配公釐圖紙時，比例 $1/N$ 之 `view_height = vp_height_mm * (N / 1000.0)`（$1/600$ 係數為 `0.6`，切勿乘 `600`）。<br>3. 併入 `A3圖框.dwt` 後先刪除樣板內建壞掉的舊 `VIEWPORT`。 | [`make_sheet.py`](../tools/a3_sheet/make_sheet.py) | `§I`, `§J`, `§K`, `§N` |
+| **EXP-B4** | 圖紙空間需避開「右下技師執業圖記區」、「左下說明區」、「右上指北針區」 | **禁用 `WIPEOUT` 或白色 `SOLID`**（`monochrome.ctb` 會印成黑塊或無效）；一律使用非矩形 `LWPOLYLINE` 裁切 `VIEWPORT`（`flags |= 65536`）。 | [`make_sheet.py`](../tools/a3_sheet/make_sheet.py) 已內建三區挖空 | `§L`, `§M` |
+| **EXP-B5** | `ezdxf` 新增 `TOMO` 字型或 `Importer` 跨檔併入時字型遺失 | `doc.styles.add("TOMO", font="gbenor.shx")`（`font` 為 keyword-only 參數），再設 `st.dxf.bigfont = "CHINA1.SHX"`；`Importer` 併檔前目標檔須先建立同名 `TOMO` 樣式。 | [`site_basemap.py`](../tools/site_basemap/site_basemap.py) | `§I` |
+| **EXP-B6** | 圖層顏色設對了，E17 仍警告「圖元自帶顏色／線粗會蓋掉圖層設定」，多為 HATCH | `ezdxf` 的 `add_hatch()` 與 `set_pattern_fill()` **預設 `color=7`**；建立填充時兩處都要 `color=256`（BYLAYER）。既有圖用 `tools\acad\apply_plot_style.py` 一次改回。 | `docs\出圖樣式與線粗.md` | `§R` |
+| **EXP-B7** | E17 把「圖層關閉」的圖層（顏色 `-8`）誤判成「顏色不在 1~8」 | 負色值＝圖層關閉，顏色取 `abs()`。`plot_style_issues()` 已處理；換色工具會保留關閉狀態。 | [`drawing_rules.py`](../tools/drawing_rules.py) | `§R` |
+
+---
+
+## 3. 地理圖資與幾何處理（DOM — GIS & Vectorization）
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-C1** | 建物資料源選擇與中庭 Hatch 填滿問題 | 1. 優先取**臺中市建物圖 SHP（113 年版，TWD97 TM2）**，可得逐戶真方位建物（130 棟 vs. `EMAPX99` 14 個連棟街廓 vs. OSM 8 棟）。<br>2. 若用 `EMAPX99`，取 `RGB(233,226,233)`，以 $4\theta$ 主軸正交化。<br>3. 逐棟建 `ANSI31` Hatch（`hatch_style=0`，外框逆時針 `flags=1`、內洞順時針 `flags=16`）。 | [`site_basemap.py`](../tools/site_basemap/site_basemap.py) | `§H`, `§K`, `§M` |
+| **EXP-C2** | `EMAPX99` 道路與街廓背景皆為白色 `#FFFFFF`，直接二值化會連成一片；或平滑外插出鬼線 | 將非純白像素（`RGB < 250`）做 `2x2` 膨脹形成 4-連通水密阻隔層，以 OSM 道路中心線為種子篩選道路連通塊；平滑採用 `simplify(0.5m)` + 2 階 **Chaikin**（禁用無約束自由 `splprep` 外插）。 | 解決道路斷線與 49 km 鬼線問題 | `§H`, `§J`, `§K` |
+| **EXP-C3** | OSM Overpass API 限流（回非 JSON）或道路 `way` 延伸使圖面範圍暴增至公里級 | 1. 查詢結果必須用視口 bbox 執行 **Liang–Barsky 裁切**。<br>2. 4326 轉 3826 四角座標需取 `min/max`。<br>3. Overpass 失敗時輪詢備援鏡像（`kumi.systems`, `osm.jp`, `osm.ch`），確認 `basemap_meta.json` 之 `osm_ok=true`。 | [`site_basemap.py`](../tools/site_basemap/site_basemap.py) | `§D`, `§G`, `§J`, `§N` |
+| **EXP-C4** | Web Mercator (`EPSG:3857`) 圖磚直接貼上 `TWD97 TM2 (EPSG:3826)` 產生邊緣偏移 | 兩者有子午線收斂角（台中約 $-0.14^\circ$）與比例差，必須逐像素或網格仿射反算重投影。台中一帶 `EPSG:3826` 假東移為 `250,000`（`E≈215,000, N≈2,669,000` 屬正常值）。 | 殘差 `< 0.001 m` | `§C`, `§J`, `§N` |
+| **EXP-C5** | 鄉道／農路「在 EMAPX99 看起來全白」，`site_basemap.py` 萃出之道路邊線離起終點 75~99 m | **不得用 0.5 m 粗間隔抽樣或目視印象判定圖面是否存在**（1 px 寬灰緣會被整個跳過）；應以 1 px 間隔抽樣或直接做灰緣連通分析。鄉道邊線不得用「逐斷面 1D 橫向掃描正射影像」（裸土彩度與鋪面同低、林蔭段亮度掉到 55~100，必然階梯化、彎道左右線交叉）；改用 **EMAPX99 灰緣直線萃取**（見 EXP-C6）。 | `tools/site_basemap/road_curb.py`（路寬中位 5.55 m，邊線平直貼合路面） | `§P` |
+| **EXP-C6** | 需高精度、平順的鄉道路面邊線（刨鋪／鋪設工程用），且 EMAPX99 僅有 1 px 灰緣、無道路面填色 | **灰緣直線萃取法**：取灰緣像素（`|R-G|≤6, |G-B|≤6, 160≤R≤242`）→ 篩中心線走廊 ±14 m 與里程區間 → 偏移直方圖找兩個主峰（左右路緣）→ 逐里程取各群中位偏移 → 大窗移動平均 → 重建平順邊線。坑：兩側必須共用同一組車站陣列；延伸後依里程排序；樁號/斷面以左右路緣**中線**為基準（OSM 中心線可能整條偏 5.5 m）。斷面裁切用 `shapely.ops.split`。 | `tools/site_basemap/road_curb.py`、`scripts/build_design_v3.py`（L=160.8 m、W=5.29 m、A=850.6 m²，E1~E14 全過） | `§P` |
+| **EXP-C7** | `data\臺中市建物` 不見了（`--bldg-shp` 空 → 建物退回 EMAPX99 連棟街廓，逐戶消失）；或直接爬 `opendata.taichung.gov.tw/search/<pid>` 抓不到下載連結 | 資料集「臺中市建物GIS圖資」SHP 本體**不在開放平臺上**：`GET /api/v1/dataset.info?id=<pid>` 取資源 → 下載到的是 CSV 索引 → 內含 Google Drive 連結 → `drive.google.com/uc?export=download&id=<fileId>` 得 7z → 解到 `data\臺中市建物\01-SHP\`。`.prj` 已是 EPSG:3826、PolygonZ 相容，不需轉換。**坑**：`/search/<pid>` 是 Nuxt 空殼、`/api/v1/*` 未帶 `id` 一律回 `NO_AUTH`；`dataset.info` 的查詢參數名就叫 `id`。完整步驟見 `docs\現況平面底圖作業流程.md` 末節。 | 1,263,194 筆全市建物；AC刨鋪案址重跑得 26 棟（EMAPX99 僅 12 連棟街廓）、26 棟＋26 Hatch 對齊、audit 0 | `§R` |
+| **EXP-C8** | 想抓臺中地籍圖時，158 站 ArcGIS token 一直回 `498 Invalid Token` | 改走免 token 的開放服務 **TCLandType MapServer/0（坵塊）與 /1（段籍）**（`https://lohas.taichung.gov.tw/arcgis168/rest/services/Dynamic3857/TCLandType/MapServer`）；`maxRecordCount=1000` 必用 `resultOffset` 分頁並檢查 `exceededTransferLimit`，否則只拿到前 1000 筆卻沒有任何錯誤訊息。 | 坵塊 217 筆完整取得、地號 97 處 | `§S` |
+| **EXP-C9** | `'MultiPolygon' object has no attribute 'exterior'` | `buffer(0)` 併合無效環後可能回 MultiPolygon／GeometryCollection。一律先寫 `split_polygons()` 遞迴拆成 Polygon 再取 `exterior`／`interiors`，不要假設 `buffer(0)` 只回 Polygon。 | `tools/cadastral/make_cadastral_map.py` | `§S` |
+| **EXP-C10** | 開 DWG 一片空白、`ZOOM E` 縮成一顆小點；模型範圍達 1.7 km | 段籍是「整個段」的大多邊形（本例 1.67×1.80 km），不是案址範圍。畫之前先 `intersection(視口外 30 m 方框)` 裁切；坵塊本身已在範圍內可不裁。 | 模型範圍 1667.7×1799.2 → 372.9×299.0 m | `§S` |
+| **EXP-C11** | 地號標註疊字、小坵塊放不下文字 | 先 `polylabel()` 找最大內接點；仍放不下就沿環狀外移（2~45 m／每 15°）＋畫引線。碰撞判定**不可用 `ezdxf.bbox`**（中文低估約 2 成），改用保守估寬（中文 1.2h、英數 0.8h）。 | 97 處標註互疊 0、93 筆坵塊 0 漏標 | `§S` |
+
+---
+
+## 4. 交件版面品管（DOM/INV — Delivery Quality Gate）
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-D1** | `audit=0`、墨量正常（~7.7%），但說明文字壓在標題欄上或標題欄填值與標籤疊字 | **檔案合法 ≠ 版面正確**。交件前強制執行 `tools\a3_sheet\check_delivery.py`（檢查 E9 保護區邊界跨越、E10 紙空間任意兩段文字 bbox 碰撞、E8 留白、E11 漏 Hatch）。標題欄填值 `x` 起點必須在欄位標籤右側（`84.7 / 155.9 / 231.5 / 282.5 / 384.4` 之後）。 | [`check_delivery.py`](../tools/a3_sheet/check_delivery.py) | `§M`, `AGENTS.md §6` |
+| **EXP-D2** | `check_delivery.py` E10 報「指 北」與「N」疊字、比例尺「25」與「(m)」疊字 | 判重疊用 `ezdxf.bbox`（含 0.3 mm 緩衝），模板原值確實相接 → 改 `make_sheet.py` 右側欄：指北針（`# ---- 3.`）的 N 文字下移、比例尺（`# ---- 4.`）的 (m) 右移、可用長度改 `cw-12`（1/700 時 Lm=20 m）。 | 本次 E1~E14 全過、退出碼 0 | `§P` |
+| **EXP-D3** | 工地範圍內確實無河道／水道，`22_水道` 圖層為空導致 E14 報錯 | 判讀確認無水道（田間灌溉溝非通用電子地圖水道圖層，不可臆造）→ 檢核指令省略 `--require-layer 22_水道`，其餘項目全過；並在交件紀錄寫明差異原因。 | 本案退出碼 0 | `§P` |
+| **EXP-D4** | 依出圖規定把字高放大到 3/4/5 mm 後，右側欄（寬 46.8 mm）文字超出圖框，但 `check_delivery` 沒報錯 | 1. `ezdxf.bbox` 對 `CHINA1.SHX` 中文寬度低估約 2 成（實測中文字寬 ≈ 1.2h、gbenor 英數 ≈ 0.8h），檢核器已改用保守估寬。<br>2. `make_sheet.py` 文字都在「圖框」層，舊版以圖層排除樣板文字會漏檢；已改用 `A3圖框_template.dxf` 文字插入點判定樣板文字。<br>3. 右側欄放不下 4 mm 資料來源 → 移到地圖左下附註區（viewport 非矩形裁切）；圖例改半形括號。<br>4. 底圖 `--scale` 與出圖比例不同時，`make_sheet.py` 自動等比修正模型文字字高。 | `tools/drawing_rules.py`、E15/E16；`tools/a3_sheet/_selftest_rules`（退出碼 0） | 本項目的出圖規定 |
+| **EXP-D5** | `check_delivery.py` 的 E9／E10 一次報 11 項，說明文字跨越 y=29.03 壓到標題欄 | MTEXT 實際高度 ≈ 行數×(5/3)×字高×line_spacing_factor（5 行 4 mm 約 30 mm，必壓標題欄）。改 **4 行 3 mm、插入點 y=51、標題 y=56**。另 `MIDDLE_LEFT` 的 TEXT bbox 下緣會再低 0.1~0.4 mm（本例差 0.19 mm 就判疊字），留淨空別抓太剛好。 | E1~E18 0 錯誤 | `§S` |
+
+---
+
+## 5. SolidCraft 參數化 3D CAD（INV — Parametric 3D Modeling）
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-E1** | 使用者口述 3D CAD 需求，要求「我用說的、你作並交付成果」 | **不要去 `artcraft-gateway` 找 SolidCraft**（apps 清單無此項）；直接呼叫 `C:\Program Files\SolidCraft\solidcraft-cli.exe`。標準流程：口述需求 → 參數表（`parameters.add`，數量型用 `unit:""`）→ 特徵腳本（尺寸只寫參數運算式）→ `document.inspect{measure:true}` 做幾何自檢 → `file.export`(step/stl)＋`file.save`(container)＋CLI `snapshot`/`render` 出圖 → 回報數量與風險。 | [`tools/solidcraft/sc.py`](../tools/solidcraft/sc.py)、[`example_run.py`](../tools/solidcraft/example_run.py)、[操作指引](SolidCraft操作指引.md) | `§Q` |
+| **EXP-E2** | `solid.combine` 報 `unknown body 'X'`；或 `expected a length, got a value in length^2`；或腳本 JSON 報 `expected value at line N` | 1. `name` 是**特徵名**、**`body_name` 才是實體名**，combine 的 target/tools 要用 `body_name`。<br>2. 數量型參數（單元數、孔數）必須 `unit:""`，否則相乘變長度²。<br>3. JSON 裡的運算式字串一律加引號：`[0,"WALL_T","BASE_T"]`。 | 首個端到端腳本連踩三坑，逐條修正後 RC=0 | `§Q` |
+| **EXP-E3** | `render.start` 報 `no image host is installed`；`render` 報「當檔案已存在時，無法建立該檔案」；`file.export` 報「系統找不到指定的路徑」 | headless CLI **不可用 `render.*` 命令**（需 GUI 主程式當 host）→ 改用 CLI 子命令 `solidcraft-cli render <src> --out x.png --overwrite` 與 `solidcraft-cli snapshot <src> --out x.png --view iso`（GPU，快）。`file.export` 目標目錄必須先 `os.makedirs`。 | 渲染／截圖皆成功出圖 | `§Q` |
+| **EXP-E4** | 模型量測體積與手算理論值差 2%（U 型溝渠案例：2,491,200,000 vs 2,448,000,000 mm³） | `corner` 是**最小角點不是中心**：挖內腔時 `corner` 的 x 給了壁厚偏移 → 內腔整條內縮。挖通長向時 `corner` 的 x 給 0，內腔用 `width`/`height` 控制。**務必做「模型量測 vs 理論值」自檢（誤差 >1% 即判定建模錯）**。 | 修正後三個規格變體誤差皆 0.000% | `§Q` |
+| **EXP-E5** | `commands` 輸出用 PowerShell `>` 落盤後 `json.loads` 報 `UnicodeDecodeError: 0xff` | PowerShell `>` 寫 UTF-16 BOM。SolidCraft 輸出落盤一律用 Python `subprocess` + `encoding="utf-8"`；本專案 `sc.py` 已封裝此事。 | `tools/solidcraft/sc.py` | `§Q` |
+
+---
+
+## 6. 工具能力邊界與選型（2026-10-28 六套實測）
+
+> 完整評估（含重疊度矩陣、決策表、紅線）見 [`docs\六套CAD工具能力邊界與重疊度.md`](六套CAD工具能力邊界與重疊度.md)。
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-F1** | 要用 CadCraft Studio（CivilCraft／TakeoffCraft）但找不到 CLI、或 MCP 回 401／`no app window takes assistants` | Studio 只有本機 HTTP MCP（`127.0.0.1:<埠>/mcp` + Bearer token，token 只在 Hub › Assistants 卡片顯示、不落地）；需使用者開 app 視窗並於 Settings › Assistants 開連線＋加 Folders。工具都帶 `window` 參數；`tools/list` 只列最後使用視窗。 | `tools/cadcraft_studio/ccs.py`、`docs/CadCraft_Studio操作指引.md` | 實測 2026-10-28 |
+| **EXP-F2** | CivilCraft 土方量比預期小約 27 倍、或 LandXML 單位為 USSurveyFoot | 新專案預設**英尺**：體積以立方碼輸出。無工具可改單位／座標系，須請使用者在視窗改公制與 EPSG:3826，再以 `site_describe` 確認。 | 換算後與理論值 0% 誤差 | 實測 2026-10-28 |
+| **EXP-F3** | CivilCraft `dwg_export` 的 DWG 在 AutoCAD 報「圖檔無效」 | 只有 `version:"2000"` 可被 AutoCAD 開啟（2007/2013/2018 皆失敗）；匯出後必用 `acc.py to_dxf` 重開驗證。 | `_cadcraft_studio測試\平面測試_v*.dwg` | 實測 2026-10-28 |
+| **EXP-G1** | AutoCAD MCP `drawing_understand` 回報 `agree:false`、把公尺圖判為英寸 | 單位推論以建築特徵（門扇寬）為準，土木圖的圓弧會被誤判。以 `$INSUNITS=6` 為準，忽略推論；量測工具本身數值正確。 | `docs/AutoCAD_MCP操作指引.md` | 實測 2026-10-28 |
+| **EXP-G2** | AutoCAD MCP `drawing_export_dwg` 報需 ODA File Converter；或建不出 TOMO 中文字型 | ezdxf 後端寫 DWG 需 ODA → 改用 `acc.py publish(pdf=False)`。`textstyle_create` 無 bigfont 參數 → 存檔後用 ezdxf 補 TOMO（gbenor.shx＋CHINA1.SHX）。 | AutoCAD 回讀圖元完整 | 實測 2026-10-28 |
+| **EXP-G3** | `acc.py publish(pdf=True)` 對只有模型空間的 DXF 逾時 | 出圖腳本的提示順序是圖紙配置用；模型空間圖改 `pdf=False` 只轉 DWG，或先用 `make_sheet.py` 配置 A3。 | `_autocad_mcp測試\mcp繪圖測試.dwg` | 實測 2026-10-28 |
+| **EXP-G4** | AutoCAD MCP 在 Codex 端（另一份安裝 `~\.agents\mcp\autocad-mcp-pro`）預設 `AUTOCAD_MCP_BACKEND="com"` 且**未設 `ALLOWED_PATHS`** → 可操作共用 GUI AutoCAD、可寫入電腦任何位置 | 與 Claude Code／Desktop 對齊：`config.toml` 的 `[mcp_servers.autocad.env]` 改 `AUTOCAD_MCP_BACKEND="ezdxf"`、加 `ALLOWED_PATHS='D:\公司案件.AI'`、移除 `CAD_PROGID`、加 `PYTHONIOENCODING="utf-8"`；改前備份。**改了 config.toml 必須重啟 Codex** 才生效。驗證方式：以 `mcp` stdio client 帶同一組 env 直啟 `autocad-mcp.exe`，驗 `system_status.active_backend=="ezdxf"`、工作區內可寫、區外 `drawing_save_as`／`drawing_open` 被拒。 | `docs\AutoCAD_MCP操作指引.md` §2.1、`~\.agents\mcp\autocad-mcp-pro\codex_ezdxf_test.py`（1.7.0，243 工具，越權寫入被拒且該處無檔案） | 實測 2026-10-28 |
+| **EXP-G5** | 對 autocad-mcp-pro 做 MCP 端到端測試時 `stdio_client` 報 `Attempted to exit cancel scope in a different task than it was entered in` | 不要手動 `__aenter__`/`__aexit__` 分開管理 `stdio_client` 與 `ClientSession`；每個測試階段用單一 `async with stdio_client(...)` ＋ 內層 `async with ClientSession(...)`，階段結束即整段退出。 | `codex_ezdxf_test.py` 三階段（IN-SCOPE／OUT-OF-SCOPE／OUT-OF-SCOPE-OPEN）皆跑通 | 實測 2026-10-28 |
+| **EXP-H1** | 需要「出 PDF／PNG 預覽」但不想叫 AutoCAD（怕 COM 衝突、怕逾時） | `cadcraft-cli run <A3.dxf> --cmd 'plot {"path":"out.pdf","layout":"全區工程位置圖","landscape":true,"plotArea":"layout","fit":false,"scale":1.0}'`，再用 PyMuPDF 轉 PNG。實測能完整重現本專案 A3 交付圖（視口內容／圖框／標題欄／技師圖記區／中文全正常）。**DWG 交件仍走 `acc.py`。** | `_cad_assess\cadcraft_plot.pdf`（86,510 B、墨量 4.45% vs AutoCAD 4.17%） | `§H` |
+| **EXP-H2** | 看到 `docs\踩坑紀錄.md` §L／EXP-B1 說「`cadcraft-cli convert` 的 DWG 缺圖紙空間」而想放棄它 | **該記錄已不成立（CADCraft CLI 0.13.0 實測）**：A3 DXF→DWG 54,398 B，`acc.py todxf` 回讀 model 68／layout 100 entity、3 IMAGE、23 圖層、TOMO、`$INSUNITS=6` 全一致；純模型圖亦保留 `Layout1`。檔案較小是 DWG 表示差異，非缺件。**但交件 DWG 仍用 `acc.py`**（契約要求 AutoCAD 2018 且已有驗收路徑）。 | `_cad_assess\cadcraft_conv.dwg`、`cadcraft_conv_回讀.dxf`、`model_only*` | `§H` |
+| **EXP-H3** | 想用 AutoCAD MCP 直接出本專案的交件圖／以為它能取代產線 | **它不懂本專案語彙**：預設是 mm／ISO／製造＋建築＋機械＋P&ID（`titleblock_apply_iso_a3`、`drawing_apply_iso_layers`、`mech_*`／`gear_*`／`weld_*`／`pid_*`／`arch_*`／`bom_*`，242 tools），**沒有 TOMO／TWD97／`數字_中文` 圖層／A3 1:600 契約**。定位＝**讀別人圖＋量測盤點＋補畫標註**，不取代 `site_basemap`／`make_sheet`／`acc.py`／`check_delivery`。 | 以 `tools/list` 實測 242 工具與其分佈；`docs\六套CAD工具能力邊界與重疊度.md` §2.4 | `§H` |
+| **EXP-H4** | 需要在「SolidCraft」與「text-to-cad（cadgen）」之間選 3D 參數化工具 | 兩者重疊約 70%（皆參數→精確實體→STEP）。**選 SolidCraft**：完全離線、本專案已有 U 型溝／擋土牆範本與體積自檢流程（`sc_build.py`）。**選 cadgen**：模型要進 git、要 code review、要純 Python 表達（`@step` 裝飾器）→ 但首次需 `uvx` 連網下載，離線案場不可用。Blender 不是選項（網格、無 STEP、無工程圖）。 | `docs\SolidCraft操作指引.md`、`~\.agents\skills\cad\SKILL.md` | `§H` |
+
+
+---
+
+## 7. 工程設計工作台與前端（INV/DOM — Design Workbench）
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-G1** | 改了 `design_api.py» 的 `field_rules»，但 `http://127.0.0.1:8765/design» 表單仍是舊的（文字框沒變下拉） | `design_api» 在 `regs_server.py» 的 handler 內才 import，第一次請求後就快取在 `sys.modules»；**必須重啟 `regs_server.py»**（測試可另開 `--port 8766»）。先用 `GET /api/design/catalog» 確認 `field_rules» 已更新，再懷疑前端。 | 本輪實測：程式已對、8765 仍回舊 catalog | `§T.2» |
+| **EXP-G2** | 某參數只有少數合法值，表單卻是自由文字；或陣列參數（`links»、`footings»）無法編輯 | 固定值一律 `type:"select"»（數字列舉也一樣，前端會轉回 Number）；巢狀欄位用 `settlement.foundation_type» 或 `path[]»（`links[].type»）；純量物件陣列自動用清單編輯器。守門在 `design_workbench_selftest.py»：example 的字串葉節點沒有 select 又不在白名單就 FAIL。 | 水保 §18／§19／§73、公路排水 §6、基礎構造 §4.5.4；21 個計算器全掃過 | `§T.1», `§T.3» |
+
+## 8. 智能體作業環境（Harness — 回合中斷／成本）
+
+| ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
+|---|---|---|---|---|
+| **EXP-H1** | 對話突然「回覆未完成」，錯誤含 `num of image is larger than the limit: 200 (2013)`；換 `/compact` 或重送都一樣失敗 | 這是**整個 session 的圖片總數**超限（每張讀過的頁面 PNG 都會隨歷史重送），不是單張的問題。解法只有**開新對話**。預防：規範核表用 `tools\regs\page_table.py`（文字層＋座標切格）取代看圖；必要看圖時一張看完即記錄，session 內 ≤20 張。 | 2026-11-01 實測：同 session 的純文字指令（lint）照常，但任何模型請求 400 | `§U` |
+| **EXP-H2** | 表格是掃描件／無文字層，`page_table.py` 只回空行或亂序 | 加 `--ocr` 走 Windows 內建 OCR 驗版面，但**數字不可取自 OCR**（`10`→`LO`、`1`→`l`）；掃描件仍須人眼或改用 MinerU 草稿（`tools\regs\auto\`，未核對不可取數）。 | `tools\regs\ocr\ocr.ps1`、市區道路 p.85 實測 | `§U.3` |
+| **EXP-H5** | `--part` 取不到分章 PDF（回 None／什麼都不印／`IndexError: page N not in document`） | `Path.rglob` 對含空白的無萬用字元樣式會失效，`find_pdf` 已改為比對 PDF 檔名 stem（完全相同→忽略大小寫→包含字串）。分章用 `--part "第五章 基礎"`（包含即可）、整本在資料夾內用 `--part "本文"`；拿整本頁碼開章本會 IndexError。**給 part 找不到時不再退回整本 PDF**，避免頁碼錯還不出聲。 | `tools\regs\page_assets.py`（`find_pdf`／`part_pdfs`，2026-11-01 改）、`page_table.py` 錯誤訊息 | `§V` |
+| **EXP-H6** | 子代理回報「這頁沒有目標表／式」，換頁重試仍找不到；同一條反覆重抓 2~3 次才對 | **PDF 檔序 ≠ 頁面印的頁碼**，而 DB 的 `unit.page` 是**條文起頁**（表常在下一頁）。**不要猜頁碼**：用 `tools\regs\page_index.py build <src>` 建「印刷頁碼 → PDF 頁」索引，再 `find <src> <印刷頁碼>` 定位。索引快取在 `_temp\regs_pages\_page_index\`。辨識原理有兩個必要條件：**(1) 必須用座標（頁首／頁尾 12% 帶內），不能用文字層前後字串**（頁面開頭可能是「3-17表3.8.1.2…」，內文的「3-8」會被誤判）；**(2) 頁碼常被拆成多個 word**（「3-17」＝`'3'`、`'-'`、`'17'`），必須把同一橫列的 token 依 x 座標串接後再比對格式。34 份現行規範中 **19 份有 PDF 可建索引**，其餘 15 份為純文字來源、本工具不適用。| 2026-11-02 第二輪消化的 27 條待核中 14 條屬此類 | `§Z` |
+| **EXP-H7** | 整頁低解析圖（110 dpi）上，子代理把公式的「上標位置」「括號外的 1−」「不等號是 ≤ 還是 ≧」讀錯 | **公式類必用高解析局部裁圖**：`tools\regs\page_crop.py "<pdf>" <頁> --clip <x0> <y0> <x1> <y1> --dpi 400 -o out.png`，260~420 dpi，座標為 PDF point（從 `page_table.py` 或 `pg.get_text('words')` 的 x0/y0 取）。本輪實際被讀錯並改正：公路路線 3.5.3 式(1)「方括號外還有一個 1−」、市區道路 3.4.3 式(4) 分母是 **R_r−R_min**、公路施工 02321 4.1.3 不等號是「**≧**」非「≤」、公路路線 3.9 加寬 U_c＝`2.5+√(R²+X)−√(R²−Y)`（讀錯會使 ΔW 得 109 m）。**先做量級檢查再定案**是最便宜的自保。| 同上 4 例皆經 260~420 dpi 裁圖＋量級／連續性檢查雙重確認 | `§Z.4` |
+| **EXP-H8** | 整表跨頁且有合併儲存格（例：耐震規範 2.18 之 SDS 鄉鎮市區表），逐行讀文字層得到錯亂的縣市歸屬、只解出 314 列 | 文字層是**逐欄順序輸出**，會打散合併格。**改用 PyMuPDF 的表格結構 API**：`page.find_tables()` → `tabs.tables[0].extract()`，合併格續列為 `None`。實測得 **327 列 ＝ 全台 368 鄉鎮市區 − 臺北市 12 − 新北市 29**，22 縣市齊備無重複。**沒有 PDF 的純文字規範**（`btr_*`、`swc_*`、`sewer_std` 等 15 份）改解析方框線（`┌─┼─┤`）：逐行以 `│` 切欄、遇內部框線結算一列——實證 `btr_equip` 第 37 條衛生設備表（9 類 × 30 列）即以此補齊。| `tools\regs\page_index.py` §2.2.2、`tools\regs\page_assets.py` | `§Z.5` |
+| **EXP-H9** | 「定性」判定後仍藏著公式：qualitative 抽驗約 4 成有算式；或新增條目 `payload_check` 全過但 `verified_selftest` 失敗（測試輸入違反自身 conditions／clause 不存在於 unit） | qualitative 只能用於「確無算式或數值表」，**範圍不符一律標 `out_of_scope`**；用 `tools\regs\audit_qualitative.py` 以式號與運算符打分、由高分往下讀。新增條目後**必跑 `verified_selftest`**（payload_check 不檢查測試是否滿足 conditions）；子條號若不是獨立 unit，`clause` 填其所屬 unit 的條號。文字層小數點倒置（`20 . 1`＝1.20、`17.2`＝117.2）以雙單位比值 10.2／3.19 與轉折點連續性還原。 | B 類 Phase 2：hwbridge104 7.3.4／7.3.5、hwbridge 8.17.x 等 11 條原標 qualitative 實有算式 | `§Z.6` |
+| **EXP-H10** | 文字層公式錯亂、無法判斷分數線／括號／表格堆疊格（如 hwbridge 10.6.3、hwroute115 表3.10.3.3） | 走視覺管道：`tools\regs\locate_pages.py` 定位 → `tools\regs\page_crop.py "<pdf>" <頁> --bands 2 --dpi 260` 切半頁 260 dpi → **每目標一個 scout**，提示內貼出文字層亂碼、要求 LaTeX／逐格表＋指定代入數字驗量級／連續性／單調性＋看不清標【不確定】。**只信圖不信文字層**（文字層曾造出不存在的分母）；雙制係數不一致的條目標 pending；有限定解（如 β＝0 回 Rankine）一定拿來當測試。 | 2026-11-02 視覺管道 10 目標，皆於一輪內完成 | `§Z.7` |
+| **EXP-H11** | 規格表格（合併表頭＋格內堆疊列）：`find_tables()` 只回骨架、欄位歸屬錯亂；或轉錄時把「－」與「空白」混用；或掃描點陣曲線圖想直接數化 | 流程固定為**`find_tables()` 定骨架 → 260 dpi 原頁圖定歸屬**（純看圖會漏列、純看 API 會錯欄）；`find_tables()` 回空字串的格就是合併格；**「－」＝不適用、「空白」＝原表不列此篩，分開寫**；合併範圍用外部標準反推（穩定值 817/544/340 kgf ＝ 1800/1200/750 lb → 夯實 75/50/35）；原書表號重複時照錄並以 a/b 區分；**掃描點陣曲線圖只收軸名／範圍／曲線條數等結構資訊，不建數值表**。 | hwconst112 02741 五表、steel99 附錄3 圖A-3.1/A-3.2 | `§Z.8` |
+| **EXP-H12** | 條目掛 `pending`（原文疑誤／版面不明），長期無法收斂；或「原書好像印錯了」 | **先假設自己讀錯**：找一個「物理／量綱上不可能」的推論當反證（1.18Fy>Fy、鋼筋比 p 被讀成 A_s 於是覺得漏 b·d、λ 在全文只有別的意思）。**驗公式不能只驗端點**——hwbridge 9-74 的重建式兩端誤差 0、中點差 19%（sin 起算點錯，等價式須用 cos）。雙制係數比值要看清「哪個量帶單位」：對 b 一次齊次的式子，長度換算不動係數，只有壓力單位動（√10.2）。來源真的缺漏時（如 btr_design 188 匯出檔寫「請詳閱完整條文檔案」），**縮小條目範圍到可確認部分並在 notes 引述缺漏原文**，不要留 pending。 | 2026-11-02 消化 7 條 pending：4 條是自身誤讀、1 條原書雙制印誤、1 條確認負指數、1 條來源缺漏 | `§Z.9` |
+| **EXP-H13** | 用啟發式打分（式號、運算符密度）篩 qualitative，低分段被當成「沒內容」直接標定性 | **打分只決定閱讀順序，不能當結論**。低分段仍可能有大量**行內未編號公式**（`2R+T≧64`、`D=146√(Q/V)`、`Av=Af/(250√h)`）與**嵌在散文裡的數值表**（表02745-1 使用溫度、表03110-1 拆模時間）。實測 204 條低分段裡有 46 條公式、21 張表。判 qualitative 前必須逐條讀；理由要引用原文片段（「條文內容為『…』」）而非「同上型」「純條文」。 | 2026-11-02 清低分段 qualitative 204 條，入庫 67 條新增條目 | `§Z.10` |

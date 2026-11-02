@@ -1,0 +1,271 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_punching_Jc_84423",
+   "title": "板柱接頭偏心剪力：臨界斷面極慣性矩 Jc 與最大因數化剪應力 vuv（混凝土結構設計規範 112 年版 8.4.4.2.3 及解說）",
+   "src": "rc112",
+   "clause": "8.4.4.2.3",
+   "page": 200,
+   "keywords": "混凝土 雙向版 偏心剪力 板柱接頭 Jc 極慣性矩 γv Msc vuv 臨界斷面 內柱 cAB cCD 8.4.4.2.2 8.4.4.2.3",
+   "unit": "kgf/cm2",
+   "output": "result",
+   "latex": "J_c=\\frac{d(c_1+d)^{3}}{6}+\\frac{(c_1+d)d^{3}}{6}+\\frac{d(c_2+d)(c_1+d)^{2}}{2};\\quad v_{uv,AB}=v_{u,AB}+\\frac{\\gamma_vM_{sc}c_{AB}}{J_c};\\quad v_{uv,CD}=v_{u,CD}-\\frac{\\gamma_vM_{sc}c_{CD}}{J_c}",
+   "vars": {
+    "c1": {
+     "desc": "柱在彎矩方向之尺寸 c1（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 40.0
+    },
+    "c2": {
+     "desc": "柱垂直彎矩方向之尺寸 c2（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 40.0
+    },
+    "d": {
+     "desc": "版有效深度 d（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 20.0
+    },
+    "vu": {
+     "desc": "直接剪力所生之因數化剪應力 vu（kgf/cm²，Vu/(bo·d)）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 8.0
+    },
+    "Msc": {
+     "desc": "由柱抵抗之因數化版彎矩 Msc（kgf·cm）",
+     "unit": "kgf-cm",
+     "min": 0,
+     "default": 2000000.0
+    },
+    "gv": {
+     "desc": "偏心剪力分擔比 γv（依式 8.4.4.2.2，γv＝1－γf）",
+     "unit": "-",
+     "min": 0,
+     "max": 1.0,
+     "default": 0.4
+    },
+    "mode": {
+     "desc": "1＝Jc（cm⁴，內柱）；2＝臨界斷面 AB 邊 vuv（cAB＝(c1+d)/2）；3＝CD 邊 vuv",
+     "unit": "-",
+     "min": 1,
+     "max": 3,
+     "default": 1
+    }
+   },
+   "expr": "_Jc if mode==1 else ((vu+gv*Msc*_c/_Jc) if mode==2 else (vu-gv*Msc*_c/_Jc))",
+   "tests": [
+    {
+     "in": {
+      "c1": 40.0,
+      "c2": 40.0,
+      "d": 20.0,
+      "vu": 8.0,
+      "Msc": 2000000.0,
+      "gv": 0.4,
+      "mode": 1
+     },
+     "out": 2960000.0
+    },
+    {
+     "in": {
+      "c1": 40.0,
+      "c2": 40.0,
+      "d": 20.0,
+      "vu": 8.0,
+      "Msc": 2000000.0,
+      "gv": 0.4,
+      "mode": 2
+     },
+     "out": 16.10810810810811
+    },
+    {
+     "in": {
+      "c1": 40.0,
+      "c2": 40.0,
+      "d": 20.0,
+      "vu": 8.0,
+      "Msc": 2000000.0,
+      "gv": 0.4,
+      "mode": 3
+     },
+     "out": -0.10810810810810878
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**8.4.4.2.3**：**由 γv·Msc 引致之因數化剪應力，應依 8.4.4.1 節規定之臨界斷面中心軸作線性分布。** 解說：**臨界斷面邊界 ABCD 依 22.6.4.1 決定；因數化剪應力 vuv 及由柱抵抗之因數化版彎矩 Msc 係於臨界斷面中心軸 c-c 處決定；最大因數化剪應力 vuv,AB＝vu,AB＋γv·Msc·cAB/Jc，vuv,CD＝vu,CD－γv·Msc·cCD/Jc**（γv 依式 8.4.4.2.2）。**內柱之 Jc（假設臨界斷面之類似極慣性矩）＝d(c1＋d)³/6＋(c1＋d)d³/6＋d(c2＋d)(c1＋d)²/2；邊柱或角柱之 Jc 可導出類似之公式。** 不經偏心剪力傳遞之部分 Msc，宜由 8.4.2.2 節規定之撓曲傳遞。**與 ACI 318-19 R8.4.4.2.3 同式 ✓；內柱 cAB＝cCD＝(c1＋d)/2 時，vuv,AB 與 vuv,CD 之差＝2γv·Msc·cAB/Jc ✓。** **量綱：kgf·cm·cm／cm⁴＝kgf/cm² ✓。** ⚠ 本條目 mode=2、3 之 c 取內柱 (c1＋d)/2；邊柱、角柱之 c 與 Jc 不同，未納入。",
+   "status": "verified",
+   "defs": [
+    [
+     "_Jc",
+     "d*(c1+d)**3/6.0+(c1+d)*d**3/6.0+d*(c2+d)*(c1+d)**2/2.0"
+    ],
+    [
+     "_c",
+     "(c1+d)/2.0"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "c1>0 and c2>0 and d>0",
+     "msg": "尺寸須為正"
+    }
+   ],
+   "_file": "payload_phase3a.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "rc112_torsion_flex_zone_reduction_95",
+   "title": "受撓壓力區縱向扭力鋼筋之減少量（混凝土結構設計規範 112 年版 9.5.4.5）",
+   "src": "rc112",
+   "clause": "9.5.4.4",
+   "page": 100,
+   "keywords": "混凝土 梁 扭力 縱向鋼筋 受撓壓力區 減少 Mu/(0.9 d fy) Al 9.5.4.4 9.5.4.5",
+   "unit": "cm2",
+   "output": "dAl",
+   "latex": "\\Delta A_\\ell=\\frac{M_u}{0.9\\,d\\,f_y}",
+   "vars": {
+    "Mu": {
+     "desc": "該斷面與 Tu 同時作用之因數化彎矩 Mu（kgf·cm）",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "d": {
+     "desc": "有效深度 d（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 55.0
+    },
+    "fy": {
+     "desc": "縱向鋼筋降伏強度 fy（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 4200.0
+    }
+   },
+   "expr": "Mu/(0.9*d*fy)",
+   "tests": [
+    {
+     "in": {
+      "Mu": 2000000.0,
+      "d": 55.0,
+      "fy": 4200.0
+     },
+     "out": 9.62000962000962
+    },
+    {
+     "in": {
+      "Mu": 5000000.0,
+      "d": 60.0,
+      "fy": 4200.0
+     },
+     "out": 22.045855379188712
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**9.5.4.4**：扭力造成之縱向鋼筋軸拉力，與混凝土斜壓力桿力平衡，**額外同心縱向拉力為 Al·fy**，此鋼筋與受撓所需鋼筋相加且均勻分布於橫向鋼筋圍繞之周界內；預力梁可以預力鋼筋之多出強度 Aps·Δfpt 承擔部分軸力。**9.5.4.5：受撓壓力區之縱向扭力鋼筋面積得減少 Mu/(0.9·d·fy)**，式中 Mu 在該斷面上與 Tu 同時作用；**惟該縱向鋼筋仍不得小於 9.6.4 節規定之最低需求。** 解說：由扭力產生之縱向拉力，部分被受撓壓力區之壓力所抵消，故容許減少。**合理性：Mu/(0.9d)＝受撓壓力區之壓力合力 C（0.9d 為內力臂近似），除以 fy 即為等效鋼筋面積 ✓；量綱 kgf·cm／(cm·kgf/cm²)＝cm² ✓。** （本條目 clause 取其所屬 unit 9.5.4.4。）",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "d>0 and fy>0",
+     "msg": "d、fy 須為正"
+    }
+   ],
+   "_file": "payload_phase3a.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "rc112_strain_limits_21222",
+   "title": "鋼筋降伏應變 εty 與拉力控制／壓力控制之應變限值（混凝土結構設計規範 112 年版 21.2.2.2 及解說）",
+   "src": "rc112",
+   "clause": "21.2.2.2",
+   "page": 340,
+   "keywords": "混凝土 強度折減 拉力控制 壓力控制 εty 0.002 fy/Es εty+0.003 0.0075 彎矩重新分布 淨拉應變 21.2.2",
+   "unit": "-",
+   "output": "result",
+   "latex": "\\varepsilon_{ty}=0.002\\ (\\text{預力鋼筋});\\ \\varepsilon_{ty}=f_y/E_s\\ (\\text{竹節鋼筋});\\quad \\text{拉力控制}:\\varepsilon_t\\ge\\varepsilon_{ty}+0.003;\\quad \\text{壓力控制}:\\varepsilon_t\\le\\varepsilon_{ty};\\quad \\text{彎矩重新分布}:\\varepsilon_t\\ge0.0075",
+   "vars": {
+    "kind": {
+     "desc": "1＝預力鋼筋（εty＝0.002，21.2.2.2）；2＝竹節鋼筋（εty＝fy/Es，21.2.2.1）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 2
+    },
+    "fy": {
+     "desc": "鋼筋降伏強度 fy（kgf/cm²；kind=2 使用）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 4200.0
+    },
+    "Es": {
+     "desc": "鋼筋彈性模數 Es（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 2040000.0
+    },
+    "mode": {
+     "desc": "1＝εty；2＝拉力控制下限 εty＋0.003；3＝壓力控制上限 εty",
+     "unit": "-",
+     "min": 1,
+     "max": 3,
+     "default": 1
+    }
+   },
+   "expr": "_ety if mode==1 else (_ety+0.003 if mode==2 else _ety)",
+   "tests": [
+    {
+     "in": {
+      "kind": 2,
+      "fy": 4200.0,
+      "Es": 2040000.0,
+      "mode": 1
+     },
+     "out": 0.002058823529411765
+    },
+    {
+     "in": {
+      "kind": 2,
+      "fy": 4200.0,
+      "Es": 2040000.0,
+      "mode": 2
+     },
+     "out": 0.005058823529411765
+    },
+    {
+     "in": {
+      "kind": 1,
+      "fy": 4200.0,
+      "Es": 2040000.0,
+      "mode": 2
+     },
+     "out": 0.005
+    }
+   ],
+   "notes": "混凝土結構設計規範（112.08.10 版）**21.2.2.2：對於所有預力鋼筋，εty 應採用 0.002。** **21.2.2.1：竹節鋼筋 εty＝fy/Es。** 解說：**構材承受彎矩或彎矩與軸力合併作用之標稱強度，係基於最外緣抗壓纖維假設應變限值 0.003；淨拉應變 εt 為最外緣拉力鋼筋在標稱強度下之拉應變（不計預力、潛變、收縮及溫度引致之應變）。最外緣拉力鋼筋之淨拉應變夠大（≥εty＋0.003）視為拉力控制；小（≤εty）為壓力控制（脆性壓力破壞）；介於其間為過渡區。僅承受軸向壓力之構材視為壓力控制，僅承受軸向拉力之構材視為拉力控制。** 在本規範之前拉力控制限值為 0.005（基於 fy＝4,200 kgf/cm²）；**fy＝4,200、Es＝2.04×10⁶ 時 εty＝0.00206，εty＋0.003＝0.00506 ≈0.005 ✓（與舊限值相符）。** **彎矩重新分布僅限用於淨拉應變至少為 0.0075 之斷面（6.6.5 節）。**",
+   "status": "verified",
+   "defs": [
+    [
+     "_ety",
+     "0.002 if kind==1 else fy/Es"
+    ]
+   ],
+   "_file": "payload_phase3a.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

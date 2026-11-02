@@ -1,0 +1,1413 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工程設計工作台</title>
+<meta name="description" content="土木、水保與結構小型工程的設計計算工作台：擋土牆、排水溝、箱涵、邊坡、基礎與 RC 構材，輸入參數即取得檢核、警示與可追溯的計算紀錄。">
+<meta name="theme-color" content="#131209">
+<script>
+(function () {
+  var KEY = "civil-theme", root = document.documentElement;
+  var mq = window.matchMedia ? window.matchMedia("(prefers-color-scheme: light)") : null;
+  function read() {
+    try { var v = localStorage.getItem(KEY); return v === "light" || v === "dark" ? v : "system"; }
+    catch (e) { return "system"; }
+  }
+  function apply(pref) {
+    var theme = pref === "system" ? (mq && mq.matches ? "light" : "dark") : pref;
+    root.setAttribute("data-theme", theme);
+    root.setAttribute("data-theme-pref", pref);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", theme === "light" ? "#F6F4EF" : "#131209");
+    var btns = document.querySelectorAll("[data-theme-choice]");
+    for (var i = 0; i < btns.length; i++) {
+      var on = btns[i].getAttribute("data-theme-choice") === pref;
+      btns[i].setAttribute("aria-checked", on ? "true" : "false");
+      btns[i].tabIndex = on ? 0 : -1;
+    }
+  }
+  function choose(pref) {
+    try { if (pref === "system") localStorage.removeItem(KEY); else localStorage.setItem(KEY, pref); } catch (e) {}
+    apply(pref);
+  }
+  apply(read());
+  if (mq) {
+    var follow = function () { if (read() === "system") apply("system"); };
+    if (mq.addEventListener) mq.addEventListener("change", follow); else if (mq.addListener) mq.addListener(follow);
+  }
+  window.addEventListener("storage", function (e) { if (e.key === KEY) apply(read()); });
+  document.addEventListener("DOMContentLoaded", function () {
+    apply(read());
+    document.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-theme-choice]") : null;
+      if (b) choose(b.getAttribute("data-theme-choice"));
+    });
+    document.addEventListener("keydown", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-theme-choice]") : null;
+      if (!b || ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].indexOf(e.key) < 0) return;
+      var all = Array.prototype.slice.call(b.parentNode.querySelectorAll("[data-theme-choice]"));
+      var i = all.indexOf(b), n = all.length;
+      i = e.key === "Home" ? 0 : e.key === "End" ? n - 1 : (i + ((e.key === "ArrowLeft" || e.key === "ArrowUp") ? -1 : 1) + n) % n;
+      e.preventDefault();
+      choose(all[i].getAttribute("data-theme-choice"));
+      all[i].focus();
+    });
+  });
+})();
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23131209'/%3E%3Ccircle cx='16' cy='13' r='6' fill='none' stroke='%23D9B382' stroke-width='1.6'/%3E%3Cpath d='M16 3v4M16 19v4M7 13h4M21 13h4M6 27h20' stroke='%23D9B382' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #131209;
+    --surface: #181818;
+    --surface-2: #1F1F1F;
+    --surface-3: #272727;
+    --line: rgba(244, 241, 234, .08);
+    --line-strong: rgba(244, 241, 234, .16);
+    --text: #F4F1EA;
+    --text-2: #ABA69B;
+    --text-3: #918B7D;
+    --accent: #D9B382;
+    --accent-strong: #EBC79A;
+    --accent-soft: rgba(217, 179, 130, .12);
+    --accent-line: rgba(217, 179, 130, .36);
+    --jade: #7CC4A4;
+    --jade-soft: rgba(124, 196, 164, .10);
+    --rust: #E4836B;
+    --rust-soft: rgba(228, 131, 107, .10);
+    --amber: #D6A75C;
+    --amber-soft: rgba(214, 167, 92, .10);
+    --amber-line: rgba(214, 167, 92, .30);
+    --line-hover: rgba(244, 241, 234, .3);
+    --hover-wash: rgba(244, 241, 234, .06);
+    --on-accent: #1A1408;
+    --jade-line: rgba(124, 196, 164, .38);
+    --rust-line: rgba(228, 131, 107, .38);
+    --amber-dot: rgba(214, 167, 92, .2);
+    --error-text: #F1BCAF;
+    --topbar-bg: rgba(24, 24, 24, .72);
+    --shadow-pop: 0 8px 24px rgba(0, 0, 0, .35);
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, .5);
+    --title-grad: linear-gradient(90deg, #FFFFFF 0%, #9B9B9B 100%);
+    --ease: cubic-bezier(.22, 1, .36, 1);
+    --sans: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    --mono: "IBM Plex Mono", "Consolas", monospace;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #F6F4EF;
+    --surface: #FFFFFF;
+    --surface-2: #F0EDE6;
+    --surface-3: #E5E0D6;
+    --line: rgba(38, 32, 20, .10);
+    --line-strong: rgba(38, 32, 20, .18);
+    --line-hover: rgba(38, 32, 20, .34);
+    --hover-wash: rgba(38, 32, 20, .05);
+    --text: #1E1B14;
+    --text-2: #514B42;
+    --text-3: #6B6458;
+    --accent: #87581B;
+    --accent-strong: #6C4510;
+    --accent-soft: rgba(135, 88, 27, .09);
+    --accent-line: rgba(135, 88, 27, .32);
+    --on-accent: #FFFFFF;
+    --jade: #1D7350;
+    --jade-soft: rgba(29, 115, 80, .08);
+    --jade-line: rgba(29, 115, 80, .34);
+    --rust: #AE3F27;
+    --rust-soft: rgba(174, 63, 39, .07);
+    --rust-line: rgba(174, 63, 39, .32);
+    --amber: #865A0C;
+    --amber-soft: rgba(176, 121, 24, .10);
+    --amber-line: rgba(176, 121, 24, .36);
+    --amber-dot: rgba(176, 121, 24, .18);
+    --error-text: #8A2E1B;
+    --topbar-bg: rgba(255, 255, 255, .8);
+    --shadow-pop: 0 8px 24px rgba(38, 32, 20, .10);
+    --shadow-card: 0 1px 2px rgba(38, 32, 20, .08);
+    --title-grad: linear-gradient(90deg, #1E1B14 0%, #6B6458 100%);
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent); color: var(--on-accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button, input, textarea, select { font: inherit; }
+  .wrap { position: relative; max-width: 1380px; margin: 0 auto; padding: 0 24px 80px; }
+
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -64px;
+    z-index: 50;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform .3s var(--ease);
+  }
+  .skip-link:focus { transform: translateY(80px); }
+
+  .topbar {
+    position: sticky;
+    top: 16px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    max-width: 100%;
+    margin: 16px auto 0;
+    padding: 8px 8px 8px 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 9999px;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    box-shadow: var(--shadow-pop);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    border-radius: 9999px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-decoration: none;
+    transition: color .3s var(--ease);
+  }
+  .brand svg { display: block; color: var(--accent); }
+  .brand:hover { color: var(--accent-strong); }
+  .nav-sep { flex: none; width: 1px; height: 16px; margin: 0 4px; background: var(--line-strong); }
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-links a {
+    padding: 8px 12px;
+    border-radius: 9999px;
+    color: var(--text-2);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color .3s var(--ease), background-color .3s var(--ease);
+  }
+  .nav-links a:hover { color: var(--text); background: var(--hover-wash); }
+  .nav-links a.on { color: var(--text); background: var(--surface-3); font-weight: 700; box-shadow: inset 0 0 0 1px var(--line-strong); }
+  .theme-switch { display: flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 9999px; background: var(--surface-2); }
+  .theme-switch button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--text-3);
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .3s var(--ease), background-color .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .theme-switch button svg { flex: none; display: block; }
+  .theme-switch button:hover { color: var(--text); background: var(--hover-wash); }
+  .theme-switch button[aria-checked="true"] { color: var(--accent); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-strong); font-weight: 700; }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 40px;
+    padding: 64px 0 48px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .eyebrow::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 9999px; background: var(--accent); }
+  .hero h1 {
+    margin: 16px 0 0;
+    max-width: 680px;
+    font-size: 36px;
+    line-height: 40px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-wrap: balance;
+    background: var(--title-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero .sub {
+    margin: 16px 0 0;
+    max-width: 680px;
+    color: var(--text-2);
+    font-size: 16px;
+    line-height: 24px;
+    text-wrap: pretty;
+  }
+  .hero-side { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; text-align: right; }
+  .mark {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--accent-line);
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .meta { font-family: var(--mono); font-size: 12px; line-height: 16px; color: var(--text-3); }
+  .meta b { display: inline-block; margin-right: 2px; color: var(--accent); font-size: 20px; line-height: 28px; font-weight: 600; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    align-items: start;
+    gap: 32px;
+    margin-top: 8px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .sidebar {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+    max-height: calc(100vh - 112px);
+    overflow: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-3) transparent;
+  }
+  .sidebar::-webkit-scrollbar { width: 8px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 9999px; }
+  .side-kicker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 16px;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text-3);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .group + .group { margin-top: 24px; }
+  .group h3 {
+    margin: 0 0 8px;
+    padding: 0 12px;
+    color: var(--text-3);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: .14em;
+  }  .group button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: color .3s var(--ease), background-color .3s var(--ease), border-color .3s var(--ease);
+  }
+  .group button::before {
+    content: "";
+    flex: none;
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: .4;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+  }
+  .group button:hover { color: var(--text); background: var(--surface-2); }
+  .group button:hover::before { opacity: .8; }
+  .group button.on { color: var(--text); background: var(--surface-2); border-color: var(--line-strong); font-weight: 700; }
+  .group button.on::before { opacity: 1; background: var(--accent); transform: scale(1.4); }
+  .side-note {
+    margin-top: 32px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-3);
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .side-note code { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
+
+  .workspace { min-width: 0; }
+  .calc-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .calc-head h2 {
+    margin: 8px 0 0;
+    color: var(--text);
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    text-wrap: balance;
+  }
+  .desc { margin: 8px 0 0; max-width: 680px; color: var(--text-2); font-size: 16px; line-height: 24px; text-wrap: pretty; }
+  .codes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .codes span {
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    padding: 4px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 9999px;
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    transition: color .3s var(--ease), border-color .3s var(--ease), background-color .3s var(--ease);
+  }
+  .status::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }
+  .status[data-state="run"] { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+  .status[data-state="run"]::before { animation: pulse 1.1s var(--ease) infinite; }
+  .status[data-state="ok"] { color: var(--jade); border-color: var(--jade-line); background: var(--jade-soft); }
+  .status[data-state="warn"] { color: var(--amber); border-color: var(--amber-line); background: var(--amber-soft); }
+  .status[data-state="error"] { color: var(--rust); border-color: var(--rust-line); background: var(--rust-soft); }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
+
+  .panel {
+    margin-top: 24px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+    background: var(--surface-2);
+  }
+  .panel-head b { color: var(--text); font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: .04em; }
+  .run-state { font-family: var(--mono); font-size: 12px; line-height: 16px; color: var(--text-3); letter-spacing: .06em; }
+  .panel-body { padding: 24px; }
+  .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
+  .section-title {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 8px;
+    color: var(--text-2);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 700;
+    letter-spacing: .12em;
+  }
+  .section-title:first-child { margin-top: 0; }
+  .section-title small { color: var(--text-3); font-family: var(--mono); font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0; }
+  .section-title::after { content: ""; flex: 1; height: 1px; margin-left: 8px; background: var(--line); }
+
+  .field { min-width: 0; }
+  .field label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-2);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: .02em;
+    overflow-wrap: anywhere;
+  }
+  .field input[type=number], .field input[type=text], .field select, textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    outline: none;
+    transition: border-color .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .field input:hover, .field select:hover, textarea:hover { border-color: var(--line-hover); }
+  .field input:focus, .field select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .field input[aria-invalid="true"], .field select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--rust); box-shadow: 0 0 0 3px var(--rust-soft); }
+  .field .hint { margin-top: 4px; color: var(--text-3); font-family: var(--sans); font-size: 12px; line-height: 16px; }
+  .field .hint.invalid { color: var(--rust); font-weight: 600; }
+  .field .preset-row { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 8px; }
+  .checkline { display: flex; align-items: center; gap: 8px; padding-top: 24px; }
+  .checkline label { margin-bottom: 0; }
+  .checkline input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); }
+  .list-editor { grid-column: 1 / -1; display: grid; gap: 12px; }
+  .list-row { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+  .list-row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .list-row-head b { color: var(--text-2); font-family: var(--mono); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .08em; }
+  .list-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+  .list-grid .field label { margin-bottom: 6px; }
+  .btn.small { padding: 4px 10px; border-radius: 6px; font-size: 12px; line-height: 18px; }
+  .list-empty { grid-column: 1 / -1; margin: 0; color: var(--text-3); font-size: 13px; line-height: 20px; }
+  .list-editor .hint { margin: 0; color: var(--text-3); font-family: var(--sans); font-size: 12px; line-height: 16px; }
+
+  .json-wrap { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .json-wrap summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    padding: 4px 0;
+    color: var(--text-2);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .3s var(--ease);
+  }
+  .json-wrap summary::-webkit-details-marker { display: none; }
+  .json-wrap summary::before {
+    content: "";
+    flex: none;
+    width: 6px;
+    height: 6px;
+    margin-right: 2px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform .3s var(--ease);
+  }
+  .json-wrap[open] summary::before { transform: rotate(45deg); }
+  .json-wrap summary:hover { color: var(--text); }
+  textarea { min-height: 240px; margin-top: 12px; resize: vertical; }
+  .form-error { margin-top: 8px; color: var(--rust); font-size: 12px; line-height: 16px; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 24px; }
+  .actions .run-state { margin-left: 4px; }  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .3s var(--ease), border-color .3s var(--ease), color .3s var(--ease), transform .3s var(--ease);
+  }
+  .btn:hover { background: var(--surface-3); border-color: var(--line-hover); transform: translateY(-1px); }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+  .btn.primary { padding: 8px 12px; border-color: var(--accent); background: var(--accent); color: var(--on-accent); font-size: 16px; line-height: 24px; font-weight: 700; }
+  .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  .btn.primary:focus-visible { outline-color: var(--text); }
+
+  .result { margin-top: 32px; }
+  .result-top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .result-top h3 { margin: 0; font-size: 18px; line-height: 28px; font-weight: 600; letter-spacing: .02em; }
+  .verdict {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border: 1px solid;
+    border-radius: 9999px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .verdict.ok { color: var(--jade); border-color: var(--jade-line); background: var(--jade-soft); }
+  .verdict.ng { color: var(--rust); border-color: var(--rust-line); background: var(--rust-soft); }
+  .result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+  .summary {
+    margin: 16px 0 0;
+    padding: 16px 24px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .table-wrap { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+  th, td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  tbody tr { transition: background-color .3s var(--ease); }
+  tbody tr:hover { background: var(--surface-2); }
+  tbody tr:last-child td { border-bottom: 0; }
+  th { background: var(--surface-2); color: var(--text-3); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; white-space: nowrap; }
+  td.num { font-family: var(--mono); text-align: right; white-space: nowrap; }
+  td.ok { color: var(--jade); font-weight: 600; }
+  td.ng { color: var(--rust); font-weight: 600; }
+  td.note { color: var(--amber); font-weight: 600; }
+
+  .warn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--amber-line);
+    border-radius: 8px;
+    background: var(--amber-soft);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .warn::before {
+    content: "!";
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: var(--amber-dot);
+    color: var(--amber);
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 700;
+  }
+  .warn ul { margin: 0; padding-left: 16px; }
+  .warn li + li { margin-top: 4px; }
+
+  .empty-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 48px 24px;
+    border: 1px dashed var(--line-strong);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .empty-kicker { color: var(--text-3); font-family: var(--mono); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; }
+  .empty-title { margin: 0; color: var(--text); font-size: 18px; line-height: 28px; font-weight: 600; }
+  .empty-sub { margin: 0; color: var(--text-3); font-size: 14px; line-height: 20px; }
+  .error {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--rust-line);
+    border-radius: 8px;
+    background: var(--rust-soft);
+    color: var(--error-text);
+    font-size: 14px;
+    line-height: 20px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .result > * { animation: fadeUp .5s var(--ease) both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .tagline { margin-top: 96px; padding-top: 48px; border-top: 1px solid var(--line); }
+  .tagline-text {
+    margin: 0;
+    max-width: 680px;
+    color: var(--text);
+    font-size: 30px;
+    line-height: 36px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    text-wrap: balance;
+  }
+  .tagline .word { display: inline-block; opacity: .3; transform: translateY(4px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+  .tagline .word.lit { opacity: 1; transform: none; }
+
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    color: var(--text-3);
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .footer p { margin: 0; max-width: 680px; }
+  .footer code { color: var(--text-2); font-family: var(--mono); font-size: 12px; }
+  .foot-mark { color: var(--text-3); font-family: var(--mono); font-size: 12px; line-height: 20px; letter-spacing: .12em; }
+
+  [data-reveal] { opacity: 0; transform: translateY(32px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  [data-reveal].in { opacity: 1; transform: none; }
+
+  @media (min-width: 768px) {
+    .hero h1 { font-size: 48px; line-height: 48px; }
+    .calc-head h2 { font-size: 30px; line-height: 36px; }
+    .tagline-text { font-size: 36px; line-height: 40px; }
+  }
+  @media (max-width: 920px) {
+    .wrap { padding: 0 16px 48px; }
+    .topbar { margin-top: 12px; }
+    .theme-switch button { padding: 6px 8px; }
+    .theme-switch button span { display: none; }
+    .hero { grid-template-columns: 1fr; align-items: start; gap: 24px; padding: 40px 0 32px; }
+    .hero-side { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; text-align: left; }
+    .layout { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
+    .sidebar { position: static; order: 2; max-height: none; overflow: visible; }
+    .workspace { order: 1; }
+    .group { margin-top: 16px; }
+    .group h3 { padding: 0; }
+    .group button { display: inline-flex; width: auto; margin: 2px; border-radius: 9999px; border-color: var(--line); background: var(--surface); }
+    .quick-grid { grid-template-columns: 1fr; }
+    .list-grid { grid-template-columns: 1fr; }
+    .result-actions { margin-left: 0; }
+    .calc-head { flex-direction: column; gap: 16px; }
+    .status { align-self: flex-start; }
+    .panel-body { padding: 16px; }
+    .panel-head { padding: 16px; }
+    .tagline { margin-top: 64px; }
+  }
+  @media (max-width: 560px) {
+    .nav-links a { padding: 8px; }
+    .brand span { display: none; }
+    .brand { padding: 4px; }
+    .summary { padding: 12px 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    [data-reveal], .tagline .word { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+<noscript><style>[data-reveal], .tagline .word { opacity: 1 !important; transform: none !important; }</style></noscript>
+</head>
+<body>
+<div class="wrap">
+  <a class="skip-link" href="#workspace">跳至計算區</a>
+
+  <nav class="topbar" aria-label="主要導覽">
+    <a class="brand" href="/design" aria-current="page">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="10" r="5"/>
+        <path d="M12 2v3M12 15v3M4 10h3M17 10h3M4 21h16"/>
+      </svg>
+      <span>設計工作台</span>
+    </a>
+    <span class="nav-sep" aria-hidden="true"></span>
+    <div class="nav-links">
+      <a class="on" href="/design" aria-current="page">設計計算</a>
+      <a href="/">規範查詢</a>
+    </div>
+    <span class="nav-sep" aria-hidden="true"></span>
+    <div class="theme-switch" role="radiogroup" aria-label="畫面主題">
+      <button type="button" role="radio" data-theme-choice="light" aria-checked="false" aria-label="亮色" title="亮色">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <span>亮色</span>
+      </button>
+      <button type="button" role="radio" data-theme-choice="dark" aria-checked="false" aria-label="暗色" title="暗色">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+        <span>暗色</span>
+      </button>
+      <button type="button" role="radio" data-theme-choice="system" aria-checked="false" aria-label="跟隨系統" title="跟隨系統">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        <span>跟隨系統</span>
+      </button>
+    </div>
+  </nav>  <header class="hero" data-reveal>
+    <div class="hero-main">
+      <p class="eyebrow">DESIGN WORKBENCH</p>
+      <h1>工程設計工作台</h1>
+      <p class="sub">擋土牆、排水溝、箱涵到邊坡，挑一個計算器，填入現場尺寸，當場取得檢核、警示與可追溯的計算紀錄。</p>
+    </div>
+    <div class="hero-side">
+      <div class="mark" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 20h18"/>
+          <path d="M6 20V9l6-5 6 5v11"/>
+          <path d="M6 14h12"/>
+        </svg>
+      </div>
+      <div class="meta" id="meta"></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="計算項目">
+      <div class="side-kicker">計算項目</div>
+      <div id="catalog"></div>
+      <div class="side-note">
+        AI 可直接呼叫同一支 <code>design_api.py</code>；網頁、命令列與智能體不使用不同的公式。
+      </div>
+    </aside>
+
+    <main class="workspace" id="workspace">
+      <section class="calc-head">
+        <div>
+          <div class="eyebrow" id="engine">CALCULATION ENGINE</div>
+          <h2 id="title">載入中…</h2>
+          <p class="desc" id="desc"></p>
+          <div class="codes" id="codes"></div>
+        </div>
+        <div class="status" id="status" data-state="ready">READY</div>
+      </section>
+
+      <section class="panel" data-reveal>
+        <div class="panel-head">
+          <b>輸入參數</b>
+          <span class="run-state" id="runstate">未執行</span>
+        </div>
+        <div class="panel-body">
+          <div class="quick-grid" id="form"></div>
+          <details class="json-wrap">
+            <summary>完整 JSON（可貼上案件資料或由 AI 產生）</summary>
+            <textarea id="json" spellcheck="false" autocomplete="off" aria-label="完整 JSON"></textarea>
+            <div class="form-error" id="jsonerr" role="alert" hidden></div>
+            <div class="actions">
+              <button class="btn" id="applyjson">套用 JSON</button>
+            </div>
+          </details>
+          <div class="actions">
+            <button class="btn primary" id="run">執行計算</button>
+            <button class="btn" id="reset">回到範例</button>
+            <span class="run-state">Ctrl + Enter 執行</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="result" id="result" data-reveal>
+        <div class="empty-result">
+          <span class="empty-kicker">READY</span>
+          <p class="empty-title">先挑一個計算器</p>
+          <p class="empty-sub">選擇左側工項，確認參數後執行。</p>
+        </div>
+      </section>
+
+      <section class="tagline" aria-label="工作台原則">
+        <p class="tagline-text" id="tagline">同一個引擎，網頁、命令列與智能體算出一樣的結果。三個月後回頭查，參數、算式與時間都還在。</p>
+      </section>
+
+      <footer class="footer">
+        <p>本頁呼叫 <code>tools\design\design_api.py</code>，每次計算自動保存於 <code>out\design_workbench\runs\</code>。設計結果仍須由工程師依現行規範、鑽探與現場條件覆核。</p>
+        <span class="foot-mark">CIVIL WORKBENCH · 2026</span>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = v => v === null || v === undefined ? "—" : (typeof v === "number" ? (Math.abs(v) >= 100000 ? v.toLocaleString() : Number(v.toFixed(4))) : v);
+const LABELS = {
+  wall_type:"牆型", height_m:"牆高 (m)", stem_thickness_m:"牆身厚 T (m)", base_width_m:"底寬 BL (m)", base_thickness_m:"底板厚 BT (m)",
+  top_width_m:"頂寬 (m)", front_batter_ratio:"前坡比", back_batter_ratio:"背坡比", toe_projection_m:"趾板突出 (m)", toe_soil_depth_m:"牆趾覆土深 D (m)", passive_ratio:"被動土壓折減比",
+  soil:"土壤參數", seismic:"地震輸入", kh:"水平地震係數 kh", gamma:"土壤單位重 (kN/m³)", phi_deg:"內摩擦角 φ (°)", c_kpa:"凝聚力 c (kPa)",
+  allowable_bearing_kpa:"容許承載力 (kPa)", ultimate_bearing_kpa:"極限承載力 (kPa)", base_friction:"基底摩擦係數", foundation:"基礎類型",
+  cell_count:"孔數", clear_width_m:"淨寬 (m)", clear_height_m:"淨高 (m)", wall_thickness_m:"外牆厚 (m)", interior_wall_thickness_m:"內牆厚 (m)",
+  top_slab_thickness_m:"頂版厚 (m)", bottom_slab_thickness_m:"底版厚 (m)", cover_depth_m:"覆土深 (m)", length_m:"涵長 (m)",
+  design_flow_m3s:"設計流量 Q (m³/s)", slope:"縱坡 S", manning_n:"曼寧 n", depth_m:"溝深 (m)", freeboard_min_m:"最小出水高 (m)",
+  inner_width_m:"內寬 (m)", nodes:"節點", links:"連線", basin:"池體", outlet:"出水口", inflow:"入流歷線",
+  bottom_length_m:"池底長 (m)", bottom_width_m:"池底寬 (m)", side_slope_h_v:"側坡 H:V", max_stage_m:"最高水位 (m)",
+  reach_length_m:"演算長度 (m)", step_m:"演算步距 (m)", control_depth_m:"下游控制水深 (m)", channel_depth_m:"斷面深 (m)",
+  velocity_min_m_s:"容許最小流速 (m/s)", velocity_max_m_s:"容許最大流速 (m/s)", minor_loss_coefficient:"局部損失係數",
+  stage_step_m:"水位步距 (m)", dam_crest_m:"池頂高程 (m)", peak_m3s:"尖峰入流 (m³/s)", time_to_peak_min:"尖峰時間 (min)",
+  duration_min:"歷線延時 (min)", time_step_min:"時間步距 (min)", allowable_outflow_m3s:"容許出流 (m³/s)",
+  geometry:"幾何", loads:"載重", slab:"配筋指定（空白＝自動）", x_grid_m:"X 軸線 (m)", storey_heights_m:"各層高 (m)", beam_width_mm:"梁寬 (mm)",
+  beam_depth_mm:"梁深 (mm)", column_width_mm:"柱寬 (mm)", column_depth_mm:"柱深 (mm)", dead_area_kn_m2:"靜載重 (kN/m²)",
+  live_area_kn_m2:"活載重 (kN/m²)", base_shear_coefficient:"底層剪力係數", load:"載重", B_m:"基腳寬 B (m)", L_m:"基腳長 L (m)",
+  thickness_m:"厚度 (m)", column_b_m:"柱寬 (m)", column_l_m:"柱長 (m)", q_allow_kpa:"容許承載力 (kPa)", columns:"柱資料",
+  piles:"樁位", P_kN:"垂直載重 (kN)", Mx_kNm:"Mx (kN·m)", My_kNm:"My (kN·m)", Q_allow_kN:"單樁容許力 (kN)",
+  P_mm:"年均雨量 P (mm)", return_period_yr:"重現期 (年)", area_ha:"集水區面積 (ha)", condition:"地表條件", stage:"設計階段",
+  l_m:"漫地流長度 (m)", v_ms:"漫地流流速 (m/s)", area_ha:"面積 (ha)", excavated_ha:"開挖整地面積 (ha)",
+  impervious_ha:"不透水面積 (ha)", kind:"性質", years:"年期", Am:"土壤流失量 (t/ha/yr)", depth_m:"深度 (m)",
+  height_m:"坡高 (m)", slope_angle_deg:"坡角 (°)", cohesion_kpa:"凝聚力 c (kPa)", friction_angle_deg:"摩擦角 φ (°)",
+  unit_weight_kn_m3:"單位重 (kN/m³)", Mu_kNm:"設計彎矩 Mu (kN·m)", Vu_kN:"設計剪力 Vu (kN)", b_mm:"寬 b (mm)", h_mm:"深 h (mm)",
+  fc_mpa:"混凝土 fc′ (MPa)", fy_mpa:"鋼筋 fy (MPa)", cover_mm:"保護層 (mm)", Pu_kN:"軸力 Pu (kN)",
+  default_foundation_type:"基礎型式", angular_distortion_limit:"角變量上限 δ/L", footings:"基礎資料",
+  immediate_layers:"瞬時沉陷土層", consolidation_layers:"壓密土層", subdivision:"分層數",
+  initial_effective_stress_kpa:"初始有效應力 σ′₀ (kPa)", compression_index:"壓縮指數 Cc",
+  recompression_index:"再壓指數 Cs", preconsolidation_stress_kpa:"預壓密應力 σ′c (kPa)",
+  void_ratio:"初始孔隙比 e₀", secondary_compression_index:"次壓縮係數 Cα",
+  consolidation_start_year:"壓密完成時間 tₚ (年)", assessment_end_year:"評估時間 tsc (年)",
+  id:"編號", from:"上游節點", to:"下游節點", type:"型式", foundation_type:"基礎型式", settlement:"沉陷參數", layers:"土層", concrete:"混凝土參數", orifice:"孔口",
+  inflow_m3s:"節點入流 (m³/s)", capacity_m3s:"容量 (m³/s)", max_fill_ratio:"最大滿水深比", diameter_m:"直徑 (m)",
+  elastic_modulus_kpa:"彈性模數 E (kPa)", constrained_modulus_kpa:"受圍束壓縮模數 (kPa)", poisson_ratio:"柏松比 ν",
+  friction_deg:"內摩擦角 φ (°)", L_km:"溪流長度 L (km)", H_km:"溪流高程差 H (km)",
+  allowable_headwater_m:"最高容許上游水深 (m)", anchor_depths_m:"地錨深度 (m)", backfill_slope_deg:"背填土坡角 β (°)",
+  bearing_plate_m:"承壓鈑邊長 (m)", bond_length_m:"錨碇段長 (m)", bond_strength_kpa:"握裹強度 (kPa)",
+  counterfort_spacing_m:"扶壁中心距 (m)", counterfort_thickness_m:"扶壁厚 (m)", counterfort_top_width_m:"扶壁頂寬 (m)",
+  course_count:"層數", course_height_m:"每層高 (m)", coverage_ratio:"覆蓋率 Rc", discharge_coefficient:"流量係數 Cd",
+  drill_diameter_mm:"鑽孔直徑 (mm)", embedment_m:"埋入深度 (m)", first_layer_m:"最下層高程 (m)",
+  foundation_phi_deg:"基礎土壤摩擦角 (°)", free_length_m:"自由段長 (m)", front_soil_depth_m:"前趾覆土深 (m)",
+  horizontal_spacing_m:"水平間距 (m)", inclination_deg:"傾角 (°)", include_passive:"計入被動土壓", inlet_type:"進口型式",
+  invert_m:"孔底高程 (m)", lockoff_factor:"鎖定荷重係數", long_term_strength_kN_per_m:"長期設計強度 Tal (kN/m)",
+  pressure_distribution:"土壓分布", q_kpa:"基礎壓力 (kPa)", reinforced_gamma:"加勁區單位重 (kN/m³)",
+  reinforced_phi_deg:"加勁區摩擦角 (°)", reinforcement_length_m:"加勁長度 L (m)", reinforcement_type:"加勁材型式",
+  retained_gamma:"保留區單位重 (kN/m³)", retained_phi_deg:"保留區摩擦角 (°)", service:"使用性質", size:"自動選配斷面",
+  step_side:"退階方向", strand_type:"鋼絞線型式", strands:"每股絞線數", surcharge_kpa:"上載 q (kPa)",
+  tailwater_depth_m:"下游水深 (m)", tendon_bond_mpa:"握裹強度 (MPa)", toe_length_m:"前趾長 (m)",
+  vertical_spacing_m:"垂直間距 Sv (m)", width_decrement_m:"每層縮減寬 (m)", x_m:"X 座標 (m)", y_m:"Y 座標 (m)"
+  ,design_method:"設計法", column:"鋼柱", section:"斷面", base_plate:"柱腳基板", anchors:"基礎螺栓", positions:"錨栓位置"
+  ,tw_mm:"腹板厚 tw (mm)", tf_mm:"翼板厚 tf (mm)", Fu_mpa:"極限強度 Fu (MPa)", E_mpa:"彈性模數 E (MPa)"
+  ,Kx:"有效長度係數 Kx", Ky:"有效長度係數 Ky", Lb_m:"側撐間距 Lb (m)", Lb_y_m:"側撐間距 Lby (m)"
+  ,Cm_x:"Cm 係數（強軸）", Cm_y:"Cm 係數（弱軸）", M1_over_M2:"M1/M2 係數"
+  ,axial_P_kN:"軸力 P (kN)", moment_Mx_kNm:"彎矩 Mx (kN·m)", moment_My_kNm:"彎矩 My (kN·m)"
+  ,shear_Vx_kN:"剪力 Vx (kN)", shear_Vy_kN:"剪力 Vy (kN)"
+  ,plate_B_m:"基板長 B (m)", plate_N_m:"基板寬 N (m)", plate_t_mm:"基板厚 t (mm)"
+  ,pedestal_B_m:"承台長 (m)", pedestal_N_m:"承台寬 (m)", grout_above_concrete:"灌漿高出混凝土面 (m)"
+  ,corrosion_allowance_mm:"腐蝕余裕 (mm)", support_condition:"柱腳支承情況", grade:"錨栓材質", shear_path:"剪力傳遞路徑"
+  ,diameter_mm:"錨栓直徑 (mm)", embedment_mm:"錨栓埋深 hef (mm)", threads_in_shear_plane:"螺紋在剪力平面內"
+  ,rolled:"H 型鋼（軋製）", cantilever:"懸臂柱"
+};
+const NUMERIC_HINT = new Set(["height_m","stem_thickness_m","base_width_m","base_thickness_m","cell_count","clear_width_m","clear_height_m","wall_thickness_m","interior_wall_thickness_m","top_slab_thickness_m","bottom_slab_thickness_m","cover_depth_m","length_m","design_flow_m3s","slope","manning_n","depth_m","freeboard_min_m","inner_width_m","bottom_length_m","bottom_width_m","side_slope_h_v","max_stage_m","stage_step_m","dam_crest_m","peak_m3s","time_to_peak_min","duration_min","time_step_min","allowable_outflow_m3s","beam_width_mm","beam_depth_mm","column_width_mm","column_depth_mm","dead_area_kn_m2","live_area_kn_m2","base_shear_coefficient","B_m","L_m","thickness_m","column_b_m","column_l_m","q_allow_kpa","P_kN","Mx_kNm","My_kNm","Q_allow_kN","P_mm","return_period_yr","area_ha","l_m","v_ms","excavated_ha","impervious_ha","years","Am","slope_angle_deg","cohesion_kpa","friction_angle_deg","unit_weight_kn_m3","Mu_kNm","Vu_kN","b_mm","h_mm","fc_mpa","fy_mpa","cover_mm","Pu_kN","angular_distortion_limit","q_kpa","subdivisions","x_m","y_m","initial_effective_stress_kpa","compression_index","recompression_index","preconsolidation_stress_kpa","void_ratio","secondary_compression_index","consolidation_start_year","assessment_end_year","friction_deg","L_km","H_km","max_fill_ratio","capacity_m3s","inflow_m3s","elastic_modulus_kpa","constrained_modulus_kpa","poisson_ratio","tw_mm","tf_mm","Fu_mpa","E_mpa","Kx","Ky","Lb_m","Lb_y_m","Cm_x","Cm_y","M1_over_M2","axial_P_kN","moment_Mx_kNm","moment_My_kNm","shear_Vx_kN","shear_Vy_kN","plate_B_m","plate_N_m","plate_t_mm","pedestal_B_m","pedestal_N_m","grout_above_concrete","corrosion_allowance_mm","diameter_mm","embedment_mm"]);
+
+let catalog = [];
+let current = null;
+let payload = {};
+let presetSelections = {};
+let lastResult = null;
+let currentRules = {};
+
+async function boot() {
+  const data = await fetch("/api/design/catalog").then(r => r.json());
+  catalog = data.calculators;
+  const groups = new Map();
+  for (const c of catalog) {
+    if (!groups.has(c.group)) groups.set(c.group, []);
+    groups.get(c.group).push(c);
+  }
+  $("#catalog").innerHTML = [...groups].map(([g, rows]) =>
+    `<div class="group"><h3>${esc(g)}</h3>${rows.map(c => `<button data-id="${esc(c.id)}">${esc(c.title)}</button>`).join("")}</div>`
+  ).join("");
+  $("#meta").innerHTML = `<b>${catalog.length}</b> 個計算器<br><b>${new Set(catalog.map(c=>c.engine)).size}</b> 支引擎`;
+  document.querySelectorAll("#catalog button").forEach(b => b.onclick = () => select(b.dataset.id));
+  const preferred = new URLSearchParams(location.search).get("calc") || "wall_stability";
+  select(catalog.some(c => c.id === preferred) ? preferred : catalog[0].id);
+}
+
+function clone(v) { return JSON.parse(JSON.stringify(v)); }
+
+function select(id) {
+  current = catalog.find(c => c.id === id) || catalog[0];
+  payload = clone(current.example);
+  currentRules = current.field_rules || {};
+  lastResult = null;
+  document.querySelectorAll("#catalog button").forEach(b => b.classList.toggle("on", b.dataset.id === id));
+  $("#engine").textContent = current.engine;
+  $("#title").textContent = current.title;
+  $("#desc").textContent = current.description;
+  $("#codes").innerHTML = (current.codes || []).map(c => `<span>${esc(c)}</span>`).join("");
+  $("#status").textContent = "READY";
+  $("#status").dataset.state = "ready";
+  $("#runstate").textContent = "未執行";
+  $("#json").value = JSON.stringify(payload, null, 2);
+  $("#result").innerHTML = `<div class="empty-result"><span class="empty-kicker">READY</span><p class="empty-title">參數已載入</p><p class="empty-sub">按「執行計算」取得檢核結果</p></div>`;
+  renderForm();
+  history.replaceState(null, "", `?calc=${encodeURIComponent(id)}`);
+}
+
+function isSimpleObjectArray(value) {
+  return Array.isArray(value) && value.length > 0 && value.every(item =>
+    item && typeof item === "object" && !Array.isArray(item) &&
+    Object.values(item).every(v => v === null || typeof v !== "object"));
+}
+
+function nextListId(rows, key) {
+  const matches = rows
+    .map(row => String(row[key] ?? "").match(/^(.*?)(\d+)$/))
+    .filter(Boolean);
+  if (!matches.length) return "";
+  const prefix = matches[0][1];
+  let max = 0;
+  for (const match of matches) {
+    if (match[1] === prefix) max = Math.max(max, Number(match[2]));
+  }
+  return prefix + (max + 1);
+}
+
+function newListRow(path, rows) {
+  const keys = [];
+  for (const row of rows) {
+    for (const key of Object.keys(row)) {
+      if (!keys.includes(key)) keys.push(key);
+    }
+  }
+  const row = {};
+  for (const key of keys) {
+    const rule = currentRules[`${path}[].${key}`] || currentRules[key];
+    if (key === "id") {
+      row[key] = nextListId(rows, key);
+    } else if (rule?.type === "select") {
+      row[key] = rule.choices?.[0]?.value ?? "";
+    } else if (typeof rows[0]?.[key] === "boolean") {
+      row[key] = false;
+    } else if (typeof rows[0]?.[key] === "number" || NUMERIC_HINT.has(key)) {
+      row[key] = null;
+    } else {
+      row[key] = "";
+    }
+  }
+  return row;
+}
+
+function listEditorHtml(path, key, rows) {
+  const label = LABELS[key] || key;
+  const allKeys = [];
+  for (const row of rows) {
+    for (const itemKey of Object.keys(row)) {
+      if (!allKeys.includes(itemKey)) allKeys.push(itemKey);
+    }
+  }
+  const cards = rows.map((row, index) => {
+    const fields = allKeys
+      .filter(itemKey => Object.prototype.hasOwnProperty.call(row, itemKey))
+      .map(itemKey => fieldHtml(`${path}.${index}.${itemKey}`, itemKey, row[itemKey]))
+      .join("");
+    return `<div class="list-row" data-index="${index}"><div class="list-row-head"><b>${esc(label)} ${index + 1}</b><button type="button" class="btn small" data-list-remove="${esc(path)}" data-index="${index}">移除</button></div><div class="list-grid">${fields}</div></div>`;
+  }).join("");
+  return `<div class="list-editor" data-list="${esc(path)}">${cards || `<p class="list-empty">目前沒有資料列。</p>`}<button type="button" class="btn small" data-list-add="${esc(path)}">＋ 新增一列</button><p class="hint">固定選項以選單選取；新增列後請補齊該列所需數值。</p></div>`;
+}
+
+function walk(obj, prefix = "") {
+  const rows = [];
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      rows.push(`<div class="section-title">${esc(LABELS[key] || key)} <small>${esc(key)}</small></div>`);
+      rows.push(...walk(value, path));
+    } else if (Array.isArray(value) && value.every(v => typeof v !== "object")) {
+      rows.push(fieldHtml(path, key, value.join(", "), "array-scalar"));
+    } else if (isSimpleObjectArray(value)) {
+      rows.push(`<div class="section-title">${esc(LABELS[key] || key)} <small>${esc(key)}</small></div>`);
+      rows.push(listEditorHtml(path, key, value));
+    } else if (!Array.isArray(value) && typeof value !== "object") {
+      rows.push(fieldHtml(path, key, value));
+    } else {
+      rows.push(`<div class="field" style="grid-column:1/-1"><label>${esc(LABELS[key] || key)}（巢狀陣列，請用下方完整 JSON）</label><div class="hint">${esc(key)}：${value.length ?? ""} 筆；含巢狀土層或子陣列，表單不拆解。</div></div>`);
+    }
+  }
+  return rows;
+}
+
+function normalizeRulePath(path) {
+  const parts = [];
+  for (const part of String(path).split(".")) {
+    if (/^\d+$/.test(part)) {
+      if (parts.length) parts[parts.length - 1] += "[]";
+      continue;
+    }
+    parts.push(part);
+  }
+  return parts.join(".");
+}
+
+function ruleFor(path, key) {
+  const rule = currentRules[path] || currentRules[normalizeRulePath(path)] || currentRules[key];
+  if (!rule) return null;
+  // 固定上限（不依其他欄位切換）：用 rule.limit，行為與 max_by 選中的限制相同
+  if (!rule.max_by) return rule.limit ? {...rule, selected: rule.limit} : {...rule};
+  const sourcePath = String(rule.max_by).split(".");
+  const sourceValue = getPath(payload, sourcePath);
+  let selected = rule.limits?.[sourceValue];
+  // 第二層切換：上限再依另一欄位而定（例：三明治式依開挖／填方坡面）
+  if (selected?.max_by && selected.limits) {
+    const subValue = getPath(payload, String(selected.max_by).split("."));
+    selected = selected.limits[subValue] || null;
+  }
+  return {...rule, selected, sourcePath, sourceValue};
+}
+
+function ruleInputOffset(rule) {
+  const key = rule?.selected?.input_offset_by;
+  if (!key) return 0;
+  const value = Number(getPath(payload, String(key).split(".")));
+  return Number.isFinite(value) ? value : 0;
+}
+
+function ruleHint(rule) {
+  if (!rule) return "";
+  if (rule.selected) {
+    const max = rule.selected.max;
+    const basis = rule.selected.basis || "";
+    if (rule.selected.input_offset_by) {
+      return `有效高上限 ${fmt(max)}${rule.unit ? " " + rule.unit : ""}；輸入總牆高，會先扣${rule.selected.offset_label || "底板厚"}${basis ? "；" + basis : ""}`;
+    }
+    return `上限 ${fmt(max)}${rule.unit ? " " + rule.unit : ""}${basis ? "；" + basis : ""}`;
+  }
+  if (rule.hint) return rule.hint;
+  if (rule.type === "select") return "請選擇項目";
+  return "";
+}
+
+function fieldHtml(path, key, value, arrayMode) {
+  const rule = ruleFor(path, key);
+  const label = rule?.label || LABELS[key] || key;
+  const hint = key !== label ? key : "";
+  if (typeof value === "boolean") {
+    return `<div class="field checkline"><input type="checkbox" data-path="${esc(path)}" ${value ? "checked" : ""}><label>${esc(label)} <span class="hint">${esc(hint)}</span></label></div>`;
+  }
+  if (rule?.type === "number_with_presets") {
+    const options = (rule.choices || []).map(choice =>
+      `<option value="${esc(choice.value)}" data-label="${esc(choice.label || choice.value)}" ${(choice.label || String(choice.value)) === presetSelections[path] ? "selected" : ""}>${esc(choice.label || choice.value)}</option>`
+    ).join("");
+    return `<div class="field"><label>${esc(label)}</label><div class="preset-row"><select data-preset-for="${esc(path)}" aria-label="${esc(label)}材料預設"><option value="">選擇材料預設…</option>${options}</select><input type="number" step="${esc(rule?.step || "any")}" data-path="${esc(path)}" value="${esc(value)}"></div><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
+  }
+  if (rule?.type === "select") {
+    const options = (rule.choices || []).map(choice =>
+      `<option value="${esc(choice.value)}" ${String(choice.value) === String(value) ? "selected" : ""}>${esc(choice.label || choice.value)}</option>`
+    ).join("");
+    return `<div class="field"><label>${esc(label)}</label><select data-path="${esc(path)}" data-rule="${rule.on_change === "rerender" ? "rerender" : ""}">${options}</select><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
+  }
+  const type = (arrayMode || typeof value === "number" || NUMERIC_HINT.has(key)) ? "number" : "text";
+  if (type === "number" && !arrayMode) {
+    return `<div class="field"><label>${esc(label)}</label><input type="number" step="${esc(rule?.step || "any")}" data-path="${esc(path)}" value="${esc(value)}"><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
+  }
+  return `<div class="field"><label>${esc(label)}</label><input type="text" data-path="${esc(path)}" value="${esc(value)}"><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}${arrayMode ? " 逗號分隔" : ""}</div></div>`;
+}
+
+function renderForm() {
+  $("#form").innerHTML = walk(payload).join("");
+  document.querySelectorAll("#form [data-path]").forEach(el => {
+    el.oninput = el.onchange = () => {
+      const path = el.dataset.path.split(".");
+      const key = path[path.length - 1];
+      const old = getPath(payload, path);
+      let value;
+      if (el.type === "checkbox") value = el.checked;
+      else if (Array.isArray(old)) value = el.value.split(",").map(x => Number(x.trim())).filter(x => Number.isFinite(x));
+      else if (el.type === "number" || NUMERIC_HINT.has(key)) value = el.value === "" ? null : Number(el.value);
+      else if (typeof old === "number") value = el.value === "" ? null : Number(el.value);
+      else value = el.value;
+      setPath(payload, path, value);
+      $("#json").value = JSON.stringify(payload, null, 2);
+      if (el.dataset.rule === "rerender") {
+        const changingRule = ruleFor(path, key);
+        for (const field of changingRule?.clear_on_change || []) delete payload[field];
+        const choice = (changingRule?.choices || []).find(c => String(c.value) === String(value));
+        if (choice?.defaults) Object.assign(payload, clone(choice.defaults));
+        renderForm();
+        return;
+      }
+      applyFieldConstraints();
+    };
+  });
+  document.querySelectorAll("#form [data-preset-for]").forEach(el => {
+    el.onchange = () => {
+      const path = el.dataset.presetFor.split(".");
+      if (el.value === "") {
+        delete presetSelections[el.dataset.presetFor];
+      } else {
+        presetSelections[el.dataset.presetFor] = el.selectedOptions[0]?.dataset.label || el.value;
+        setPath(payload, path, Number(el.value));
+      }
+      $("#json").value = JSON.stringify(payload, null, 2);
+      renderForm();
+    };
+  });
+  document.querySelectorAll("#form [data-list-add]").forEach(el => {
+    el.onclick = () => {
+      const path = el.dataset.listAdd.split(".");
+      const list = getPath(payload, path);
+      if (!Array.isArray(list)) return;
+      list.push(newListRow(el.dataset.listAdd, list));
+      $("#json").value = JSON.stringify(payload, null, 2);
+      renderForm();
+    };
+  });
+  document.querySelectorAll("#form [data-list-remove]").forEach(el => {
+    el.onclick = () => {
+      const path = el.dataset.listRemove.split(".");
+      const list = getPath(payload, path);
+      if (!Array.isArray(list)) return;
+      list.splice(Number(el.dataset.index), 1);
+      $("#json").value = JSON.stringify(payload, null, 2);
+      renderForm();
+    };
+  });
+  applyFieldConstraints();
+}
+
+function applyFieldConstraints() {
+  document.querySelectorAll("#form [data-path]").forEach(el => {
+    const path = el.dataset.path;
+    const key = path.split(".").at(-1);
+    const rule = ruleFor(path, key);
+    if (!rule) return;
+    const hintEl = document.querySelector(`[data-hint-for="${CSS.escape(path)}"]`);
+    if (el.type === "number" && rule.selected) {
+      const value = Number(el.value);
+      const offset = ruleInputOffset(rule);
+      const effective = value - offset;
+      const invalid = Number.isFinite(effective) && effective > Number(rule.selected.max);
+      el.max = Number(rule.selected.max) + offset;
+      el.setAttribute("aria-invalid", invalid ? "true" : "false");
+      if (hintEl) {
+        const base = key !== (LABELS[key] || key) ? key : "";
+        const effectiveHint = offset
+          ? `有效高 ${fmt(effective)} m；上限 ${fmt(rule.selected.max)} m；已扣${rule.selected.offset_label || "底板厚"} ${fmt(offset)} m`
+          : ruleHint(rule);
+        hintEl.textContent = [base, effectiveHint, invalid ? "有效高超過上限" : ""]
+          .filter(Boolean).join("；");
+        hintEl.classList.toggle("invalid", invalid);
+      }
+    } else if (hintEl) {
+      const base = key !== (LABELS[key] || key) ? key : "";
+      hintEl.textContent = [base, ruleHint(rule)].filter(Boolean).join("；");
+    }
+  });
+}
+
+function validateFieldRules() {
+  const errors = [];
+  for (const el of document.querySelectorAll("#form [data-path]")) {
+    const path = el.dataset.path;
+    const key = path.split(".").at(-1);
+    const rule = ruleFor(path, key);
+    if (!rule || el.type !== "number" || !rule.selected) continue;
+    const value = Number(el.value);
+    const effective = value - ruleInputOffset(rule);
+    if (Number.isFinite(effective) && effective > Number(rule.selected.max)) {
+      errors.push(`有效高 ${fmt(effective)} m 超過 ${rule.selected.basis || "適用上限"}`);
+    }
+  }
+  return errors;
+}
+
+function getPath(obj, parts) { return parts.reduce((o, k) => o?.[k], obj); }
+function setPath(obj, parts, value) {
+  let p = obj;
+  for (let i = 0; i < parts.length - 1; i++) p = p[parts[i]];
+  p[parts[parts.length - 1]] = value;
+}
+
+async function run() {
+  const ruleErrors = validateFieldRules();
+  if (ruleErrors.length) {
+    $("#status").textContent = "INPUT ERROR";
+    $("#status").dataset.state = "error";
+    $("#runstate").textContent = "超出適用範圍";
+    $("#result").innerHTML = `<div class="error">${ruleErrors.map(esc).join("<br>")}</div>`;
+    return;
+  }
+  $("#run").disabled = true;
+  $("#run").textContent = "計算中…";
+  $("#status").textContent = "RUNNING";
+  $("#status").dataset.state = "run";
+  $("#runstate").textContent = "計算中…";
+  try {
+    const res = await fetch("/api/design/run", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({calculator: current.id, payload})
+    });
+    const data = await res.json();
+    lastResult = data;
+    renderResult(data);
+  } catch (e) {
+    $("#result").innerHTML = `<div class="error">連線或格式錯誤：${esc(e.message)}</div>`;
+    $("#status").textContent = "ERROR";
+    $("#status").dataset.state = "error";
+    $("#runstate").textContent = "失敗";
+  } finally {
+    $("#run").disabled = false;
+    $("#run").textContent = "執行計算";
+  }
+}
+
+function relationText(c) {
+  if (c.relation === "ge") return "≥ " + fmt(c.limit);
+  if (c.relation === "le") return "≤ " + fmt(c.limit);
+  if (Array.isArray(c.limit)) return `${fmt(c.limit[0])} ～ ${fmt(c.limit[1])}`;
+  return fmt(c.limit);
+}
+
+function renderResult(d) {
+  if (d.error) {
+    $("#status").textContent = "INPUT ERROR";
+    $("#status").dataset.state = "error";
+    $("#runstate").textContent = "輸入失敗";
+    $("#result").innerHTML = `<div class="result-top"><h3>${esc(d.title)}</h3><span class="verdict ng">NG</span></div><div class="error">${esc(d.error)}</div>`;
+    return;
+  }
+  const ok = !!d.ok;
+  $("#status").textContent = ok ? "PASS" : "CHECK";
+  $("#status").dataset.state = ok ? "ok" : "warn";
+  $("#runstate").textContent = d.saved_to ? "已保存" : "完成";
+  const checks = d.checks || [];
+  const rows = checks.map(c => {
+    const advisory = c.severity === "advisory";
+    const state = c.ok ? "OK" : (advisory ? "NOTE" : "NG");
+    const cls = advisory && !c.ok ? "note" : (c.ok ? "ok" : "ng");
+    return `<tr><td>${esc(c.item)}</td><td class="num">${fmt(c.value)}</td><td>${relationText(c)}</td><td>${esc(c.unit || "")}</td><td class="${cls}">${state}</td></tr>`;
+  }).join("");
+  const warn = (d.warnings || []).filter(Boolean);
+  $("#result").innerHTML = `
+    <div class="result-top">
+      <h3>計算結果</h3>
+      <span class="verdict ${ok ? "ok" : "ng"}">${ok ? "全部通過" : "有未通過項"}</span>
+      <div class="result-actions">
+        <button class="btn" id="download">下載 JSON</button>
+        <a class="btn" href="/?q=${encodeURIComponent(current.title)}" target="_blank">查相關規範</a>
+      </div>
+    </div>
+    <pre class="summary">${esc(d.summary)}</pre>
+    ${rows ? `<div class="table-wrap"><table><thead><tr><th>檢核項目</th><th>計算值</th><th>準則</th><th>單位</th><th>結果</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
+    ${warn.length ? `<div class="warn"><ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+    <div class="actions"><button class="btn" id="showraw">顯示完整 JSON</button></div>
+    <textarea id="rawjson" style="display:none;min-height:360px">${esc(JSON.stringify(d.result, null, 2))}</textarea>
+  `;
+  $("#download").onclick = () => {
+    const blob = new Blob([JSON.stringify(d, null, 2)], {type: "application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${current.id}_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  $("#showraw").onclick = () => {
+    const t = $("#rawjson");
+    t.style.display = t.style.display === "none" ? "block" : "none";
+  };
+}
+
+$("#run").onclick = run;
+$("#reset").onclick = () => select(current.id);
+$("#applyjson").onclick = () => {
+  try {
+    const v = JSON.parse($("#json").value);
+    if (!v || Array.isArray(v) || typeof v !== "object") throw new Error("必須是 JSON 物件");
+    payload = v;
+    renderForm();
+    $("#jsonerr").hidden = true;
+    $("#json").removeAttribute("aria-invalid");
+    $("#runstate").textContent = "JSON 已套用";
+  } catch (e) {
+    const box = $("#jsonerr");
+    box.textContent = "JSON 格式錯誤：" + e.message + "。請修正後再套用。";
+    box.hidden = false;
+    $("#json").setAttribute("aria-invalid", "true");
+    $("#json").focus();
+  }
+};
+$("#json").addEventListener("input", () => {
+  $("#jsonerr").hidden = true;
+  $("#json").removeAttribute("aria-invalid");
+});
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); run(); }
+});
+
+const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const revealTargets = document.querySelectorAll("[data-reveal]");
+if (prefersReduced || !("IntersectionObserver" in window)) {
+  revealTargets.forEach(el => el.classList.add("in"));
+} else {
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("in");
+      revealObserver.unobserve(entry.target);
+    });
+  }, { rootMargin: "0px 0px -10% 0px", threshold: 0.08 });
+  revealTargets.forEach(el => revealObserver.observe(el));
+}
+
+const taglineEl = document.getElementById("tagline");
+if (taglineEl) {
+  const chars = Array.from(taglineEl.textContent.trim().replace(/\s+/g, " "));
+  taglineEl.textContent = "";
+  const wordEls = [];
+  chars.forEach(ch => {
+    if (ch === " ") { taglineEl.appendChild(document.createTextNode(" ")); return; }
+    const span = document.createElement("span");
+    span.className = "word";
+    span.textContent = ch;
+    taglineEl.appendChild(span);
+    wordEls.push(span);
+  });
+  if (prefersReduced || !("IntersectionObserver" in window)) {
+    wordEls.forEach(w => w.classList.add("lit"));
+  } else {
+    const step = Math.min(45, 900 / Math.max(wordEls.length, 1));
+    const tagObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        wordEls.forEach((w, i) => setTimeout(() => w.classList.add("lit"), i * step));
+        tagObserver.disconnect();
+      });
+    }, { threshold: 0.3 });
+    tagObserver.observe(taglineEl);
+  }
+}
+
+boot().catch(e => {
+  $("#title").textContent = "工作台載入失敗";
+  $("#result").innerHTML = `<div class="error">${esc(e.message)}</div>`;
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+name,unit,expression,value,comment,favorite
+H,mm,3000 mm,3000,牆高（背面土高）,false
+L,mm,2000 mm,2000,牆長（單元）,false
+T,mm,250 mm,250,牆身厚,false
+BT,mm,400 mm,400,趾板厚,false
+BL,mm,600 mm,600,趾板長,false
+HD,mm,50 mm,50,排水孔直徑,false
+NZ,,3,3,排水孔列數,false

@@ -1,0 +1,188 @@
+{
+ "formulas": [
+  {
+   "id": "swc92_sediment_volume",
+   "title": "沉砂設施泥砂生產量體積（第92條，USLE 值換算＋下限）",
+   "src": "swc_tech",
+   "clause": "92",
+   "keywords": "泥砂生產量 沉砂池 體積 臨時性 永久性 下限 USLE",
+   "unit": "m3",
+   "output": "V",
+   "latex": "V=\\max(\\tfrac12A_m^{m3}A_{exc},250A_{exc})+\\max(\\tfrac12A_m^{m3}A_{oth},30A_{oth})\\;(\\text{臨時});\\quadA_m^{m3}A_{exc}+\\max(A_m^{m3}A_{oth},30A_{oth})\\;(\\text{永久}),\\;A_m^{m3}=A_m/1.4",
+   "vars": {
+    "Am": {
+     "desc": "USLE 年土壤流失量（swc35_usle；乘上年期）",
+     "unit": "公噸/公頃/年",
+     "min": 0
+    },
+    "area_ha": {
+     "desc": "集水區（開發）面積",
+     "unit": "ha",
+     "min": 0
+    },
+    "excavated_ha": {
+     "desc": "其中開挖整地部分面積",
+     "unit": "ha",
+     "default": 0.0,
+     "min": 0
+    },
+    "impervious_ha": {
+     "desc": "不透水鋪面面積（得扣除）",
+     "unit": "ha",
+     "default": 0.0,
+     "min": 0
+    },
+    "years": {
+     "desc": "估算年期（條文未定，須於報告寫明）",
+     "unit": "年",
+     "default": 1.0,
+     "min": 0.1
+    },
+    "permanent": {
+     "desc": "永久性沉砂設施＝1；臨時性＝0",
+     "unit": "-",
+     "default": 0,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "other0",
+     "area_ha-excavated_ha"
+    ],
+    [
+     "d_oth",
+     "min(impervious_ha,other0)"
+    ],
+    [
+     "d_exc",
+     "min(impervious_ha-d_oth,excavated_ha)"
+    ],
+    [
+     "exc",
+     "excavated_ha-d_exc"
+    ],
+    [
+     "oth",
+     "other0-d_oth"
+    ],
+    [
+     "vp",
+     "Am/1.4*years"
+    ],
+    [
+     "v_exc",
+     "max((0.5 if permanent<0.5 else 1.0)*vp*exc,(250 if permanent<0.5 else 0)*exc)"
+    ],
+    [
+     "v_oth",
+     "max((0.5 if permanent<0.5 else 1.0)*vp*oth,30*oth)"
+    ]
+   ],
+   "expr": "v_exc+v_oth",
+   "conditions": [
+    {
+     "expr": "excavated_ha<=area_ha",
+     "msg": "開挖整地面積不得大於總面積"
+    },
+    {
+     "expr": "impervious_ha<=area_ha",
+     "msg": "不透水面積不得大於總面積"
+    }
+   ],
+   "notes": "第92條：一、臨時性沉砂設施依 USLE 估算值之 1/2，但**開挖整地部分**每公頃不得小於 250 m3、**未開挖或已完成水土保持處理部分**每公頃不得小於 30 m3；二、永久性者於完成水保處理或未開挖部分每公頃不得小於 30 m3。下限係按分區各自取（不是把總量與下限總和比大小），故本式分區計算後相加。USLE 值換算體積以每立方公尺 1.4 公噸計（第35條）。得就不透水鋪面面積扣除（以 net 處理）。條文未定年期，使用時須在報告寫明。",
+   "tests": [
+    {
+     "in": {
+      "Am": 22.5,
+      "area_ha": 2.0,
+      "excavated_ha": 0.1
+     },
+     "out": 82.0,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "Am": 22.5,
+      "area_ha": 2.0,
+      "excavated_ha": 0.1,
+      "permanent": 1
+     },
+     "out": 58.607142857142854,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "Am": 5.0,
+      "area_ha": 2.0,
+      "excavated_ha": 1.5
+     },
+     "out": 390.0,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照條文＋手算＋與 sediment_basin.sediment_production 交叉比對（發現並修正原以『總量取最大』之錯誤）",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "swc95_outflow_cap",
+   "title": "滯洪設施出流洪峰流量上限（第95條第三款）",
+   "src": "swc_tech",
+   "clause": "95",
+   "keywords": "滯洪 出流 洪峰 80% 開發前 容許排洪量",
+   "unit": "m3/s",
+   "output": "Qout_max",
+   "latex": "Q_{out}\\le\\min(0.8Q_{in},\\;Q_{pre},\\;Q_{allow})",
+   "vars": {
+    "Qin": {
+     "desc": "基地開發後入流洪峰流量",
+     "unit": "m3/s",
+     "min": 0
+    },
+    "Qpre": {
+     "desc": "開發前之洪峰流量",
+     "unit": "m3/s",
+     "min": 0
+    },
+    "Qallow": {
+     "desc": "下游排水系統之容許排洪量（未知時給大值，但不得省略 Qpre 條件）",
+     "unit": "m3/s",
+     "min": 0
+    }
+   },
+   "expr": "min(0.8*Qin,Qpre,Qallow)",
+   "notes": "第95條第三款：開發後出流洪峰流量應小於入流洪峰流量 80%，且不得大於開發前之洪峰流量，且不應超過下游排水系統容許排洪量。入流歷線至少採重現期 50 年以上、出流歷線為 25 年以下（同條第四款）。免設滯洪設施之情形見第95條之1（本庫未收錄）。",
+   "tests": [
+    {
+     "in": {
+      "Qin": 10,
+      "Qpre": 4,
+      "Qallow": 100
+     },
+     "out": 4.0
+    },
+    {
+     "in": {
+      "Qin": 3,
+      "Qpre": 4,
+      "Qallow": 100
+     },
+     "out": 2.4000000000000004,
+     "tol": 1e-09
+    }
+   ],
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照條文（索引文字）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ],
+ "tables": []
+}

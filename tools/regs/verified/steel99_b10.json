@@ -1,0 +1,137 @@
+{
+ "formulas": [
+  {
+   "id": "steel99_built_up_column_64",
+   "title": "組合受壓構材之修正長細比 (KL/r)m 與彈性挫屈有效長細比（鋼結構極限設計法 6.4 式6.4-1、6.4-2、C6.4-1）",
+   "src": "steel99",
+   "clause": "6.4",
+   "page": 5,
+   "keywords": "鋼結構 LRFD 組合受壓構材 修正長細比 KL/r m 螺栓 銲接 摩阻型 分離比 α 0.82 a/ri 組合柱 C6.4-1 撓曲扭轉挫屈 Fe",
+   "unit": "-",
+   "output": "KLr_m",
+   "latex": "\\left(\\frac{KL}{r}\\right)_m=\\sqrt{\\left(\\frac{KL}{r}\\right)_o^{2}+\\left(\\frac{a}{r_i}\\right)^{2}}\\ (\\text{緊貼螺栓});\\quad \\sqrt{\\left(\\frac{KL}{r}\\right)_o^{2}+0.82\\frac{\\alpha^{2}}{1+\\alpha^{2}}\\left(\\frac{a}{r_{ib}}\\right)^{2}}\\ (\\text{銲接／摩阻型}),\\ \\alpha=\\frac{h}{2r_{ib}};\\qquad \\left(\\frac{KL}{r}\\right)_e=\\pi\\sqrt{\\frac{E}{F_e}}",
+   "vars": {
+    "KLr_o": {
+     "desc": "組合受壓構材之整體長細比 (KL/r)o",
+     "unit": "-",
+     "min": 0,
+     "default": 60.0
+    },
+    "a": {
+     "desc": "各單元型鋼之無支撐長度 a（cm，即連接器間距）",
+     "unit": "cm",
+     "min": 0,
+     "default": 80.0
+    },
+    "ri": {
+     "desc": "各單元型鋼之最小迴轉半徑 ri（cm；mode=1 使用）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 3.0
+    },
+    "rib": {
+     "desc": "各單元型鋼在平行於挫屈軸但相對於各自重心之最小迴轉半徑 rib（cm；mode=2 使用）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 4.0
+    },
+    "h": {
+     "desc": "垂直於組合構材斷面挫屈軸之各單元型鋼形心間距離 h（cm；mode=2 使用）",
+     "unit": "cm",
+     "min": 0,
+     "default": 30.0
+    },
+    "E": {
+     "desc": "鋼材彈性模數 E（tf/cm²；mode=3）",
+     "unit": "tf/cm2",
+     "min": 1.0,
+     "default": 2040.0
+    },
+    "Fe": {
+     "desc": "彈性臨界挫屈應力 Fe（tf/cm²，取自附錄1、2；mode=3）",
+     "unit": "tf/cm2",
+     "min": 1e-09,
+     "default": 3.0
+    },
+    "mode": {
+     "desc": "1＝栓緊至緊貼狀態之螺栓接頭（6.4-1）；2＝銲接或摩阻型螺栓接合（6.4-2）；3＝撓曲扭轉挫屈之有效長細比 π√(E/Fe)（C6.4-1）",
+     "unit": "-",
+     "min": 1,
+     "max": 3,
+     "default": 1
+    }
+   },
+   "expr": "sqrt(KLr_o**2+(a/ri)**2) if mode==1 else (sqrt(KLr_o**2+0.82*_al**2/(1.0+_al**2)*(a/rib)**2) if mode==2 else pi*sqrt(E/Fe))",
+   "tests": [
+    {
+     "in": {
+      "KLr_o": 60.0,
+      "a": 80.0,
+      "ri": 3.0,
+      "rib": 4.0,
+      "h": 30.0,
+      "E": 2040.0,
+      "Fe": 3.0,
+      "mode": 1
+     },
+     "out": 65.65905201197403
+    },
+    {
+     "in": {
+      "KLr_o": 60.0,
+      "a": 80.0,
+      "ri": 3.0,
+      "rib": 4.0,
+      "h": 30.0,
+      "E": 2040.0,
+      "Fe": 3.0,
+      "mode": 2
+     },
+     "out": 62.499792530775984
+    },
+    {
+     "in": {
+      "KLr_o": 60.0,
+      "a": 80.0,
+      "ri": 3.0,
+      "rib": 4.0,
+      "h": 30.0,
+      "E": 2040.0,
+      "Fe": 3.0,
+      "mode": 3
+     },
+     "out": 81.9227135337982
+    }
+   ],
+   "notes": "鋼結構極限設計法（(二)）**6.4 組合受壓構材**：**兩支以上型鋼組合而成之受壓構材，若挫屈變形造成各型鋼接合間產生剪力，則 KL/r 以 (KL/r)m 替代——(1) 栓緊至緊貼狀態之螺栓接頭：(KL/r)m＝√[(KL/r)o²＋(a/ri)²]**（式6.4-1）；**(2) 銲接和摩阻型螺栓接合：(KL/r)m＝√[(KL/r)o²＋0.82·α²/(1＋α²)·(a/rib)²]**（式6.4-2），其中 **(KL/r)o 為組合受壓構材整體長細比、a 各單元型鋼之無支撐長度、ri 各單元型鋼最小迴轉半徑、rib 各單元型鋼在平行挫屈軸向但相對於各自重心之最小迴轉半徑、分離比值 α＝h/(2rib)、h 為垂直於挫屈軸之各單元型鋼形心間距離**。**解說：撓曲扭轉挫屈之彈性臨界挫屈應力 Fe 可用以計算有效長細比 (KL/r)e＝π√(E/Fe)**（式C6.4-1），再依式(6.3-1) 或 (6.3-2) 計算容許應力。**構造規定：單元型鋼間個別長細比（由最小迴轉半徑計）不得超過組合構材整體長細比之 3/4，且沿長度方向至少應有兩個中間接合點；外側板之螺栓間距不得超過外側最薄板厚之 30/√Fy 倍或 300 mm（交錯排列 50/√Fy 倍或 450 mm）。** **與 AISC LRFD E4 完全一致 ✓；(KL/r)e 為歐拉公式 Fe＝π²E/(KL/r)² 之反解 ✓。** **合理性：連接器間距 a→0 時 (KL/r)m→(KL/r)o ✓；α→∞（單元分離甚遠）時式6.4-2 第二項→0.82(a/rib)²。**",
+   "status": "verified",
+   "defs": [
+    [
+     "_al",
+     "h/(2.0*rib)"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "mode!=2 or rib>0",
+     "msg": "mode=2 需 rib>0"
+    },
+    {
+     "expr": "mode!=1 or ri>0",
+     "msg": "mode=1 需 ri>0"
+    },
+    {
+     "expr": "mode!=3 or Fe>0",
+     "msg": "mode=3 需 Fe>0"
+    }
+   ],
+   "_file": "payload_phase2g.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

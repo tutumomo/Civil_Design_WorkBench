@@ -1,0 +1,86 @@
+{
+ "swc_tech": {
+  "16": [
+   {
+    "tex": "\\frac{I^{T}_{t}}{I^{25}_{60}}=(G+H\\log T)\\,\\frac{A}{(t+B)^{C}}\\quad(1)"
+   },
+   {
+    "tex": "I^{25}_{60}=\\left(\\frac{P}{25.29+0.094P}\\right)^{2}\\quad(2)"
+   },
+   {
+    "tex": "A=\\left(\\frac{P}{-189.96+0.31P}\\right)^{2}\\quad(3)"
+   },
+   {
+    "tex": "B=55\\quad(4)"
+   },
+   {
+    "tex": "C=\\left(\\frac{P}{-381.71+1.45P}\\right)^{2}\\quad(5)"
+   },
+   {
+    "tex": "G=\\left(\\frac{P}{42.89+1.33P}\\right)^{2}\\quad(6)"
+   },
+   {
+    "tex": "H=\\left(\\frac{P}{-65.33+1.836P}\\right)^{2}\\quad(7)"
+   }
+  ],
+  "17": [
+   {
+    "tex": "Q_p=\\frac{1}{360}\\,C\\,I\\,A"
+   }
+  ],
+  "19": [
+   {
+    "tex": "t_c=t_1+t_2"
+   },
+   {
+    "tex": "t_1=\\frac{l}{v}"
+   },
+   {
+    "tex": "t_2=\\frac{L}{W}"
+   },
+   {
+    "tex": "W=72\\left(\\frac{H}{L}\\right)^{0.6}"
+   }
+  ],
+  "25": [
+   {
+    "tex": "S=\\frac{n\\pi\\Delta h}{8L}\\times100"
+   },
+   {
+    "tex": "S=\\frac{h}{L}\\times100"
+   }
+  ],
+  "35": [
+   {
+    "tex": "A_m=R_m\\times K_m\\times L\\times S\\times C\\times P"
+   }
+  ],
+  "37": [
+   {
+    "tex": "D_n=D_i\\times P_i"
+   }
+  ],
+  "84": [
+   {
+    "tex": "v=\\frac{1}{n}R^{2/3}S^{1/2}"
+   },
+   {
+    "tex": "R=\\frac{A}{P}"
+   }
+  ],
+  "96": [
+   {
+    "tex": "V_{s1}=\\frac{t_b'(Q_2-Q_1)}{2}\\times3600"
+   },
+   {
+    "tex": "V_{s2}=\\frac{t_b'(Q_3-Q_1)}{2}\\times3600"
+   },
+   {
+    "tex": "V_{sd}=1.1V_{s2}"
+   },
+   {
+    "tex": "V_{sd}=1.3V_{s1}"
+   }
+  ]
+ }
+}

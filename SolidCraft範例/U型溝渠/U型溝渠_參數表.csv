@@ -1,0 +1,7 @@
+name,unit,expression,value,comment,favorite
+UNIT_LEN,mm,1000,1000,預鑄單元長度,false
+INNER_W,mm,600,600,內寬,false
+INNER_H,mm,600,600,內高,false
+WALL_T,mm,120,120,側壁厚,false
+BASE_T,mm,120,120,底板厚,false
+N_UNITS,,10,10,單元數（純數量）,false

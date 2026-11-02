@@ -1,0 +1,79 @@
+{
+ "meta": {
+  "name": "交通部公路總局第二區養護工程處 單價分析表（表2）",
+  "source_url": "https://ws.thb.gov.tw/Download.ashx?u=LzAwMS9VcGxvYWQvNDU4L3JlbGZpbGUvMTMzMDAvMjQ4ODAzL2U2ODNmYzVjLTE1Y2YtNDhlNi04Nzc5LWZhOTQ2OGZiMzU2MS5wZGY%3d",
+  "local_copy": "data\\物價\\公路局單價分析表_表2.pdf（10 頁，另存 .txt 全文）",
+  "region": "全台（公路總局通用）",
+  "note": "政府機關公開之單價分析表，含工料分析（材料費＋工資＋雜費），可直接作為預算單價依據。",
+  "verified_date": "2026-10-28"
+ },
+ "items": [
+  {
+   "code": "CONC210",
+   "name": "結構用混凝土，預拌，210kgf/cm²，含澆置及搗實",
+   "unit": "M3",
+   "price": 2599,
+   "breakdown": "材料 2,218 ＋ 澆置搗實 300 ＋ 養護什費 30 ＋ 運雜費 20 ＋ 零星工料 31",
+   "source": "單價分析表 壹.一.20"
+  },
+  {
+   "code": "REBAR_SD420",
+   "name": "鋼筋，連工帶料（SD420 級）",
+   "unit": "kg",
+   "price": 26,
+   "breakdown": "單價分析表內「鋼筋，連工帶料 KG 50.000 單價 26」；另 SD420W 工地交貨 24,300 元/T（=24.3 元/kg，含零星工料）",
+   "source": "單價分析表 標誌懸掛式項下工料分析"
+  },
+  {
+   "code": "REBAR_SD420_MAT",
+   "name": "鋼筋 SD420W，工地交貨（僅材料）",
+   "unit": "T",
+   "price": 24300,
+   "breakdown": "材料 23,900 ＋ 零星工料 400",
+   "source": "單價分析表 壹.一.28"
+  },
+  {
+   "code": "FORMWORK_ORD",
+   "name": "普通模板",
+   "unit": "M2",
+   "price": 435,
+   "breakdown": "",
+   "source": "單價分析表 標誌懸掛式項下工料分析"
+  },
+  {
+   "code": "FORMWORK_NOSTRIP",
+   "name": "免拆模板（木質）",
+   "unit": "M2",
+   "price": 206,
+   "breakdown": "材料 120 ＋ 大工 84 ＋ 零星工料 2",
+   "source": "單價分析表 壹.一.26"
+  },
+  {
+   "code": "GRANULAR_BASE",
+   "name": "級配粒料底層，碎石級配（含鋪設及滾壓）",
+   "unit": "M3",
+   "price": 1200,
+   "breakdown": "材料 860 ＋ 鋪設及滾壓 150 ＋ 運雜費 170 ＋ 零星工料 20",
+   "source": "單價分析表 壹.一.18",
+   "use_for": "背填級配碎石（透水性材料）之參考"
+  },
+  {
+   "code": "WATERSTOP_PVC",
+   "name": "止水帶，聚氯乙烯，A 型，150×9 mm",
+   "unit": "M",
+   "price": 175,
+   "breakdown": "材料 152 ＋ 安裝費 20 ＋ 工具損耗 3",
+   "source": "單價分析表 壹.一.44",
+   "use_for": "伸縮縫之止水帶部分（未含填縫料與施工）"
+  },
+  {
+   "code": "PIPE_PVC_B100",
+   "name": "硬質聚氯乙烯塑膠管（B 管厚管），標稱 100 mm，含管配件",
+   "unit": "M",
+   "price": 314,
+   "breakdown": "材料 259 ＋ 小工 42 ＋ 運雜費 10 ＋ 零星工料 3",
+   "source": "單價分析表 壹.一.38",
+   "use_for": "洩水管部分（未含鑽孔與反濾層）"
+  }
+ ]
+}

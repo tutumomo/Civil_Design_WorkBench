@@ -1,0 +1,6 @@
+name,unit,expression,value,comment,favorite
+B,mm,400 mm,400,溝內寬,false
+H,mm,300 mm,300,溝內深,false
+t,mm,80 mm,80,側牆厚,false
+tb,mm,100 mm,100,底版厚,false
+Lg,mm,1000 mm,1000,單節長度,false

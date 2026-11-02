@@ -1,0 +1,637 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 響應式網頁設定：若後端設定不開啟響應式網頁效果，則不顯示以下這一行 -->
+    <meta id="ctl00_RWDSetup" name="viewport" content="width=590" /><title>
+	農業部主管法規共用系統-法規檢索結果
+</title>
+    <!--[if lt IE 9]>
+    <script src="/js/html5shiv.min.js"></script>
+    <![endif]-->
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" media="screen" /><link href="css/bootstrap-icons.min.css" rel="stylesheet" type="text/css" /><link href="css/layout.css" rel="stylesheet" type="text/css" media="screen" /><link href="css/table.css" rel="stylesheet" type="text/css" media="screen" />
+    <!-- 網站樣式設定：依據後端設定樣式編號，讀取對應的CSS檔 -->
+    <link id="ctl00_TemplateID" href="/css/06.css" rel="stylesheet" type="text/css" media="all" /><link href="css/printweb.css" rel="stylesheet" type="text/css" media="print" />
+    <!-- 網頁背景圖設定：若後端自行上傳背景圖，則顯示以下這一行 -->
+    
+
+    <script src="/js/jquery-3.7.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            //避免XFS攻擊
+            if (top != self) { top.location = self.location; }
+            //無障礙需求
+            //$("pre").attr("title", "內容");
+        });
+    </script>
+    <noscript><span style="color: #fff;">您的瀏覽器不支援JavaScript功能，若網頁功能無法正常使用時，請開啟瀏覽器JavaScript狀態</span></noscript>
+    
+    <link href="css/jquery.treeview.css" rel="stylesheet">
+</head>
+<body>
+    <form name="aspnetForm" method="post" action="./LawResult.aspx?NLawTypeID=all&amp;KW=%u6c34%u571f%u4fdd%u6301%u6280%u8853%u898f%u7bc4&amp;name=1&amp;content=1" id="aspnetForm">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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" />
+</div>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="3A0507AE" />
+	<input type="hidden" name="__VIEWSTATEENCRYPTED" id="__VIEWSTATEENCRYPTED" value="" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="Hj8Q+PKGPZc55cJ/3DCrUKAbLmaKWr+uvgbvBjF0KtJhEVHNbXR2aO9DIGkfQkdGFOwrZz/bRdNiXxiHItrJ4I9C49fZuIZPbstUbIsT6WgG4boxy5qV++RbpYLRW5s7gHcsEWMQHGtkWJD5CITMxK96UcyqwullRnTx+6hd4eLJrOLoOM2BqApOzyvYjid6fRdeycAniGdWDlawaQTiUuarprkwjURn5mpw0eGl5LzcyqcbO5gt3cu26VJetpMeAcX8DqR3VVszkCwvoa4mmWvHsofezjgrrCtE1+1Aw7Y=" />
+</div>
+        
+        <!--<a href="#content" id="AM" class="sr-only sr-only-focusable A1">跳到主要內容區塊</a>-->
+        <header>
+            <div class="navbar navbar-expand-md navbar-default">
+				<a href="#AC" id="AM" class="sr-only sr-only-focusable A1">跳到主要內容區塊</a>
+                <div id="ctl00_h1title" class="nav-system">主管法規查詢系統</div>
+                <div class="header-con">
+                    <!-- 上方選單 -->
+                    <div class="collapse navbar-collapse header-nav">
+                        <ul class="nav navbar-nav">
+                            <li><a href="#U" id="AU" name="U" title="功能區塊" accesskey="U">:::</a></li>
+
+                            <li><a href="SiteMapPage.aspx">網站導覽</a></li>
+                            
+                            <li id="ctl00_Manual_All"><a href="/UseManual/使用手冊20171020.pdf" title="下載使用手冊.pdf">使用手冊</a></li>
+                            
+                            
+                            <li><a href="index.aspx">回首頁</a></li>
+                            <li id="ctl00_Manual_Eng"><a href="EngNewsList.aspx">English</a></li>
+                            
+                        </ul>
+                    </div>
+                    <div class="navbar-header">
+						<ul class="navbar-nav d-md-none m-menu">
+                            <li class="nav-item text-nowrap">
+                                <button type="button" class="navbar-toggler myNavbar" data-bs-toggle="offcanvas" data-bs-target="#myNavbar" aria-controls="myNavbar" aria-expanded="false" aria-label="功能選單">
+                                    <span class="navbar-toggler-icon"></span>
+                                </button>
+                            </li>
+                        </ul>
+                        <!-- 領用機關Logo 圖片-->
+                        <h1 class="logo">
+                            <a href="index.aspx" id="ctl00_aUCName" title="農業部主管法規查詢系統：回首頁">
+                                <img src="ImageHandler.ashx?Field=Logo" id="ctl00_imgUCName" width="320" height="90" alt="農業部logo：回主管法規查詢系統首頁" />
+                            </a>
+                        </h1>
+                        <!-- 系統名稱Banner -->
+                        <div class="sys-name">
+                            <img src="images/logo_system.png" id="ctl00_imglogo" width="300" height="90" alt="主管法規查詢系統 Laws and Regulations Retrieving System" />
+                        </div>
+                        <!-- 上方整合查詢 -->
+                        <div class="collapse navbar-collapse search-box">
+                            <div class="navbar-form" role="search">
+                                <div class="input-group">
+                                    <label for="keyword1" class="sr-only">請輸入關鍵字</label>
+                                    <input id="keyword1" type="text" class="form-control" accesskey="S" placeholder="請輸入關鍵字" aria-label="整合查詢">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default" onclick="GlobalCheckForm1();return false;">整合查詢</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+						<ul class="navbar-nav d-md-none m-search">
+                            <li class="nav-item text-nowrap">
+                                <button type="button" class="navbar-toggler mySearch" data-bs-toggle="collapse" data-bs-target="#mySearch" aria-controls="mySearch" aria-expanded="false" aria-label="查詢功能">
+                                    <span class="bi bi-search"></span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!-- myNavbar 主選單 -->
+                <nav class="offcanvas offcanvas-end menu" id="myNavbar" aria-label="主要功能選單">
+                    <div class="menu-con">
+                        <div class="offcanvas-header">
+                            <div>主管法規查詢系統</div>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="關閉主選單"></button>
+                        </div>
+                        <ul>
+                            <li class="active"><a href="index.aspx">最新訊息</a></li>
+                            <li><a href="LawCategoryMain.aspx?type=M" id="hlLawCategory">法規體系</a></li>
+                            <li><a href="LawQuery.aspx">法規檢索</a></li>
+                            <!-- 人事行政總處客制 -->
+                            <li></li>
+                            <!-- 環保署客制 -->
+                            <li></li>
+                            
+                            <li><a href="DraftForum.aspx">草案預告</a></li>
+                            <li><a href="WebList.aspx">相關網站</a></li>
+                            <!-- 小螢幕才會顯示 -->
+                            <li class="topmenu visible-xs"><a href="SiteMapPage.aspx">網站導覽</a></li>
+                            
+                            <li class="topmenu visible-xs"><a href="/UseManual/使用手冊20171020.pdf" title="下載使用手冊.pdf">使用手冊</a></li>
+                            <li class="topmenu visible-xs"><a href="index.aspx">回首頁</a></li>
+                            <li id="ctl00_Manual_Eng_mobile" class="topmenu visible-xs"><a href="EngNewsList.aspx">English</a></li>
+                            
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                </nav>
+                <!-- mySearch 整合查詢 小螢幕顯示-->
+                <div class="menu visible-xs" role="navigation">
+                    <div class="collapse navbar-collapse" id="mySearch">
+                        <div class="navbar-form" role="search">
+                            <div class="input-group">
+                                <label for="keyword2" class="sr-only">請輸入關鍵字</label>
+                                <input id="keyword2" type="text" class="form-control" placeholder="請輸入關鍵字">
+                                <button type="button" class="btn btn-default" onclick="GlobalCheckForm2();return false;">
+                                    <i class="bi bi-search"><span class="sr-only">整合查詢</span></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要內容 -->
+        <div class="container-fluid con-bg">
+            <div class="content-con" id="content" role="main">
+                <a href="#C" id="AC" name="C" title="內容區塊" accesskey="C">:::</a>
+                
+    <ol class="breadcrumb">
+        現在位置：
+		<li><span aria-current="page">法規檢索結果</span></li>
+    </ol>
+    <div class="text-con">
+        <div class="text-title">
+            <h2><i class="bi bi-geo-alt-fill"></i>法規檢索結果</h2>
+        </div>
+        
+                <div class="row">
+                    <div class="col-md-3 left">
+                        <div class="well leftResult">
+                            <h3>法規類別</h3>
+                            <ul id="ctl00_cp_content_ulLawTypeID"><li class="active"><a href="#">全部<span class="badge">20</span></a></li><li><a href="LawResult.aspx?NLawTypeID=1&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">法律<span class="badge">2</span></a></li><li><a href="LawResult.aspx?NLawTypeID=3&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">法規命令<span class="badge">7</span></a></li><li><a href="LawResult.aspx?NLawTypeID=2&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">行政規則<span class="badge">11</span></a></li><li><a href="LawResult.aspx?NLawTypeID=7&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">實質法規<span class="badge">1</span></a></li></ul>
+                        </div>
+                        <div id="ctl00_cp_content_divLawCategory" class="well leftCategory">
+                            <h3>法規體系<!--<a href="#L" id="AL" name="L" title="左側選單：請以上下鍵選擇法規類別">:::</a>-->
+                                
+                            </h3>
+                            <div id="tree">
+                                <ul id="ctl00_cp_content_ulLawCategory"><li><a href="LawResult.aspx?NCategoryID=01&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">組織目<span class="badge">0</span></a></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 綜合規劃目">綜合規劃目</a><ul><li><a href="LawResult.aspx?NCategoryID=0201&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">政策規劃<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0202&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">經濟研究<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0203&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">管制考核<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0204&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">協調服務<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 資源永續利用目">資源永續利用目</a><ul><li><a href="LawResult.aspx?NCategoryID=0301&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">永續發展<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0302&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農地規劃<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0303&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">氣候治理<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 農民輔導目">農民輔導目</a><ul><li><a href="LawResult.aspx?NCategoryID=0401&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農會輔導<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0402&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業推廣<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0403&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農民福利<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0404&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業人力發展<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0405&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農民保險<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0406&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農民退休儲金<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 畜牧目">畜牧目</a><ul><li><a href="LawResult.aspx?NCategoryID=0501&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">畜牧行政<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0502&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">養豬產業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0503&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">家禽產業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0504&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">草食產業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0505&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">畜牧其他<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 動物保護目">動物保護目</a><ul><li><a href="LawResult.aspx?NCategoryID=0601&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">動保行政<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0602&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">寵物管理目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=0603&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">動物福利目<span class="badge">0</span></a></li></ul></li><li><a href="LawResult.aspx?NCategoryID=13&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業科技目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=008&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">國際事務目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=009&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">資訊目<span class="badge">0</span></a></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 農糧目">農糧目</a><ul><li><a href="LawResult.aspx?NCategoryID=1001&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">企劃<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1002&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">果樹及花卉產業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1003&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">蔬菜及種苗產業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1004&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">稻作產業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1005&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">雜糧特作<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1006&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業資源<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1007&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農糧其他<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 漁業目">漁業目</a><ul><li><a href="LawResult.aspx?NCategoryID=1101&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">企劃及漁民輔導目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1102&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">沿近海漁業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1103&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">遠洋漁業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1104&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">養殖漁業<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1105&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">漁業人力<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1106&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">漁業建設<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1107&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">漁業其他<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 動植物防檢疫目">動植物防檢疫目</a><ul><li><a href="LawResult.aspx?NCategoryID=1201&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">動物防疫<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1202&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">動物檢疫<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1203&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">植物防疫<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1204&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">植物檢疫<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1205&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">肉品檢查<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1206&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">防檢其他<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 林業及自然保育目">林業及自然保育目</a><ul><li><a href="LawResult.aspx?NCategoryID=1301&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">保育企劃<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1302&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">保育管理<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1303&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">森林管理<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1304&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">森林產業<span class="badge">1</span></a></li><li><a href="LawResult.aspx?NCategoryID=1305&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">森林育樂<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1306&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">集水區治理<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1307&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">林業其他<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 農村發展及水土保持目">農村發展及水土保持目</a><ul><li><a href="LawResult.aspx?NCategoryID=1402&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農村規劃<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1403&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農村建設<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1401&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">產業發展及休閒<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1404&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">保育治理<span class="badge">1</span></a></li><li><a href="LawResult.aspx?NCategoryID=1405&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">坡地管理<span class="badge">18</span></a></li><li><a href="LawResult.aspx?NCategoryID=1406&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">減災監測<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1407&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農村水保其他<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 農田水利目">農田水利目</a><ul><li><a href="LawResult.aspx?NCategoryID=1501&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農田水利管理<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1502&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農田水利建設<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1503&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">綜合企劃<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1504&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農田水利其他<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 農業金融目">農業金融目</a><ul><li><a href="LawResult.aspx?NCategoryID=1601&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業保險及資訊<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1602&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業金融管理目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1603&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">綜合規劃及農業貸款<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1604&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農金其他<span class="badge">0</span></a></li></ul></li><li><a href="LawResult.aspx?NCategoryID=017&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業科技園區目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=18&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業試驗改良目<span class="badge">0</span></a></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 秘書目">秘書目</a><ul><li><a href="LawResult.aspx?NCategoryID=1901&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">文書檔案<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1902&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">綜合行政<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1903&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">庶務管理<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=1904&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">公共關係<span class="badge">0</span></a></li></ul></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 人事目">人事目</a><ul><li><a href="LawResult.aspx?NCategoryID=2001&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">組編任免<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2002&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">考核培訓<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2003&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">給與退撫<span class="badge">0</span></a></li></ul></li><li><a href="LawResult.aspx?NCategoryID=21&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">政風目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=22&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">會計目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=23&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">統計目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=24&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">法制目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=17&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">其他法規<span class="badge">0</span></a></li><li><a href="javascript:void(0);" role="button" aria-pressed="false" aria-label="收合 廢止法規">廢止法規</a><ul><li><a href="LawResult.aspx?NCategoryID=2601&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">組織目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2602&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">綜合規劃目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2603&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">資源永續利用目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2604&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農民輔導目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2605&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">畜牧目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2606&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">動物保護目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2607&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業科技目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2608&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">國際事務目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2609&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">資訊目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2610&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農糧目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2611&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">漁業目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2612&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">動植物防檢疫目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2613&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">林業及自然保育目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2614&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農村發展及水土保持目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2615&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農田水利目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2616&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業金融目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2617&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業科技園區目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2618&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">農業試驗改良目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2619&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">秘書目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2620&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">人事目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2621&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">政風目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2622&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">會計目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2623&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">統計目<span class="badge">0</span></a></li><li><a href="LawResult.aspx?NCategoryID=2624&GroupID=&CategoryID=&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&StartDate=&EndDate=&LNumber=&now=&fei=">法制目<span class="badge">0</span></a></li></ul></li></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9 col-sm-12 hidden-xs">
+                        <div class="law-result">
+                            <h3><i class="bi bi-chevron-right"></i>法規類別：全部
+                                20
+                                筆 </h3>
+                        </div>
+                        <div id="ctl00_cp_content_divorderby" class="dropdown pull-right" style="margin: 2px 0;">
+                            <button id="ctl00_cp_content_buttonorderby" class="btn btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">依日期新到舊排序 <span class="caret"></span></button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ctl00_cp_content_buttonorderby">
+                                <li><a href="/LawResult.aspx?NLawTypeID=all&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&orderby=DA" id="ctl00_cp_content_aDA">依日期舊到新排序</a></li>
+                                <li><a href="/LawResult.aspx?NLawTypeID=all&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&orderby=DD" id="ctl00_cp_content_aDD">依日期新到舊排序</a></li>
+                                <li><a href="/LawResult.aspx?NLawTypeID=all&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&orderby=NA" id="ctl00_cp_content_aNA">依法規名稱筆畫少到多排序</a></li>
+                                <li><a href="/LawResult.aspx?NLawTypeID=all&KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&name=1&content=1&orderby=ND" id="ctl00_cp_content_aND">依法規名稱筆畫多到少排序</a></li>
+                            </ul>
+                        </div>
+                        
+                        
+                        
+                                <table class="table table-hover tab-list tab-result">
+                                    <tbody>
+                                        <th style="text-align:left">序</th>
+                                        <th style="text-align:left">日期</th>
+                                        <th style="text-align:left">標題</th>
+                                        <th style="text-align:left">法規類別</th>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        1.</td>
+                                    <td width="6%">
+                                        115.01.20</td>
+                                    <td><i id="ctl00_cp_content_rptList_ctl01_spanLawFilesRela" class="bi bi-paperclip"></i><a id="ctl00_cp_content_rptList_ctl01_hlkLawName" href="LawContent.aspx?id=FL014515&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">特定水土保持區劃定與廢止準則</a>
+                                        <div id="ctl00_cp_content_rptList_ctl01_divHLawName"></div>
+                                    </td>
+                                    <td width="15%">
+                                        法規命令
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        2.</td>
+                                    <td width="6%">
+                                        114.12.04</td>
+                                    <td><i id="ctl00_cp_content_rptList_ctl02_spanLawFilesRela" class="bi bi-paperclip"></i><a id="ctl00_cp_content_rptList_ctl02_hlkLawName" href="LawContent.aspx?id=FL020138&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">農業部山坡地範圍劃定及檢討變更作業要點</a>
+                                        <div id="ctl00_cp_content_rptList_ctl02_divHLawName">原名稱：山坡地範圍劃定及檢討變更作業要點<br>原名稱：行政院農業委員會山坡地範圍劃定及檢討變更作業要點<br></div>
+                                    </td>
+                                    <td width="15%">
+                                        行政規則
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        3.</td>
+                                    <td width="6%">
+                                        114.09.09</td>
+                                    <td><i id="ctl00_cp_content_rptList_ctl03_spanLawFilesRela" class="bi bi-paperclip"></i><a id="ctl00_cp_content_rptList_ctl03_hlkLawName" href="LawContent.aspx?id=FL031569&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">水土保持計畫審核監督辦法</a>
+                                        <div id="ctl00_cp_content_rptList_ctl03_divHLawName"></div>
+                                    </td>
+                                    <td width="15%">
+                                        法規命令
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        4.</td>
+                                    <td width="6%">
+                                        114.08.20</td>
+                                    <td><i id="ctl00_cp_content_rptList_ctl04_spanLawFilesRela" class="bi bi-paperclip"></i><span id="ctl00_cp_content_rptList_ctl04_spanCauseCode" class="label-fei">廢</span><a id="ctl00_cp_content_rptList_ctl04_hlkLawName" href="LawContent.aspx?id=GL000130&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">獎勵造林審查要點</a>
+                                        <div id="ctl00_cp_content_rptList_ctl04_divHLawName"></div>
+                                    </td>
+                                    <td width="15%">
+                                        行政規則
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        5.</td>
+                                    <td width="6%">
+                                        114.05.07</td>
+                                    <td><i id="ctl00_cp_content_rptList_ctl05_spanLawFilesRela" class="bi bi-paperclip"></i><a id="ctl00_cp_content_rptList_ctl05_hlkLawName" href="LawContent.aspx?id=FL014521&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84"><mark>水土保持技術規範</mark></a>
+                                        <div id="ctl00_cp_content_rptList_ctl05_divHLawName"></div>
+                                    </td>
+                                    <td width="15%">
+                                        法規命令
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        6.</td>
+                                    <td width="6%">
+                                        114.01.03</td>
+                                    <td><i id="ctl00_cp_content_rptList_ctl06_spanLawFilesRela" class="bi bi-paperclip"></i><a id="ctl00_cp_content_rptList_ctl06_hlkLawName" href="LawContent.aspx?id=GL000193&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">農業部山坡地土地可利用限度查定工作要點</a>
+                                        <div id="ctl00_cp_content_rptList_ctl06_divHLawName">原名稱：山坡地土地可利用限度查定工作要點<br>原名稱：行政院農業委員會山坡地土地可利用限度查定工作要點<br></div>
+                                    </td>
+                                    <td width="15%">
+                                        行政規則
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        7.</td>
+                                    <td width="6%">
+                                        112.10.27</td>
+                                    <td><i id="ctl00_cp_content_rptList_ctl07_spanLawFilesRela" class="bi bi-paperclip"></i><a id="ctl00_cp_content_rptList_ctl07_hlkLawName" href="LawContent.aspx?id=FL047055&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">農業部農村發展及水土保持署抽查山坡地開發案件臨時防災措施執行計畫</a>
+                                        <div id="ctl00_cp_content_rptList_ctl07_divHLawName">原名稱：行政院農業委員會水土保持局抽查山坡地開發案件臨時防災措施執行計畫<br></div>
+                                    </td>
+                                    <td width="15%">
+                                        行政規則
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        8.</td>
+                                    <td width="6%">
+                                        112.08.29</td>
+                                    <td><a id="ctl00_cp_content_rptList_ctl08_hlkLawName" href="LawContent.aspx?id=FL042349&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">農業部農村發展及水土保持署工程施工臨時防減災措施注意事項</a>
+                                        <div id="ctl00_cp_content_rptList_ctl08_divHLawName">原名稱：行政院農業委員會水土保持局工程施工臨時防減災措施注意事項<br></div>
+                                    </td>
+                                    <td width="15%">
+                                        行政規則
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        9.</td>
+                                    <td width="6%">
+                                        109.12.02</td>
+                                    <td><a id="ctl00_cp_content_rptList_ctl09_hlkLawName" href="LawContent.aspx?id=FL014520&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">水土保持法施行細則</a><span class="label-eng"><a aria-labelledby=ctl00_cp_content_rptList_ctl09_hlkLawName href="EngLawList.aspx?id=FL014520" title="英譯資料">英</a></span>
+                                        <div id="ctl00_cp_content_rptList_ctl09_divHLawName"></div>
+                                    </td>
+                                    <td width="15%">
+                                        法規命令
+                                    </td>
+                                </tr>
+                            
+                                <tr>
+                                    <td width="1%">
+                                        10.</td>
+                                    <td width="6%">
+                                        109.10.06</td>
+                                    <td><a id="ctl00_cp_content_rptList_ctl10_hlkLawName" href="LawContent.aspx?id=GL000918&amp;kw=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84">山坡地土地可利用限度分類標準</a>
+                                        <div id="ctl00_cp_content_rptList_ctl10_divHLawName"></div>
+                                    </td>
+                                    <td width="15%">
+                                        法規命令
+                                    </td>
+                                </tr>
+                            
+                                </tbody>
+                                </table>
+                                <!--- Page --->
+                                <div id="ctl00_cp_content_rptList_ctl11_PagerButtom_navPager" class="pageZone">
+    <ul id="ctl00_cp_content_rptList_ctl11_PagerButtom_plControl" class="pager">
+        <li id="ctl00_cp_content_rptList_ctl11_PagerButtom_liFirst" class="disabled hidden-xs">
+            <a id="ctl00_cp_content_rptList_ctl11_PagerButtom_hlFirst" disabled="disabled">第一頁</a></li>
+        <li id="ctl00_cp_content_rptList_ctl11_PagerButtom_liPriv" class="disabled">
+            <a id="ctl00_cp_content_rptList_ctl11_PagerButtom_hlPriv" disabled="disabled">上一頁</a></li>
+        <li id="ctl00_cp_content_rptList_ctl11_PagerButtom_liNext">
+            <a id="ctl00_cp_content_rptList_ctl11_PagerButtom_hlNext" href="/LawResult.aspx?NLawTypeID=all&amp;KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&amp;name=1&amp;content=1&amp;page=2">下一頁</a></li>
+        <li id="ctl00_cp_content_rptList_ctl11_PagerButtom_liLast" class="hidden-xs">
+            <a id="ctl00_cp_content_rptList_ctl11_PagerButtom_hlLast" href="/LawResult.aspx?NLawTypeID=all&amp;KW=%e6%b0%b4%e5%9c%9f%e4%bf%9d%e6%8c%81%e6%8a%80%e8%a1%93%e8%a6%8f%e7%af%84&amp;name=1&amp;content=1&amp;page=2">最末頁</a></li>
+        <li class="pageinfo">共
+            20
+            筆，頁次：1
+            /
+            2<div class="pageno hidden-xs">
+                ，<label for="ctl00_cp_content_rptList_ctl11_PagerButtom_ddlPage">每頁顯示筆數</label>
+            <select name="ctl00$cp_content$rptList$ctl11$PagerButtom$ddlPage" id="ctl00_cp_content_rptList_ctl11_PagerButtom_ddlPage">
+	<option selected="selected" value="10">10</option>
+	<option value="20">20</option>
+	<option value="30">30</option>
+	<option value="40">40</option>
+
+</select>
+            <button id="buttonPage" type="button" class="btn btn-default btn-sm" onclick="changeSize();">送出</button>
+            </div>
+        </li>
+    </ul>
+</div>
+<script>
+    function changeSize(size) {
+        var size = document.getElementById('ctl00_cp_content_rptList_ctl11_PagerButtom_ddlPage').value;
+        var regexPage = /[&?\??]page=[0-9]+&?/;
+        var regexSize = /[&?\??]size=[0-9]+&?/;
+        var resultURL = location.href.replace(regexPage, "").replace(regexSize, "");
+        if (resultURL.indexOf("?") > -1) {
+            if (isLocalUrl(resultURL))
+                window.open(resultURL + "&size=" + encodeURIComponent(size), "_self");
+            if (IsSafeUrl(resultURL))
+                window.open(resultURL + "&size=" + encodeURIComponent(size), "_self");
+        } else {
+            if (isLocalUrl(resultURL))
+                window.open(resultURL + "?size=" + encodeURIComponent(size), "_self");
+            if (IsSafeUrl(resultURL))
+                window.open(resultURL + "?size=" + encodeURIComponent(size), "_self");
+        }
+    }
+
+    function isLocalUrl(url) {
+        try {
+            const base = window.location.origin;
+            const targetUrl = new URL(url, base);
+            return targetUrl.origin === base;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function IsSafeUrl(url) {
+        const allowedDomains = [window.location.hostname];
+        const targetUrl = new URL(url);
+
+        return allowedDomains.includes(targetUrl.hostname);
+    }
+</script>
+
+                            
+                    </div>
+                </div>
+            
+    </div>
+    <!-- text-con end -->
+
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <!-- 主要內容結束 -->
+
+        <footer>
+
+            
+                    <div class="footer-con">
+                        <a href="#Z" id="AF" name="Z" title="網站資訊區塊" accesskey="Z">:::</a>
+                        <div class="clearfix"></div>
+                        
+                        <ul class="address">
+                            <li>
+                                農業部：10014 臺北市中正區南海路 37 號 【本網站資料如與公發布資料不同，以公發布文字為準】</li>
+                            <li>電話總機：
+                                (02)2381-2991
+                                傳真電話：(02)2331-0341</li>
+                            <li>系統版本：<span id="ctl00_lblVersionDate">114.11.28</span></li>
+                            <li>系統更新日期：<span id="ctl00_lblUpdateDate">115.01.06</span></li>
+                            
+                        </ul>
+
+                        <ul class="logo-box">
+                            
+                            
+                            
+                        </ul>
+                        <div id="ctl00_divBrowsingPeople" class="visitors">瀏覽人數：74,651,656</div>
+                    </div>
+                
+            <p id="gotop"><a role="button" href="#">回上方</a></p>
+        </footer>
+    </form>
+</body>
+</html>
+<script src="/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="/js/app.js" type="text/javascript"></script>
+<script src="/js/FYLS.js"></script>
+<script type="text/javascript">
+    $(function () {
+        ChangeFunUrl();
+        $(window).resize(function () {
+            ChangeFunUrl();
+        });
+    });
+    function ChangeFunUrl() {
+        //功能頁面切換：依據頁面寬度切換功能
+        if ($(window).width() < 767) {
+            $("#hlLawCategory").attr("href", "LawCategoryMain.aspx?type=M");
+        }
+        else {
+            $("#hlLawCategory").attr("href", "LawCategoryMain.aspx");
+        }
+    }
+    function QueryString(name) {
+        var AllVars = window.location.search.substring(1);
+        var Vars = AllVars.split("&");
+        for (i = 0; i < Vars.length; i++) {
+            var Var = Vars[i].split("=");
+            if (Var[0] == name) return Var[1];
+        }
+        return "";
+    }
+    function GlobalCheckForm1() {
+        var keyword = $.trim($("#keyword1").val());
+        //全文檢索字詞不得為空值
+        if (keyword == "") {
+            alert("請輸入「檢索字詞」！");
+            return false;
+        }
+        //全文檢索字詞格式綜合判斷
+        if (keyword != "" && !validKeys(keyword)) {
+            alert("檢索字詞格式錯誤！請檢查後重新輸入！");
+            return false;
+        }
+        if (keyword != "" && isFullWidthText(keyword)) {
+            alert("檢索字詞格式錯誤！請檢查後重新輸入！")
+            return false;
+        }
+        window.open("SearchAllResultList.aspx?KW=" + encodeURIComponent(keyword), "_self");
+    }
+    function isFullWidthText(text) {
+        for (let i = 0; i < text.length; i++) {
+            const charCode = text.charCodeAt(i);
+            if ((charCode >= 0xFF01 && charCode <= 0xFF60) ||
+                (charCode >= 0xFFE0 && charCode <= 0xFFE6)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+    function GlobalCheckForm2() {
+        var keyword = $.trim($("#keyword2").val());
+        //全文檢索字詞不得為空值
+        if (keyword == "") {
+            alert("請輸入「檢索字詞」！");
+            return false;
+        }
+        //全文檢索字詞格式綜合判斷
+        if (keyword != "" && !validKeys(keyword)) {
+            alert("檢索字詞格式錯誤！請檢查後重新輸入！");
+            return false;
+        }
+        if (keyword != "" && isFullWidthText(keyword)) {
+            alert("檢索字詞格式錯誤！請檢查後重新輸入！")
+            return false;
+        }
+        window.open("SearchAllResultList.aspx?KW=" + encodeURIComponent(keyword), "_self");
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(document).on("keydown", function (e) {
+            if (e.key === "Enter") {
+                var active = document.activeElement;
+                console.log("目前焦點元素：", active.id);
+                if (active && active.id === "keyword1") {
+                    // 使用者焦點在 Master 的檢索輸入欄位，才觸發整合查詢
+                    GlobalCheckForm1();
+                    e.preventDefault();  // 阻止預設送出表單
+                    return false;
+                }
+                if (active && active.id === "keyword2") {
+                    // 使用者焦點在 Master 的檢索輸入欄位，才觸發整合查詢
+                    GlobalCheckForm2();
+                    e.preventDefault();  // 阻止預設送出表單
+                    return false;
+                }
+            }
+        });
+    });
+</script>
+
+
+    <script src="/js/jquery.treeview.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            let urlParams = new URLSearchParams(window.location.search);
+
+            $.ajax({
+                type: 'post',
+                url: 'LdapValidationCheck.ashx',
+                data: { CategoryID: urlParams.get('NCategoryID') },
+                success: function (data) {
+                    if (data == "1") {
+                        alert("您的要求可能具有潛在攻擊性質，若操作非屬攻擊性質，請稍後再試或洽系統管理員。");
+                    }
+                }
+            });
+
+            $("#tree > ul").treeview({
+                collapsed: true,
+                animated: "fast",
+                persist: "location",
+                toggle: function () {
+
+                    if (this.className.indexOf('collapsable') >= 0) {
+                        $(this).find('.sr-only').text('已展開');
+                    }
+
+                    if (this.className.indexOf('expandable') >= 0) {
+                        $(this).find('.sr-only').text('已收合');
+                    }
+                }
+            });
+            $("#tree li").on("click", "a",
+                function () {
+                    if (document.location.href != this) {
+                        document.location.href = this;
+                    }
+                }
+            );
+            $(window).resize(function () {
+                var sType = getParameterByName("type")
+                var resultURL = location.href.replace("", "");
+                //功能頁面切換：依據頁面寬度切換功能
+                if ($(window).width() < 767 && sType == null) {
+                    if (isLocalUrl(resultURL))
+                        window.open(resultURL + "&type=M", "_self");
+                    else if (IsSafeUrl(resultURL))
+                        window.open(resultURL + "&type=M", "_self");
+                }
+                else if ($(window).width() >= 767 && sType == "M") {
+                    var regextype = /[&?\??]type=[M]+&?/;
+                    var resultURL = location.href.replace(regextype, "");
+                    if (isLocalUrl(resultURL))
+                        window.open(resultURL, "_self");
+                    else if (IsSafeUrl(resultURL))
+                        window.open(resultURL, "_self");
+                }
+            });
+        });
+
+        document.querySelectorAll('a[role="button"]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                // 檢查按鈕內容是否為 "全選"，如果是則跳過
+                if (this.textContent.trim() === "全選") return;
+                if (this.textContent.trim() === "取消全選") return;
+
+                let isExpanded = this.getAttribute('aria-pressed') === 'true';
+                this.setAttribute('aria-pressed', isExpanded ? 'false' : 'true');
+                this.setAttribute('aria-label', isExpanded ? '收合 ' + this.textContent.trim() : '展開 ' + this.textContent.trim());
+            });
+        });
+
+        function IsSafeUrl(url) {
+            const allowedDomains = [window.location.hostname];
+            const targetUrl = new URL(url);
+
+            return allowedDomains.includes(targetUrl.hostname);
+        }
+        function isLocalUrl(url) {
+            try {
+                const base = window.location.origin;
+                const targetUrl = new URL(url, base);
+                return targetUrl.origin === base;
+            } catch (e) {
+                return false;
+            }
+        }
+    </script>
+

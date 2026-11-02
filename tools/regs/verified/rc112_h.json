@@ -1,0 +1,610 @@
+{
+ "formulas": [
+  {
+   "id": "rc112_ety_yield",
+   "title": "鋼筋降伏應變 εty＝fy／Es（21.2.2.1）",
+   "src": "rc112",
+   "clause": "21.2.2.1",
+   "page": 366,
+   "keywords": "降伏應變 εty fy Es 竹節鋼筋 拉力控制 壓力控制 強度折減因數",
+   "unit": "-",
+   "output": "ety",
+   "latex": "\\varepsilon_{ty}=\\frac{f_y}{E_s}",
+   "vars": {
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "MPa",
+     "min": 200
+    },
+    "Es": {
+     "desc": "鋼筋彈性模數（一般 200,000 MPa）",
+     "unit": "MPa",
+     "min": 1000,
+     "default": 200000
+    }
+   },
+   "expr": "fy/Es",
+   "conditions": [
+    {
+     "expr": "Es>0",
+     "msg": "Es 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fy": 420,
+      "Es": 200000
+     },
+     "out": 0.0021
+    },
+    {
+     "in": {
+      "fy": 550,
+      "Es": 200000
+     },
+     "out": 0.00275
+    }
+   ],
+   "notes": "21.2.2.1：竹節鋼筋之 εty 為 fy/Es；**對於 fy=4,200 kgf/cm²[420 MPa] 之竹節鋼筋，εty 可採用 0.002**（規範允許之取整值，本式算得 0.0021）。21.2.2.2：所有預力鋼筋 εty 一律採用 0.002。εty 用於表21.2.2 判定壓力控制（εt≤εty）、過渡區與拉力控制（εt≥εty+0.003）之 φ 值（見 rc112_phi_flexure／rc112_phi_112_T2122）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.366 §21.2.2.1＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_fs_service_max",
+   "title": "裂縫控制用之鋼筋使用載重應力 fs 得取 (2/3)fy（24.3.2.1）",
+   "src": "rc112",
+   "clause": "24.3.2.1",
+   "page": 435,
+   "keywords": "裂縫控制 fs 使用載重 無因數化彎矩 鋼筋間距 表24.3.2",
+   "unit": "MPa",
+   "output": "fs",
+   "latex": "f_s=\\frac{2}{3}f_y",
+   "vars": {
+    "fy": {
+     "desc": "鋼筋降伏強度",
+     "unit": "MPa",
+     "min": 200
+    }
+   },
+   "expr": "2.0/3.0*fy",
+   "conditions": [
+    {
+     "expr": "fy>0",
+     "msg": "fy 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fy": 420
+     },
+     "out": 280.0
+    },
+    {
+     "in": {
+      "fy": 550
+     },
+     "out": 366.66666666666663,
+     "tol": 1e-09
+    }
+   ],
+   "notes": "24.3.2.1：最靠近拉力面之竹節鋼筋於使用載重下之應力 fs，**須基於無因數化（使用）彎矩計算**，但亦可用 (2/3)fy 替代之。本式僅提供替代上限值；正式設計宜以使用載重彎矩計算 fs 再代入 rc112_bar_spacing_max（表24.3.2 之間距式）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.435 §24.3.2.1＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_storey_Q",
+   "title": "樓層穩定指數 Q＝ΣPu·Δo／(Vus·ℓc)（式6.6.4.4.1）",
+   "src": "rc112",
+   "clause": "6.6.4.4.1",
+   "page": 77,
+   "keywords": "樓層穩定指數 Q 無側移構架 二階效應 PΔ 因數化垂直載重 樓層剪力",
+   "unit": "-",
+   "output": "Q",
+   "latex": "Q=\\frac{\\Sigma P_u\\,\\Delta_o}{V_{us}\\,\\ell_c}",
+   "vars": {
+    "SPu": {
+     "desc": "評估樓層之因數化總垂直載重 ΣPu",
+     "unit": "kN",
+     "min": 0
+    },
+    "DeltaO": {
+     "desc": "該樓層頂、底部於一階次分析中因 Vus 引致之相對側向位移 Δo",
+     "unit": "m",
+     "min": 0
+    },
+    "Vus": {
+     "desc": "評估樓層之總水平樓層剪力 Vus",
+     "unit": "kN",
+     "min": 0
+    },
+    "lc": {
+     "desc": "樓層高度 ℓc",
+     "unit": "m",
+     "min": 0
+    }
+   },
+   "expr": "SPu*DeltaO/(Vus*lc)",
+   "conditions": [
+    {
+     "expr": "Vus>0 and lc>0",
+     "msg": "Vus 與 ℓc 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "SPu": 10000,
+      "DeltaO": 0.02,
+      "Vus": 200,
+      "lc": 4
+     },
+     "out": 0.25
+    },
+    {
+     "in": {
+      "SPu": 5000,
+      "DeltaO": 0.01,
+      "Vus": 500,
+      "lc": 3
+     },
+     "out": 0.03333333333333333,
+     "tol": 1e-09
+    }
+   ],
+   "notes": "6.6.4.3：滿足 (a) 二階分析增加之柱端彎矩 ≤ 一階分析之 5%，或 (b) 依本式計算之 Q ≤ 0.05，該柱及樓層得視為無側移構架分析。計算 Q 時 ΣPu 宜對應最大 ΣPu 情況之側向載重；若採 6.6.3.2.2 節使用載重下慣性矩與使用載重計算側向變位，Q 值計算允許採使用重力載重總和之 1.2 倍、使用載重樓層剪力、及一階分析使用載重樓層變位之 1.4 倍。一個構架可能同時包含無側移與有側移樓層。",
+   "status": "verified",
+   "verified": {
+    "method": "原頁圖／座標化文字層判讀 p.77 式(6.6.4.4.1)（ΣPu、Δo、Vus、ℓc）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_Pc_buckling",
+   "title": "臨界挫屈載重 Pc＝π²(EI)eff／ℓc²（式6.6.4.4.2）",
+   "src": "rc112",
+   "clause": "6.6.4.4.2",
+   "page": 77,
+   "keywords": "臨界挫屈載重 Pc 有效勁度 EIeff 柱 彎矩放大 歐拉",
+   "unit": "kN",
+   "output": "Pc",
+   "latex": "P_c=\\frac{\\pi^2 (EI)_{eff}}{\\ell_c^2}",
+   "vars": {
+    "EIeff": {
+     "desc": "柱之有效撓曲勁度 (EI)eff（依式6.6.4.4.4a~c）",
+     "unit": "kN·m2",
+     "min": 0
+    },
+    "lc": {
+     "desc": "柱未支撐長度 ℓc",
+     "unit": "m",
+     "min": 0
+    }
+   },
+   "expr": "pi**2*EIeff/lc**2",
+   "conditions": [
+    {
+     "expr": "lc>0",
+     "msg": "ℓc 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "EIeff": 1000000,
+      "lc": 4
+     },
+     "out": 616850.275,
+     "tol": 0.01
+    },
+    {
+     "in": {
+      "EIeff": 500000,
+      "lc": 3
+     },
+     "out": 548311.355,
+     "tol": 0.01
+    }
+   ],
+   "notes": "(EI)eff 由式(6.6.4.4.4a)~(6.6.4.4.4c) 求得；其中 (6.6.4.4.4c) 為 EcIg/(1+βdns) 之形式，βdns 為同載重組合中最大因數化持續軸向載重與最大因數化軸向載重之比值（實務可假設 βdns=0.6，此時 (EI)eff=0.25EcIg）；I 值依表6.6.3.1.1(b) 之柱與牆計算。Pc 用於 δ 放大因數（rc112_delta_magnifier）。",
+   "status": "verified",
+   "verified": {
+    "method": "原頁圖／座標化文字層判讀 p.77 式(6.6.4.4.2)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_Mc_magnified",
+   "title": "柱牆設計因數化彎矩 Mc＝δ·M2（式6.6.4.5.1）",
+   "src": "rc112",
+   "clause": "6.6.4.5.1",
+   "page": 78,
+   "keywords": "彎矩放大法 無側移構架 Mc 一階分析 M2 δ 柱 牆",
+   "unit": "kN·m",
+   "output": "Mc",
+   "latex": "M_c=\\delta\\, M_2",
+   "vars": {
+    "delta": {
+     "desc": "彎矩放大因數 δ（式6.6.4.5.2）",
+     "unit": "-",
+     "min": 1.0
+    },
+    "M2": {
+     "desc": "一階分析之因數化彎矩 M2",
+     "unit": "kN·m",
+     "min": 0
+    }
+   },
+   "expr": "delta*M2",
+   "conditions": [
+    {
+     "expr": "delta>=1.0",
+     "msg": "δ 依規範不得小於 1.0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "delta": 1.3,
+      "M2": 200
+     },
+     "out": 260.0
+    },
+    {
+     "in": {
+      "delta": 1.0,
+      "M2": 150
+     },
+     "out": 150.0
+    }
+   ],
+   "notes": "6.6.4.5 彎矩放大法（無側移構架）：柱、牆設計採用之因數化彎矩 Mc 應為考量構材彎曲放大效應之一階分析因數化彎矩 M2。有側移構架之放大另見 6.6.4.6（本庫未收錄）。",
+   "status": "verified",
+   "verified": {
+    "method": "原頁圖／座標化文字層判讀 p.78 式(6.6.4.5.1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_delta_magnifier",
+   "title": "彎矩放大因數 δ＝Cm／[1－Pu/(0.75Pc)]，且 ≥1.0（式6.6.4.5.2）",
+   "src": "rc112",
+   "clause": "6.6.4.5.2",
+   "page": 78,
+   "keywords": "彎矩放大因數 δ Cm Pu Pc 無側移 柱 細長效應",
+   "unit": "-",
+   "output": "delta",
+   "latex": "\\delta=\\frac{C_m}{1-\\dfrac{P_u}{0.75P_c}}\\ \\ge 1.0",
+   "vars": {
+    "Cm": {
+     "desc": "端點彎矩修正係數 Cm（6.6.4.5.3）",
+     "unit": "-",
+     "min": 0
+    },
+    "Pu": {
+     "desc": "因數化軸向載重 Pu",
+     "unit": "kN",
+     "min": 0
+    },
+    "Pc": {
+     "desc": "臨界挫屈載重 Pc（式6.6.4.4.2）",
+     "unit": "kN",
+     "min": 0
+    }
+   },
+   "expr": "max(1.0, Cm/(1-Pu/(0.75*Pc)))",
+   "conditions": [
+    {
+     "expr": "Pc>0",
+     "msg": "Pc 須為正"
+    },
+    {
+     "expr": "Pu<0.75*Pc",
+     "msg": "Pu ≥ 0.75Pc 時放大因數無意義（柱已接近挫屈），須加大斷面或降低載重"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Cm": 1.0,
+      "Pu": 1000,
+      "Pc": 5000
+     },
+     "out": 1.3636363636363638,
+     "tol": 1e-09
+    },
+    {
+     "in": {
+      "Cm": 0.6,
+      "Pu": 1000,
+      "Pc": 5000
+     },
+     "out": 1.0
+    }
+   ],
+   "notes": "式(6.6.4.5.2)：δ＝Cm/(1－Pu/0.75Pc)，且不小於 1.0（故 Cm=0.6、Pu/Pc 小時仍取 1.0）。工作台 rc_design 之柱設計**未實作細長效應（彎矩放大法）**，見 design_conformance 的 KNOWN `rc_column_no_slenderness`。",
+   "status": "verified",
+   "verified": {
+    "method": "原頁圖／座標化文字層判讀 p.78 式(6.6.4.5.2)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_Pnt_max",
+   "title": "最大標稱軸向拉力強度 Pnt,max＝fy·Ast＋(fse＋Δfp)·Apt（式22.4.3.1）",
+   "src": "rc112",
+   "clause": "22.4.3.1",
+   "page": 375,
+   "keywords": "軸向拉力強度 Pnt,max 預力 fse Δfp Aps 柱 拉力",
+   "unit": "N",
+   "output": "Pnt_max",
+   "latex": "P_{nt,max}=f_y A_{st}+(f_{se}+\\Delta f_p)A_{pt}",
+   "vars": {
+    "fy": {
+     "desc": "普通鋼筋降伏強度",
+     "unit": "MPa",
+     "min": 0
+    },
+    "Ast": {
+     "desc": "普通（非預力）鋼筋總面積 Ast",
+     "unit": "mm2",
+     "min": 0
+    },
+    "fse": {
+     "desc": "預力鋼筋有效應力 fse",
+     "unit": "MPa",
+     "min": 0,
+     "default": 0
+    },
+    "dfp": {
+     "desc": "預力鋼筋應力增量 Δfp",
+     "unit": "MPa",
+     "min": 0,
+     "default": 0
+    },
+    "Apt": {
+     "desc": "預力鋼筋總面積 Apt（非預力構材取 0）",
+     "unit": "mm2",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "expr": "fy*Ast+(fse+dfp)*Apt",
+   "conditions": [
+    {
+     "expr": "fy>=0 and Ast>=0 and Apt>=0",
+     "msg": "fy、Ast、Apt 須為非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fy": 420,
+      "Ast": 2000
+     },
+     "out": 840000.0
+    },
+    {
+     "in": {
+      "fy": 420,
+      "Ast": 2000,
+      "fse": 1000,
+      "dfp": 100,
+      "Apt": 500
+     },
+     "out": 1390000.0
+    }
+   ],
+   "notes": "22.4.3.1：非預力、合成或預力構材之標稱軸向拉力強度不得大於 Pnt,max。其中 (fse+Δfp) 不應超過 fpy，且**非預力構材 Apt 取為 0**。**（fse+Δfp）> fpy 之檢核須由使用者自行比對**（fpy 未列為本式輸入，以免成為必填）。對照：最大軸向壓力強度 Pn,max 見表22.4.2.1／rc112_Po_Pnmax（0.80Po 箍筋、0.85Po 螺箍筋）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.375 式(22.4.3.1)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_tie_Fnt",
+   "title": "拉桿標稱拉力強度 Fnt＝Ats·fy＋Atp·Δfp（式23.7.2）",
+   "src": "rc112",
+   "clause": "23.7.2",
+   "page": 420,
+   "keywords": "壓拉桿模式 拉桿 Fnt Ats Atp 預力 應力增量",
+   "unit": "N",
+   "output": "Fnt",
+   "latex": "F_{nt}=A_{ts}f_y+A_{tp}\\Delta f_p",
+   "vars": {
+    "Ats": {
+     "desc": "非預力拉桿鋼筋面積 Ats",
+     "unit": "mm2",
+     "min": 0
+    },
+    "fy": {
+     "desc": "非預力鋼筋降伏強度",
+     "unit": "MPa",
+     "min": 0
+    },
+    "Atp": {
+     "desc": "預力拉桿鋼筋面積 Atp（非預力構材取 0）",
+     "unit": "mm2",
+     "min": 0,
+     "default": 0
+    },
+    "dfp": {
+     "desc": "預力鋼筋應力增量 Δfp",
+     "unit": "MPa",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "expr": "Ats*fy+Atp*dfp",
+   "conditions": [
+    {
+     "expr": "Ats>=0 and fy>=0",
+     "msg": "Ats、fy 須為非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Ats": 1000,
+      "fy": 420
+     },
+     "out": 420000.0
+    },
+    {
+     "in": {
+      "Ats": 1000,
+      "fy": 420,
+      "Atp": 200,
+      "dfp": 150
+     },
+     "out": 450000.0
+    }
+   ],
+   "notes": "23.7.2：拉桿之標稱拉力強度 Fnt 依本式計算，其中**非預力構材之 Atp 等於 0**。解說：預力拉桿總強度為 Atp(fse+Δfp)，係依 23.2.7 節將預力效應模擬成外力作用。壓桿圍束箍筋間距（23.6.3.1）取 (a) 壓桿斷面最小尺度、(b) 48db、(c) 受壓鋼筋 16db 之最小值；第一個閉合箍筋距壓桿兩端節點區表面 ≤0.5s。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.420 式(23.7.2)＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_column_tie_min_area",
+   "title": "柱橫向鋼筋每方向最小量：n·Ab ≥ 0.0015·h·s（10.7.6.1.1）",
+   "src": "rc112",
+   "clause": "10.7.6.1.1",
+   "page": 150,
+   "keywords": "柱 橫向鋼筋 箍筋 繫筋 最小斷面積 h1 h2 間距 Ab",
+   "unit": "mm2",
+   "output": "Ab_req",
+   "latex": "\\text{方向1: }4A_b\\ge 0.0015 h_1 s,\\quad \\text{方向2: }2A_b\\ge 0.0015 h_2 s",
+   "vars": {
+    "h": {
+     "desc": "該方向柱斷面尺度 h（方向1 取 h1、方向2 取 h2）",
+     "unit": "mm",
+     "min": 0
+    },
+    "s": {
+     "desc": "橫向鋼筋間距 s",
+     "unit": "mm",
+     "min": 0
+    },
+    "n": {
+     "desc": "該方向同時受箍筋／繫筋圍束之支數（方向1 為 4、方向2 為 2）",
+     "unit": "支",
+     "default": 4,
+     "min": 1
+    }
+   },
+   "expr": "0.0015*h*s/n",
+   "conditions": [
+    {
+     "expr": "n>0",
+     "msg": "支數 n 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "h": 600,
+      "s": 100,
+      "n": 4
+     },
+     "out": 22.5
+    },
+    {
+     "in": {
+      "h": 600,
+      "s": 100,
+      "n": 2
+     },
+     "out": 45.0
+    }
+   ],
+   "notes": "10.7.6.1.1：柱橫向鋼筋應適用鋼筋間距最嚴格的要求，且兩個方向分別滿足 方向1：4Ab ≥ 0.0015 h1 s、方向2：2Ab ≥ 0.0015 h2 s（Ab 為箍筋斷面積）。本式回傳「每支所需最小 Ab」；方向1 之 n 取 4、方向2 取 2。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.150 §10.7.6.1.1＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  },
+  {
+   "id": "rc112_diaphragm_shear_limit",
+   "title": "橫膈板剪力上限 Vu／Acv ≤ φ·0.66√fc′（式12.5.3.4，SI）",
+   "src": "rc112",
+   "clause": "12.5.3.4",
+   "page": 172,
+   "keywords": "橫膈板 剪力 名義強度 Acv fc 上限 0.66 sqrt fc 2.12",
+   "unit": "MPa",
+   "output": "v_limit",
+   "latex": "\\frac{V_u}{A_{cv}}\\le \\phi\\,0.66\\sqrt{f_c'}\\ \\ (\\mathrm{MPa})\\quad[2.12\\sqrt{f_c'}\\ \\mathrm{kgf/cm^2}]",
+   "vars": {
+    "fc": {
+     "desc": "混凝土規定抗壓強度 fc′（用於本式時不得超過 8.3 MPa 之換算上限）",
+     "unit": "MPa",
+     "min": 10
+    },
+    "phi": {
+     "desc": "剪力強度折減因數 φ",
+     "unit": "-",
+     "default": 0.75,
+     "min": 0.4,
+     "max": 1.0
+    }
+   },
+   "expr": "phi*0.66*sqrt(fc)",
+   "conditions": [
+    {
+     "expr": "fc>0",
+     "msg": "fc′ 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "fc>8.3",
+     "msg": "式中用來計算 Vn 之 √fc′ 值應不超過 8.3 MPa（對應 26.5 kgf/cm²）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc": 28,
+      "phi": 0.75
+     },
+     "out": 2.6192937979539446,
+     "tol": 1e-05
+    },
+    {
+     "in": {
+      "fc": 21
+     },
+     "out": 2.268375,
+     "tol": 1e-05
+    }
+   ],
+   "notes": "12.5.3.4 原文（kgf/cm²）：Vu/Acv ≤ φ·2.12√fc′ 且 ≤ φ·0.66√fc′（兩式為公制與 SI 之同一限制），並規定「式中用來計算 Vn 之 √fc′ 值應不超過 26.5 kgf/cm²[8.3 MPa]」。本式回傳應力上限（MPa），實際檢核為 Vu/Acv ≤ 結果。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照混凝土結構設計規範(112年版) p.172 式(12.5.3.4)（kgf 與 MPa 兩版）＋手算",
+    "by": "agent",
+    "date": "2026-11-01"
+   }
+  }
+ ]
+}

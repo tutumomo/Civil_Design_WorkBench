@@ -1,0 +1,35 @@
+# 土木小型工程設計工作區 — Python 依賴
+#
+# 安裝（建議在虛擬環境內）：
+#   python -m venv .venv
+#   # Windows: .venv\Scripts\activate      macOS/Linux: source .venv/bin/activate
+#   python -m pip install -r requirements.txt
+#
+# 只跑設計計算（design/*、boq/*）時，核心需求只有 numpy；
+# 出圖、讀 PDF、讀 SHP 才會用到 ezdxf／pymupdf／shapely 等，缺了會由各工具自行提示。
+
+# --- 數值與設計計算（必要）---
+numpy>=1.26
+
+# --- CAD 出圖（tools/a3_sheet、tools/wall_section、tools/cadastral 需要）---
+ezdxf>=1.3
+matplotlib>=3.8
+shapely>=2.0
+
+# --- 座標轉換與地理資料（現況底圖、地籍套繪需要）---
+pyproj>=3.6
+pyshp>=2.3
+
+# --- 讀規範 PDF、抽表格（tools/regs 需要）---
+PyMuPDF>=1.24          # import fitz；find_tables() 需 >=1.23
+
+# --- 讀地籍／水利開放資料（tools/cadastral 需要）---
+requests>=2.31
+urllib3>=2.0
+
+# --- Word 報告（tools/report 的後處理與驗證需要；產 docx 由 WordCraft 負責）---
+python-docx>=1.1
+
+# --- 選用 ---
+# opencv-python>=4.9   # tools/site_basemap 的影像處理實驗腳本
+# beautifulsoup4>=4.12 # tools/regs/fetch_regs.py 抓法規網頁（純 HTML 解析）

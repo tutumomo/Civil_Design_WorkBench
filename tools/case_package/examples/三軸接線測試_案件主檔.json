@@ -1,0 +1,16 @@
+{
+ "_note": "案件主檔（三軸接線測試）：刻意混用三個已知的良好樣本，只為驗證 case_package 能在一道指令裡同時驅動三軸並彙整交付清單。實際案件請用同一案的三份資料（見 docs\\案件交付包.md §2）。",
+ "title": "三軸接線測試",
+ "out_dir": "_case_package_test\\三軸",
+ "boq_path": "tools/boq/examples/AC刨鋪5cm工程.json",
+ "report_path": "tools/report/examples/AC刨鋪5cm工程.json",
+ "drawing": {
+  "dxf": "tools/a3_sheet/_selftest_rules/規定測試_現況平面圖_A3.dxf",
+  "scale": 600,
+  "require_dwg": true,
+  "require_layers": [
+   "10_道路邊線_現況",
+   "20_建物"
+  ]
+ }
+}

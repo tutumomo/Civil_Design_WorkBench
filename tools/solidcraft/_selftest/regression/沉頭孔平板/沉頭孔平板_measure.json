@@ -1,0 +1,233 @@
+{
+  "bodies": [
+    {
+      "area_mm2": 9777.82853025791,
+      "bbox": {
+        "max": [
+          40.000000000000014,
+          25.00000000000003,
+          5.999999999999945
+        ],
+        "min": [
+          -40.0,
+          -25.000000000000007,
+          -1.090078077518847e-14
+        ]
+      },
+      "center_of_mass": [
+        -3.1925652187973535e-16,
+        4.603934581462995e-15,
+        2.9815946987373705
+      ],
+      "closed": true,
+      "density_g_cm3": 1.29,
+      "edges": 40,
+      "face_types": {
+        "cylinder": 12,
+        "plane": 10
+      },
+      "faces": 22,
+      "kernel": {
+        "edges": 72,
+        "faces": 30,
+        "shells": 1,
+        "vertices": 48
+      },
+      "mass_g": 30.10238870520849,
+      "material": "Default",
+      "name": "Body1",
+      "vertices": 32,
+      "volume_mm3": 23335.18504279728
+    }
+  ],
+  "body_count": 1,
+  "params": [
+    {
+      "comment": "",
+      "error": null,
+      "expression": "80 mm",
+      "model": false,
+      "name": "L",
+      "unit": "mm",
+      "value": 80.0
+    },
+    {
+      "comment": "",
+      "error": null,
+      "expression": "50 mm",
+      "model": false,
+      "name": "W",
+      "unit": "mm",
+      "value": 50.0
+    },
+    {
+      "comment": "",
+      "error": null,
+      "expression": "6 mm",
+      "model": false,
+      "name": "T",
+      "unit": "mm",
+      "value": 6.0
+    },
+    {
+      "comment": "",
+      "error": null,
+      "expression": "8 mm",
+      "model": false,
+      "name": "inset",
+      "unit": "mm",
+      "value": 8.0
+    },
+    {
+      "comment": "",
+      "error": null,
+      "expression": "W",
+      "model": true,
+      "name": "d1",
+      "unit": "mm",
+      "value": 50.0
+    },
+    {
+      "comment": "",
+      "error": null,
+      "expression": "L",
+      "model": true,
+      "name": "d2",
+      "unit": "mm",
+      "value": 80.0
+    },
+    {
+      "comment": "",
+      "error": null,
+      "expression": "L/2 - inset",
+      "model": true,
+      "name": "d6",
+      "unit": "mm",
+      "value": 32.0
+    },
+    {
+      "comment": "",
+      "error": null,
+      "expression": "W/2 - inset",
+      "model": true,
+      "name": "d7",
+      "unit": "mm",
+      "value": 17.0
+    }
+  ],
+  "sketches": [
+    {
+      "curves": 6,
+      "dof": 0,
+      "id": 1,
+      "name": "PlateSketch",
+      "profiles": 1,
+      "status": "solved",
+      "visible": false
+    },
+    {
+      "curves": 0,
+      "dof": 0,
+      "id": 4,
+      "name": "HolePts",
+      "profiles": 0,
+      "status": "solved",
+      "visible": true
+    }
+  ],
+  "timeline": [
+    {
+      "boolean_diagnostics": {
+        "events": [],
+        "truncated": false
+      },
+      "error": null,
+      "id": 1,
+      "ms": 0.2992,
+      "name": "PlateSketch",
+      "rolled_back": false,
+      "suppressed": false,
+      "type": "Sketch",
+      "warning": null
+    },
+    {
+      "boolean_diagnostics": {
+        "events": [],
+        "truncated": false
+      },
+      "error": null,
+      "id": 2,
+      "ms": 1.185,
+      "name": "Plate",
+      "rolled_back": false,
+      "suppressed": false,
+      "type": "ExtrudeFeature",
+      "warning": null
+    },
+    {
+      "boolean_diagnostics": {
+        "events": [],
+        "truncated": false
+      },
+      "error": null,
+      "id": 3,
+      "ms": 35.7945,
+      "name": "Corners",
+      "rolled_back": false,
+      "suppressed": false,
+      "type": "FilletFeature",
+      "warning": null
+    },
+    {
+      "boolean_diagnostics": {
+        "events": [],
+        "truncated": false
+      },
+      "error": null,
+      "id": 4,
+      "ms": 0.0494,
+      "name": "HolePts",
+      "rolled_back": false,
+      "suppressed": false,
+      "type": "Sketch",
+      "warning": null
+    },
+    {
+      "boolean_diagnostics": {
+        "events": [],
+        "truncated": false
+      },
+      "error": null,
+      "id": 5,
+      "ms": 32.5084,
+      "name": "Hole",
+      "rolled_back": false,
+      "suppressed": false,
+      "type": "HoleFeature",
+      "warning": null
+    },
+    {
+      "boolean_diagnostics": {
+        "events": [],
+        "truncated": false
+      },
+      "error": null,
+      "id": 6,
+      "ms": 321.97409999999996,
+      "name": "Holes",
+      "rolled_back": false,
+      "suppressed": false,
+      "type": "RectangularPatternFeature",
+      "warning": null
+    }
+  ],
+  "total": {
+    "area_mm2": 9777.82853025791,
+    "edges": 40,
+    "faces": 22,
+    "mass_g": 30.10238870520849,
+    "open_bodies_skipped": 0,
+    "vertices": 32,
+    "volume_mm3": 23335.18504279728
+  }
+}

@@ -1,0 +1,4244 @@
+{
+ "items": [
+  {
+   "src": "btr_design",
+   "clause": "116-3",
+   "status": "out_of_scope",
+   "reason": "建築物安全維護照明之地面照度基準表；屬建築設備／電氣照明範疇，非本工作區（道路、排水、擋土牆、邊坡）之設計引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "119",
+   "status": "out_of_scope",
+   "reason": "建築基地臨接道路寬度與基地長度之關係表；屬建築基地規劃管制，與道路幾何設計（公路路線／市區道路規範）不同層次",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "124-1",
+   "status": "out_of_scope",
+   "reason": "觀眾席連續式席位之寬度與橫排間距規定；屬建築物內部空間，非土木設計引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "167-3",
+   "status": "out_of_scope",
+   "reason": "無障礙廁所盥洗室數量表；屬建築物無障礙設施規範範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "167-5",
+   "status": "out_of_scope",
+   "reason": "輪椅觀眾席位數量表；屬建築物無障礙設施範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "167-7",
+   "status": "out_of_scope",
+   "reason": "無障礙客房數量表（B-4 組）；屬建築物無障礙設施範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "26",
+   "status": "out_of_scope",
+   "reason": "建築面積計算規定（基地境界線臨接道路比例）；屬建築基地管制，非本工作區設計計算",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "302",
+   "status": "out_of_scope",
+   "reason": "建築基地綠化固碳當量基準表；屬建築節能／綠建築範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "308",
+   "status": "out_of_scope",
+   "reason": "建築外殼節約能源之氣候分區表；屬建築節能範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "308-1",
+   "status": "out_of_scope",
+   "reason": "屋頂平均熱傳透率與透光天窗面積規定；屬建築節能範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "309",
+   "status": "out_of_scope",
+   "reason": "空調型建築物之類組列舉；屬建築節能範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "311",
+   "status": "out_of_scope",
+   "reason": "學校類建築窗面平均日射取得量基準表；屬建築節能範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "312",
+   "status": "out_of_scope",
+   "reason": "大型空間類建築窗面平均日射取得量公式；屬建築節能範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "33",
+   "status": "out_of_scope",
+   "reason": "建築物樓梯及平臺寬度、梯級尺寸表（依用途類別）；屬建築物內部空間",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "42",
+   "status": "out_of_scope",
+   "reason": "建築物採光用窗或開口之有效採光面積計算式；屬建築物內部空間／採光",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "56",
+   "status": "out_of_scope",
+   "reason": "垃圾排除設備（導管、垃圾箱）構造規定；屬建築設備範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "59",
+   "status": "out_of_scope",
+   "reason": "建築物附設停車空間數量表；屬建築基地管制，與停車場幾何設計不同層次",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "69",
+   "status": "out_of_scope",
+   "reason": "應為防火構造之建築物表；屬建築物防火範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "70",
+   "status": "out_of_scope",
+   "reason": "主要構造（柱、樑、承重牆、樓地板、屋頂）防火時效表；屬建築物防火範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "88",
+   "status": "out_of_scope",
+   "reason": "建築物內部裝修材料限制表；屬建築物防火範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_design",
+   "clause": "92",
+   "status": "out_of_scope",
+   "reason": "建築物走廊寬度表（依用途別）；屬建築物內部空間",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_equip",
+   "clause": "115",
+   "status": "out_of_scope",
+   "reason": "定性條文：昇降機房面積須大於昇降機道水平面積之二倍、機房內淨高度等規定；無可轉錄之數值表（原表另見第111條）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_equip",
+   "clause": "56",
+   "status": "out_of_scope",
+   "reason": "定性條文：撒水頭裝置位置與結構體之關係（迴水板應成水平、與屋頂板或天花板之距離等）；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "btr_equip",
+   "clause": "77",
+   "status": "out_of_scope",
+   "reason": "定性條文：火警自動警報器配線規定（耐熱 600 V 塑膠絕緣電線、線徑不得小於 1.2 mm 等）；屬施工規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "farmroad108",
+   "clause": "附件-2",
+   "status": "covered",
+   "reason": "已與附表一合併收錄於 farmroad108_design_norms_4levels（clause 附件-1）之「項目 × 四級並列」表，二級欄位完整；不另立條目",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "farmroad108",
+   "clause": "附件-3",
+   "status": "covered",
+   "reason": "已與附表一合併收錄於 farmroad108_design_norms_4levels（同一並列表之三級欄位）；不另立條目",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "farmroad108",
+   "clause": "附件-4",
+   "status": "covered",
+   "reason": "已與附表一合併收錄於 farmroad108_design_norms_4levels（同一並列表之四級欄位）；四級之路基寬度與凹型豎曲線分級未完整擷取，已於該條目 notes 標明",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "farmroad108",
+   "clause": "附件-5",
+   "status": "qualitative",
+   "reason": "純條文與附圖：農路設計規範第23 條水泥混凝土路面設計規定（厚度 ≥15 cm 並加鋪鋼筋或鋼線網；伸縮縫間隔 ≤8 m 等）及設計附圖，屬定性規定與圖說，無可轉錄之數值表或算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "此「單元」實為規範卷首：編訂小組與審查委員名單（依姓氏筆劃）、前言、以及目錄。全文 5,067 字無任何可計算之算式或數值表，係索引器把卷首頁當成條文收錄。此為解析 artifact，非本規範之條文，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "1",
+   "status": "qualitative",
+   "reason": "附錄F 為 AI CP-1 DAMA 程式輸入之示範案例（已知條件／解），內容為範例輸入值與操作步驟，非規範條文，無可轉錄之公式或數值表",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "18.8",
+   "status": "qualitative",
+   "reason": "本單元為第 9 章末尾之圖索引（圖9.3.(1)~(5) 之圖名與編號）與「參考資料」清單（[901] 公路養護手冊、[902] AI MS-17、[903] AASHTO 1993 等），另有「建議加鋪 AC 18cm 厚」之結論句。全篇無算式、無數值表，判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "2",
+   "status": "qualitative",
+   "reason": "附錄F 另一示範案例之「解」（DAMA 程式輸入步驟與範例數值），屬範例非規範條文，無公式或數值表可轉錄",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "2.2.2",
+   "status": "covered",
+   "reason": "交叉引用（設計基準版）：求出 80kN ESAL 後代入設計手冊公式3.2.(3) 求得 TI；該公式已入庫 flexpave91_TI（clause 3.2.4），本條無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "2.2.5",
+   "status": "covered",
+   "reason": "交叉引用（設計基準版）：交通量成長係數可參照設計手冊公式3.2.(7)；該式已入庫 flexpave91_GF（clause 3.2.6），本條無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "2.36",
+   "status": "qualitative",
+   "reason": "該條為參考文獻清單（[301]~[304] 等）與 4.1 簡介之段落，文字層為舊式字型編碼，內容為 AASHTO 設計方法沿革敘述，無算式或數值表可轉錄",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "2.4.3",
+   "status": "covered",
+   "reason": "交叉引用（設計基準版）：AASHTO 排水因子 m2、m3 可參照設計手冊 4.3.5 節及公式3.4.(1)；排水係數表已入庫 flexpave91_mi_T434、SN 式已入庫 flexpave91_SN_layers，本條無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "3.1.3",
+   "status": "covered",
+   "reason": "本款全文僅 15 字「詳見設計手冊圖4.1.(1)。」，係指向設計手冊之圖，本規範本身未給算式或數值；該圖對應之 AASHTO 設計式（式4.4.(1)）已入庫為 flexpave91_AASHTO_W18，故以 covered 處理",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "3.1.4",
+   "status": "covered",
+   "reason": "本款全文僅 63 字「設計公式可參照設計手冊公式4.4.(1)、公式4.4.(2)及公式4.4.(3)；設計圖表詳見設計手冊第4.4 節」，係純跨參照。所指三式已分別入庫為 flexpave91_AASHTO_W18（式4.4.(1) 之 log10W18）、flexpave91_SN_layers（式4.4.(2) SN＝a1D1＋a2D2m2＋a3D3m3）與 flexpave91_min_AC_T441（式4.4.(3) D1*≥SN1/a1），故以 covered 處理",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "3.1.5",
+   "status": "qualitative",
+   "reason": "每一種大致相同土壤最少要求 6 個試驗值，依累積曲線法求設計值；屬統計作業程序，無公式表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "3.2.9",
+   "status": "qualitative",
+   "reason": "初期交通量之來源（交通量調查、年報、文獻）與需涵蓋之項目（車輛數量、貨車因子、年成長率）；屬調查作業定性規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "3.3.5",
+   "status": "qualitative",
+   "reason": "大粒料瀝青混凝土（LSAM，標稱最大粒徑 >25 mm）之涵義與試驗方法；屬材料定義與試驗方法",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "3.4.3",
+   "status": "out_of_scope",
+   "reason": "純條文：90065-設計基準.pdf／柔性鋪面設計規範(設計基準).pdf 之 3.4.3 僅交叉引用設計手冊第7.2節與表7.2.(2)~(4)，條文本身無算式可轉錄。註：設計手冊-CH3 之 3.4.3「溫度」條另計（無公式表格，如日後轉錄 MAAT 資料請先自本筆移除）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "4.1",
+   "status": "qualitative",
+   "reason": "純條文與圖說：章節簡介（設計手冊-CH4 p.1-2）＋圖4.1.(1) AASHTO 方法設計步驟流程圖；流程圖內之 SN、a1~a3、D1~D3 公式已於 4.4.1 之 flexpave91_SN_layers 等條目入庫，本條無獨立算式可轉錄",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.1",
+   "status": "qualitative",
+   "reason": "此單元文字層為空（僅有標題或純圖頁），無內容可轉錄；判定為定性（非缺口）——原文若確有表／式，須回索引器修正切分",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.1.1",
+   "status": "qualitative",
+   "reason": "條文內容為「台灣地區使用美國瀝青學會鋪面設計方法(MS-1)已有數十年,若以路基土壤強度表示方法、交通量…」（424 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.1.2",
+   "status": "covered",
+   "reason": "本條內容與 5.2.2 相同（AI MS-1 1991 固定設計圖之 εt、εc 與公式5.2.(1) 等已於 flexpave91_AI_fatigue_N／flexpave91_AI_C／flexpave91_AI_rutting_N 入庫），且該頁文字層為舊式字型編碼（不可辨讀），故不另立條目",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.3.3",
+   "status": "covered",
+   "reason": "路基土壤強度表示法（MR）與試驗方法（AASHTO T292 或 AI MS-10）；換算公式已入庫（flexpave91_MR_from_CBR／MR_from_R，clause 4.3.3），本筆為試驗方法說明",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.6.1",
+   "status": "qualitative",
+   "reason": "DAMA（多層彈性理論 N-Layer Program）的背景與適用範圍說明：源自 Chevron 研究、與 AI MS-1(1981) 的關係、PC 版適用性等，全為程序性敘述，無算式或表格",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.7.5",
+   "status": "covered",
+   "reason": "本節為「材料調查」之索引：粗級配瀝青混凝土材料調查詳見附錄D，並以「|E*| 試驗值索引表」（料源／壓實度／對應表號，如南部 95%→表D.6.(4)）指向附錄D 各表；另有波生比 ν＝0.35 之參數值。所指之表D.6.(8)(9) 已入庫為 flexpave91_Estar_D68／D69，其餘表為同型之動彈性模數表，故以 covered 處理",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.7.6",
+   "status": "qualitative",
+   "reason": "條文內容為「底層碎石級配料之材料調查詳見附錄E[510]。2.MR試驗值(壓實度98%,飽和度80%):…」（182 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "5.9",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（基於路基土壤、設計當量軸次及鋪築材料等假設值不同,提供四個範例,列於附錄F.4節內。5-27…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "6.1.1",
+   "status": "qualitative",
+   "reason": "條文內容為「美國加州設計方法(以下簡稱加州設計法)係一種半理論設計法(Semi-theoreticalM…」（210 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "6.2.4",
+   "status": "covered",
+   "reason": "本條僅陳述「礫石之當量係數 Gf＝1.0」與「AC 之 Gf 因 TI 而變，詳表6.2.(1)」，屬定性陳述；數值已入庫為表6.2.(1)（flexpave91_Gf_T621，掛 6.2.5）",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "6.3.2",
+   "status": "covered",
+   "reason": "純條文＋交叉引用：交通量指數公式即公式3.2.(3) TI=9.0(80kN ESAL/10^6)^0.119（已入庫 flexpave91_TI，clause 3.2.4）；交通量計算程序詳 3.2.9 節，本條無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "6.4.2",
+   "status": "qualitative",
+   "reason": "美國加州 1995 年版設計方法之設計流程圖（圖6.4.(1)，含路基強度設計值、TI 等步驟流向）；屬流程圖，無獨立數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "6.5.1",
+   "status": "covered",
+   "reason": "示範範例：以 TI=15.1、R=8 求 GE=0.975(15.1)(100-8)=1354 mm、再以 R=78 求 GE(AC)=323.9 mm、加安全因子 60 mm 後查表6.2.(1) 得 AC 240 mm — 全為公式6.4.(1)(2)（已入庫 flexpave91_T_california／flexpave91_GE_california）與表6.2.(1)（暫緩）之應用，非獨立公式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "7.2.8",
+   "status": "covered",
+   "reason": "示範範例：鄉道每日 20 輛重型貨車、10 年累積 73,000 輛→查表7.2.(1) 得Ⅲ級、CBR=2 屬不良→查表7.2.(3) 得 40+85+300=425 mm；僅為表7.2.(1)(3)（已入庫 flexpave91_AItraffic_T721／flexpave91_AI181_design_T723）之查表示範，無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "7.3.1",
+   "status": "covered",
+   "reason": "定性條文：美國加州設計方法以 TI 為交通量分析基準，**TI ≤6.5 時該道路即為低交通量道路**；並述低交通量道路之厚度公式仍採公式6.4.(1)（已入庫 flexpave91_T_california），惟各層 Gf 與加州 1995 年版不同（表7.3.(1) 已入庫 flexpave91_conv_ratio_T731）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "7.3.7",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（1.求出設計當量軸次,然後再求出交通量指數(7.3.3節)。2.求出路基土壤R值設計值(7.…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "7.3.8",
+   "status": "qualitative",
+   "reason": "加州設計法之範例題（CBR=3、ESAL=5.3×10⁴ 求鋪面厚度）；屬範例",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "9.1.2",
+   "status": "covered",
+   "reason": "純條文：瀝青路面修復分為應急修復（修補、裂縫填補、加薄封層<2.5cm、局部翻修）與改善工程（加鋪、銑刨加鋪、翻修）兩大類之定義性敘述；其加鋪厚度＝重新設計厚度－有效厚度之觀念已入庫 flexpave91_overlay_To／flexpave91_Te_effective（clause 9.2.2），另參考圖9.1.(1) 現況評定值曲線（圖面未收錄）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "9.2.1",
+   "status": "out_of_scope",
+   "reason": "純表單：表9.2.(1) 為「AI 決定鋪面現況評定值表」，內容是工程名稱／長度寬度／鋪面類別／缺失項目（橫向裂縫、縱向裂縫…）與評定值範圍 0~5 之人工調查記錄表，屬現場評分表單而非可計算之數值表；表9.2.(2) 為修復時機評定（亦為分級判讀）。評定值→修復決策之表格待與 9.2.(3) 轉換因子表一併處理",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "9.2.3",
+   "status": "out_of_scope",
+   "reason": "純步驟性條文：AI MS-17 撓度加鋪設計方法之流程（決定加鋪路段、撓度量測、計算 RRD、評估 ESAL、決定加鋪厚度）；數值工具為圖9.2.(2)~(4) 之諸模圖（回彈撓度→加鋪厚度），無閉式公式或數值表可轉錄",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "99.3",
+   "status": "qualitative",
+   "reason": "條號為解析 artifact（來自「99.3」字串）。這批 unit 實為附錄E.2／E.3 的材料試驗數據表（R 值、MR 試驗，AASHTO T292）與附錄F 的 DAMA 程式輸入／輸出畫面（F.12／F.22／F.37 的 batch 輸入提示）；E.1 的 CBR 表已入庫（flexpave91_CBR_TE11），其餘為程式操作畫面與試驗原始數據，非設計算式或設計用限值",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "附錄B",
+   "status": "qualitative",
+   "reason": "附錄B AASHTO 鋪面設計範例（範例B.1：四車道高速公路、20 年分析期）；屬範例",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "附錄C",
+   "status": "qualitative",
+   "reason": "附錄C 修訂 AI MS-1 固定設計圖範例（範例C.1：ESAL=1.7×10⁷ 之設計）；屬範例，無新規則",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "附錄D",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（附錄D.台灣地區現用瀝青混凝土規格與材質關係附D.1附錄D.台灣地區現用瀝青混凝土規格與材質…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "附錄E",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（附錄E.底層碎石級配料CBR、R值與MR關係附E.1附錄E.底層碎石級配料CBR、R值與MR…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "flexpave91",
+   "clause": "附錄F",
+   "status": "out_of_scope",
+   "reason": "附錄F AI CP-1 DAMA 程式之輸入方法與步驟（含螢幕畫面之材料規定）；屬外部程式操作手冊，非設計規則",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "1.3",
+   "status": "qualitative",
+   "reason": "條文內容為「本規範所列之大地工程調查、試驗規劃、設計分析、施工監測及安全評估準則,乃基於學理及工程實務經…」（362 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "1.7",
+   "status": "qualitative",
+   "reason": "條文內容為「基礎分析設計時,針對基礎承受之各種設計載重特性及加(減)載作用狀況,必須先研判基礎地層所受應…」（527 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "10.2",
+   "status": "qualitative",
+   "reason": "純條文：土壤液化評估之地震參數（尖峰水平地表加速度 A、地震矩規模 M_W）應依工程重要性、地質特性以機率法決定，或引用內政部「建築物耐震設計規範與解說」；本規範不重複規定數值，無算式或數值表（數值已由 seis113 收錄）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "2",
+   "status": "qualitative",
+   "reason": "條文內容為「基礎限界狀態係指滿足建築物安全性、修復性與使用性等所能容許之基礎受力或變形上限值。可分為對應…」（1374 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "2.12",
+   "status": "qualitative",
+   "reason": "純條文：只定義抗浮安全係數＝建築物整體抗浮能力／基礎底面上舉水壓力，未給最小安全係數數值（數值須查解說或契約另訂）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "3.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「建築物基地之調查可配合建築計畫之規劃設計及施工作業階段逐步辦理,調查之精度由低至高,並視工程…」（2390 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "4.2",
+   "status": "qualitative",
+   "reason": "條文內容為「基礎板底深度之設定須考慮地層受溫度、體積變化或沖刷之影響,如有冰凍之地區,基礎板底之深度必須…」（262 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "4.4.7",
+   "status": "qualitative",
+   "reason": "定性條文：次壓縮沉陷量可利用壓縮性地層不擾動土樣之單向度壓密試驗結果推估；次壓縮通常發生於高壓縮性黏土層（工作台 foundation_settlement 之次壓縮以 Cα 法實作）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "4.5.1",
+   "status": "qualitative",
+   "reason": "條文內容為「對應各種淺基礎型式,應建立適當之分析模式,分析基礎承受載重與變位之反應曲線,供基礎設計使用。…」（1723 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "5.1.3",
+   "status": "qualitative",
+   "reason": "條文內容為「基樁之支承力因施工方式而異,施作方式主要可分為下列三類:採用打擊方式將預製之實體樁貫入於地層…」（1288 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "5.1.4",
+   "status": "qualitative",
+   "reason": "條文內容為「基樁之施工都將對周邊環境產生影響,設計前應先詳細調查,評估施工可行性,以及其對周邊環境之影響…」（968 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "5.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「基樁之選擇及設計,應綜合考慮地質條件、上部構造型式、載重方式、容許變位、施工可行性、施工品質…」（966 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "5.3.3",
+   "status": "qualitative",
+   "reason": "【2026-11-02 更正判定】原註記「解5.3-10／解5.3-11 為分段排列之公式」有誤：該二編號實為**圖號**（p.125 為圖-解5.3-10「基樁負摩擦力觀測結果」、p.141 為圖-解5.5-3），5.3.3 全節僅有條文與圖示（樁-土互制機制、彈性基礎梁模式 Hetenyi 1946、p-y 曲線與雙線性彈簧），無閉式計算公式，屬定性條文",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "5.5.2",
+   "status": "qualitative",
+   "reason": "條文內容為「群樁之沉陷量應考慮樁身受壓之變形量,及群樁底部地層受群樁合力影響而生之變形量。若底部地層為可…」（662 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "5.6.2",
+   "status": "qualitative",
+   "reason": "純條文：預鑄混凝土樁之材料須符合建築構造編相關章節、樁體須能承受設計載重與吊樁/打樁最大應力、離心法製品比照 CNS1260‧A2031；另有最低混凝土強度 280 kgf/cm2、主鋼筋最少支數與斷面積比等「材料與配筋下限」規定，無可轉錄之計算公式或數值表（下限值屬單點規定，已載於本 skip 理由）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.2.11",
+   "status": "out_of_scope",
+   "reason": "定性條文：沉箱受垂直載重之沉陷量＝沉箱體彈性變形量＋沉箱底部地層沉陷量（彈性變形依載重與沉箱材料性質推算）；本工作區未涉及沉箱基礎",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.2.14",
+   "status": "out_of_scope",
+   "reason": "沉箱負摩擦力檢核式(6.2-1)（Pf＋... ≤ σsa·Ac/FS）；本工作區未涉及沉箱（大型橋梁基礎），非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.2.15",
+   "status": "out_of_scope",
+   "reason": "沉箱基礎各構件之結構設計應符合建築構造編規定（解說說明除上部結構載重外之考量）；本工作區未涉及沉箱，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.2.5",
+   "status": "out_of_scope",
+   "reason": "定性條文：沉箱設計須擬定沉設計畫，檢討各階段下沉作業之總下沉力與地盤阻抗關係；本工作區未涉及沉箱",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.2.6",
+   "status": "qualitative",
+   "reason": "條文內容為「計算沉箱基礎之設計反應值時,應考慮基礎及地盤特性建立結構分析模型,依彈性理論或彈塑性理論推算…」（1277 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "6.2.7",
+   "status": "out_of_scope",
+   "reason": "定性條文：沉箱基礎分析模式之地盤阻抗採彈簧元素模擬（底面垂直與水平剪切、前後壁外側水平等）；本工作區未涉及沉箱",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.3.6",
+   "status": "qualitative",
+   "reason": "條文內容為「計算井式基礎之設計反應值時,應考慮基礎及地盤特性建立結構分析模式,基礎以有限長梁模擬,地盤阻…」（1355 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "6.3.7",
+   "status": "out_of_scope",
+   "reason": "定性條文：井式基礎設計所用地盤反力係數之種類（基礎底面垂直、水平剪切、前背面水平等）；本工作區未涉及井式基礎",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.4.11",
+   "status": "out_of_scope",
+   "reason": "定性條文：箱形連續壁基礎之變位以基礎頂板頂端為代表位置，依 6.4.6 節分析模式計算各設計情況之側向變位；本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.4.2",
+   "status": "qualitative",
+   "reason": "條文內容為「決定連續壁基礎的形狀、尺寸與施工方法,應考慮下列各項目:1.連續壁基礎的地盤條件、地盤阻抗特…」（808 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "6.4.7",
+   "status": "out_of_scope",
+   "reason": "定性條文：箱形連續壁基礎之地盤阻抗假設方式；本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.4.8",
+   "status": "out_of_scope",
+   "reason": "定性條文：箱形連續壁基礎之地盤阻抗模式應考慮地盤與施工條件、支承條件、形狀尺寸及作用特性；本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "6.4.9",
+   "status": "out_of_scope",
+   "reason": "定性條文：箱形連續壁基礎之極限垂直支承力＝基礎尖端極限尖端支承力＋基礎周面極限周面支承力；本工作區未涉及連續壁基礎",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "7.3.9",
+   "status": "qualitative",
+   "reason": "定性條文：擋土牆背回填土或牆背地層非均質時應採其他適當方法計算土壓力；採用較複雜型式擋土牆時應另考量；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "7.5.3",
+   "status": "qualitative",
+   "reason": "7.5.3 懸臂式擋土牆為定性規定（p.242-243 僅圖示 圖-解7.5-1，無閉式公式）；穩定條件為水平合力=0、力矩=0，須以土壓力分布圖數值求解",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "7.6.2",
+   "status": "qualitative",
+   "reason": "定性條文：鋼筋混凝土地下牆如採與地上構造物相同施工方法，其設計依建築構造編第六章混凝土構造各項規定；屬引用規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "8.10.5",
+   "status": "qualitative",
+   "reason": "條文內容為「各監測項目之監測點配置、數量及監測頻率應符合一般大地工程學理及經驗分析研判之需要,並以可充分…」（1040 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "8.3",
+   "status": "qualitative",
+   "reason": "定性條文：基礎開挖深度在地下水位以下時應設水位控制設施；解說列舉常用降水方法（重力式排水、點井、深井等）與對鄰近環境影響之防護措施。條文無算式或數值表（降水位至開挖面下 1~2 m 為經驗值，屬解說敘述）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "8.5",
+   "status": "qualitative",
+   "reason": "定性條文：基礎開挖無法以邊坡式開挖維護安全時，基地周圍應以合適擋土設施保護（選擇時考慮施工難易、水... 續文截斷）；擋土設施設計見 tools/design/ 各擋土牆計算器",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "8.7.3",
+   "status": "out_of_scope",
+   "reason": "定性條文：作用於支撐系統之側向土壓力應視地層分布、土壤特性、支撐型式及擋土結構變位而定（內撐式支撐系統之土壓力分布另述）；本工作區未涉及深開挖內撐",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "8.7.7",
+   "status": "qualitative",
+   "reason": "定性條文：開挖支撐設計應就基地地震分區及施工期長短考慮施工期間可能發生之地震並檢核安全性；屬耐震定性規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "8.9.2",
+   "status": "qualitative",
+   "reason": "條文內容為「由擋土壁及支撐系統所構成之擋土結構系統,須具有適當之勁度,並應事先評估開挖後所導致擋土結構體…」（367 字）；已逐字確認屬調查、分析或施工原則，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "found112",
+   "clause": "9.2.2",
+   "status": "qualitative",
+   "reason": "定性條文：地盤加密法之原理（機械振動、夯實或其他外力使土層密度增加、孔隙比減少）與適用範圍（非粘性土層或回填土）；屬地盤改良方法論",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "9.2.4",
+   "status": "qualitative",
+   "reason": "定性條文：地層固化法之工法分類（表層加固法、深層攪拌法、高壓噴射法）與適用土層說明；為工法選擇之定性規定，無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "found112",
+   "clause": "9.2.5",
+   "status": "qualitative",
+   "reason": "定性條文：低壓灌漿工法之原理、適用條件與設計要點（調查灌注地層類別及空隙率、依目的設計灌注量、選灌漿類別、預期滲入機制與範圍、灌注壓力範圍）；條文為定性規定，無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "此「單元」為規範卷首（封面／編訂小組名單／法規沿革），非條文；全篇 123 字無算式或數值表，係索引器把卷首頁收成條文，屬解析 artifact，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "10",
+   "status": "out_of_scope",
+   "reason": "本節設計假設未含輪重位於橫向無支承板緣之情況，橋兩端及跨徑中不連續處板緣應以隔梁或…；屬橋面板邊緣設計",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "10.1",
+   "status": "qualitative",
+   "reason": "符號定義：第十章支承之全部符號（A 橡膠支承面積、B 長度/寬度、D 直徑、E 彈性模數、G 橡膠剪力模數、S 形狀因數、Δ 位移、β PTFE 摩擦角等）之文字說明；各符號已寫入對應已驗證條目之 vars.desc，本條無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "10.5.2",
+   "status": "qualitative",
+   "reason": "交叉引用：特殊應用之支承須有適當載重及位移活動容量，表10.1 及圖10.1 所列內容作為選用與定義不同支承系統之指引；本條僅指向該表與圖，無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "10.6.1",
+   "status": "qualitative",
+   "reason": "定性條文：金屬搖動及滾動支承之構造細節應考慮檢視及維護便利性，並規定支承轉動軸應與所支撐構材發生最大轉動量之轉動軸一致；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "2",
+   "status": "qualitative",
+   "reason": "定性條文：橋梁結構各部分所採設計法（容許應力設計法、強度設計法）之基本要求陳述——使用載重組合應力 ≦ 容許應力；需要強度 ≦ 設計強度（即（載重因數）×（使用載重）組合 ≦（強度折減因數）×（計算強度））。無具體算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "2.9",
+   "status": "qualitative",
+   "reason": "定性條文：欄杆之設置原則與材料規定（車道欄杆之目的、材質須為混凝土／金屬／木料或其混合、金屬材料伸長率 <10% 不得使用；市區快速道路應以混合欄杆分隔人行道與車道）。原條以文字敘述尺寸與配置，無可轉錄之數值表或算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "4.3",
+   "status": "qualitative",
+   "reason": "簡支跨徑定義（支承中心至中心，但不超過淨跨徑與橋板厚度之和）；屬橋梁跨徑定義",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "4.5",
+   "status": "out_of_scope",
+   "reason": "（本批為第四章載重分佈）木橋面板輪重分佈與式(4-2)(4-3) 已於前批列暫緩；此條重複項一併登錄",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "4.6",
+   "status": "qualitative",
+   "reason": "條文內容為「通則(1)鋼格橋面應設計為連續結構,分析可採用簡支彎矩並依4.3節之規定折減。(2)本節所規…」（524 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "5.2",
+   "status": "qualitative",
+   "reason": "條文內容為「基礎設計應能提供適當之結構支承、容許沉陷範圍內之適當基礎承載力及鄰近邊坡之整體穩定。結構之容…」（467 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "5.7.6",
+   "status": "qualitative",
+   "reason": "條文內容為「基樁之設計載重按照本章5.5節規定辦理之。基樁之設計應能承載所施加之全部載重。基樁之承載力得…」（141 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "7.1.1",
+   "status": "qualitative",
+   "reason": "本條為符號定義表（各符號之名稱、意義與單位，如「1.符號a:相當矩形應力塊之深度,見7.3.3節…」），不含可計算之算式；符號本身無需轉錄為條目，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "7.1.10",
+   "status": "covered",
+   "reason": "已入庫於 hwbridge104_a 分片：hwbridge104_spiral_ratio（螺箍筋比率式）與 hwbridge104_column_longitudinal_ratio（縱向鋼筋 0.01Ag~0.04Ag、圓形 6 根／矩形 4 根、最小 D16）。本規範（hwbridge）之同一條文為章本與整本之重複單元（p.12／p.128），內容相同，不另立條目",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "7.1.21",
+   "status": "covered",
+   "reason": "鋼筋續接應依設計圖說或工程師指定（搭接通則）；同型已於 hwbridge104 7.1.21 建立 skip 紀錄",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "7.1.22",
+   "status": "covered",
+   "reason": "連續及剛架構材應依彈性理論分析並考慮乾縮、潛變、溫度變化；同型已於 hwbridge104 7.1.22 建立 skip 紀錄",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "7.3.1",
+   "status": "qualitative",
+   "reason": "定性條文：結構物及構材之設計應使所有斷面之設計強度至少等於依 3.23 節設計載重組合算得之需要強度；屬原則性規定，無算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "7.3.4",
+   "status": "covered",
+   "reason": "受軸力或撓曲與軸力合併作用構材依 7.3.2 節應力應變相合性設計（細長效應依 7.3.5）；同型已於 hwbridge104 7.3.4 建立 skip 紀錄",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "8.17.2",
+   "status": "covered",
+   "reason": "內容已轉錄於 hwbridge_pc_flexure_strength_8173（式8-13／8-14~8-16／8-20~8-23）",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "8.18.1",
+   "status": "covered",
+   "reason": "內容已轉錄於 hwbridge_pc_flexure_strength_8173（式8-13／8-14~8-16／8-20~8-23）",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "8.20.1",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（1.預力混凝土撓曲構材,除實心板及基腳外,應配置承受剪力及斜拉應力之鋼筋。空心板應考量配置鋼…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "8.20.2",
+   "status": "covered",
+   "reason": "混凝土提供之剪力強度 Vc 取 Vci 或 Vcw 之較小者；預力構材剪力，Vcw 式已入庫（rc112 22.5.6.3.2），本筆為取小值規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "8.21.4",
+   "status": "qualitative",
+   "reason": "條文內容為「通則(1)鋼腱錨碇區力量之傳遞,可以壓力撐桿件與拉力拉桿件作近似模擬,兩桿件以節點交接。其中…」（1381 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.1.12",
+   "status": "qualitative",
+   "reason": "定性條文：除強度設計法使用結實斷面須依 9.3.7/9.3.10/9.3.11 節外，撓曲構材應使用彈性斷面模數設計；無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.1.2",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（本規範適用於下列各節內所列鋼材,使用其他鋼材則須另外訂定其材料性質、強度、容許應力及工作性等…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.1.23",
+   "status": "qualitative",
+   "reason": "設計剪力及拉力聯結物時應使用標稱直徑、高強度螺栓可代替 ASTM A307 螺栓等；屬鋼橋螺栓規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.1.24",
+   "status": "out_of_scope",
+   "reason": "樞接合受拉構材淨斷面積（穿過樞孔之淨斷面不得小於所需淨斷面之 140% 等）；屬鋼橋樞接合，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.2.12",
+   "status": "out_of_scope",
+   "reason": "以加勁鋼板做為橋面板之鋼橋設計（縱向肋條及橫梁加勁、橋面板有效寬）；屬鋼橋橋面，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.2.4",
+   "status": "out_of_scope",
+   "reason": "板梁依慣性矩法設計（主要受撓曲構材計算拉壓應力用整個總斷面）；屬鋼橋板梁，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.3.10",
+   "status": "out_of_scope",
+   "reason": "結實合成梁正彎矩區最大強度 Mu 之計算（鋼材應力-應變關係）；屬鋼橋合成梁，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.3.11",
+   "status": "out_of_scope",
+   "reason": "合成梁負彎矩區最大強度 Mu（混凝土板假定不承受拉力）；屬鋼橋合成梁，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.3.12",
+   "status": "out_of_scope",
+   "reason": "由兩根或多根單室合成箱梁組成之中等長度橋梁設計（相鄰箱梁翼板中心距離限制）；屬鋼橋箱梁，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.3.14",
+   "status": "out_of_scope",
+   "reason": "腹板鋼材強度低於翼板之大梁設計（合成或非合成板梁及合成箱梁）；屬鋼橋大梁設計，本工作區未涉及鋼橋",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.3.15",
+   "status": "out_of_scope",
+   "reason": "混合梁結實斷面最大強度 Mu＝Z·Fyf（式9-14x）；屬鋼橋混合梁設計，本工作區未涉及鋼橋",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "9.3.6",
+   "status": "qualitative",
+   "reason": "條文內容為「承受應力之構材所能承受之最大彎矩、剪力或軸力,應依3.23節之公式計得。結構物275之每一部…」（155 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge",
+   "clause": "附錄H",
+   "status": "out_of_scope",
+   "reason": "附錄H 結構用膠合材之許可單位應力（附錄表H-2，適用正常載重情形）；屬木構造膠合材，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge104",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "第七章章首、符號表與目錄頁，非條文內容",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge104",
+   "clause": "7.1.20",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（1.剪力鋼筋應至少延伸至拉力鋼筋之中心,並應在保護層及鄰近鋼筋排列許可下,儘量接近構材之受壓…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge104",
+   "clause": "7.1.21",
+   "status": "covered",
+   "reason": "定性條文：鋼筋續接應依設計圖說或由工程師指定，並列搭接通則（含 7.1.21 節 4. 項與 5.4.9）；續接長度之定量式已入庫 rc112 §25.5 系列條目",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge104",
+   "clause": "7.3.1",
+   "status": "qualitative",
+   "reason": "定性條文：結構物及其構材之設計應使所有斷面之設計強度至少等於依 3.23 節設計載重組合算得之需要強度；屬原則性規定，無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge104",
+   "clause": "7.3.10",
+   "status": "covered",
+   "reason": "定性條文：為控制混凝土撓曲裂縫，受拉鋼筋於最大拉力區域內應適當分佈（受拉鋼筋降伏強度 fy 超過 2800 kgf/cm² 者之特別規定續文未完整擷取）；裂縫控制之定量式已入庫 rc112 相關條目",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwbridge104",
+   "clause": "7.3.11",
+   "status": "qualitative",
+   "reason": "本條為通則／解說性質之規定（1.通則設計橋梁結構之受撓構材應使其具有適當之勁度,以限制對結構強度或使用性有不…），內容為適用範圍、設計原則或背景說明，無可參數化之算式或數值表，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridge104",
+   "clause": "7.3.2",
+   "status": "qualitative",
+   "reason": "定性條文：受撓曲與軸力構材之強度設計應根據本節假設並滿足平衡條件及應變相合性（鋼筋與混凝土應變與距中性軸距離成正比等）；無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "封面、規範沿革與目錄頁（公路工程施工規範 111 年 12 月），非條文內容",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "01525/2.1.3",
+   "status": "out_of_scope",
+   "reason": "支撐架新製鋼材材質（須符合 CNS 4750、CNS 5644，檢驗依 CNS 2608、CNS 4751 等）；屬材料標準引用",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "01525/3.2.3",
+   "status": "qualitative",
+   "reason": "條文內容為「支撐架基礎須位於可均勻承載之良好土層,其基地並須有良好之排水設施,以免因地面水漫流積蓄致承載…」（355 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02424/2.1.1",
+   "status": "out_of_scope",
+   "reason": "粒料須符合第03053 章規定且細粒料通過 No.200 篩之有害物質含量限制；屬材料標準引用",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02468/3.4.14",
+   "status": "covered",
+   "reason": "表02469-1（全套管基樁材料與施工檢驗項目）已入庫為 hwconst112_pile_inspection_T024691；本條 02468/3.4.14 為其引用條文，本身無獨立表格或算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02492/7",
+   "status": "qualitative",
+   "reason": "基樁載重試驗之觀測程序（依表02492 附A-1 規定測觀時間、各階段維持荷重期間量測變位並繪製變位量～對數時間圖）；屬試驗程序規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02714/2.1.3",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（(1)承包商應提供瀝青處理底層之「工作拌和公式」(JobMixFormula),送交工程司核…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02741/1.5.3",
+   "status": "qualitative",
+   "reason": "條文內容為「瀝青混凝土配合設計報告書除契約圖說另有規定或經工程司核可者外,應依馬歇爾法(AIMS-2)辦…」（329 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02741/2.1.1",
+   "status": "qualitative",
+   "reason": "條文內容為「一般要求A.粒料應潔淨,不含過量有機物、土塊、雜物及其他有害物質,且導入拌和機時不得有結塊之…」（1204 字）；已逐字確認屬材料標準引用，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02743/2.2.3",
+   "status": "out_of_scope",
+   "reason": "改質瀝青品質應符合 CNS 14184 第III型或表規定之引用條文（表身未隨條文完整擷取）；屬材料標準引用",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02743/2.3.4",
+   "status": "out_of_scope",
+   "reason": "石膠泥瀝青混凝土（SMA）纖維材料用量（木質纖維約總混合料質量 0.3%、礦物纖維另計）；屬配比材料用量指引，數值為「一般約」非強制",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02743/2.5",
+   "status": "qualitative",
+   "reason": "SMA 配合設計程序（依 NAPA QIP 122 及 AI MS-2 馬歇爾法）；屬程序規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02743/3.3.3",
+   "status": "qualitative",
+   "reason": "條文內容為「各種尺寸的粒料、填縫料與纖維材料在拌和機內先予乾拌再加入瀝青材料濕拌,其用量應依工作拌和公式…」（359 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02743/3.6.2",
+   "status": "out_of_scope",
+   "reason": "石膠泥瀝青混凝土（SMA）滾壓作業（初壓、複壓、終壓三階段及壓實要求）；屬 SMA 特殊鋪面施工，本工作區一般 AC 鋪面未含 SMA，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02789/2.1.1",
+   "status": "out_of_scope",
+   "reason": "瀝青表面處理用瀝青材料種類及等級（如表02789-1，實際種類依設計圖說）；屬材料標準引用",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02789/2.1.2",
+   "status": "qualitative",
+   "reason": "瀝青表面處理用粒料品質要求（花崗岩、石英岩、片麻岩等軋製碎石或天然卵石，須潔淨堅硬緻密耐磨級配良好）；屬定性材料要求",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02798/2.2.3",
+   "status": "out_of_scope",
+   "reason": "改質瀝青品質應符合 CNS 14184 第III型或表規定之引用條文（表身未隨條文完整擷取）；屬材料標準引用",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02798/2.3.4",
+   "status": "out_of_scope",
+   "reason": "多孔隙瀝青混凝土纖維穩定劑用量（木質纖維約總混合料質量 0.x%）；同上為一般用量指引",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02798/2.5",
+   "status": "qualitative",
+   "reason": "排水性鋪面配合設計程序（依日本道路協會「排水性鋪裝技術指針」及 AI MS-2 馬歇爾法）；屬程序規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02798/3.3.3",
+   "status": "qualitative",
+   "reason": "條文內容為「各種大小不同之粒料、礦物填充料與纖維穩定劑在拌和機內先予乾拌再加入瀝青材料濕拌,其用量應依工…」（357 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02798/3.6.2",
+   "status": "out_of_scope",
+   "reason": "多孔隙瀝青混凝土滾壓作業（初壓、複壓、終壓三階段）；屬排水性鋪面特殊施工，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "02966/2.1.4",
+   "status": "qualitative",
+   "reason": "條文內容為「為決定瀝青材料及粒料之用量,承包商應於施工前,根據所規定之材料種類做配合設計,並經各項試驗選…」（332 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "03380/3.2",
+   "status": "out_of_scope",
+   "reason": "預鑄預力混凝土 I 形梁、箱形梁、平板及預力樁之許可差（表03380-1~3）；預鑄預力橋梁構件，本工作區未涉及，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "03380/4.2.3",
+   "status": "qualitative",
+   "reason": "條文內容為「契約單價已包含混凝土、模板、支撐架、鋼筋、預力鋼腱、預力續接器、4-7903380-9錨碇裝…」（233 字）；已逐字確認屬計價與計量規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "03382/3.2.11",
+   "status": "qualitative",
+   "reason": "條文內容為「節塊底板底緣與未灌漿預力套管之淨距不得小於15cm。(2)滑動支承外緣與腹板外緣之距離不得小…」（423 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05121/2.1.2",
+   "status": "qualitative",
+   "reason": "鋼結構銲接材料選用（銲蕊、溶劑及銲條應依鋼料與銲接型式採用符合規範之最適用材料）；屬材料選用定性規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05121/3.2.3",
+   "status": "out_of_scope",
+   "reason": "鋼結構構材組立規定（應儘量使用工作架及輔助夾具、臨時固定銲接等）；屬鋼橋製造程序，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05121/3.2.4",
+   "status": "out_of_scope",
+   "reason": "鋼橋試拼裝規定（工廠製造完成後應在工程司指導下依設計圖說與施工製造圖樣試拼裝）；屬鋼橋製造程序，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05121/3.4.3",
+   "status": "out_of_scope",
+   "reason": "鋼結構銲道檢查規定（所有銲道應先目視檢查；對銲及角銲內部缺陷檢查依表05121-10 等）；屬鋼橋銲接品管，本工作區未涉及鋼橋製造，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05821/2.1.1",
+   "status": "qualitative",
+   "reason": "支承材料之提報與檢驗報告規定（鋼板等第(1)~(8)目應提報具公信力試驗機構之檢驗報告）；屬文件提報規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05821/2.2.2",
+   "status": "out_of_scope",
+   "reason": "支承設計採強度設計法，容許應力及設計強度依「公路橋梁設計規範」及 AASHTO 施工篇；屬引用規定（橋梁支承，非本工作區範疇）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05821/4.1",
+   "status": "qualitative",
+   "reason": "條文內容為「「盤式支承,xx型,xxxtf(或V=xxxtf,H=xxxtf)」係以「個」為計價單位,工…」（67 字）；已逐字確認屬計價與計量規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05821/4.2",
+   "status": "qualitative",
+   "reason": "計價條文（盤式支承契約單價已考慮設計圖之設計載重等）；屬計價規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05823/2.2.8",
+   "status": "out_of_scope",
+   "reason": "支承試驗表（抗拉強度、破斷伸長量、壓縮量等 ASTM 規格要求）；橡膠支承屬橋梁構件，本工作區未涉及橋梁支承設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "05831/4.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「含鋼板、螺紋套筒、螺栓、剪力釘)、平面或L型鋼板之製作與安裝所需一切材料、人工、機具設備等費…」（784 字）；已逐字確認屬計價與計量規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "09972/3.3.1",
+   "status": "qualitative",
+   "reason": "條文內容為「一般規定A.塗裝工程應切實按本規範之規定辦理。除由業主基於實際需要以書面所做補充說明或解釋外…」（6004 字）；已逐字確認屬材料標準引用，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "1",
+   "status": "qualitative",
+   "reason": "條文內容為「範」、中華民國國家標準(CNS)、美國材料試驗協會(ASTM)、日前言─2本工業規格協會(J…」（165 字）；已逐字確認屬材料標準引用，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「說明公路照明系統之製造、供應、安裝、測試及檢驗等相關規定。」等節名或殘句（29 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.2",
+   "status": "qualitative",
+   "reason": "條文內容為「說明準備工作、產品提供、施工方法、檢驗與系統測試等相關工作。除契約另有規定外,燈具種類包括高…」（63 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.3",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.3.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.4",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.4.1",
+   "status": "qualitative",
+   "reason": "條文內容為「電燈泡(普通照明用)CNS691螢光燈管(一般照明用)CNS692螺旋燈座CNS927螢光燈…」（203 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.4.2",
+   "status": "qualitative",
+   "reason": "條文內容為「加鈮釩高強度低合金結構鋼規範)…」（113 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.5",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.5.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「」等節名或殘句（12 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.5.2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/1.5.3",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.1.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「為標準之性能需求。」等節名或殘句（9 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.1.2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「具之型號與顏色必須與原產品一致。」等節名或殘句（16 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2.1",
+   "status": "qualitative",
+   "reason": "條文內容為「一般通則A.除契約另有規定外,同型式燈具應為同一製造廠之產品。B.除契約另有規定外,同一型式…」（238 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「除契約另有規定外,各項材料及施工之檢驗項目如下(1)高強度放電燈(水銀燈、複金屬燈及高壓鈉燈…」（248 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2.3",
+   "status": "qualitative",
+   "reason": "條文內容為「除契約另有規定外,各項材料及施工之檢驗項目如下(1)白熾燈泡及高強度放電燈泡之燈座:需符合C…」（175 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2.4",
+   "status": "qualitative",
+   "reason": "條文內容為「除契約另有規定外,各項材料及施工之檢驗項目如下(1)高強度放電燈之安定器需符合CNS2729…」（394 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2.5",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「有關柱長、形狀、材質、燈桿強度、構造及燈柱基礎依契約設計圖說規定。」等節名或殘句（34 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2.6",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「依契約設計圖說規定。」等節名或殘句（23 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/2.2.7",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「依契約設計圖說規定。」等節名或殘句（10 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.1.1",
+   "status": "qualitative",
+   "reason": "條文內容為「埋設導管、基礎、人孔及手孔時,所需之開挖工作應避免對於路幅、地貌及其他設施造成不必要之損害。…」（162 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.1.2",
+   "status": "qualitative",
+   "reason": "條文內容為「緣石、邊溝、水泥混凝土及瀝青混凝土路面、底層材料、草皮、樹木及其他改良物等,由於承包商施工作…」（64 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.1.3",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「照明燈柱基座之基礎、人孔及手孔依契約設計圖說規定辦理。」等節名或殘句（27 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.2.1",
+   "status": "qualitative",
+   "reason": "條文內容為「錨底座(AnchorBase)及錨碇螺栓(AnchorBolt)依契約設計圖說辦理。…」（44 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「鍍鋅鋼柱體在焊接完成後,應在足夠之壓力下作縱向冷輾,以壓平焊接縫。(2)燈柱製成後,應澈底清…」（120 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.3",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「除契約另有規定外,參照下列規定辦理。」等節名或殘句（18 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.3.1",
+   "status": "qualitative",
+   "reason": "條文內容為「連續性試驗各電路均應作連續性試驗,檢查各迴路施工後是否結合相通良好,以達9-2716526-…」（207 字）；已逐字確認屬燈具／照明材料之規格引用與試驗程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.3.2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「作試驗,若契約無規定則連續操作試驗之天數至少五天。」等節名或殘句（25 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/3.3.3",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「複連續試驗至合規定為止。」等節名或殘句（12 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/4",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/4.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「按契約詳細價目表所列項目及單位計量。」等節名或殘句（18 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/4.2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/4.2.1",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526/4.2.2",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「他為完成本工作所需之費用在內。〈本章結束〉9-28」等節名或殘句（27 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "16526章",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層為空——僅有節名或純標題頁，無條文內容可轉錄。已核對同章其他單元文字層正常，故此為原規範之章節結構而非解析漏失；實質內容見同章 1.1~4.2 各節（燈具規格、試驗、施工、計量）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "2",
+   "status": "qualitative",
+   "reason": "條文內容為「本規範條文為原則性規定。鑑於工程材料、設備及工法等發展日新月異,各工程主辦機關應用時應依工程…」（99 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "3",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「理。」等節名或殘句（2 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "附錄B",
+   "status": "out_of_scope",
+   "reason": "附錄B 地錨適用性試驗（以實際使用之工作地錨為對象，就不同錨碇地層與構件條件施作）；地錨屬特殊工法，本工作區未涉及，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwconst112",
+   "clause": "附錄C",
+   "status": "out_of_scope",
+   "reason": "附錄C 驗收試驗（地錨例行驗收試驗之荷重循環階段與最少觀測時間，如表0249x）；地錨屬特殊工法，本工作區未涉及，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "封面、規範沿革與目錄頁（含章節頁次），非條文內容",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "2.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「土地利用公路沿線相關集水區內土地利用現況、水土保持措施以及洪泛區與洪水平原管制區等。2.水利…」（370 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "2.3.3",
+   "status": "qualitative",
+   "reason": "條文內容為「公路工程施工期間,應依下列規定,施作臨時排水設施及施工臨時便橋:-8-1.施工中臨時排水設計…」（238 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "3",
+   "status": "qualitative",
+   "reason": "條文內容為「量,應依防洪計畫或排水計畫之規定。橋梁或涵洞上游有洩洪設施者,須特別注意其洩洪量,協調其管理…」（395 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "3.3",
+   "status": "qualitative",
+   "reason": "條文內容為「自長期觀測之雨量或流量紀錄資料,採部分延時序列法(methodofdurationserie…」（419 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "3.4",
+   "status": "covered",
+   "reason": "定性條文：設計雨量之推算以採用有關單位曾分析計畫地點附近區域之適用雨量強度公式為準；無適用公式者參考後續步驟（降雨強度公式已入庫 hwdrain107_i_form / swc_tech 第16條）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "3.4.4",
+   "status": "qualitative",
+   "reason": "條文內容為「各頻率之降雨強度,由自記雨量紀錄,依時間雨量關係式推求;無自記雨量紀錄者,依鄰近自記雨量站資…」（101 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.10",
+   "status": "qualitative",
+   "reason": "條文內容為「渠道通過公路、窪地、其他水路,或為維持公路開挖段兩側原有灌排水路之暢通,宜設高架渡槽(參見圖…」（193 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.2",
+   "status": "qualitative",
+   "reason": "條文內容為「一般渠道之水理設計可視實際情況假設為一維性的均勻流或非均勻流。其水理分析可用能量方程式或曼寧…」（64 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.3.2",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（非黏性土壤之渠道於設計流量情況下,渠底及側坡水流拖曳力不應大於土壤之臨界拖曳力(參見附錄K)…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.4.2",
+   "status": "qualitative",
+   "reason": "條文內容為「均勻流況無迴水影響之均勻斷面渠流,可假設為均勻流,應用曼寧公式及連續方程式計算平均流速及水深…」（277 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.8.2",
+   "status": "qualitative",
+   "reason": "條文內容為「渠道局部落差在3m以下時,設垂直式跌水構造消能(參見圖4-2及附錄L)。跌水構造應有足夠長度…」（98 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.8.4",
+   "status": "qualitative",
+   "reason": "條文內容為「渠道局部落差大且下游水位不穩定之情況,設齒坡式跌水構造消能(參見圖4-4)。齒坡式跌水縱向坡…」（148 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.8.5",
+   "status": "qualitative",
+   "reason": "條文內容為「明溝或管涵之出口流速小於10m/s,且下游水位不穩定時,可設衝擊式跌水構造消能(參見圖4-5…」（124 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "4.9",
+   "status": "qualitative",
+   "reason": "條文內容為「明溝沿陡峻山坡通過時,得設置座槽(參見圖4-6)。1.除特殊情況外,座槽採用矩形斷面之鋼筋混…」（181 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "5.12",
+   "status": "qualitative",
+   "reason": "條文內容為「於暗渠適當距離或方向折變處或二個以上管道相接處,設置人孔以利清理(參見圖5-6)。…」（42 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "5.12.2",
+   "status": "qualitative",
+   "reason": "條文內容為「人孔應有足夠之空間供人員上下及工作使用,其形狀及構造不應嚴重干擾水流,而致增加能量損失。設於…」（95 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "5.13",
+   "status": "qualitative",
+   "reason": "定性條文：路面排水系統末端應儘可能引至現有水路排放；排水出口處水位不應影響上游排水功能，出口與無襯砌水路銜接時視流速等因素設置消能設施。無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "5.2",
+   "status": "qualitative",
+   "reason": "條文內容為「路面排水系統係指收集路面逕流量,輸送至末端之各種排水設施。一般路面均俱橫向與縱向坡度,路面排…」（758 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "5.8.1",
+   "status": "qualitative",
+   "reason": "條文內容為「淺溝進水口視水理特性、漂浮物堵塞可能性、安全及經濟等因素,選用緣石進水口、格柵進水口或複式進…」（124 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "6.2.3",
+   "status": "qualitative",
+   "reason": "條文內容為「流況為進口控制時,涵洞通水能力受上游水位、涵洞進口幾何形狀及斷面大小之影響,以孔口流公式計算…」（68 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "6.2.4",
+   "status": "qualitative",
+   "reason": "條文內容為「流況為出口控制時,涵洞通水能力受上游水位、下游位以及涵洞之進口幾何形狀、斷面大小、長度、坡度…」（121 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "6.5",
+   "status": "qualitative",
+   "reason": "條文內容為「端牆、翼牆及導流牆之設計(參見圖6-2),視路堤高度、填土材料、水理條件、安全及美觀等因素決…」（49 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "6.5.3",
+   "status": "qualitative",
+   "reason": "條文內容為「導流牆設於水路流向改變處,以流線型漸變段設計。其長度應儘量使水流均勻穩定。-42-端牆翼牆護…」（88 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "6.7.1",
+   "status": "qualitative",
+   "reason": "條文內容為「涵洞與上下游水路之溝底落差不大,管底標高降低有限者,以橫交倒虹吸管處理(參見圖6-4)。倒虹…」（375 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "7.3.2",
+   "status": "qualitative",
+   "reason": "條文內容為「在緩流河川,壅水高度應以適當經驗公式計算之(參見附錄R),其下游有相鄰橋梁者,亦應考慮多橋影…」（74 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "7.8",
+   "status": "qualitative",
+   "reason": "條文內容為「橋墩處之基礎承載力,宜依其遭受最大可能沖刷情況計算。最大可能沖刷深度應考量局部沖刷深度、河床…」（112 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "7.8.1",
+   "status": "qualitative",
+   "reason": "條文內容為「橋墩局部最大沖刷深度,根據河性(水深、流速、流向......)、河床質、墩柱形狀,選用適當公…」（123 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "7.8.2",
+   "status": "qualitative",
+   "reason": "條文內容為「橋墩使河槽寬度縮小,其可能之沖刷深度,根據橋梁上下游水位差及河床質組成,選用適當公式計算之(…」（68 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "7.8.3",
+   "status": "qualitative",
+   "reason": "條文內容為「洪水通過時,河床質之移動層厚度,可自河床土壤組成柱狀圖或其他地質調查方法研判,或利用適當之輸…」（82 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "8.3",
+   "status": "qualitative",
+   "reason": "條文內容為「地下排水溝由透水管及溝槽內回填之濾層(或由透水濾布所包裹之透水材料)所構成(參見圖8-1)。…」（106 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "8.3.2",
+   "status": "qualitative",
+   "reason": "定性條文：地下排水溝透水管埋設深度視施工後地下水位、透水管間距、路面坡度、路基透水性及兩側邊坡特性等因素而定（參見圖8-2）。無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "8.9.3",
+   "status": "qualitative",
+   "reason": "條文內容為「公路經過潛在地滑區,須有適當之邊坡穩定施設,以減緩路基受損。2.有關崩塌地及土石流之防治處理…」（104 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "9.5.1",
+   "status": "qualitative",
+   "reason": "條文內容為「台數抽水機台數及馬力應依抽水井進流量大小與其變化率、設備之經濟性與風險性、用地及備用機組等需…」（342 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "附錄D",
+   "status": "qualitative",
+   "reason": "條文內容為「附錄D常用雨量紀錄補遺方法(相關章節:第三章3.4.3節)適用線性關係之對應雨量推定。D.1…」（361 字）；已逐字確認屬原則或構造要求（數值見所引條文），無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "附錄F",
+   "status": "covered",
+   "reason": "表F-1 住都處降雨強度延時公式（14 地區 × 3 重現期距）與公式 I＝a/(t+b)、a/t^c、a/(t+5)^c 已入庫為 rain_intensity_F1（公式）與 rain_intensity_F1_T（14 列對照表）；本處另一單元為表F-1/F-2 之測站名稱與經緯度索引（261 站），屬測站位置對照而非設計算式，且 F.2 之水利署 Horner 參數條文明示須另查水利署最新資料，規範本文未列",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "附錄G",
+   "status": "qualitative",
+   "reason": "附錄G「河川橋設計流量推估例」為三峽溪某重要公路河川橋之完整設計例：水文站選用（三峽流量站集水面積 125 km²、16 年記錄；石門雨量站 39 年記錄）、以極端值第I型分布與對數皮爾森第III型分布做頻率分析、面積比法推估，再以合理公式法與三種單位歷線法間接推算。全篇為演算程序與案例數字，無獨立可參數化之算式（其引用之公式已分別入庫：附錄A 經驗公式、附錄H 合理化公式與單位歷線）",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "附錄I",
+   "status": "qualitative",
+   "reason": "方法說明：美國土木工程師學會十分鐘單位歷線（無流量紀錄供查對時使用，摘譯），為圖表法說明，無獨立算式可轉錄",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "附錄L",
+   "status": "qualitative",
+   "reason": "設計例：垂直跌水構造設計例（下游最高水位小於上游渠底加 0.6 倍臨界水深等），為範例演算而非條文公式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "附錄N",
+   "status": "qualitative",
+   "reason": "方法說明：排水涵洞進口控制水力設計（N.1 混凝土管涵洞進口控制水力計算，水理設計圖表法），進口控制已另有 culvert_hydraulics 引擎與 hwdrain107_culvert_outlet_Hw／Ke_TO1 條目，本附錄為圖解法說明",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwdrain107",
+   "clause": "附錄X",
+   "status": "qualitative",
+   "reason": "條文內容為「附錄X公路排水工程常用專有名詞中英文對照(相關章節:本規範全冊)中文部份(以中文字首筆劃為序…」（5970 字）；已逐字確認屬名詞對照，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "14.2.16",
+   "status": "qualitative",
+   "reason": "條文說明本規範未來新建橋梁跨越本橋梁之淨高規定，及本橋梁下方淨高應依所跨越設施（公路、鐵路、河川、人行道等）之各有關目的事業個別規定辦理；屬權責劃分之定性條文",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.2.10",
+   "status": "out_of_scope",
+   "reason": "轉向車道（左、右轉車道及加減速車道）寬度與漸變段規定；本工作區不含多車道交叉路口之轉向車道設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.2.12",
+   "status": "out_of_scope",
+   "reason": "環形交叉設計速率表（依輻射道路設計速率）；本工作區不含環形交叉設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.2.9",
+   "status": "out_of_scope",
+   "reason": "轉向彎道（槽化路口供轉向且與主線分離之車道）設置規定：最短停車視距同 3.3.1 節、車道寬、轉向角等；本工作區為小型道路／農路案件，不含槽化路口與轉向彎道設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.3.2",
+   "status": "out_of_scope",
+   "reason": "立體交叉之縱坡度、超高率與平曲線最小半徑規定（無匝道者同第三章）；本工作區不含立體交叉，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.3.2.2",
+   "status": "out_of_scope",
+   "reason": "立體交叉匝道分匯流區主線最大超高率與平曲線最小半徑表；本工作區不含匝道，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.3.6",
+   "status": "out_of_scope",
+   "reason": "匝道設計速率（主線設計速率之 50%~80%、環道不宜低於 40 km/h 等）；本工作區不含匝道，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.3.6.2",
+   "status": "out_of_scope",
+   "reason": "匝道行車道最小寬度表（依內緣半徑）；本工作區不含匝道，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.3.8",
+   "status": "out_of_scope",
+   "reason": "出口匝道（減速長度 DL、漸變段）與入口匝道（加速長度）配置規定；本工作區不含匝道，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "4.3.9",
+   "status": "out_of_scope",
+   "reason": "連續匝道鼻端間最小距離表與連續出口/入口匝道最小距離 Lr；本工作區不含匝道，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwroute115",
+   "clause": "附錄四",
+   "status": "qualitative",
+   "reason": "附錄四「注意及配合事項」：規範用詞說明（「應」表嚴格拘束、「宜」表建議等）與適用說明；屬用詞定義，無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwslope104",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "此「單元」為規範卷首（封面／編訂小組名單／法規沿革），非條文；全篇 42 字無算式或數值表，係索引器把卷首頁收成條文，屬解析 artifact，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwslope104",
+   "clause": "1",
+   "status": "qualitative",
+   "reason": "目錄頁（C6.7 錨長等章節頁次），非條文內容",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "hwslope104",
+   "clause": "10.2.4",
+   "status": "qualitative",
+   "reason": "公路邊坡工程設計規範「10.2.4」項下 18 個單元實為整本設計規範的「規範解說」章（C-1~C-56）：總則與用語定義、邊坡調查與試驗（地質調查、鑽探、取樣與試體品質等級）、岩石邊坡穩定分析之破壞型態（平面滑動、楔形滑動、傾覆）與立體投影研判、增加阻抗力之工法、地錨防蝕保護設計、坡面保護設施之選擇、監測類別與頻率（手動每一至三個月至少一次、自動每 10 分鐘一筆且不超過 30 分鐘）、參考文獻。全部為程序性與定性規定；其中的穩定分析方法（無限邊坡、圓弧滑動、Fellenius/Bishop）已由 tools/design/slope_stability.py 依水保技術規範第72、73 條實作，本規範之條文未給可參數化之算式，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwslope111",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "條文內容為「第1頁,共6頁公路邊坡工程設計規範(含解說)修正總說明高鐵苗栗通霄段於110年8月7日發生邊…」（2699 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "hwslope111",
+   "clause": "5",
+   "status": "covered",
+   "reason": "與第 4 條「雨型」段落內容重複（屬同條之解說：單位歷線法／合理化公式之選用、集水區面積與人工設施效應、山區湧水量），已併入 hwslope111_rain_intensity_rule（clause 4）之表格；不另立條目",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "1.3.3",
+   "status": "qualitative",
+   "reason": "條文內容為「制在後並用[]括號標註。解說:本規範之公式及數值單位將目前國內工程習慣所用公制(mks制)列…」（92 字）；已逐字確認屬材料標準引用，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "12.5.1.4",
+   "status": "qualitative",
+   "reason": "條文內容為「預力鋼筋之預壓力得用來抵抗橫膈板上之作用力。解說:典型預力樓板所施之預力最少需抵抗因數化載重…」（236 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "13.2.6.2",
+   "status": "covered",
+   "reason": "定性條文：歸類為(a)淺基礎（透過直接承壓受土壤連續支撐）或(b)擋土牆（抵抗側向土壓力）之構材，可忽略第22.5節單向剪力與第22.6節雙向剪力之尺寸效應修正，即 λs=1；條文本身無獨立算式（λs 之公式見 22.5.5.1.3，已入庫 rc112_lambda_s）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "13.4.3.2",
+   "status": "out_of_scope",
+   "reason": "交叉引用：深基礎構材之強度設計依第10.5節，並使用表13.4.3.2 之無彎矩軸向載重強度折減因子及表21.2.1 之拉力、剪力、組合軸力與彎矩折減因子；本條僅指向其他條文之表，無獨立算式（φ 值見 rc112_phi_flexure／rc112_phi_112_T2122）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "13.4.6.4",
+   "status": "qualitative",
+   "reason": "條文內容為「樁帽設計如依第13.2.6.3節之壓拉桿方法時,壓桿中有效混凝土抗壓強度fce應依第23.4…」（121 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "14.4.3.4.1",
+   "status": "qualitative",
+   "reason": "條文內容為「雙向剪力臨界斷面應使周界bo最小化,但與下列(a)至(c)之距離,無需小於h/2:(a)如表…」（167 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "14.5.4.2",
+   "status": "covered",
+   "reason": "實心矩形斷面牆當 Mu ≤ Pu(h/6) 時得免計 Mu、Pn 依式計算；純混凝土牆之設計規定，Pn 主式已入庫（式14.5.3.1）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "15.2.9",
+   "status": "qualitative",
+   "reason": "條文內容為「對於傳遞彎矩之板柱接合部而言,強度與細部要求應符合第八章、第15.3.2節、與第22.6節相…」（793 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "16.5.6.3",
+   "status": "qualitative",
+   "reason": "定性條文：托架或梁托前端之主拉力鋼筋應以 (a) 銲接於至少同尺寸橫向鋼筋（能發展達 fy）、(b) 向後彎曲成水平環、或 (c) 其他錨定方法發展達 fy 三者之一錨定；條文本身無算式或數值表",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "16.5.6.6",
+   "status": "covered",
+   "reason": "定性條文：托架閉合肋筋或箍筋 Ah 應均勻分布於由主拉力鋼筋起算之 (2/3)d 範圍內；該頁其餘為銲接細節圖（tweld＝db/4 等圖內散字），本條條文無獨立算式（Ah 之計算已入庫 rc112_corbel_Ah）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.1.5",
+   "status": "qualitative",
+   "reason": "條文內容為「及直接式錨栓,例如以火藥或空氣擊置等方式施作之錨釘或錨栓。解說:特製預埋件之形狀和配置方式,…」（69 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.10.5.1",
+   "status": "covered",
+   "reason": "定性條文：錨栓剪力設計之規定（不得大於同一載重組合中錨栓因數化拉力總和之 20% 等），並指向 17.6 節與表17.5.2 之拉力強度；本條為限制性規定，其計算式在 17.6/17.7 節（部分已入庫如 rc112_ldh_hook 系列），本條無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.11.1.1.6",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「剪力榫之混凝土拉破強度須符合φVcb,sl≥Vu,φ=0.65。」等節名或殘句（36 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.11.1.1.7",
+   "status": "qualitative",
+   "reason": "條文內容為「標稱混凝土拉破強度Vcb,sl依第17.11.3節決定。解說:雖然不考慮第17.11.2節之…」（264 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.5.1.2",
+   "status": "qualitative",
+   "reason": "錨栓標稱強度試驗依據（5% 分位數、材料一致性、混凝土強度與尺度效應修正）；屬錨栓評估準則之原則，工作台未實作",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.6.2.2.2",
+   "status": "qualitative",
+   "reason": "純解說：說明基本混凝土拉破強度公式之推導（破壞錐角約 35°、kc 由大量未開裂混凝土試驗以 5% 分位數決定後修正為開裂混凝土之值），並述黏結式錨栓之 kc 約與膨脹錨栓相同；無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.6.2.5.2",
+   "status": "qualitative",
+   "reason": "純條文與解說：混凝土開裂應由符合 24.3.2 節配置之撓曲鋼筋控制，或配置圍束鋼筋提供等值效果；解說僅說明評估準則要求裂縫寬度 0.03 cm 時錨栓仍表現良好（ACI 224R）。條文無獨立算式或數值表",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.6.5.1.1",
+   "status": "qualitative",
+   "reason": "條文內容為「似,由單根黏結式錨栓之中心或錨栓群中一整列相鄰錨栓之中心線向外一段距離cNa所形成,ANa應…」（82 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "17.6.5.2.4",
+   "status": "qualitative",
+   "reason": "純條文與解說：黏結式錨栓得在符合評估準則試驗（5% 分位數）時以未開裂握裹應力 τuncr 取代式(17.6.5.2.1) 之 τcr；無產品資料時表17.6.5.2.5 提供下限預設值。本條無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.10.6.1",
+   "status": "qualitative",
+   "reason": "本條為通則／解說性質之規定（被支承之結構構材。解說:需要建立樁帽中之傳力路徑,以便將柱或邊界構材主筋中之拉力…），內容為適用範圍、設計原則或背景說明，無可參數化之算式或數值表，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.11.3.3",
+   "status": "qualitative",
+   "reason": "若引致彎矩或剪力大於構架構材 φMn／φVn 或未計算時應符合 (a)~(d) 規定；屬非結構構材與構架互制之耐震規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.2.1.5",
+   "status": "out_of_scope",
+   "reason": "純條文：未符合第十八章規定之鋼筋混凝土結構系統，若有實驗證據與分析顯示其強度與韌性等於或超過類比且符合本章規定者得允許使用；屬性能設計之例外規定，無算式或數值表",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.2.6.1",
+   "status": "qualitative",
+   "reason": "特殊抗彎矩構架與特殊結構牆之鋼筋應符合 20.2.2 節特殊耐震系統規定；屬引用規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.3.5.2",
+   "status": "qualitative",
+   "reason": "特殊抗彎矩構架梁之箍筋細部（延伸 6db 且 ≥7.5 cm、細部A/B/C、25.3.5 定義之繫筋）；屬耐震細部圖示規定，圖說未含數據",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.4.5.2",
+   "status": "covered",
+   "reason": "本款為橫向鋼筋 (a)~(f) 之構造規定（螺箍筋／圓形閉合箍筋／直線型閉合箍筋與繫筋之配置、繫筋端部交替、依 25.7.2.2 與 25.7.2.3 提供縱向鋼筋側向支撐、hx ≤35 cm，及 Pu>0.3Ag f′c 或 f′c>700 kgf/cm² 時 hx ≤20 cm）。全為定性構造要求，無可參數化之算式，判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.4.5.5",
+   "status": "qualitative",
+   "reason": "lo 範圍外之橫向鋼筋量規定（除 18.4.4.3 或 18.4.6 另有要求較多者外）；屬耐震細部定性規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.4.6.2.1",
+   "status": "qualitative",
+   "reason": "於 lo 長度範圍內 (a)(b) 同時發生時，設計橫向鋼筋抵抗剪力應假設 Vc＝0；屬耐震剪力設計細節",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.5.2.3.1",
+   "status": "covered",
+   "reason": "使用 fy＝5,000 或 5,600 kgf/cm² 縱向鋼筋時之擴頭深度規定；屬擴頭鋼筋細節，機械性質表已入庫",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.5.3.1",
+   "status": "qualitative",
+   "reason": "純交叉引用：梁柱接頭橫向鋼筋須符合 18.4.5.2(a)~(e)、18.4.5.3、表18.4.5.4(a)(b)或(d)(e) 與 18.4.5.7；解說僅述「不論剪力大小，接頭處皆須配置橫向鋼筋」，條文無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.5.3.2",
+   "status": "qualitative",
+   "reason": "條文內容為「若構入接頭之梁連續或符合15.2.7節,且梁寬度至少為柱寬度之3/4,則在該構入梁接頭兩側較…」（191 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.5.5.2",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（符合第20.2.1.6節和第25.4.4.1節規定之擴頭竹節鋼筋,其受拉伸展長度ldt應至少…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.5.5.4",
+   "status": "qualitative",
+   "reason": "定性條文：直鋼筋終止於接頭者應貫穿柱或邊界構件之圍束核心；ld 不在圍束核心內之部分應放大 1.6 倍；屬耐震錨定細部",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.7.1.2",
+   "status": "covered",
+   "reason": "本款為預鑄特殊結構牆之適用範圍宣示：「除應符合第18.7 節之外，另應符合第18.8 節之規定」，並以表R18.7.1 說明垂直牆段依 hw/lw 與 lw/bw 之適用條款（牆／牆墩二分）。係跨節引用之導引條，本身未給獨立算式，故以 covered 處理（表R18.7.1 為分類矩陣，其內容為條款指向而非數值限值）",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.9.12.2",
+   "status": "qualitative",
+   "reason": "條文內容為「結構桁架構件之所有連續鋼筋伸展或續接應達fy之拉力強度。解說:橫向鋼筋Ash公式係要求等效柱…」（87 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.9.7.6",
+   "status": "qualitative",
+   "reason": "集力構件斷面壓應力超過 0.2f′c 時應全長配置符合 18.4.5.2 及 18.4.5.3 之橫向鋼筋；屬耐震細部定性規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "18.9.9.4",
+   "status": "qualitative",
+   "reason": "橫膈板剪力強度不得超過 22.9.4.4 限制值且 Ac 以覆板厚度計，為跨參照限制與解說，無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "19.3.3.2",
+   "status": "qualitative",
+   "reason": "條文內容為「混凝土應依CNS1174取樣,並應依CNS9661或CNS9662量測空氣含量。解說:驗收新…」（265 字）；已逐字確認屬材料標準引用，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "19.3.3.6",
+   "status": "covered",
+   "reason": "已入庫於 19.3.3.1 條目 notes（fc′>350 kgf/cm² 時含氣量得減少 1.0%）；本條為該例外規定，無獨立算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "2.2",
+   "status": "qualitative",
+   "reason": "符號定義表（第二章符號與名詞定義，p.17/23/29 等）：a、av、Ab、ldm、ldt、Δfpt、Δr 等數十個符號之文字定義，非公式或數值表；各符號之意義已寫入對應已驗證條目之 vars.desc",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "2.3",
+   "status": "qualitative",
+   "reason": "名詞定義（第二章符號與名詞定義，p.39 等）：柱頭板、套管等構造名詞之文字解釋，無公式或數值表",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "20.3.1.1",
+   "status": "qualitative",
+   "reason": "條文內容為「預力鋼筋除應符合第20.3.1.3節有關特殊抗彎矩構架及特殊結構牆之需求外,亦應符合(a)、…」（2290 字）；已逐字確認屬材料標準引用，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "21.1.1",
+   "status": "qualitative",
+   "reason": "條文內容為「除第二十七章允許項目以外,設計時選用之強度折減因數均應遵照本章規定。解說:採用強度折減因數之…」（178 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "22.2.1.4",
+   "status": "covered",
+   "reason": "本款全文僅 144 字：「握裹鋼腱之 fps 公式，如第20.3.2.4 節所列，已證實符合試驗結果」，係純跨參照。所指之 fps 公式已入庫為 rc112_fps_bonded_203231 與 rc112_gamma_p_T203231，故以 covered 處理",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "22.5.3.2",
+   "status": "qualitative",
+   "reason": "條文內容為「鋼筋或預力混凝土梁及混凝土櫊柵小梁構造,具備符合第9.6.3.3節或第9.6.4.2節規定之…」（351 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "22.5.8.5.4",
+   "status": "qualitative",
+   "reason": "規定剪力鋼筋 Vs 可依式 22.5.8.5.3 或離散模型二擇一計算，為方法選擇與解說，式本體在 22.5.8.5.3",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "22.6.5.4",
+   "status": "covered",
+   "reason": "預力雙向構材適用 22.6.5.5 之三項條件（握裹鋼筋、柱距不連續邊≥4h、fpc≥9 kgf/cm²），已併入 rc112_prestressed_two_way_vc_22655 的 notes 與 warn_if",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "22.7",
+   "status": "qualitative",
+   "reason": "條文內容為「解說:本節之扭力設計係依照薄壁管與立體桁架之類比理論。梁承受扭力時,參照圖R22.7(a),…」（546 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "23.11.3.1",
+   "status": "qualitative",
+   "reason": "定性條文：特殊壓拉桿系統之壓桿應配置鋼筋，其細節須滿足 23.11.3.2 或 23.11.3.3 節要求；解說僅述壓桿允許兩種不同圍束方式。無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "23.11.3.2",
+   "status": "qualitative",
+   "reason": "條文內容為「鋼筋。橫向鋼筋應垂直於壓桿方向並滿足(a)至(d):(a)鋼筋細節應符合第18.4.5.2節…」（144 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "23.2.6",
+   "status": "qualitative",
+   "reason": "本節為第 23 章壓拉桿模型之「節點區」解說文字：說明 C-C-C、C-C-T、C-T-T 節點區之應力面假設、端板／擴頭鋼筋／彎鉤錨定，以及非靜壓節點由最大應力面控制節點尺度。內容全為圖 R23.2.6a(i)~(iii) 之文字說明，無獨立算式或數值表，判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "23.4.1",
+   "status": "covered",
+   "reason": "壓桿標稱抗壓強度 Fns 之 (a)(b) 計算（無縱向鋼筋 Fns＝fce·Acs 等）；壓拉桿模型，工作台未實作（fce 式已入庫）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "23.9.5",
+   "status": "qualitative",
+   "reason": "條文內容為「在三維壓拉桿模式中,其節點區任一面之面積不可低於第23.9.4節規定之值,且節點區任一面之形…」（71 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "24.2.3.1",
+   "status": "covered",
+   "reason": "定性條文：即時撓度應由彈性撓度之方法或公式計算，並考量開裂及鋼筋對構材勁度之影響；無獨立算式（Ie 已入庫 rc112_Ie）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "24.2.3.7",
+   "status": "covered",
+   "reason": "交叉引用：具均勻斷面之單向板及梁，Ie 得依表24.2.3.5 計算；簡支及連續跨度以跨度中央計算、懸臂以支承處計算。本條無獨立算式（Ie 之公式已入庫 rc112_Ie）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "24.2.3.8",
+   "status": "qualitative",
+   "reason": "條文內容為「第24.5.2節所定義之U類型預力板與梁,得使用Ig計算撓度。解說:U類型預力混凝土構材之即…」（125 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "24.3.1",
+   "status": "qualitative",
+   "reason": "條文內容為「握裹鋼筋須均布於受單向撓曲之非預力及C類型預力板及梁之拉力區,以控制撓曲開裂。解說:當使用載…」（428 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "24.4.3.1",
+   "status": "qualitative",
+   "reason": "條文內容為「收縮與溫度竹節鋼筋須按表20.2.2.4(a)之規定,及符合第24.4.3.2節至第24.4…」（55 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "25.4.1.3",
+   "status": "qualitative",
+   "reason": "條文內容為「鋼筋伸展長度不須使用強度折減因數φ。解說:強度折減因數φ不使用於鋼筋伸展長度與續接長度之計算…」（66 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "25.4.2.1",
+   "status": "covered",
+   "reason": "受拉竹節鋼筋與麻面鋼線伸展長度 ld 之組成（取 25.4.2.3 節式與其他式之較大值）；主式 ld 已入庫（rc112 伸展長度系列），本筆為取大值之規定，無獨立數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "25.4.2.4",
+   "status": "covered",
+   "reason": "受拉竹節鋼筋及麻面鋼線伸展長度 ld 之計算式（含 fy、ψt、ψe、ψs、cb、Ktr 等，文字層分式破碎）；主式已入庫於 rc112 伸展長度系列，本筆為原始排版殘片",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "25.4.4.1",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（若滿足下列(a)至(f)條件,得使用擴頭於受拉竹節鋼筋之伸展:(a)鋼筋應符合第20.2.1…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "25.4.6.2",
+   "status": "covered",
+   "reason": "銲接麻面鋼線網之 ld 依 25.4.2.2／25.4.2.3 節計算後再依 25.4.6.3 等節修正；屬伸展長度之引用與修正規定，主式已入庫於伸展長度系列",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "25.9.4.3.1",
+   "status": "qualitative",
+   "reason": "一般區域設計之 (a)~(c) 方法（壓拉桿、線性應力分析含有限元素、斷面分析法）；屬構件一般區域之設計方法列舉",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "25.9.4.3.2",
+   "status": "out_of_scope",
+   "reason": "若 (a)~(g) 任一項發生則第25.9.4.3.1 節(c) 之簡化公式不得用於一般區域設計；屬施工圖說簡化法之適用限制，非本工作區引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "26.4.2.2",
+   "status": "qualitative",
+   "reason": "混凝土合格要求（結構各部位施工階段需要之抗壓強度應提交審查等）；施工品管規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "26.6.4.2",
+   "status": "qualitative",
+   "reason": "非預力鋼筋銲接合格要求（須符合設計圖說或經設計者核准、材質符合 CNS 560 鋼筋符號等）；施工品管規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "26.6.5.1",
+   "status": "qualitative",
+   "reason": "鋼筋機械式續接檢驗（施工前性能試驗與施工中品質檢驗；須出具最近試驗室報告）；施工品管規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "26.6.5.2",
+   "status": "qualitative",
+   "reason": "鋼筋機械式續接試驗之辦理依據（依 CNS 15560，惟指定負載、加載反復週次及循環週次依本節規定；試體準備與裝置依 CNS 155xx）；屬施工品管試驗程序，非設計計算引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "27.6",
+   "status": "out_of_scope",
+   "reason": "本章（既有結構耐震評估與補強）之解說參考文獻與附篇A（非線性反應歷時分析設計驗證 A.7 行為分類與臨界狀態）；屬專章方法論與文獻，本工作區未涉及既有結構評估，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "4.2.2",
+   "status": "qualitative",
+   "reason": "純解說：說明第三、十九、二十、二十六章之分工與噴凝土行為得視同混凝土；無算式或數值表",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "5.3.12",
+   "status": "out_of_scope",
+   "reason": "預力效應併用壓拉桿方法時之載重因數 (a)(b) 納入 5.3.1 節載重組合；屬載重組合細節，本工作區未涉及壓拉桿",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "5.3.3",
+   "status": "qualitative",
+   "reason": "活載重 L 之載重因數得調整之(a)(b)(c) 例外情形；屬載重組合之細節規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "5.3.5",
+   "status": "qualitative",
+   "reason": "T（溫度）載重之載重因數訂定原則（不確定性、同時發生機率、效應大於假設值之風險）；屬載重組合解說",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "6.6.3.1",
+   "status": "qualitative",
+   "reason": "純解說：說明 6.6.3.1.1 與 6.6.3.1.2 兩套勁度規定皆可使用（為RC建築加載至接近或超過降伏之近似勁度，與實驗合理相關）；另述地震載重可能需變位放大係數、剪力模數可取 0.4Ec、面積查表6.6.3.1.1(a)。條文無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "6.6.3.2.2",
+   "status": "qualitative",
+   "reason": "定性條文：計算即時側向變位之慣性矩得取 6.6.3.1 節 I 值乘 1.4 倍（且不得大於 Ig），或利用更詳細分析；單一係數規定，無獨立算式（I 值見 rc112_Ig_factored_T66311a）",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "6.6.5.5",
+   "status": "qualitative",
+   "reason": "純解說：說明彎矩再分配有賴塑鉸區韌性、負彎矩減少與正彎矩增加之機制（再分配之計算規定在 6.6.5.1~6.6.5.4，本條為解說段）；無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "6.7.1",
+   "status": "qualitative",
+   "reason": "本條為通則／解說性質之規定（解說:在線彈性二階分析時,結構變形之幾何形狀已包含在平衡方程式中,以計算PΔ效應…），內容為適用範圍、設計原則或背景說明，無可參數化之算式或數值表，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "6.7.1.1",
+   "status": "qualitative",
+   "reason": "純解說：說明分析用之勁度 EI 宜代表構材接近破壞前之勁度，斷面性質依 6.7.2 節；無算式或數值表",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "6.7.1.2",
+   "status": "covered",
+   "reason": "純交叉引用：沿柱長度方向之長細效應須予考量，其值依第6.6.4.5節（彎矩放大法）計算；本條無獨立算式，相關公式已入庫 rc112_storey_Q／rc112_Pc_buckling／rc112_Mc_magnified／rc112_delta_magnifier",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "8.3.2",
+   "status": "qualitative",
+   "reason": "純條文：雙向板之即時與依時撓度應依第24.2節計算且不超過 24.2.2 節限制（適用於不符合 8.3.1 節之非預力板、四周無內梁且長短跨比>2 之板、預力板）；解說另列預力平板跨深比 42/48（可增至 48/52）之經驗值。條文本身無獨立算式",
+   "date": "2026-11-01",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "rc112",
+   "clause": "8.4.2.2.1",
+   "status": "covered",
+   "reason": "導引條：只規定「因重力、風力、地震力等引致板與柱間彎矩傳遞時，一部分之 Msc 應依 8.4.2.2.2~8.4.2.2.5 節由撓曲傳遞」，本身不含公式；γf 計算式在 8.4.2.2.2（已入庫 rc112_gamma_f_8422）",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "9.3.1.1.3",
+   "status": "covered",
+   "reason": "純交叉引用：常重與輕質混凝土組合之非預力合成梁（施工有支撑且輕質混凝土受壓）應使用第 9.3.1.1.2 節之修正，本身無獨立數值；9.3.1.1.2 之修正為表9.3.1.1 之值乘 (a)1.650−0.315wc 與 (b)1.09 之大者（wc 1.4~1.9 tf/m³）",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "9.3.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「。除非構材合成前深度亦符合第9.3.1節之規定,合成前所發生之撓度應予探討。解說:表9.3.…」（260 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "9.3.3.1",
+   "status": "qualitative",
+   "reason": "條文內容為「之非預力梁應符合表21.2.2拉力控制之規定。解說:此限制效果係限制非預力梁之鋼筋比,以減少…」（136 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "rc112",
+   "clause": "9.5.2.2",
+   "status": "qualitative",
+   "reason": "條文內容為「′0.10gfA,Mn應依照第22.4節之規定計算。解說:梁承受顯著軸力時,需要考慮軸力與彎…」（135 字）；已逐字確認屬設計原則或細部規定，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "seis113",
+   "clause": "1.10",
+   "status": "qualitative",
+   "reason": "本條為符號定義表（各符號之名稱、意義與單位，如「採用之符號與其意義如下所述:ap:結構物部分構體…」），不含可計算之算式；符號本身無需轉錄為條目，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "seis113",
+   "clause": "1.7",
+   "status": "qualitative",
+   "reason": "條文內容為「結構系統可分類為如表1-3所示,其定義如下:(一)承重牆系統結構系統無完整承受垂直載重立體構…」（2073 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "seis113",
+   "clause": "10.2.1",
+   "status": "out_of_scope",
+   "reason": "屬第十章「隔震與消能元件」之位移型元件行為說明（受力與位移反應主要為兩端相對位移之函數），非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "10.2.2",
+   "status": "out_of_scope",
+   "reason": "屬第十章「隔震與消能元件」（速度型／位移型元件之受力－位移關係、線性靜力分析適用條件、阻尼係數），本工作區未涉及消能元件，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "10.3.1",
+   "status": "out_of_scope",
+   "reason": "屬第十章「隔震與消能元件」（速度型／位移型元件之受力－位移關係、線性靜力分析適用條件、阻尼係數），本工作區未涉及消能元件，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "10.7.2",
+   "status": "qualitative",
+   "reason": "定性條文：消能元件實體試驗之通則、資料擷取、測試順序與循環週數規定（每類型每尺寸各 2 個全尺寸試體）；屬試驗程序規定，無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "10.9",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（C或jC:阻尼係數。iCF:使用於速度相關之消能元件之狀態組合係數。D:目標譜位移,或一消能…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "seis113",
+   "clause": "11.1.5",
+   "status": "qualitative",
+   "reason": "定性條文：極軟弱或可能液化土層之耐震設計原則（中小度地震 FL 不得小於 1.0；設計地震與最大考量地震容許液化但須選適當基礎型式並檢核安全性與功能性，必要時採地盤改良）。無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "2",
+   "status": "qualitative",
+   "reason": "定性條文：具凹角性（不規則平面）建築物之耐震設計原則，屬平面不規則性之認定與處理規定；條文無算式或數值表（凹角性之定量門檻另見平面不規則性相關條文）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "2.7.2",
+   "status": "out_of_scope",
+   "reason": "臺北市及新北市非屬盆地範圍之一般震區里別表（表2-6(b)）與設計地震力計算依據；屬震區地理劃分查表，本工作區案件（台中一帶）不適用",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "3.11",
+   "status": "out_of_scope",
+   "reason": "屬第三章動力分析或第二章靜力分析之分析方法論（總橫力調整、垂直地震效應之程式考量），本工作區以靜力法為主，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "3.2",
+   "status": "out_of_scope",
+   "reason": "屬動力分析之方法論（多振態反應譜疊加、振態數與有效質量 90% 規定、加速度反應譜係數與調整係數），本工作區以靜力法為主，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "3.3",
+   "status": "out_of_scope",
+   "reason": "屬第三章動力分析或第二章靜力分析之分析方法論（總橫力調整、垂直地震效應之程式考量），本工作區以靜力法為主，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "3.5",
+   "status": "out_of_scope",
+   "reason": "屬動力分析之方法論（多振態反應譜疊加、振態數與有效質量 90% 規定、加速度反應譜係數與調整係數），本工作區以靜力法為主，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "4.0",
+   "status": "covered",
+   "reason": "本筆為 Ta＝C·S·SDS 等週期與設計譜加速度係數之公式片段（文字層僅 113 字且排版破碎，係第4 章「一般建築物」之計算式殘片）；完整式已於 seis113 第2 章相關條目入庫（設計地震力 SDS/SD1、週期 Ta），暫不重複",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "4.2",
+   "status": "out_of_scope",
+   "reason": "非結構構材之最小設計水平地震力 Fph 公式（含 ap、Rp、hx/hn 等）；非結構構材耐震屬建築設備範疇，本工作區未涉及，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "4.4",
+   "status": "out_of_scope",
+   "reason": "屬第三章動力分析或第二章靜力分析之分析方法論（總橫力調整、垂直地震效應之程式考量），本工作區以靜力法為主，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "4.5",
+   "status": "qualitative",
+   "reason": "定性條文：若有可靠試驗與分析資料足以提供特定類別設備、部分構體或非結構構材之耐震設計，可接受替代惟受兩點限制；屬替代規定",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "6.2.1",
+   "status": "out_of_scope",
+   "reason": "定性條文：表1-3 所述四種一般建築物基本結構系統應滿足本節規定及有關韌性特別規定；本工作區之擋土牆／箱涵非屬該四種結構系統，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "8.2",
+   "status": "qualitative",
+   "reason": "條文內容為「建築物進行耐震能力評估前,應對結構部分(如梁、柱、牆與斜撐系統等)作實地調查。並應充分了解建…」（1407 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.1.7",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、位移與勁度檢核），本工作區為小型土木工程（道路、排水、擋土牆、邊坡、箱涵），不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.2.11",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（隔震建築物仍應考慮垂直地震效應,對應此效應時,應考慮隔震元件之垂直向勁度及位於隔震系統上方結…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.2.3.1",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、設計位移 DD/DTD/DTM、有效勁度與週期檢核），本工作區不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.2.3.2",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、設計位移 DD/DTD/DTM、有效勁度與週期檢核），本工作區不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.2.4",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、設計位移 DD/DTD/DTM、有效勁度與週期檢核），本工作區不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.2.5.1",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、位移與勁度檢核），本工作區為小型土木工程（道路、排水、擋土牆、邊坡、箱涵），不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.2.5.2",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、位移與勁度檢核），本工作區為小型土木工程（道路、排水、擋土牆、邊坡、箱涵），不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.2.6",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、設計位移 DD/DTD/DTM、有效勁度與週期檢核），本工作區不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.3.3.1",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、位移與勁度檢核），本工作區為小型土木工程（道路、排水、擋土牆、邊坡、箱涵），不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.3.4",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、位移與勁度檢核），本工作區為小型土木工程（道路、排水、擋土牆、邊坡、箱涵），不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "9.3.5.3.1",
+   "status": "out_of_scope",
+   "reason": "屬第九章「隔震建築物」專章（隔震元件、隔震層、位移與勁度檢核），本工作區為小型土木工程（道路、排水、擋土牆、邊坡、箱涵），不含隔震設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "seis113",
+   "clause": "附錄A",
+   "status": "qualitative",
+   "reason": "附錄A 耐震工程品管（原第七章草案內容，含品管程序與檢查表）；屬施工品管程序，非設計計算引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "29",
+   "status": "out_of_scope",
+   "reason": "定性條文：人孔設置位置規定（管渠起始點、方向/坡度/管徑變化處、會流點、底部高程驟變處等）；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "37",
+   "status": "out_of_scope",
+   "reason": "抽水設備設置（抽水機臺數依計畫抽水量與性能而定，另附表）；屬抽水站設備設計，非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "39",
+   "status": "out_of_scope",
+   "reason": "污水處理廠設計（考量地形與用地形狀、集中或分區處理、計畫污水量等）；屬污水處理廠規劃，非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "42",
+   "status": "out_of_scope",
+   "reason": "沉澱池設置（初步沉澱池矩形長寬比 3:1~5:1、寬度依刮泥設備而定等）；屬**污水處理廠**沉澱池，與本工作區之沉砂池（水保 §92/93，見 tools/design/sediment_basin.py）不同設施，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "43",
+   "status": "out_of_scope",
+   "reason": "曝氣池設計及設置（按處理方法依表設計）；屬污水處理廠設備，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "44",
+   "status": "out_of_scope",
+   "reason": "生物膜法反應池（標準滴濾法濾池直徑限制等）；屬污水處理廠設備，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "45",
+   "status": "out_of_scope",
+   "reason": "消毒設備（加氯／紫外線／臭氧，消毒效果應符合放流水標準）；屬污水處理廠設備，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "46",
+   "status": "out_of_scope",
+   "reason": "定性條文：二級處理水回收再利用處理設施（取水場所應設於水位變動少、不易受沉澱物影響且能確保充分取水量處等）；屬污水回收設施，本工作區（道路、排水、擋土牆、邊坡、箱涵、滯洪池）非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "53",
+   "status": "out_of_scope",
+   "reason": "污泥脫水設備（消化污泥乾燥床構造、投入污泥面距床頂 15 cm 等）；屬污水處理廠設備，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "sewer_std",
+   "clause": "8",
+   "status": "out_of_scope",
+   "reason": "定性條文：人孔設置規定（同上型，另一條次之文字）；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "封面、目錄與章節頁（鋼結構設計法 極限設計法／容許應力設計法），非條文內容；另有 φcr·Ag·F 之公式殘片（6.2-1）無上下文可辨",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "1.5",
+   "status": "qualitative",
+   "reason": "定性條文：鋼結構設計應檢核強度極限狀態與使用性極限狀態（並列舉設計原則與荷重組合之要求）；屬總則性規定，無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "1.6.4",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「繪畫圖線,應依CNSB1001「工程製圖之一般準則」之規定。」等節名或殘句（31 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "10.1.3",
+   "status": "qualitative",
+   "reason": "條文內容為「承受衝擊或振動之接合部,應使用銲接或摩阻型高強度螺栓設計之。因特殊需要而不容許螺栓滑動,或因…」（187 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "10.10.1",
+   "status": "qualitative",
+   "reason": "條文內容為「錨栓之設計需能抵抗在各種載重組合下,柱端所承受之拉力和剪力,包含由柱底部束制產生之彎矩所引致…」（934 字）；已逐字確認屬材料標準引用，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "11.2.1",
+   "status": "qualitative",
+   "reason": "集中載重下翼板與腹板之設計強度總則，僅列舉 11.2-2~11.2-7 各極限狀態名稱與單／雙集中載重類型之解說，無算式",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "11.4",
+   "status": "qualitative",
+   "reason": "本條為通則／解說性質之規定（承受疲勞載重之構材及其接合應依照附錄4之規定設計之。解說:因大多數建築結構之構材…），內容為適用範圍、設計原則或背景說明，無可參數化之算式或數值表，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "11.6",
+   "status": "qualitative",
+   "reason": "符號定義：柱斷面積 A、翼板寬度 bf、全深 d、柱全深 dc、腹板降伏強度 Fy 等之說明；各符號已寫入對應條目 vars.desc，本條無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "13.5.2",
+   "status": "qualitative",
+   "reason": "定性條文：普通抗彎矩構架（OMRF）梁柱接頭應符合 13.6.1 節（完全束制接頭）等規定之一；屬接頭分類與合格方式之定性規定，無獨立算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "13.6.6",
+   "status": "out_of_scope",
+   "reason": "側向束制接頭之規定（柱在接頭區外保持彈性時，柱翼板側向支撐僅須設置於梁柱接頭與梁上翼板同高處等）；屬鋼構耐震接頭細部，本工作區未涉及鋼構耐震",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "13.8.4",
+   "status": "out_of_scope",
+   "reason": "不超過二層樓之建築物或屋頂結構，若以式(13.3-1)(13.3-2)載重組合決定構材及接頭強度，則其斜撐可依簡化規定；屬鋼構耐震之簡化條款，本工作區未涉及鋼構耐震",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "13.9.1",
+   "status": "qualitative",
+   "reason": "定性條文：斜撐構材至少一端須與連桿梁相接、連桿梁翼板與腹板寬厚比須小於表4.5-1 之 λpd、連桿梁鋼材 Fy 不得超過 3.7 tf/cm2、腹板須為單一鋼板不得疊合或開孔；屬構造規定（本庫未收錄表4.5-1）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "13.9.4",
+   "status": "out_of_scope",
+   "reason": "斜撐與連桿梁外之梁所受軸力與彎矩（連桿梁設計剪力強度乘 1.5 倍）；屬鋼構偏心斜撐構架設計，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "13.9.6",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（柱之強度需求應依載重組合(2.2-3)、(2.2-5)決定之,但連桿梁或斜撐經由接頭傳遞至柱…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "4.3",
+   "status": "covered",
+   "reason": "交叉引用：銲接構材上有鑽孔或以塞孔銲／塞槽銲接合時，式(5.2-2) 應取通過孔處之淨斷面積；解說為軸拉力構材破壞模式之說明。本條無獨立算式（拉力強度式已入庫 steel99_Pn_tension_rupture）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "4.7",
+   "status": "qualitative",
+   "reason": "條文內容為「構架設計時須考慮P-Δ效應之影響,P-Δ效應可直接作二次應力分析求得,或以第八章之簡化公式計…」（953 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "4.8",
+   "status": "qualitative",
+   "reason": "定性條文：含斜撐系統構架之受壓構材有效長度係數 K 應採 1.0，若欲採小於 1.0 之 K 須以分析方法求得（多樓層構架另有規定）；無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "4.9",
+   "status": "qualitative",
+   "reason": "符號定義：A、Ae、Ag 等斷面積符號之定義（含 Ae＝UA 之有效淨斷面積）；各符號已寫入對應條目 vars.desc，本條無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "5.3",
+   "status": "qualitative",
+   "reason": "條文內容為「受拉構材利用二個以上型鋼或鋼板以填板分隔並連結,在其所使用之螺栓或銲接之縱向間距內,各元件之…」（554 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "6.5",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（組合受壓構材之各部分及其沿螺栓線之橫向間距應符合第4.4節有關最大長細比之規定。組合受壓構材…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "7.4.2",
+   "status": "covered",
+   "reason": "半結實箱型或鋼管之 Fb＝0.60Fy（式7.4-3）已併入 steel99_box_Fb_Lc_741 的 mode=3，本節另無獨立算式",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "7.8",
+   "status": "qualitative",
+   "reason": "符號定義：Cb（撓曲修正係數）、Cv（腹板臨界應力比）、Cw（翹曲常數）、E 等之說明；各符號已寫入對應條目 vars.desc，本條無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "8.1",
+   "status": "qualitative",
+   "reason": "條文內容為「本章適用於具雙對稱或單對稱斷面受軸力與彎矩共同作用之構材。本章適用於具雙對稱或單對稱斷面受組…」（58 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "8.4",
+   "status": "qualitative",
+   "reason": "軸力與彎矩共同作用構材之符號定義清單（Cm、Fa、Fb、Fe′、Mo、fa、fb、δo），算式本體在 8.1~8.3，本節僅為符號表",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "8.5",
+   "status": "qualitative",
+   "reason": "符號定義：第八章構材承受組合力及扭矩之符號說明（Pu、Pn、Mu、Mn、φt、φc、φb、Mnt、Mlt、ΣPu、Δoh、ΣH、L 等）；各符號已寫入對應條目之 vars.desc，本條無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "9.1",
+   "status": "qualitative",
+   "reason": "條文內容為「本章適用於由熱軋型鋼、組合型鋼或鋼管與結構混凝土共同作用之合成柱,以及鋼骨梁支撐混凝土樓版且…」（757 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "9.7",
+   "status": "qualitative",
+   "reason": "定性條文：合成構造不符合本章規定者，應以適當之結構試驗檢驗之；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "9.8",
+   "status": "qualitative",
+   "reason": "合成柱斷面符號定義（Ac 混凝土斷面積、Ag 合成全斷面積、As 鋼骨面積、Ar 縱向鋼筋面積）；屬符號定義",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "steel99",
+   "clause": "附錄5",
+   "status": "qualitative",
+   "reason": "條文內容為「附錄5專有名詞中英對照柱之有效長度係數圖Alignmentchartforcolumn放大係…」（3508 字）；已逐字確認屬名詞對照，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "steel99",
+   "clause": "附錄6",
+   "status": "qualitative",
+   "reason": "條文內容為「附錄6專有名詞中英對照柱之有效長度係數圖Alignmentchartforcolumn放大係…」（3502 字）；已逐字確認屬名詞對照，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "swc_tech",
+   "clause": "209",
+   "status": "qualitative",
+   "reason": "第16526 章（公路照明）之子條單元，文字層僅有「本規範未規定者,得適用相關學理、經驗法則、既有定理、公式、工法等。」等節名或殘句（34 字），無可轉錄之算式或數值表。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "swc_tech",
+   "clause": "37",
+   "status": "qualitative",
+   "reason": "條文內容為「河床質粒徑分析含採樣孔粒徑調查分析及表面粒徑調查分析。一、採樣孔粒徑調查分析方法:(一)河床…」（800 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "traffic114",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "規範沿革頁（頒布日期、文號、修正沿革表）與目錄，非條文內容；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "traffic114",
+   "clause": "10",
+   "status": "qualitative",
+   "reason": "條文內容為「同一路段,雙向流量中較高流向之交通量佔雙向交通量之百分比,係作之百分比,係作為道路設計及交通…」（53 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "traffic114",
+   "clause": "14",
+   "status": "qualitative",
+   "reason": "定性條文：旅行速率與空間平均速率（Space Mean Speed）等速率定義；屬名詞定義",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "traffic114",
+   "clause": "26",
+   "status": "covered",
+   "reason": "本單元（p.55）為第 C2 章「交通調查」之條文：車輛種類分類（依道路交通安全規則第2、3、6 條）、小客車當量換算之原則、交通調查計畫之一般要求。全篇 5,988 字為程序性規定，無算式或數值表；本規範同一條號另有 p.70／p.93／p.144 三個單元（內容各異），本筆僅處理 p.55 之調查章，判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "traffic114",
+   "clause": "33",
+   "status": "qualitative",
+   "reason": "標線分類章節之導言與分類定義（依功能分警告／禁制／指示標線等）；屬分類定義，無算式或數值表（各標線尺寸於其他條文）",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "traffic114",
+   "clause": "42",
+   "status": "qualitative",
+   "reason": "交通島／庇護島等設施設置原則之定性敘述與圖說；無獨立算式或可轉錄之數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "traffic114",
+   "clause": "49.5",
+   "status": "out_of_scope",
+   "reason": "交通錐、交通筒、交通桿及交通板之高度與設置規定（如日間速限 70 km/h 以下路段交通錐高度至少 45 cm）；條文為單點尺寸規定且續文未完整擷取，暫以 skip 記錄，若日後需引用尺寸請回原條文",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "traffic_sign",
+   "clause": "144",
+   "status": "out_of_scope",
+   "reason": "定性條文：施工警告燈號（閃光／定光、黃或紅色、安裝於拒馬等）；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "traffic_sign",
+   "clause": "175",
+   "status": "out_of_scope",
+   "reason": "定性條文：車種專用車道標字之標繪方式（文字或圖案）；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "traffic_sign",
+   "clause": "201",
+   "status": "out_of_scope",
+   "reason": "定性條文：號誌燈面數及設置規定（每一燈頭得裝一或多向燈面等）；無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "11.4.1",
+   "status": "out_of_scope",
+   "reason": "人行天橋及人行地下道最小淨寬度表（表11.4.1，因用地限制得酌減但不得小於 1.5 m）；屬人行立體穿越設施，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "12.3",
+   "status": "qualitative",
+   "reason": "交通寧靜區之設計原則（整體考量路網機能、交通安全、行人與自行車空間、路邊停車、景觀、噪音振動、貨物裝卸）；屬定性原則",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "12.5.2",
+   "status": "out_of_scope",
+   "reason": "減速墊、減速丘、減速台之設置規定（鋪面顏色、標線及標誌須確保辨識性等）；屬交通寧靜設施之定性規定，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "14.2.1",
+   "status": "out_of_scope",
+   "reason": "人行道路緣斜坡設置規定（配合無障礙通路、坡度與高低差等）；屬人行道無障礙設施，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "14.3",
+   "status": "out_of_scope",
+   "reason": "人行道無障礙坡道設置規定（坡度超過 5% 視為無障礙坡道、不含路緣斜坡，配置見圖14.3.1）；屬人行道無障礙設施，本工作區未涉及",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "15.1",
+   "status": "qualitative",
+   "reason": "本條內容為定性規定（1.緣石係指道路中凸起區域(公共設施帶、人行道、交通島)之邊緣設施物,其功能包含排水控制、路…），已逐字讀過，確無可參數化之算式或數值表；其數值要求多以「依第 X 節」指向他條，故判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "19.2",
+   "status": "out_of_scope",
+   "reason": "市區道路、服務道路、人行道之照明輝度及照度表（表19.2.x）；照明設計非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "19.3",
+   "status": "qualitative",
+   "reason": "條文內容為「光色及光源規定如下:1.市區內道路照明燈具之光色應避免與交通號誌燈相混淆。2.多霧多塵煙地區…」（342 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "19.4",
+   "status": "out_of_scope",
+   "reason": "燈具型式宜符合表19.4.1；照明設計非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "19.5.2",
+   "status": "out_of_scope",
+   "reason": "長隧道照明之分區（基本照明、加強照明、夜間照明、緊急照明及連接段）；隧道照明非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "4.2.5",
+   "status": "out_of_scope",
+   "reason": "轉向彎道（槽化路口供轉向且與主線分離之車道）設置規定；本工作區不含槽化路口，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "4.2.6",
+   "status": "out_of_scope",
+   "reason": "轉向車道（左、右轉車道與加減速車道）設置規定；本工作區為小型道路／農路案件，不含多車道交叉路口轉向車道設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "4.2.8",
+   "status": "out_of_scope",
+   "reason": "環形交叉設計速率表、環道縱坡度（不宜超過 3%、最大 5%）與交織距離；本工作區不含環形交叉設計，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "4.3.2",
+   "status": "out_of_scope",
+   "reason": "立體交叉之縱坡度、超高率與平曲線最小半徑（無匝道者同第三章）；本工作區不含立體交叉，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "4.3.6",
+   "status": "out_of_scope",
+   "reason": "匝道設計速率（主線之 50%~80%、環道不宜低於 40 km/h）；本工作區不含匝道，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "4.3.7",
+   "status": "out_of_scope",
+   "reason": "出口匝道減速長度 DL 與入口匝道加速長度配置；本工作區不含匝道，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "5.4",
+   "status": "out_of_scope",
+   "reason": "腳踏自行車專用車道及人車共用道之線形與寬度規定；屬自行車道專章，本工作區小型工程未涉及，非引用項",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "7.1",
+   "status": "covered",
+   "reason": "定性條文：市區道路排水設計基本原則（已有區域性排水系統或雨水下水道規劃地區宜參照其規劃、或協調水利主管機關）；無算式或數值表。實務計算用 tools/design/channel_hydraulics.py 與 urbanroad113 第7 章已入庫之入庫表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "7.2.5",
+   "status": "qualitative",
+   "reason": "條文內容為「為推算各頻率之降雨強度,道路鄰近區域如已有相關水利主管機關可供參考之降雨強度公式者,則可考量…」（121 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "8.4",
+   "status": "out_of_scope",
+   "reason": "填方路段之邊坡與擋土設施設計規定（文字層含圖說引用）；本工作區擋土牆設計採 tools/design/retaining_wall.py 與水保 §118~120，市區道路版之填方斷面另須回原條文",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "附錄三",
+   "status": "qualitative",
+   "reason": "附錄三 名詞解釋（平均行駛速率、服務水準等名詞）；屬定義彙編",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "附錄五",
+   "status": "qualitative",
+   "reason": "附錄五 參考文獻、圖目錄與表目錄；非設計條文",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "urbanroad113",
+   "clause": "附錄四",
+   "status": "qualitative",
+   "reason": "附錄四 注意及配合事項（用詞說明「應／宜」之拘束程度等）；屬用詞定義",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103",
+   "clause": "1.2",
+   "status": "qualitative",
+   "reason": "符號定義：耐風規範全部符號（A 有效受風面積、Ac 開放式建築物受風特徵面積、Ag 迎風面總面積、Agi 非迎風面總面積、A0 迎風面總開口面積等）之文字說明；各符號已寫入對應條目 vars.desc，本條無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103",
+   "clause": "1.3",
+   "status": "qualitative",
+   "reason": "名詞定義：基本設計風速 V10(C)、主要風力抵抗系統等專有名詞之定義（地況 C、離地 10 m、50 年回歸期之 10 分鐘平均風速）；屬定義性條文，無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103full",
+   "clause": "0",
+   "status": "qualitative",
+   "reason": "此「單元」實為規範卷首：封面、法規沿革與目錄（第一章至第 N 章之章節標題與頁碼）。全文 4,867 字為目錄條目，無任何算式或數值表，係索引器把卷首頁當成條文收錄。此為解析 artifact，判定性",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "wind103full",
+   "clause": "1.2",
+   "status": "qualitative",
+   "reason": "符號表（A 有效受風面積、Ac 開放式建築物受風作用特徵面積、Ag 等）；屬符號定義，無算式或數值表",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103full",
+   "clause": "2.12",
+   "status": "qualitative",
+   "reason": "定性條文：建築物同時受順風向、橫風向與扭轉向風力，三者最大值不一定同時發生，設計時應對考量之來風方向分別計算並組合；屬組合原則",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103full",
+   "clause": "2.2",
+   "status": "covered",
+   "reason": "定性條文：封閉式、部分封閉式或開放式建築物主要風力抵抗系統所承受之設計風壓 p、屋頂女兒牆設計風壓 pp 及設計風力 F 之計算架構說明；主式已入庫（3.2 式3.1／3.2、3.4 式3.4），本筆為總則性說明",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103full",
+   "clause": "2.7",
+   "status": "qualitative",
+   "reason": "定性條文與解說：不考慮動態效應時，作用於封閉式或部分封閉式建築物之風壓力＝風速壓×風壓係數 Cp；開放式建築物所受風力＝風速壓×淨風壓係數；屬原理說明",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103full",
+   "clause": "3.1",
+   "status": "qualitative",
+   "reason": "條文內容為「規則性封閉式、部分封閉式與開放式建築物或地上獨立結構物之局部構材及外部被覆物所應承受之設計風…」（426 字）；已逐字確認屬定性規定或程序，無可參數化之算式或數值表（數值另見該條所引之表或他條，已分別入庫者不重複）。",
+   "date": "2026-11-02",
+   "by": "agent"
+  },
+  {
+   "src": "wind103full",
+   "clause": "4.3",
+   "status": "out_of_scope",
+   "reason": "條文為舒適性規定：回歸期半年之風力下，建築物最高居室樓層角隅側向振動尖峰加速度不得超過 0.05 m/s²；屬高層建築舒適度，非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  },
+  {
+   "src": "wind103full",
+   "clause": "4.4",
+   "status": "out_of_scope",
+   "reason": "振動尖峰加速度之合成方法（順風向、橫風向、扭轉可分別計算再合成）；屬高層建築舒適度分析，非本工作區範疇",
+   "date": "2026-11-02",
+   "by": "agent",
+   "legacy_status": "no-content"
+  }
+ ]
+}

@@ -1,0 +1,61 @@
+{
+ "formulas": [
+  {
+   "id": "steel99_pin_plate_beff_55",
+   "title": "樞接受拉構材有效寬度 beff（鋼結構容許應力設計法 5.5 符號定義）",
+   "src": "steel99",
+   "clause": "5.5",
+   "page": 7,
+   "keywords": "鋼結構 樞接 受拉構材 有效寬度 beff 2t+1.6 板厚 樞孔 5.5",
+   "unit": "cm",
+   "output": "beff",
+   "latex": "b_{eff}=2t+1.6\\ \\text{cm}\\ (\\le\\text{垂直於作用力方向樞孔邊至構材邊之距離})",
+   "vars": {
+    "t": {
+     "desc": "板厚 t（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 2.0
+    },
+    "b_edge": {
+     "desc": "垂直於作用力方向樞孔邊至構材邊之距離（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 10.0
+    }
+   },
+   "expr": "min(2.0*t+1.6, b_edge)",
+   "tests": [
+    {
+     "in": {
+      "t": 2.0,
+      "b_edge": 10.0
+     },
+     "out": 5.6
+    },
+    {
+     "in": {
+      "t": 4.0,
+      "b_edge": 8.0
+     },
+     "out": 8.0
+    }
+   ],
+   "notes": "鋼結構設計規範（(一)容許應力設計法）**5.5 符號說明：beff＝2t＋1.6 cm，但不大於垂直於作用力方向樞孔邊至構材邊之距離；t 板厚 (cm)、d 樞梢直徑 (cm)、a 平行於作用力方向樞孔邊至構材邊之最短距離 (cm)、Fy 標稱降伏應力、Fu 標稱極限抗拉應力 (tf/cm²)。** **與 AISC D3.1（beff＝2t＋16 mm）一致 ✓。** （樞接受拉構材之強度公式見該節 5.5 本文。）",
+   "status": "verified",
+   "conditions": [
+    {
+     "expr": "t>0 and b_edge>0",
+     "msg": "尺寸須為正"
+    }
+   ],
+   "_file": "payload_phase3c.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

@@ -1,0 +1,316 @@
+{
+ "formulas": [
+  {
+   "id": "steel99_encased_beam_shear_946",
+   "title": "包覆型合成梁混凝土與剪力鋼筋之剪力強度 Vc、Vs（鋼結構容許應力設計法 9.4.6 式9.4-3、9.4-4）",
+   "src": "steel99",
+   "clause": "9.4.6",
+   "page": 9,
+   "keywords": "鋼結構 合成梁 包覆型 剪力強度 Vc 0.53 Vs 2.12 Av Fyr d/s Vnrc 0.60 φv 0.85 9.4-3 9.4-4",
+   "unit": "kgf",
+   "output": "result",
+   "latex": "V_c=0.53\\sqrt{f'_c}\\,b_wd;\\quad V_s=\\frac{A_vF_{yr}d}{s}\\le2.12\\sqrt{f'_c}\\,b_wd;\\quad V_{allow}=0.60(V_c+V_s)\\ \\text{或}\\ \\phi_v(V_c+V_s),\\ \\phi_v=0.85",
+   "vars": {
+    "fc": {
+     "desc": "混凝土標稱抗壓強度 f'c（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 280.0
+    },
+    "bw": {
+     "desc": "包覆型合成梁斷面寬度 bw（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 40.0
+    },
+    "d": {
+     "desc": "受壓面最外緣至受拉鋼筋形心距離 d（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 55.0
+    },
+    "Av": {
+     "desc": "距離 s 內剪力鋼筋斷面積 Av（cm²）",
+     "unit": "cm2",
+     "min": 0,
+     "default": 1.42
+    },
+    "Fyr": {
+     "desc": "剪力鋼筋標稱降伏應力 Fyr（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 4200.0
+    },
+    "s": {
+     "desc": "剪力鋼筋間距 s（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 15.0
+    },
+    "mode": {
+     "desc": "1＝Vc；2＝Vs；3＝容許剪力 0.60Vnrc（ASD）；4＝設計剪力 φvVnrc（φv＝0.85，LRFD）",
+     "unit": "-",
+     "min": 1,
+     "max": 4,
+     "default": 3
+    }
+   },
+   "expr": "_Vc if mode==1 else (_Vs if mode==2 else (0.60*(_Vc+_Vs) if mode==3 else 0.85*(_Vc+_Vs)))",
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "bw": 40.0,
+      "d": 55.0,
+      "Av": 1.42,
+      "Fyr": 4200.0,
+      "s": 15.0,
+      "mode": 1
+     },
+     "out": 19510.911818774643
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "bw": 40.0,
+      "d": 55.0,
+      "Av": 1.42,
+      "Fyr": 4200.0,
+      "s": 15.0,
+      "mode": 2
+     },
+     "out": 21868.0
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "bw": 40.0,
+      "d": 55.0,
+      "Av": 1.42,
+      "Fyr": 4200.0,
+      "s": 15.0,
+      "mode": 3
+     },
+     "out": 24827.347091264786
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "bw": 40.0,
+      "d": 55.0,
+      "Av": 1.42,
+      "Fyr": 4200.0,
+      "s": 15.0,
+      "mode": 4
+     },
+     "out": 35172.075045958445
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**9.4.6 剪力**：**1. 鋼骨與樓版共同作用之合成梁，容許剪力強度為 Fv·Aw，Fv 依 7.5 節（見 steel99_web_shear_Fv_75），Aw 為斷面全深與腹板厚度之乘積。2. 包覆型合成梁之容許剪力強度取下列兩者之大者：a. 鋼骨腹板之 Fv·Aw；b. 混凝土與剪力鋼筋共同作用之 0.60Vnrc，Vnrc＝Vc＋Vs。** **Vc＝0.53√f′c·bw·d**（式9.4-3，僅受剪力與撓曲之構材）；**Vs＝Av·Fyr·d/s≤2.12√f′c·bw·d**（式9.4-4，剪力鋼筋為垂直肋筋時）。**解說（LRFD 對應）：設計剪力強度取 φvVnrc，φv＝0.85。** **與 ACI 318-83 §11.3.1.1、11.5.6.8 完全一致（0.53√f′c·bw·d、Vs 上限 2.12√f′c·bw·d）✓；0.53＝0.17×√10.2×… 即 ACI SI 之 0.17√f′c 換算 kgf/cm² ✓。** 合成梁之垂直剪力強度未考慮合成作用，設計較保守但簡單。",
+   "status": "verified",
+   "defs": [
+    [
+     "_Vc",
+     "0.53*sqrt(fc)*bw*d"
+    ],
+    [
+     "_Vs",
+     "min(Av*Fyr*d/s, 2.12*sqrt(fc)*bw*d)"
+    ]
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  },
+  {
+   "id": "steel99_composite_beam_pna_942",
+   "title": "合成梁正彎矩塑性應力分布與部分合成梁有效性質（鋼結構容許應力設計法 9.4.2 解說 式C9.4-1~C9.4-7）",
+   "src": "steel99",
+   "clause": "9.4.2",
+   "page": 6,
+   "keywords": "鋼結構 ASD 合成梁 正彎矩 塑性應力分布 混凝土壓力 C ΣQn Mn Ieff Seff 部分合成 C9.4-1 C9.4-5 C9.4-6 C9.4-7 0.25",
+   "unit": "tf",
+   "output": "result",
+   "latex": "C=\\min\\left\\{A_sF_y,\\ 0.85f'_cA_c,\\ \\sum Q_n\\right\\};\\ a=\\frac{C}{0.85f'_cb};\\ M_n=C(d_1+d_2)+P_y(d_3-d_2);\\ I_{eff}=I_s+\\sqrt{\\frac{\\sum Q_n}{C_f}}\\left(I_{tr}-I_s\\right)",
+   "vars": {
+    "As": {
+     "desc": "鋼骨斷面積 As（cm²）",
+     "unit": "cm2",
+     "min": 1e-09,
+     "default": 100.0
+    },
+    "Fy": {
+     "desc": "鋼骨標稱降伏強度 Fy（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09,
+     "default": 2.5
+    },
+    "fc": {
+     "desc": "混凝土標稱抗壓強度 f'c（tf/cm²）",
+     "unit": "tf/cm2",
+     "min": 1e-09,
+     "default": 0.28
+    },
+    "Ac": {
+     "desc": "有效寬度內混凝土版面積 Ac（cm²）",
+     "unit": "cm2",
+     "min": 1e-09,
+     "default": 1500.0
+    },
+    "SQn": {
+     "desc": "最大正彎矩與彎矩為零之間所有剪力釘標稱強度總和 ΣQn（tf）",
+     "unit": "tf",
+     "min": 0,
+     "default": 200.0
+    },
+    "b": {
+     "desc": "混凝土版有效寬度 b（cm；mode=2 使用）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 150.0
+    },
+    "d1": {
+     "desc": "混凝土壓力 C 作用點至鋼骨上緣距離 d1（cm；mode=3）",
+     "unit": "cm",
+     "default": 10.0
+    },
+    "d2": {
+     "desc": "鋼骨斷面壓力中心至鋼骨上緣距離 d2（cm；鋼骨不受壓時 0）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0.0
+    },
+    "d3": {
+     "desc": "Py 作用位置至鋼骨上緣距離 d3（cm；mode=3）",
+     "unit": "cm",
+     "min": 0,
+     "default": 25.0
+    },
+    "Is": {
+     "desc": "鋼骨慣性矩 Is（cm⁴；mode=4）",
+     "unit": "cm4",
+     "min": 0,
+     "default": 20000.0
+    },
+    "Itr": {
+     "desc": "完全合成未開裂轉換斷面慣性矩 Itr（cm⁴；mode=4）",
+     "unit": "cm4",
+     "min": 0,
+     "default": 60000.0
+    },
+    "mode": {
+     "desc": "1＝混凝土版壓力 C（tf）；2＝壓力塊深度 a（cm）；3＝標稱塑性彎矩 Mn（tf·cm）；4＝部分合成有效慣性矩 Ieff（cm⁴，ΣQn/Cf≥0.25）",
+     "unit": "-",
+     "min": 1,
+     "max": 4,
+     "default": 1
+    }
+   },
+   "expr": "_C if mode==1 else (_C/(0.85*fc*b) if mode==2 else ((_C*(d1+d2)+As*Fy*(d3-d2)) if mode==3 else (Is+sqrt(SQn/_Cf)*(Itr-Is))))",
+   "tests": [
+    {
+     "in": {
+      "As": 100.0,
+      "Fy": 2.5,
+      "fc": 0.28,
+      "Ac": 1500.0,
+      "SQn": 200.0,
+      "b": 150.0,
+      "d1": 10.0,
+      "d2": 0.0,
+      "d3": 25.0,
+      "Is": 20000.0,
+      "Itr": 60000.0,
+      "mode": 1
+     },
+     "out": 200.0
+    },
+    {
+     "in": {
+      "As": 100.0,
+      "Fy": 2.5,
+      "fc": 0.28,
+      "Ac": 1500.0,
+      "SQn": 200.0,
+      "b": 150.0,
+      "d1": 10.0,
+      "d2": 0.0,
+      "d3": 25.0,
+      "Is": 20000.0,
+      "Itr": 60000.0,
+      "mode": 2
+     },
+     "out": 5.602240896358543
+    },
+    {
+     "in": {
+      "As": 100.0,
+      "Fy": 2.5,
+      "fc": 0.28,
+      "Ac": 1500.0,
+      "SQn": 200.0,
+      "b": 150.0,
+      "d1": 10.0,
+      "d2": 0.0,
+      "d3": 25.0,
+      "Is": 20000.0,
+      "Itr": 60000.0,
+      "mode": 3
+     },
+     "out": 8250.0
+    },
+    {
+     "in": {
+      "As": 100.0,
+      "Fy": 2.5,
+      "fc": 0.28,
+      "Ac": 1500.0,
+      "SQn": 150.0,
+      "b": 150.0,
+      "d1": 10.0,
+      "d2": 0.0,
+      "d3": 25.0,
+      "Is": 20000.0,
+      "Itr": 60000.0,
+      "mode": 4
+     },
+     "out": 50983.86676965933
+    }
+   ],
+   "notes": "鋼結構容許應力設計法（(一)）**9.4.2 解說**：**正彎矩設計強度——當撓曲強度由塑性應力分布求得時，混凝土版壓力 C 取下列三式之最小值：C＝As·Fy＋…（非混合鋼骨 C＝As·Fy，式C9.4-1）、C＝0.85f′c·Ac（式C9.4-2）、C＝ΣQn（式C9.4-3）；混凝土壓力塊深度 a＝C/(0.85f′c·b)**（式C9.4-4）；**合成梁正標稱塑性彎矩 Mn＝C(d1＋d2)＋Py(d3－d2)**（式C9.4-5；Py＝As·Fy 鋼骨拉力降伏強度，d1 混凝土壓力 C 至鋼骨上緣距離，d2 鋼骨壓力中心至上緣距離，d3 Py 作用位置至上緣距離）。**部分合成梁近似彈性性質：Ieff＝Is＋√(ΣQn/Cf)·(Itr－Is)**（式C9.4-6）；**Seff＝Ss＋√(ΣQn/Cf)·(Str－Ss)**（式C9.4-7）；Cf 為完全合成梁於混凝土版內之壓力（取式C9.4-1 與 C9.4-2 之較小值）；**ΣQn/Cf 小於 0.25 時式C9.4-6、C9.4-7 不得使用，以避免過度滑動與梁勁度過低。** 同條：**容許撓曲強度取 0.60Mn；腹板 h/tw≤170/√Fyf 時 Mn 依塑性應力分布，>170/√Fyf 時依彈性應力疊加；負彎矩容許撓曲強度為 S·Fb 或鋼骨結實且側撐充分、剪力釘連接時取 0.60Mn。** **與 AISC 合成梁塑性分析（C＝min(As·Fy, 0.85f′c·Ac, ΣQn)、Ieff＝Is＋√(ΣQn/Cf)(Itr－Is)）一致 ✓；完全合成（ΣQn≥Cf）時 Ieff→Itr ✓；ΣQn→0 時 Ieff→Is ✓。**",
+   "status": "verified",
+   "defs": [
+    [
+     "_Cf",
+     "min(As*Fy, 0.85*fc*Ac)"
+    ],
+    [
+     "_C",
+     "min(As*Fy, 0.85*fc*Ac, SQn)"
+    ]
+   ],
+   "conditions": [
+    {
+     "expr": "mode!=4 or SQn>0",
+     "msg": "部分合成 Ieff 須 ΣQn>0"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "mode==4 and SQn/min(As*Fy, 0.85*fc*Ac)<0.25",
+     "msg": "ΣQn/Cf<0.25：不得使用式C9.4-6、C9.4-7"
+    }
+   ],
+   "_file": "payload_phase2f.json",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   }
+  }
+ ],
+ "tables": []
+}

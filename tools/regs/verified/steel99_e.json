@@ -1,0 +1,153 @@
+{
+ "formulas": [
+  {
+   "id": "steel99_truss_end_connection_min",
+   "title": "桁架構材端部接合之最低設計強度＝構材強度之 50%（鋼構 10.1.5）",
+   "src": "steel99",
+   "clause": "10.1.5",
+   "page": 2,
+   "keywords": "鋼構 桁架 端部接合 最低強度 50% 構材強度 接合設計",
+   "unit": "tf",
+   "output": "R_required",
+   "latex": "R_{req}\\ge0.5\\,R_{member}",
+   "vars": {
+    "Rmember": {
+     "desc": "構材之設計強度 R_member",
+     "unit": "tf",
+     "min": 0
+    }
+   },
+   "expr": "0.5*Rmember",
+   "conditions": [
+    {
+     "expr": "Rmember>=0",
+     "msg": "構材強度須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Rmember": 100
+     },
+     "out": 50.0
+    },
+    {
+     "in": {
+      "Rmember": 60
+     },
+     "out": 30.0
+    }
+   ],
+   "notes": "10.1.5（(二) 版）：**桁架之構材其端部接合應能承擔其設計載重，但不得小於構材強度之 50%**。本式回傳該下限值，供與接合設計強度比較。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十章 p.2 §10.1.5",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "payload_b17b.json"
+  },
+  {
+   "id": "steel99_connection_min_strength",
+   "title": "接合處最低設計強度 4.5 tf 係數化載重（鋼構 10.1.6）",
+   "src": "steel99",
+   "clause": "10.1.6",
+   "page": 2,
+   "keywords": "鋼構 接合 最低設計強度 4.5 噸 係數化載重 繫條 吊桿 圍梁",
+   "unit": "tf",
+   "output": "R_min",
+   "latex": "R_{n}\\ge4.5\\ \\mathrm{tf}",
+   "vars": {
+    "Rdesign": {
+     "desc": "接合處之設計強度（僅供記錄；下限為固定值 4.5 tf）",
+     "unit": "tf",
+     "min": 0,
+     "default": 4.5
+    }
+   },
+   "expr": "4.5",
+   "conditions": [
+    {
+     "expr": "Rdesign>=0",
+     "msg": "設計強度須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Rdesign": 10
+     },
+     "out": 4.5
+    },
+    {
+     "in": {
+      "Rdesign": 4.5
+     },
+     "out": 4.5
+    }
+   ],
+   "notes": "10.1.6（(二) 版）：**除繫條、吊桿、圍梁外，接合處之設計強度至少應能承受 4.5 噸係數化載重**。本式回傳該下限值（與設計強度無關），方便與計算結果直接比較。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十章 p.2 §10.1.6",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "payload_b17b.json"
+  },
+  {
+   "id": "steel99_bolt_bearing_area",
+   "title": "螺栓及螺牙桿件之有效承壓面積＝直徑×承壓長度（鋼構 10.3.2）",
+   "src": "steel99",
+   "clause": "10.3.2",
+   "page": 16,
+   "keywords": "鋼構 螺栓 螺牙桿件 有效承壓面積 直徑 承壓長度 Apb",
+   "unit": "cm2",
+   "output": "A_pb",
+   "latex": "A_{pb}=d\\,t_{brg}",
+   "vars": {
+    "d": {
+     "desc": "螺栓標稱直徑 d",
+     "unit": "cm",
+     "min": 0
+    },
+    "tbrg": {
+     "desc": "承壓長度（承壓方向之板厚）",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "d*tbrg",
+   "conditions": [
+    {
+     "expr": "d>0 and tbrg>0",
+     "msg": "d、承壓長度須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "d": 2.0,
+      "tbrg": 1.0
+     },
+     "out": 2.0
+    },
+    {
+     "in": {
+      "d": 2.2,
+      "tbrg": 1.2
+     },
+     "out": 2.64
+    }
+   ],
+   "notes": "10.3.2（(二) 版）：**螺栓及螺牙桿件之有效承壓面積為其直徑與承壓長度之乘積**。此面積即 10.3.9 節承壓強度式中之投影承壓面積（見 steel99_bolt_bearing_Rn）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照鋼結構設計規範 (二) 第十章 p.16 §10.3.2",
+    "by": "agent",
+    "date": "2026-11-01"
+   },
+   "_file": "payload_b17b.json"
+  }
+ ]
+}

@@ -1,0 +1,610 @@
+{
+ "formulas": [
+  {
+   "id": "hwbridge_caisson_qu_582",
+   "title": "沉箱基礎之極限垂直承載力 qu（公路橋梁 5.8.2 式5-9）",
+   "src": "hwbridge",
+   "clause": "5.8.2",
+   "page": 107,
+   "keywords": "公路橋梁 沉箱基礎 極限垂直承載力 qu 0.5γ2BNγ γ1DfNq αcNc 承載力因素 Nc Nq Nγ 形狀影響因素 表5.9 表5.10",
+   "unit": "tf/m2",
+   "output": "qu",
+   "latex": "q_u=\\frac{1}{2}\\gamma_2 B N_{\\gamma}+\\gamma_1 D_f N_q+\\alpha\\,c\\,N_c",
+   "vars": {
+    "g1": {
+     "desc": "基礎底面下土壤之有效單位重 γ1（tf/m³）",
+     "unit": "tf/m3",
+     "min": 0
+    },
+    "g2": {
+     "desc": "基礎底面以上土壤之平均有效單位重 γ2（tf/m³）",
+     "unit": "tf/m3",
+     "min": 0
+    },
+    "B": {
+     "desc": "基礎寬度 B（m）",
+     "unit": "m",
+     "min": 0
+    },
+    "Df": {
+     "desc": "基礎之有效埋置深度 Df（m）",
+     "unit": "m",
+     "min": 0
+    },
+    "Nc": {
+     "desc": "承載力因素 Nc（見表5.9）",
+     "unit": "-",
+     "min": 0
+    },
+    "Nq": {
+     "desc": "承載力因素 Nq（見表5.9）",
+     "unit": "-",
+     "min": 0
+    },
+    "Ng": {
+     "desc": "承載力因素 Nγ（見表5.9）",
+     "unit": "-",
+     "min": 0
+    },
+    "c": {
+     "desc": "基礎底面下土壤之凝聚力 c（tf/m²）",
+     "unit": "tf/m2",
+     "min": 0
+    },
+    "alpha": {
+     "desc": "基礎底面形狀影響因素 α（見表5.10）",
+     "unit": "-",
+     "min": 0,
+     "default": 1.0
+    },
+    "beta": {
+     "desc": "基礎底面形狀影響因素 β（見表5.10；本式未使用，僅供查表對照）",
+     "unit": "-",
+     "min": 0,
+     "default": 1.0
+    }
+   },
+   "expr": "0.5*g2*B*Ng+g1*Df*Nq+alpha*c*Nc",
+   "conditions": [
+    {
+     "expr": "B>=0 and Df>=0",
+     "msg": "B、Df 須非負"
+    },
+    {
+     "expr": "Nc>=0 and Nq>=0 and Ng>=0",
+     "msg": "承載力因素須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "g1": 1.8,
+      "g2": 1.8,
+      "B": 4.0,
+      "Df": 3.0,
+      "Nc": 30.0,
+      "Nq": 18.0,
+      "Ng": 15.0,
+      "c": 1.0,
+      "alpha": 1.0,
+      "beta": 1.0
+     },
+     "out": 181.2
+    },
+    {
+     "in": {
+      "g1": 1.9,
+      "g2": 1.9,
+      "B": 6.0,
+      "Df": 5.0,
+      "Nc": 40.0,
+      "Nq": 25.0,
+      "Ng": 20.0,
+      "c": 2.0,
+      "alpha": 0.8,
+      "beta": 0.8
+     },
+     "out": 415.5
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**5.8.2 及式(5-9)**：**沉箱基礎之垂直極限承載力應根據 5.3 節工址調查結果，依下式估算：qu＝(1/2)γ2·B·Nγ＋γ1·Df·Nq＋α·c·Nc**。符號：**qu 基礎底面地層之極限承載力（tf/m²）、c 基礎底面下土壤之凝聚力（tf/m²）、γ1 基礎底面下土壤之有效單位重（tf/m³）、γ2 基礎底面以上土壤之平均有效單位重（tf/m³）、B 基礎寬度、Df 基礎之有效埋置深度、Nc／Nq／Nγ 承載力因素（見表5.9）、α／β 基礎底面形狀影響因素（見表5.10）**。**量綱檢查：(tf/m³)·m·(無因次)＝tf/m² ✓ 三項同為應力單位。** ⚠ **文字層給 β 但本式未用到 β（β 用於同條其他形狀修正式），本條目保留 β 為查表參數但不進入算式。**",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2a_hwbridge.json"
+  },
+  {
+   "id": "hwbridge_caisson_negfriction_583",
+   "title": "沉箱負摩擦力之檢核（公路橋梁 5.8.3 式5-14、5-15）",
+   "src": "hwbridge",
+   "clause": "5.8.3",
+   "page": 109,
+   "keywords": "公路橋梁 沉箱 負摩擦力 Pfn 中立點 檢核 Ac σsa 安全係數1.2 Qb Rf 正摩擦阻力 短期容許應力",
+   "unit": "-",
+   "output": "utilization",
+   "latex": "\\frac{P+P_{fn}}{A_c}\\le\\sigma_{sa};\\qquad P+P_{fn}\\le\\frac{Q_b+R_f}{1.2}",
+   "vars": {
+    "P": {
+     "desc": "沉箱頂部之軸向長期載重 P（tf）",
+     "unit": "tf",
+     "min": 0
+    },
+    "Pfn": {
+     "desc": "中立點以上之負摩擦力總和 Pfn（tf）",
+     "unit": "tf",
+     "min": 0
+    },
+    "Ac": {
+     "desc": "中立點位置之沉箱斷面積 Ac（m²）",
+     "unit": "m2",
+     "min": 1e-09
+    },
+    "sa": {
+     "desc": "沉箱材料之短期容許應力 σsa（tf/m²）",
+     "unit": "tf/m2",
+     "min": 0
+    },
+    "Qb": {
+     "desc": "沉箱底面地層之極限承載力 Qb（tf）",
+     "unit": "tf",
+     "min": 0
+    },
+    "Rf": {
+     "desc": "中立點以下之正摩擦阻力 Rf（tf）",
+     "unit": "tf",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "_u1",
+     "(P+Pfn)/Ac/sa if sa>0 else 0"
+    ],
+    [
+     "_u2",
+     "(P+Pfn)/((Qb+Rf)/1.2) if Qb+Rf>0 else 0"
+    ]
+   ],
+   "expr": "max(_u1, _u2)",
+   "conditions": [
+    {
+     "expr": "Ac>0",
+     "msg": "Ac 須為正（分母）"
+    },
+    {
+     "expr": "sa>0",
+     "msg": "σsa 須為正（分母）"
+    },
+    {
+     "expr": "Qb+Rf>0",
+     "msg": "Qb＋Rf 須為正（分母）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "P": 1000.0,
+      "Pfn": 300.0,
+      "Ac": 20.0,
+      "sa": 100.0,
+      "Qb": 2000.0,
+      "Rf": 500.0
+     },
+     "out": 0.65
+    },
+    {
+     "in": {
+      "P": 1000.0,
+      "Pfn": 300.0,
+      "Ac": 20.0,
+      "sa": 200.0,
+      "Qb": 1200.0,
+      "Rf": 300.0
+     },
+     "out": 1.04
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**5.8.3 及式(5-14)(5-15)**：**沉箱設計應檢討負摩擦力發生之可能性及大小，並按下列二式檢核其安全性**——**(5-14)：(P＋Pfn)/Ac ≤σsa**；**(5-15)：P＋Pfn ≤(Qb＋Rf)/1.2**。符號：**P 沉箱頂部之軸向長期載重(tf)、Pfn 中立點以上之負摩擦力總和(tf)、Qb 沉箱底面地層之極限承載力(tf)、Rf 中立點以下之正摩擦阻力(tf)、Ac 中立點位置之沉箱斷面積(m²)、σsa 沉箱材料之短期容許應力(tf/m²)**。**本式回傳兩式之較大利用比（≤1 合格）。** **合理性檢查：式(5-14) 檢核「中立點斷面之壓應力」（材料強度）、式(5-15) 檢核「整體承載」（對 Qb＋Rf 取安全係數 1.2）——兩者破壞模式不同，須同時滿足 ✓。** ⚠ **1.2 為承載力之安全係數（短期載重），與 5.8.2 之極限承載力 qu 為兩件事，不可互換。**",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2a_hwbridge.json"
+  },
+  {
+   "id": "hwbridge_fillet_weld_Fv_922",
+   "title": "填角銲與塞銲之容許剪應力（公路橋梁 9.2.2）",
+   "src": "hwbridge",
+   "clause": "9.2.2",
+   "page": 259,
+   "keywords": "公路橋梁 鋼結構 銲接 填角銲 塞銲 容許剪應力 Fv 0.27Fu 868 85.5 銲條等級 拉力強度 對銲 母材",
+   "unit": "kgf/cm2",
+   "output": "Fv",
+   "latex": "\\text{填角銲}:F_v=0.27F_u;\\qquad \\text{塞銲}:F_v=868\\ \\text{kgf/cm}^{2}\\ (85.5\\ \\text{MPa})",
+   "vars": {
+    "Fu": {
+     "desc": "銲條等級之拉力強度 Fu（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "mode": {
+     "desc": "1＝填角銲（Fv＝0.27Fu）；2＝塞銲（Fv＝868 kgf/cm²，僅用於抗剪力）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "0.27*Fu if mode==1 else 868.0",
+   "conditions": [
+    {
+     "expr": "mode!=1 or Fu>0",
+     "msg": "填角銲需給 Fu>0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fu": 4200.0,
+      "mode": 1
+     },
+     "out": 1134.0
+    },
+    {
+     "in": {
+      "Fu": 0.0,
+      "mode": 2
+     },
+     "out": 868.0
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.2.2 第2 項 銲接材料**：**除另有規定者外，銲接金屬之降伏點及極限強度應等於或大於其母材之最小規定值**；銲接金屬有效面積之容許應力如下——**對銲：與所連接之母材相同，但如連接之母材有不同降伏應力，則以低者為準**；**填角銲：Fv＝0.27Fu**（Fv 容許剪應力、Fu 銲條等級之拉力強度）；**塞銲：Fv＝868 kgf/cm²（85.5 MPa），僅用於抗剪力之容許剪應力**。**為淬火及回火鋼材設計填角銲時，設計者可使用低於母材強度之銲條等級，但應在設計圖上註明。** **量綱檢查：0.27 為無因次，Fv 與 Fu 同單位 ✓；868 kgf/cm² ×0.0985＝85.5 MPa ✓ 雙單位自洽。**",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2a_hwbridge.json"
+  },
+  {
+   "id": "hwbridge_arch_moment_magnifier_927",
+   "title": "鋼拱肋之彎矩放大因數與互制檢核（公路橋梁 9.2.7 式9-45~9-47）",
+   "src": "hwbridge",
+   "clause": "9.2.7",
+   "page": 281,
+   "keywords": "公路橋梁 鋼拱 拱肋 彎矩放大因數 A 1/(1-T/1.70Fe) Fe π2E/(KL/r)2 歐拉挫屈 互制 fa/Fa+fb/Fb 1.0 四分之一處",
+   "unit": "-",
+   "output": "A",
+   "latex": "A_F=\\frac{1}{1-\\dfrac{T}{1.70\\,A\\,F_e}};\\qquad F_e=\\frac{\\pi^{2}E}{\\left(KL/r\\right)^{2}};\\qquad \\frac{f_a}{F_a}+\\frac{f_b}{F_b}\\le1",
+   "vars": {
+    "T": {
+     "desc": "拱肋在四分之一處，由靜重＋活重＋衝擊力所計得之軸力 T（tf）",
+     "unit": "tf",
+     "min": 0
+    },
+    "E": {
+     "desc": "彈性模數 E（tf/cm²，鋼材一般 2040）",
+     "unit": "tf/cm2",
+     "min": 1,
+     "default": 2040.0
+    },
+    "K": {
+     "desc": "有效長度因子 K",
+     "unit": "-",
+     "min": 0.5,
+     "max": 2.5,
+     "default": 1.0
+    },
+    "L": {
+     "desc": "拱肋長度之一半 L（cm）",
+     "unit": "cm",
+     "min": 0
+    },
+    "r": {
+     "desc": "迴轉半徑 r（cm）",
+     "unit": "cm",
+     "min": 1e-09
+    },
+    "A_sec": {
+     "desc": "拱肋橫斷面積 A（cm²）",
+     "unit": "cm2",
+     "min": 1e-09,
+     "default": 100.0
+    }
+   },
+   "defs": [
+    [
+     "_Fe",
+     "pi**2*E/((K*L/r)**2)"
+    ]
+   ],
+   "expr": "1.0/(1.0-T/(1.70*A_sec*_Fe))",
+   "conditions": [
+    {
+     "expr": "r>0 and E>0 and A_sec>0",
+     "msg": "r、E、A 須為正"
+    },
+    {
+     "expr": "T/(1.70*A_sec*_Fe)<1",
+     "msg": "T ≥1.70·A·Fe：放大因數無意義（已達挫屈），須重新設計"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "T/(1.70*A_sec*_Fe)>=0.8",
+     "msg": "T/(1.70AFe) ≥0.8：放大因數已達 5 倍，接近挫屈載重"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "T": 100.0,
+      "E": 2040.0,
+      "K": 1.0,
+      "L": 500.0,
+      "r": 20.0,
+      "A_sec": 100.0
+     },
+     "out": 1.0185996471134666
+    },
+    {
+     "in": {
+      "T": 2000.0,
+      "E": 2040.0,
+      "K": 1.0,
+      "L": 500.0,
+      "r": 20.0,
+      "A_sec": 100.0
+     },
+     "out": 1.5753001623436684
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.2.7 第1 項**：**活重加衝擊力之彎矩若按不考慮拱肋撓度之影響而分析決定時，應乘以放大因數 A**——**放大因數 A_F＝1/(1－T/(1.70·A·Fe))**（式9-45，文字層『AF』實為 A_F 符號，其後『T／1.70AFe』之 A 為橫斷面積），式中 **T 為拱肋在四分之一處由靜重加活重加衝擊力所計得之軸力**；**Fe＝π²E/(KL/r)²**（歐拉挫屈應力，式9-46），**L 為拱肋長度之一半、A 為橫斷面積、r 為迴轉半徑、K 為有效長度因子**。**拱肋之設計應符合：fa/Fa＋fb/Fb ≤1**（式9-47），式中 **fa 計得之軸向應力、fb 最外纖維之計得彎曲應力（包括彎矩放大值）、Fa 容許之軸向應力、Fb 容許之彎曲應力**。**本式回傳放大因數 A（≥1）。** **量綱檢查：T(tf)／[A(cm²)·Fe(tf/cm²)] 無因次 ✓（若漏掉 A 則為 tf／(tf/cm²)＝cm²，量綱不通——這是本條目初稿的錯，已更正）。** **合理性檢查：T→0 時 A→1（無軸力即無放大）✓；T 增大時 A 單調遞增 ✓；1.70Fe 為分母之臨界值，即 T 達 1.70 倍歐拉應力時放大因數趨於無限 ✓。**",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2a_hwbridge.json"
+  },
+  {
+   "id": "hwbridge_compact_section_Mu_937",
+   "title": "結實斷面之最大強度 Mu＝Fy·Z 與三項結實性需求（公路橋梁 9.3.7 式9-92~9-96）",
+   "src": "hwbridge",
+   "clause": "9.3.7",
+   "page": 305,
+   "keywords": "公路橋梁 鋼結構 LRFD 結實斷面 Mu Fy Z 塑性模數 1089 5098.6 8917.9 Lb ry 2.53 1.55 側向支撐 腹板深厚比",
+   "unit": "mixed",
+   "output": "Mu",
+   "latex": "M_u=F_yZ;\\qquad \\frac{b}{t}\\le\\frac{1089}{\\sqrt{F_y}};\\quad \\frac{D}{t_w}\\le\\frac{5098.6}{\\sqrt{F_y}};\\quad \\left(\\frac{D}{t_w}\\right)\\left(\\frac{b}{t_f}\\right)\\le\\frac{8917.9}{\\sqrt{F_{yf}}};\\quad L_b\\le\\frac{r_y\\left[2.53-1.55\\frac{M_u}{M_l}\\right]\\times10^{5}}{F_y}",
+   "vars": {
+    "Fy": {
+     "desc": "所用鋼材之規定降伏點 Fy（kgf/cm²；係數 1089、5098.6、8917.9、10⁵ 為 kgf/cm² 制）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 2500.0
+    },
+    "Z": {
+     "desc": "斷面塑性模數 Z（cm³）；Mu＝Fy·Z 之結果自 kgf·cm 換算為 tf·m（÷10⁵）",
+     "unit": "cm3",
+     "min": 0
+    },
+    "b": {
+     "desc": "翼板寬度 b（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "t": {
+     "desc": "翼板厚度 t（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 1.0
+    },
+    "D": {
+     "desc": "翼板間之淨距離 D（cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "tw": {
+     "desc": "腹板厚度 tw（cm）",
+     "unit": "cm",
+     "min": 1e-09,
+     "default": 1.0
+    },
+    "Fyf": {
+     "desc": "受壓翼板降伏強度 Fyf（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "mode": {
+     "desc": "1＝最大強度 Mu；2＝翼板 b/t 上限；3＝腹板 D/tw 上限；4＝併合上限 (D/tw)(b/tf)；5＝側向支撐間距 Lb 上限",
+     "unit": "-",
+     "min": 1,
+     "max": 5,
+     "default": 1
+    },
+    "Mu": {
+     "desc": "係數化彎矩 Mu（tf·m；mode=5 時使用）",
+     "unit": "tf-m",
+     "min": 0,
+     "default": 0
+    },
+    "Ml": {
+     "desc": "側向無支撐段端部之較小彎矩 Ml（tf·m；mode=5 時使用）",
+     "unit": "tf-m",
+     "min": 0,
+     "default": 0
+    },
+    "ry": {
+     "desc": "對 Y-Y 軸（弱軸）之迴轉半徑 ry（cm；mode=5 時使用）",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "_Mu",
+     "Fy*Z/1e5"
+    ],
+    [
+     "_bt",
+     "1089.0/sqrt(Fy) if Fy>0 else 0"
+    ],
+    [
+     "_dtw",
+     "5098.6/sqrt(Fy) if Fy>0 else 0"
+    ],
+    [
+     "_comb",
+     "8917.9/sqrt(Fyf) if Fyf>0 else 0"
+    ],
+    [
+     "_lb",
+     "ry*(2.53-1.55*(Mu/Ml))*1e5/Fy if (Ml>0 and Fy>0) else 0"
+    ]
+   ],
+   "expr": "_Mu if mode==1 else (_bt if mode==2 else (_dtw if mode==3 else (_comb if mode==4 else _lb)))",
+   "conditions": [
+    {
+     "expr": "Fy>0",
+     "msg": "Fy 須為正（分母與開根號）"
+    },
+    {
+     "expr": "mode!=4 or Fyf>0",
+     "msg": "mode=4 需給 Fyf>0"
+    },
+    {
+     "expr": "mode!=5 or (Ml>0 and ry>0)",
+     "msg": "mode=5 需給 Ml>0、ry>0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fy": 2500.0,
+      "Z": 2000.0,
+      "b": 20.0,
+      "t": 2.0,
+      "D": 50.0,
+      "tw": 1.2,
+      "Fyf": 2500.0,
+      "mode": 1,
+      "Mu": 0.0,
+      "Ml": 0.0,
+      "ry": 0.0
+     },
+     "out": 50.0
+    },
+    {
+     "in": {
+      "Fy": 2500.0,
+      "Z": 0.0,
+      "b": 20.0,
+      "t": 2.0,
+      "D": 50.0,
+      "tw": 1.2,
+      "Fyf": 2500.0,
+      "mode": 2,
+      "Mu": 0.0,
+      "Ml": 0.0,
+      "ry": 0.0
+     },
+     "out": 21.78
+    },
+    {
+     "in": {
+      "Fy": 2500.0,
+      "Z": 0.0,
+      "b": 20.0,
+      "t": 2.0,
+      "D": 50.0,
+      "tw": 1.2,
+      "Fyf": 2500.0,
+      "mode": 5,
+      "Mu": 100.0,
+      "Ml": 150.0,
+      "ry": 5.0
+     },
+     "out": 299.3333333333333
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.3.7（強度設計法）第1 項 結實斷面**：**有適當側向支撐、固定梁深、無腹板縱向加勁材、受拉翼板無開孔且具高度抗局部挫屈強度者，可視為結實斷面**；滾軋或組合撓曲構材斷面若符合(1) 節者**最大強度 Mu＝Fy·Z**（式9-92；Fy 所用鋼材之規定降伏點、Z 斷面塑性模數）。**結實斷面應符合：a. 受壓翼板 b/t ≤1089/√Fy**（式9-93）；**b. 腹板厚度 D/tw ≤5098.6/√Fy**（式9-94）；**當 b/t 與 D/tw 兩者均超過上限值之 75% 時，應符合 (D/tw)(b/tf) ≤8917.9/√Fyf**（式9-95）；**c. 受壓翼板側向支撐之間距 Lb ≤ry[2.53－1.55(Mu/Ml)]×10⁵/Fy**（式9-96）。**組合I型梁受壓翼板寬度 b 宜不小於 0.2 倍腹板深度且不得小於 0.15 倍；受壓翼板厚 t 宜不小於 1.5 倍腹板厚度；受拉翼板寬厚比 b/t 不得超過 24。** **雙單位驗證（強證據）：文字層同時給出 kgf 與 MPa 兩組係數——1089／341.2、5098.6／1596.2、8917.9／2793.2，三組比值皆為 3.19＝√10.2 ✓；側向支撐式為 10⁵/Fy 與 10⁴/Fy，比值 10 ✓。** ⚠ **Fy 單位：1089/√Fy 在 Fy=2500 kgf/cm² 時為 21.8，若誤輸 2.5 則得 688.7 而失去物理意義。** ⚠ **式(9-96) 中 Ml 為「側向無支撐段端部之較小彎矩」；文字層在該處被截斷，本條目依上下文判定 Ml 為較小端彎矩，引用前請回原頁確認。** 本式依 mode 回傳：1＝Mu(tf·m)、2＝b/t 上限、3＝D/tw 上限、4＝(D/tw)(b/tf) 上限（無因次）、5＝Lb 上限(cm)；Fy、Fyf 一律以 kgf/cm² 輸入（係數為 kgf 制，tf/cm² 輸入會錯 1000 倍）。",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2a_hwbridge.json"
+  },
+  {
+   "id": "hwbridge_web_slender_938",
+   "title": "單對稱斷面之腹板細長比上限 Dc/tw（公路橋梁 9.3.8 式9-120、9-122）",
+   "src": "hwbridge",
+   "clause": "9.3.8",
+   "page": 316,
+   "keywords": "公路橋梁 鋼結構 單對稱斷面 腹板厚度 Dc/tw 4839 9678 縱向加勁板 合成梁 正彎矩 負彎矩 2Dc/5",
+   "unit": "-",
+   "output": "Dc_over_tw_max",
+   "latex": "\\frac{D_c}{t_w}\\le\\frac{4839}{\\sqrt{F_y}}\\ (9\\text{-}120);\\qquad \\frac{D_c}{t_w}\\le\\frac{9678}{\\sqrt{F_y}}\\ (9\\text{-}122)",
+   "vars": {
+    "Fy": {
+     "desc": "鋼材標稱降伏強度 Fy（kgf/cm²）",
+     "unit": "kgf/cm2",
+     "min": 1.0,
+     "default": 2500.0
+    },
+    "mode": {
+     "desc": "1＝豎向加勁單對稱斷面（式9-120）；2＝縱向加勁且 Dc>D/2（式9-122）",
+     "unit": "-",
+     "min": 1,
+     "max": 2,
+     "default": 1
+    }
+   },
+   "expr": "4839.0/sqrt(Fy) if mode==1 else 9678.0/sqrt(Fy)",
+   "conditions": [
+    {
+     "expr": "Fy>0",
+     "msg": "Fy 須為正（開根號）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fy": 2500.0,
+      "mode": 1
+     },
+     "out": 96.78
+    },
+    {
+     "in": {
+      "Fy": 2500.0,
+      "mode": 2
+     },
+     "out": 193.56
+    }
+   ],
+   "notes": "公路橋梁設計規範（98 年版）**9.3.8（強度設計法）第2、3 項**：**2. 豎向加勁之單對稱斷面：當受壓翼板與其中性軸之淨距 Dc 超過 D/2 時，腹板厚度 tw 應符合 Dc/tw ≤4839/√Fy**（式9-120，Fy 為 kgf/cm²）；**如腹板細長比 Dc/tw 超過上限，則斷面應修改至符合限制或設置一縱向加勁材。** **3. 縱向加勁之單對稱斷面：當 Dc 超過 D/2 時，腹板厚度 tw 應符合 Dc/tw ≤9678/√Fy**（式9-122）——恰為式9-120 之 2 倍（設縱向加勁材後容許加倍）✓。 **雙單位驗證：4839／1514.75＝3.19＝√10.2 ✓、9678／3029.5＝3.19 ✓。** ⚠ **未納入：式(9-121) 縱向加勁板最佳位置 ds（單對稱合成梁正彎矩區）。文字層『ds＝Dcs／(1.5＋…fDL／fDL+LL)』的分數結構無法由文字層判定（初稿曾臆測為 1.5D/(1+fDL/fDL+LL)，已撤回），待視覺管道（Phase 2 pix2tex＋裁圖）確認後另立條目。** 本式回傳 Dc/tw 之上限。",
+   "status": "verified",
+   "verified": {
+    "method": "unit 文字層逐式／逐格轉錄＋量綱與邊界條件檢查（B 類 Phase 2）",
+    "by": "agent",
+    "date": "2026-11-02"
+   },
+   "_file": "payload_phase2a_hwbridge.json"
+  }
+ ],
+ "tables": []
+}

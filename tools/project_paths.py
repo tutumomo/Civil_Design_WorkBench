@@ -109,6 +109,8 @@ ARTCRAFT_APPS = {
     "FilmCraft": "filmcraft-cli",
     "EffectCraft": "effectcraft-cli",
     "SoundCraft": "soundcraft-cli",
+    "TextureCraft": "texturecraft-cli",
+    "Craft Anything": "craft-anything-cli",
 }
 
 
@@ -137,8 +139,11 @@ def artcraft_cli(app: str) -> str | None:
     key = app[:-4] if app.lower().endswith("-cli") else app
     stem = ARTCRAFT_APPS.get(key)
     if stem is None:
+        norm_in = key.lower().replace(" ", "").replace("-", "").replace("_", "")
         for k, v in ARTCRAFT_APPS.items():
-            if k.lower() == key.lower():
+            norm_k = k.lower().replace(" ", "").replace("-", "").replace("_", "")
+            if norm_k == norm_in:
+                key = k
                 stem = v
                 break
     if stem is None:

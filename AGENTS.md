@@ -124,7 +124,7 @@ egs\`）。
 若與標稱費率不符才需要問依據。
 
 ## 5. 按需載入觸發器（On-Demand Skill & Library Triggers）
-- **When the user asks in plain words to operate any ArtCraft app (CAD/Grid/Word/Deck/Pdf/Photo/Light/Vector/Design/Fig/Film/Effect/Sound Craft), SolidCraft, Blender or text-to-cad (口語操作 App)**, read [`docs/口語操作手冊_ArtCraft與CAD工具.md`](docs/口語操作手冊_ArtCraft與CAD工具.md) first（口語→工具對照、參數坑、全部走 headless CLI；完整指令清單在 `docs\artcraft_commands\`）。
+- **When the user asks in plain words to operate any ArtCraft app (CAD/Grid/Word/Deck/Pdf/Photo/Light/Vector/Design/Fig/Film/Effect/Sound/Texture Craft or Craft Anything), SolidCraft, Blender or text-to-cad (口語操作 App)**, read [`docs/口語操作手冊_ArtCraft與CAD工具.md`](docs/口語操作手冊_ArtCraft與CAD工具.md) first（口語→工具對照、參數坑、全部走 headless CLI；完整指令清單在 `docs\artcraft_commands\`）。
 - **Before using the `autocad` MCP tools (`mcp__autocad__*`)**, read [`docs/AutoCAD_MCP操作指引.md`](docs/AutoCAD_MCP操作指引.md)（僅限 `ezdxf` 後端；DWG 一律經 `acc.py`；`drawing_understand` 單位推論不可信；文字須補 TOMO）。
 - **When doing terrain / cut-fill / LandXML work (CivilCraft) or quantity takeoff from DWG/DXF/PDF (TakeoffCraft)**, read [`docs/CadCraft_Studio操作指引.md`](docs/CadCraft_Studio操作指引.md) first（需使用者開視窗並提供 token；token 不落地；CivilCraft 須先改公制；DWG 只能匯出 2000 版）。
 - **Before producing or modifying any drawing (basemap, A3 sheet, detail)**, read [`本項目的出圖規定(不定期新增).md`](本項目的出圖規定(不定期新增).md)（使用者不定期新增）並遵守；已工具化的條文集中於 `tools\drawing_rules.py`（字高 本文 3／附註 4／標題 5 mm、模型空間依比例換算、標準比例尺清單、顏色 1~8 → 線粗），出圖樣式的實作與 CTB 說明見 `docs\出圖樣式與線粗.md`，規定新增時須同步該檔。；**既有舊圖要改成新樣式時用 `tools\acad\apply_plot_style.py`**，不要重跑整條產線

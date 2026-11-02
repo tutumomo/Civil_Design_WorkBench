@@ -73,3 +73,5 @@ claude_desktop_config.json
 *.dwl2
 *.tmp
 ~$*
+*.bak_*
+tools/solidcraft/_dev/

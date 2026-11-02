@@ -423,6 +423,65 @@ def main() -> int:
         and "plate_t_mm:" in page
         and "embedment_mm:" in page,
     )
+    checks.check(
+        "workbench renders SVG schema diagrams, plain-Chinese hints, and recursive nested lists",
+        "buildSchemaData" in page
+        and "renderSchema" in page
+        and "FIELD_HINTS" in page
+        and "fieldHintText" in page
+        and "sublist-wrap" in page
+        and "adv-group" in page
+        and "表單不拆解" not in page,
+    )
+    checks.check(
+        "workbench includes Step 2 decision support (search, guide, presets, autosize, margin bar, diagnosis, refs)",
+        "calcsearch" in page
+        and "side-guide" in page
+        and "SCENARIO_PRESETS" in page
+        and "autosize" in page
+        and "computeCheckMargin" in page
+        and "diagnoseCheckFailure" in page
+        and "refs-panel" in page,
+    )
+    checks.check(
+        "workbench includes Step 3 workflow closure (history, A/B compare, A4 print, case.json export, Pyodide fallback)",
+        "history-panel" in page
+        and "renderCompareHtml" in page
+        and "printsheet" in page
+        and "buildCaseExport" in page
+        and "ensurePyodideEngine" in page,
+    )
+    wall_sized = API.run_calculation(
+        "wall_stability",
+        {"wall_type": "cantilever", "height_m": 3.5, "size": True},
+        persist=False,
+    )
+    checks.check(
+        "wall_stability auto-sizing returns sized_section and passes",
+        wall_sized["ok"] and bool((wall_sized.get("result") or {}).get("sized_section")),
+    )
+    ch_sized = API.run_calculation(
+        "channel_hydraulics",
+        {"design_flow_m3s": 0.8, "inner_width_m": 0.3, "depth_m": 0.3, "slope": 0.005, "size": True},
+        persist=False,
+    )
+    checks.check(
+        "channel_hydraulics auto-sizing returns sized_section and passes",
+        ch_sized["ok"] and bool((ch_sized.get("result") or {}).get("sized_section")),
+    )
+    cc_sized = API.run_calculation(
+        "channel_cover",
+        {**dict(next(row["example"] for row in calculators if row["id"] == "channel_cover")), "size": True},
+        persist=False,
+    )
+    checks.check(
+        "channel_cover auto-sizing returns sized_section and passes",
+        cc_sized["ok"] and bool((cc_sized.get("result") or {}).get("sized_section")),
+    )
+    checks.check(
+        "references_for includes enriched formula details",
+        any(r.get("expr") or r.get("latex") for r in (wall_sized.get("references") or [])),
+    )
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), regs_server.Handler)
     port = server.server_address[1]

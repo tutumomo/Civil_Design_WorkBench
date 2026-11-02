@@ -3,7 +3,7 @@
 > **這份文件的用途**：把「法規原文 → 可被智能體計算的已驗證庫」這件事，變成**任何人照著做都能得到同樣結果**的流程。
 > 適用範圍：`data\法規\` 內的 34 部規範，以及之後新增的任何規範。工具都在 `tools\regs\`。
 > **核心原則**：**文字層的公式與表格不可信；智能體只能引用「已驗證庫」（`tools\regs\verified\*.json`）的數值。**
-> 最後更新：2026-11-01（coverage 1384/1384 收盤；六道閘門、merge_shard 已制度化）
+> 最後更新：2026-11-02（coverage 1384/1384 收盤；納入規範查詢台三階段優化、KaTeX 公式表渲染、條號精準直達與 Cloudflare 雙入口同步規範）
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|---|---|
 | ① 原頁圖／原文 | PDF 頁面 PNG（`/api/pageimg`） | 人 | 對照用 |
 | ② 閱讀輔助 | 框線表格→HTML、人工 LaTeX 圖（`formulas.json`、`tables.json`）、MinerU 草稿（`auto\*.json`，**未核對**） | 人 | **否** |
-| ③ 已驗證庫 | `verified\*.json`：公式（可執行運算式）、表格（結構化數值） | 智能體（MCP `regs_formula`／`regs_table`、`design_run.references`） | **是** |
+| ③ 已驗證庫 | `verified\*.json`：公式（可執行運算式＋KaTeX）、表格（結構化數值） | 智能體（MCP `regs_formula`／`regs_table`、`design_run.references`）＋**網頁前端（全文抽屜 `.vpanel` 與工作台 KaTeX 公式卡）** | **是** |
 
 智能體規則：算規範公式一律 `regs_formula`；查規範表值一律 `regs_table`；`regs_clause` 開頭標「【可信度：低】」者不得取數；回報時附 `source`（條文＋頁碼）與 `warnings`。
 
@@ -79,6 +79,7 @@ C:\Python312\python.exe -E -P -X utf8 tools\regs\regs_vtool.py coverage --curren
    - 表：`kind, columns, rows[{key,values}], unit, notes`；**範圍值寫 `[下限,上限]`，空白寫 `null`（不可寫 0）**。
    - 條文被索引併進前一單位時加 `index_clause` 指回實際存在的單位。
    - 公式需查表時用 `lookups`（§7.3）；整數節點表用 `kind="stepdown"`。
+   - **前端 KaTeX 與結構化表格直出（2026-11-02）**：`latex`、`vars{desc,unit}` 與表格 `columns`/`rows` 會直接呈現在「規範查詢台」全文抽屜的 `.vpanel`（已驗證公式／表格面板）及「工程設計工作台」的依據公式卡中，請確保 `latex` 為標準 KaTeX 可解析語法、`vars.desc` 為簡明中文物理意義。
 5. **自我驗算設計**（§2.1）→ 再寫測試。
 6. **原文疑誤**：照原文轉錄但 `status="pending"`，`notes` 以「**【待核】**」開頭說明疑點與替代做法，並登錄 `design_conformance.py` 的 `KNOWN`。**pending 不得宣稱可用。**
 7. **沒入庫的條文一律要登錄，且必須分四類**（2026-11-02 起；舊的 `no-content`／`deferred` 已拆除）：
@@ -387,6 +388,11 @@ C:\Python312\python.exe -E -P -X utf8 tools\regs\merge_shard.py <payload.json> t
 3. `regs_vtool.py new-source <src>` 看待辦，按 §2 轉錄；需要的新主題用 `add_topic.py` 登錄，`regq_selftest` 補一題考題。
 4. **先查是否已存在（跨檔）**：`regs_vtool.py find <src> <clause>`。
 5. 只有網頁文字的規範：框線表格自動轉 HTML；公式／表格走 §2（對照網頁原文），供人閱讀的放 `formulas.json`／`tables.json`，供智能體用的進 `verified\`。
+6. **註冊「🎯 條號精準直達」口語別名**：在 `tools\regs\regs_server.py` 的 `_DIRECT_ALIASES` 與 `tools\design\build_cloudflare.py` 的 `DIRECT_ALIASES` 同步加上該規範的常用口語簡稱（例如 `"水保": ["swc_tech"]`、`"混凝土": ["rc112", "rc100"]`），讓使用者輸入「`<簡稱> <條號>`」（如 `水保 93`、`混凝土 7.4.2`）即可精準直達該條文。
+7. **主題分組與計算器深連結（`tools\regs\regs_web.html`）**：若在 `topics.json` 新增了設計主題，須將主題名加入 `regs_web.html` 的 `TOPIC_GROUPS` 六大工程領域分組；若主題 `tools` 綁定了計算引擎，確認 `TOOL_TO_CALCS` 已配置對應計算器卡片（`design_launch_check.py --all` G0／G7 會自動驗證）。
+8. **同步更新本機服務與 Cloudflare 線上雙入口**：
+   - 本機重啟 `tools\regs\regs_server.py --web`。
+   - 執行 `tools\design\build_cloudflare.py` 重新切分 64 個靜態條文分桶（`api/clauses/*.json`）與精簡搜尋索引（`api/search_index.json`，自動跳過 >20KB 原頁 base64 圖以維持單檔 <5MB），接著於 `_temp\cloudflare_design\` 執行 `$env:CLOUDFLARE_ACCOUNT_ID='e2c04af8447f8efcbf6ca597d6d3ad36'; npx wrangler deploy`（**勿加 `--temporary`**）更新線上固定網址 `https://civil-design-workbench.foil-newsstand.workers.dev/`。
 
 ### 9.2 修訂版
 

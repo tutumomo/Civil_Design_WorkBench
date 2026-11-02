@@ -213,14 +213,36 @@ def blender_exe() -> str | None:
 
 
 def cad_fonts_dir() -> Path | None:
-    """CAD 字體庫（TOMO 樣式用 gbenor.shx + CHINA1.SHX）：`CAD_FONTS` → 常見位置。"""
+    """CAD 字體庫（TOMO 樣式用 gbenor.shx + CHINA1.SHX）。
+
+    解析順序：`CAD_FONTS` 環境變數 → **專案內 `CAD_FONTS/`（已隨 repo 附）** →
+    AutoCAD 安裝目錄的 Fonts 子目錄 → 舊的 `c:\\CadFont[S]`。
+
+    注意：DXF 內只記字型**檔名**（`font="gbenor.shx"`），AutoCAD 開圖時是到自己的
+    字型搜尋路徑找檔；所以把字型放在專案裡不會自動讓 AutoCAD 找到，
+    仍需把兩個 .shx 複製到 AutoCAD 的字型目錄（見 `tools/install_cad_fonts.py`）。
+    """
     p = _env_path("CAD_FONTS")
     if p and p.is_dir():
         return p
-    for c in (Path(r"c:\CadFont[S]"), Path(r"C:\CadFont[S]"), ROOT / "data" / "CadFont"):
+    in_repo = ROOT / "CAD_FONTS"
+    if in_repo.is_dir() and any(in_repo.glob("*.shx")):
+        return in_repo
+    for c in (Path(r"C:\CadFont[S]"), Path(r"C:\Program Files\Autodesk")):
         if c.is_dir():
-            return c
+            for sub in sorted(c.rglob("Fonts")):
+                if sub.is_dir() and any(sub.glob("gbenor.shx")):
+                    return sub
     return None
+
+
+def cad_font(name: str) -> Path | None:
+    """回傳指定 SHX 字型檔的路徑（找不到回傳 None）。"""
+    d = cad_fonts_dir()
+    if not d:
+        return None
+    p = d / name
+    return p if p.is_file() else None
 
 
 # ---------------------------------------------------------------- 自我檢查
@@ -245,6 +267,8 @@ def report() -> dict:
         "solidcraft": solidcraft_cli(),
         "blender": blender_exe(),
         "cad_fonts": str(cad_fonts_dir()) if cad_fonts_dir() else None,
+        "cad_font_files": {n: (str(cad_font(n)) if cad_font(n) else None)
+                           for n in ("gbenor.shx", "CHINA1.SHX")},
     }
 
 
@@ -267,7 +291,9 @@ def main(argv=None) -> int:
     print(f"accoreconsole: {info['accoreconsole'] or '—（AutoCAD 僅 Windows；沒有也能產 DXF，只是不能轉 DWG）'}")
     print(f"SolidCraft   : {info['solidcraft'] or '—（選用）'}")
     print(f"Blender      : {info['blender'] or '—（選用）'}")
-    print(f"CAD 字體庫   : {info['cad_fonts'] or '—（選用，缺了 DXF 中文會用替代字體）'}")
+    print(f"CAD 字體庫   : {info['cad_fonts'] or '—（TOMO 樣式的 gbenor.shx / CHINA1.SHX 找不到）'}")
+    for k, v in info["cad_font_files"].items():
+        print(f"  {k:<14} {v or '—'}")
     return 0
 
 

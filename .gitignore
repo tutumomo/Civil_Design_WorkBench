@@ -56,6 +56,9 @@ env/
 Thumbs.db
 desktop.ini
 
+# ---------------- CAD 字體（隨附，供部署者自行安裝到 AutoCAD） ----------------
+# 保留：CAD_FONTS/ 必須入版控（.shx 已在 .gitattributes 標為 binary）
+
 # ---------------- 機密與個人化設定 ----------------
 claude_desktop_config.json
 .mcp.json

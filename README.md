@@ -88,6 +88,25 @@ python tools/project_paths.py
 它會印出：專案根目錄、Python 版本與平台、規範索引在不在、**13 套 ArtCraft 找到幾套**、
 AutoCAD `accoreconsole`、SolidCraft、Blender、CAD 字體庫。加 `--json` 可給安裝腳本吃。
 
+### 步驟 3.5：安裝 CAD 字型（有 AutoCAD 才需要）
+
+TOMO 文字樣式用 `gbenor.shx`（英數）＋ `CHINA1.SHX`（中文）。**這兩個字型已隨 repo 附在 `CAD_FONTS/`**，
+但 DXF 裡只記字型**檔名**，AutoCAD 開圖時是到自己的字型目錄找檔，所以仍要裝一次：
+
+```bash
+# 先看會裝到哪（不改動）
+python tools/install_cad_fonts.py
+
+# 實際安裝（Program Files 受保護，需以系統管理員身分執行）
+python tools/install_cad_fonts.py --apply
+```
+
+不想用系統管理員權限也可以：AutoCAD → OPTIONS → 檔案 → 字型檔名，把專案的 `CAD_FONTS` 資料夾
+加入字型搜尋路徑即可（**不影響 DXF 產生**，只影響 AutoCAD 開圖與列印時的字型呈現）。
+
+> 沒有 AutoCAD（macOS／Linux）時這段可略過：DXF 仍會帶正確的字型名稱，
+> 只是用其他軟體開圖時字型由該軟體自行取代。
+
 ### 步驟 4：下載規範並建索引（第一次需要，之後可略）
 
 ```bash
@@ -136,7 +155,7 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 | 項目 | 用途 | 沒有會怎樣 | 平台 |
 |---|---|---|---|
 | **AutoCAD 2020+**（`accoreconsole`） | DXF → **DWG**、PDF 出圖 | 只能交 DXF | **僅 Windows** |
-| **CAD 字體**（`gbenor.shx`、`CHINA1.SHX`） | TOMO 中文文字樣式 | 圖面中文變替代字體 | 全平台（自行放置） |
+| **CAD 字體**（`gbenor.shx`、`CHINA1.SHX`） | TOMO 中文文字樣式 | 圖面中文變替代字體 | **已隨 repo 附於 `CAD_FONTS/`**；安裝見步驟 3.5 |
 | **ArtCraft**（CADCraft／GridCraft／WordCraft 為交付必要，其餘選用） | 預算書 xlsx、報告 docx、轉檔 | 對應產出需改用其他方式 | 依該套是否有該平台版本 |
 | SolidCraft／Blender | 3D 模型與渲染 | 3D 軸停用 | Blender 有 macOS／Linux 版 |
 
@@ -161,7 +180,7 @@ ARTCRAFT_HOME      # ArtCraft 安裝根目錄（Windows 預設 C:\Program\ArtCra
 AUTOCAD_HOME       # AutoCAD 安裝目錄（含 accoreconsole.exe）
 SOLIDCRAFT_CLI     # SolidCraft CLI 完整路徑
 BLENDER            # Blender 執行檔
-CAD_FONTS          # CAD 字體庫目錄
+CAD_FONTS          # CAD 字體庫目錄（預設＝專案內 CAD_FONTS/，已隨 repo 附）
 CIVIL_AI_STD_BLOCKS # 公司標準元件 DWG 資料夾（_ref 重建腳本用）
 ```
 
@@ -174,7 +193,7 @@ macOS／Linux：寫進 `~/.bashrc` 或 `~/.zshrc` 的 `export ARTCRAFT_HOME=...`
 |---|---|
 | `python: command not found` | Windows 只裝了 py launcher → 用 `py -3`；macOS/Linux 用 `python3` |
 | `pip install` 被拒（externally-managed-environment） | 先建 venv（步驟 2），或加 `--break-system-packages` |
-| 中文變問號／方框 | 缺 CAD 字體，設定 `CAD_FONTS` 指向含 `gbenor.shx`、`CHINA1.SHX` 的資料夾 |
+| 中文變問號／方框 | AutoCAD 找不到 SHX 字型。字型已隨 repo 附於 `CAD_FONTS/`，執行 `python tools/install_cad_fonts.py --apply`（需系統管理員權限），或在 AutoCAD 的 OPTIONS → 字型檔名把該資料夾加入搜尋路徑 |
 | `規範索引 missing` | 還沒跑 `python tools/regs/build_index.py`（需先 `fetch_regs.py`） |
 | `找不到 ArtCraft` | 未安裝或路徑非預設，設 `ARTCRAFT_HOME` |
 | 產不出 DWG | 平台沒有 AutoCAD，或 `accoreconsole` 不在預設路徑，設 `AUTOCAD_HOME` |
@@ -273,6 +292,7 @@ python tools/regs/design_conformance.py        # 引擎 ↔ 已驗證庫 雙向�
 ├── AGENTS.md                 共用作業規範（智能體常駐主規範）
 ├── README.md
 ├── requirements.txt
+├── CAD_FONTS/               TOMO 用 SHX 字型（gbenor.shx、CHINA1.SHX）
 ├── 怎麼用.md                 給人看的入口（三步驟、四類案件、六道閘門）
 ├── tools/
 │   ├── project_paths.py      ★ 路徑與外部程式的唯一解析入口（跨平台、無絕對路徑）

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>工程設計工作台</title>
+<title>工程設計工作台 · 穀山技術顧問有限公司</title>
 <meta name="description" content="土木、水保與結構小型工程的設計計算工作台：擋土牆、排水溝、箱涵、邊坡、基礎與 RC 構材，輸入參數即取得檢核、警示與可追溯的計算紀錄。">
 <meta name="theme-color" content="#131209">
 <script>
@@ -60,6 +60,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/katex/katex.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css'">
 <style>
   :root {
     --bg: #131209;
@@ -198,6 +199,14 @@
   }
   .brand svg { display: block; color: var(--accent); }
   .brand:hover { color: var(--accent-strong); }
+
+  .brand-logo { height: 28px; width: auto; display: block; object-fit: contain; }
+  .brand-logo-light { display: none; }
+  :root[data-theme="light"] .brand-logo-dark { display: none; }
+  :root[data-theme="light"] .brand-logo-light { display: block; }
+  .mark.logo-mark { width: 56px; height: 56px; padding: 6px; background: var(--surface); border-color: var(--accent-line); }
+  .mark.logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
   .nav-sep { flex: none; width: 1px; height: 16px; margin: 0 4px; background: var(--line-strong); }
   .nav-links { display: flex; align-items: center; gap: 4px; }
   .nav-links a {
@@ -449,9 +458,92 @@
     padding: 16px 24px;
     background: var(--surface-2);
   }
+  .panel-head-right { display: flex; align-items: center; gap: 10px; }
   .panel-head b { color: var(--text); font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: .04em; }
   .run-state { font-family: var(--mono); font-size: 12px; line-height: 16px; color: var(--text-3); letter-spacing: .06em; }
   .panel-body { padding: 24px; }
+
+  .schema-card {
+    display: grid;
+    grid-template-columns: 348px minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    background: var(--surface-2);
+  }
+  .schema-svg-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+  }
+  .schema-svg-wrap svg {
+    width: 100%;
+    max-width: 328px;
+    height: auto;
+    display: block;
+    font-family: var(--mono);
+  }
+  .schema-info h4 {
+    margin: 0;
+    color: var(--accent);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .schema-orient {
+    margin: 6px 0 12px;
+    color: var(--text-2);
+    font-size: 13px;
+    line-height: 20px;
+  }
+  .schema-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .schema-legend li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-2);
+  }
+  .schema-tag {
+    flex: none;
+    padding: 1px 6px;
+    border: 1px solid var(--accent-line);
+    border-radius: 4px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .schema-val {
+    margin-left: auto;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
   .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
   .section-title {
     grid-column: 1 / -1;
@@ -466,8 +558,84 @@
     letter-spacing: .12em;
   }
   .section-title:first-child { margin-top: 0; }
-  .section-title small { color: var(--text-3); font-family: var(--mono); font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0; }
+  .section-title small { color: var(--text-3); font-family: var(--sans); font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0; }
   .section-title::after { content: ""; flex: 1; height: 1px; margin-left: 8px; background: var(--line); }
+  .adv-group {
+    grid-column: 1 / -1;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+    padding: 12px 16px;
+  }
+  .adv-group > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    cursor: pointer;
+    color: var(--text-2);
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 700;
+    letter-spacing: .06em;
+  }
+  .adv-group > summary::-webkit-details-marker { display: none; }
+  .adv-group > summary::before {
+    content: "";
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform .25s var(--ease);
+  }
+  .adv-group[open] > summary::before { transform: rotate(45deg); }
+  .adv-group > summary small {
+    color: var(--text-3);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .adv-group-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .sublist-wrap {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+  .sublist-wrap > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    cursor: pointer;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .sublist-wrap > summary::-webkit-details-marker { display: none; }
+  .sublist-wrap > summary::before {
+    content: "";
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform .25s var(--ease);
+  }
+  .sublist-wrap[open] > summary::before { transform: rotate(45deg); }
+  .sublist-body { margin-top: 10px; }
 
   .field { min-width: 0; }
   .field label {
@@ -709,6 +877,282 @@
     .calc-head h2 { font-size: 30px; line-height: 36px; }
     .tagline-text { font-size: 36px; line-height: 40px; }
   }
+  /* Step 2 & Step 3 UI Enhancements */
+  .side-search {
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .side-search::placeholder { color: var(--text-3); }
+  .side-guide {
+    margin: 0 0 14px;
+    border: 1px solid var(--accent-line);
+    border-radius: 8px;
+    background: var(--accent-soft);
+    overflow: hidden;
+  }
+  .side-guide summary {
+    padding: 8px 12px;
+    color: var(--accent-strong);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+  }
+  .side-guide-body {
+    padding: 8px 12px 10px;
+    border-top: 1px solid var(--line);
+    color: var(--text-2);
+    font-size: 12px;
+    line-height: 18px;
+  }
+  .side-guide-body p { margin: 0 0 6px; }
+  .side-guide-body p:last-child { margin-bottom: 0; }
+  .side-guide-body b { color: var(--text); }
+  .catalog-empty {
+    padding: 16px 12px;
+    border: 1px dashed var(--line-strong);
+    border-radius: 8px;
+    color: var(--text-3);
+    font-size: 13px;
+    text-align: center;
+  }
+  .scenario-select {
+    max-width: 240px;
+    padding: 5px 10px;
+    border: 1px solid var(--accent-line);
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn.accent-outline {
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-weight: 600;
+  }
+  .btn.accent-outline:hover {
+    border-color: var(--accent);
+    background: var(--surface-3);
+  }
+  .diag-tip {
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-left: 3px solid var(--rust);
+    border-radius: 0 6px 6px 0;
+    background: var(--rust-soft);
+    color: var(--text);
+    font-size: 12px;
+    line-height: 18px;
+  }
+  .diag-tip b { color: var(--rust); }
+  .margin-cell { min-width: 125px; }
+  .margin-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .margin-bar {
+    height: 6px;
+    width: 100%;
+    border-radius: 999px;
+    background: var(--surface-3);
+    overflow: hidden;
+  }
+  .margin-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width .3s var(--ease);
+  }
+  .margin-fill.ok { background: var(--jade); }
+  .margin-fill.warn { background: var(--amber); }
+  .margin-fill.ng { background: var(--rust); }
+  .margin-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 14px;
+    color: var(--text-2);
+  }
+  .refs-panel, .case-panel, .history-panel {
+    margin-top: 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .refs-panel > summary, .case-panel-head, .history-panel > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+  }
+  .refs-body, .case-panel-body, .history-body {
+    padding: 12px 14px;
+    border-top: 1px solid var(--line);
+  }
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .ref-card {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 12px;
+    line-height: 18px;
+  }
+  .ref-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .ref-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .ref-src {
+    color: var(--text-2);
+    font-size: 12px;
+  }
+  .ref-math {
+    display: block;
+    margin: 8px 0 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 22px;
+    overflow-x: auto;
+  }
+  .ref-math .katex { font-size: 1.06em; color: var(--text); }
+  .ref-math .katex-display { margin: 2px 0; overflow-x: auto; overflow-y: hidden; }
+  .ref-vars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin: 4px 0 6px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: var(--hover-wash);
+    color: var(--text-2);
+    font-size: 11px;
+    line-height: 16px;
+  }
+  .ref-vars span b { color: var(--accent); font-family: var(--mono); }
+  .ref-mini-table {
+    width: 100%;
+    margin: 6px 0;
+    border-collapse: collapse;
+    font-size: 11px;
+    line-height: 15px;
+  }
+  .ref-mini-table th, .ref-mini-table td {
+    padding: 3px 6px;
+    border: 1px solid var(--line-strong);
+    text-align: left;
+  }
+  .ref-mini-table th { background: var(--surface-2); color: var(--text-2); }
+  .ref-note {
+    color: var(--text-3);
+    font-size: 11px;
+    line-height: 16px;
+  }
+  .history-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .history-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 12px;
+  }
+  .history-chip .verdict-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+  }
+  .history-chip .verdict-dot.ok { background: var(--jade); }
+  .history-chip .verdict-dot.ng { background: var(--rust); }
+  .compare-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line-strong);
+    font-size: 12px;
+  }
+  .compare-bar select {
+    max-width: 260px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  .diff-changed {
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+  .print-only-header { display: none; }
+  @media print {
+    :root {
+      --bg: #FFFFFF !important;
+      --surface: #FFFFFF !important;
+      --surface-2: #F8F8F8 !important;
+      --surface-3: #EFEFEF !important;
+      --text: #111111 !important;
+      --text-2: #333333 !important;
+      --text-3: #555555 !important;
+      --line: #CCCCCC !important;
+      --line-strong: #999999 !important;
+    }
+    body { background: #FFFFFF !important; color: #111111 !important; font-size: 12px; line-height: 18px; }
+    .topbar, .sidebar, .skip-link, .hero, .tagline, .json-wrap, .actions, .result-actions, .history-panel, .case-panel, #toggleadv, #scenariopreset { display: none !important; }
+    .wrap { max-width: 100%; padding: 0; margin: 0; }
+    .layout { display: block; border: 0; padding: 0; margin: 0; }
+    .panel, .result { box-shadow: none !important; border: 1px solid #999 !important; margin-bottom: 12px; break-inside: avoid; }
+    .print-only-header {
+      display: flex !important;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #111;
+    }
+    details.adv-group, details.refs-panel { open: true; }
+  }
+
   @media (max-width: 920px) {
     .wrap { padding: 0 16px 48px; }
     .topbar { margin-top: 12px; }
@@ -722,7 +1166,10 @@
     .group { margin-top: 16px; }
     .group h3 { padding: 0; }
     .group button { display: inline-flex; width: auto; margin: 2px; border-radius: 9999px; border-color: var(--line); background: var(--surface); }
+    .schema-card { grid-template-columns: 1fr; gap: 16px; }
+    .schema-legend { grid-template-columns: 1fr; }
     .quick-grid { grid-template-columns: 1fr; }
+    .adv-group-body { grid-template-columns: 1fr; }
     .list-grid { grid-template-columns: 1fr; }
     .result-actions { margin-left: 0; }
     .calc-head { flex-direction: column; gap: 16px; }
@@ -749,12 +1196,9 @@
   <a class="skip-link" href="#workspace">跳至計算區</a>
 
   <nav class="topbar" aria-label="主要導覽">
-    <a class="brand" href="/design" aria-current="page">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-        <circle cx="12" cy="10" r="5"/>
-        <path d="M12 2v3M12 15v3M4 10h3M17 10h3M4 21h16"/>
-      </svg>
-      <span>設計工作台</span>
+    <a class="brand" href="/design" aria-current="page" title="穀山技術顧問有限公司 · 工程設計工作台">
+      <img class="brand-logo brand-logo-dark" src="data:image/png;base64,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" alt="穀山技術顧問有限公司 GUU-SHAN">
+      <img class="brand-logo brand-logo-light" src="data:image/png;base64,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" alt="穀山技術顧問有限公司 GUU-SHAN">
     </a>
     <span class="nav-sep" aria-hidden="true"></span>
     <div class="nav-links">
@@ -783,12 +1227,8 @@
       <p class="sub">擋土牆、排水溝、箱涵到邊坡，挑一個計算器，填入現場尺寸，當場取得檢核、警示與可追溯的計算紀錄。</p>
     </div>
     <div class="hero-side">
-      <div class="mark" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 20h18"/>
-          <path d="M6 20V9l6-5 6 5v11"/>
-          <path d="M6 14h12"/>
-        </svg>
+      <div class="mark logo-mark" aria-hidden="true">
+        <img src="data:image/png;base64,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" alt="GUU-SHAN Logo">
       </div>
       <div class="meta" id="meta"></div>
     </div>
@@ -797,13 +1237,30 @@
   <div class="layout">
     <aside class="sidebar" aria-label="計算項目">
       <div class="side-kicker">計算項目</div>
+      <input type="search" class="side-search" id="calcsearch" placeholder="🔍 搜尋工項、口語（如：蛇籠、箱涵、植筋）…" aria-label="搜尋計算器">
+      <details class="side-guide">
+        <summary>💡 新手選型小幫手（不知道選哪個？）</summary>
+        <div class="side-guide-body">
+          <p><b>🧱 擋土牆怎麼挑？</b><br>• 高度 ≤ 4m：優先看「重力式／半重力式」或「疊砌式（蛇籠、砌石）」<br>• 高度 4～8m：選「懸臂式 RC」或「加勁擋土牆」<br>• 高度 8～10m：選「扶壁式 RC」；高陡岩坡選「地錨擋土牆」</p>
+          <p><b>🌊 排水設計流程：</b><br>① 先用「集水區設計流量」算 Qp → ②「明渠水力」定溝寬溝深 → ③ 跨路用「箱涵」或「路側溝加蓋」→ ④ 開發區減洪用「滯洪池」</p>
+          <p><b>🏢 建築與基礎流程：</b><br>①「平面剛架」或「RC 梁／柱」算內力 → ② 單柱選「獨立基腳」、雙柱選「聯合基腳」、軟弱土選「樁群」→ ③「沉陷與角變量」驗變形</p>
+        </div>
+      </details>
       <div id="catalog"></div>
+      <div class="catalog-empty" id="catalogempty" hidden>找不到符合的計算器，請試試其他關鍵字（如：牆、溝、基腳、梁）。</div>
       <div class="side-note">
         AI 可直接呼叫同一支 <code>design_api.py</code>；網頁、命令列與智能體不使用不同的公式。
       </div>
     </aside>
 
     <main class="workspace" id="workspace">
+      <div class="print-only-header">
+        <div>
+          <strong style="font-size:18px">土木工程結構與水理設計計算書（Engineering Calculation Sheet）</strong>
+          <div style="font-size:12px;color:#555">由 Civil Design Workbench 產出 · 參數、規範條文與檢核結果具可追溯性</div>
+        </div>
+        <div id="printtimestamp" style="font-size:11px;font-family:monospace;text-align:right"></div>
+      </div>
       <section class="calc-head">
         <div>
           <div class="eyebrow" id="engine">CALCULATION ENGINE</div>
@@ -817,12 +1274,19 @@
       <section class="panel" data-reveal>
         <div class="panel-head">
           <b>輸入參數</b>
-          <span class="run-state" id="runstate">未執行</span>
+          <div class="panel-head-right">
+            <select class="scenario-select" id="scenariopreset" aria-label="快速套用常見工程情境">
+              <option value="">✨ 快速套用常見工程情境…</option>
+            </select>
+            <button type="button" class="btn small" id="toggleadv" hidden>收合進階參數</button>
+            <span class="run-state" id="runstate">未執行</span>
+          </div>
         </div>
         <div class="panel-body">
+          <div class="schema-card" id="schema" aria-label="幾何尺寸與符號定義示意圖"></div>
           <div class="quick-grid" id="form"></div>
           <details class="json-wrap">
-            <summary>完整 JSON（可貼上案件資料或由 AI 產生）</summary>
+            <summary>進階：檢視或貼上完整 JSON（一般使用無須展開，上方表單已完整對應）</summary>
             <textarea id="json" spellcheck="false" autocomplete="off" aria-label="完整 JSON"></textarea>
             <div class="form-error" id="jsonerr" role="alert" hidden></div>
             <div class="actions">
@@ -831,8 +1295,9 @@
           </details>
           <div class="actions">
             <button class="btn primary" id="run">執行計算</button>
+            <button class="btn accent-outline" id="autosize" hidden title="由引擎自動搜尋滿足所有安全係數與規範檢核的最小合格斷面">⚡ 自動試算合格斷面</button>
             <button class="btn" id="reset">回到範例</button>
-            <span class="run-state">Ctrl + Enter 執行</span>
+            <span class="run-state" id="runtimehint">Ctrl + Enter 執行</span>
           </div>
         </div>
       </section>
@@ -924,15 +1389,324 @@ const LABELS = {
 };
 const NUMERIC_HINT = new Set(["height_m","stem_thickness_m","base_width_m","base_thickness_m","cell_count","clear_width_m","clear_height_m","wall_thickness_m","interior_wall_thickness_m","top_slab_thickness_m","bottom_slab_thickness_m","cover_depth_m","length_m","design_flow_m3s","slope","manning_n","depth_m","freeboard_min_m","inner_width_m","bottom_length_m","bottom_width_m","side_slope_h_v","max_stage_m","stage_step_m","dam_crest_m","peak_m3s","time_to_peak_min","duration_min","time_step_min","allowable_outflow_m3s","beam_width_mm","beam_depth_mm","column_width_mm","column_depth_mm","dead_area_kn_m2","live_area_kn_m2","base_shear_coefficient","B_m","L_m","thickness_m","column_b_m","column_l_m","q_allow_kpa","P_kN","Mx_kNm","My_kNm","Q_allow_kN","P_mm","return_period_yr","area_ha","l_m","v_ms","excavated_ha","impervious_ha","years","Am","slope_angle_deg","cohesion_kpa","friction_angle_deg","unit_weight_kn_m3","Mu_kNm","Vu_kN","b_mm","h_mm","fc_mpa","fy_mpa","cover_mm","Pu_kN","angular_distortion_limit","q_kpa","subdivisions","x_m","y_m","initial_effective_stress_kpa","compression_index","recompression_index","preconsolidation_stress_kpa","void_ratio","secondary_compression_index","consolidation_start_year","assessment_end_year","friction_deg","L_km","H_km","max_fill_ratio","capacity_m3s","inflow_m3s","elastic_modulus_kpa","constrained_modulus_kpa","poisson_ratio","tw_mm","tf_mm","Fu_mpa","E_mpa","Kx","Ky","Lb_m","Lb_y_m","Cm_x","Cm_y","M1_over_M2","axial_P_kN","moment_Mx_kNm","moment_My_kNm","shear_Vx_kN","shear_Vy_kN","plate_B_m","plate_N_m","plate_t_mm","pedestal_B_m","pedestal_N_m","grout_above_concrete","corrosion_allowance_mm","diameter_mm","embedment_mm"]);
 
+const FIELD_HINTS = {
+  stem_thickness_m: "懸臂式常取 0.25～0.40 m；重力式為牆身均厚",
+  base_width_m: "基礎底板全寬；初估常取 0.5～0.7 倍牆高 H",
+  base_thickness_m: "基礎底板厚；懸臂式初估約 0.08～0.12 倍牆高 H（重力式無底板填 0）",
+  top_width_m: "牆頂寬度；半重力式／砌石牆常取 0.30～0.50 m",
+  front_batter_ratio: "臨空面坡比 m（1:m，水平:垂直）；0 表鉛直",
+  back_batter_ratio: "靠土側坡比 m（1:m）；0 表牆背鉛直",
+  toe_projection_m: "牆趾自牆面前緣往外突出的水平長度",
+  toe_length_m: "前趾板自牆板前緣往外伸出的水平長度",
+  gamma: "一般背填砂礫土約 18～20 kN/m³",
+  reinforced_gamma: "加勁回填區土壤單位重，常取 18～20 kN/m³",
+  retained_gamma: "後方保留區土壤單位重，常取 18～19 kN/m³",
+  unit_weight_kn_m3: "土壤或混凝土單位重（土壤約 18、RC 約 24 kN/m³）",
+  phi_deg: "砂質土約 28°～36°；須以鑽探或試驗值為準",
+  reinforced_phi_deg: "加勁回填料內摩擦角，優良級配常取 32°～36°",
+  retained_phi_deg: "後方原土層內摩擦角，常取 28°～32°",
+  foundation_phi_deg: "基底下方土層內摩擦角，決定承載力係數",
+  friction_deg: "土壤內摩擦角 φ，砂質土約 28°～36°",
+  c_kpa: "無凝聚性砂土常取 0；黏性土依試驗值輸入",
+  cohesion_kpa: "土壤有效凝聚力 c；無把握時保守取 0",
+  allowable_bearing_kpa: "基地長期容許承載力 qa（一般緊密土層約 150～300 kPa）",
+  q_allow_kpa: "地基容許承載力 qa（kPa），依鑽探報告輸入",
+  base_friction: "基底與土壤摩擦係數 μ（混凝土對砂礫常取 0.50～0.60）",
+  kh: "水平地震震度係數；0 表平時工況，地震常取 0.10～0.20",
+  surcharge_kpa: "牆後地面均佈活載重（道路車載常取 10 kPa）",
+  backfill_slope_deg: "牆後填土表面向上傾斜角度 β（水平填土填 0°）",
+  clear_width_m: "單孔內側水平淨寬 B",
+  clear_height_m: "箱涵或溝渠內側垂直淨高 H",
+  wall_thickness_m: "外側牆體厚度（箱涵常取 0.30～0.45 m）",
+  interior_wall_thickness_m: "多孔箱涵之中隔牆厚度（單孔時不計）",
+  top_slab_thickness_m: "頂版厚度（常取 0.30～0.45 m）",
+  bottom_slab_thickness_m: "底版厚度（常取 0.35～0.50 m）",
+  cover_depth_m: "頂版上方覆土加鋪面總厚度",
+  length_m: "構造物沿水流方向或構材軸向總長度",
+  design_flow_m3s: "重現期設計尖峰流量 Q（cms）",
+  slope: "渠底縱向坡度 S（例：0.005 代表千分之 5）",
+  inner_width_m: "矩形明渠內側淨寬 B",
+  depth_m: "結構總深度 D（含出水高）",
+  channel_depth_m: "渠道結構總深 D（須大於水深加最小出水高）",
+  freeboard_min_m: "水面至渠頂／堤頂之最小安全出水高（水保常取 ≥ 0.20 m）",
+  side_slope_h_v: "梯形側坡比 z（水平 H : 垂直 1）；0 表矩形直立壁",
+  step_m: "標準步法沿程演算之間距 Δx（常取 10～25 m）",
+  velocity_min_m_s: "防止淤積之最小容許流速（水保 §85 為 0.8 m/s）",
+  velocity_max_m_s: "防止沖刷之最大容許流速（RC 常流水 4.57 m/s）",
+  bottom_length_m: "池底平面長度",
+  bottom_width_m: "池底寬度（渠道為渠底寬）",
+  max_stage_m: "演算允許之最高蓄水深",
+  stage_step_m: "水位—蓄水曲線分層計算步距（常取 0.05～0.20 m）",
+  dam_crest_m: "池頂（堤頂）相對池底之高程",
+  diameter_m: "圓形放流孔口或圓管之內徑",
+  discharge_coefficient: "孔口流量係數 Cd（圓孔常取 0.60～0.62）",
+  peak_m3s: "入流歷線之洪峰流量 Qp",
+  time_to_peak_min: "降雨開始至入流達洪峰之時間 tp",
+  duration_min: "入流歷線總延時",
+  time_step_min: "調洪演算時間步距 Δt",
+  allowable_outflow_m3s: "下游排水系統容許之最大放流流量",
+  x_grid_m: "各柱軸線 X 座標（逗號分隔，例：0, 6, 12 表兩跨各 6 m）",
+  storey_heights_m: "由一樓往上各樓層高度（逗號分隔，例：3.5, 3.5, 3.5）",
+  beam_width_mm: "RC 梁斷面寬度 b（常取 300～500 mm）",
+  beam_depth_mm: "RC 梁全深 h（含版厚，常取跨度之 1/12～1/10）",
+  column_width_mm: "RC 柱斷面寬度（常取 400～600 mm）",
+  column_depth_mm: "RC 柱斷面深度（常取 400～600 mm）",
+  dead_area_kn_m2: "樓版單位面積靜載重 DL（含版自重與粉刷，約 4～7 kN/m²）",
+  live_area_kn_m2: "樓版單位面積活載重 LL（一般住宅／辦公約 2～3 kN/m²）",
+  base_shear_coefficient: "等值靜力地震基底剪力係數 V/W（常取 0.10～0.18）",
+  P_kN: "柱底傳至基腳／樁帽之垂直軸壓力（向下為正）",
+  Mx_kNm: "繞 X 軸之柱底彎矩",
+  My_kNm: "繞 Y 軸之柱底彎矩",
+  B_m: "基腳短向（或橫向）寬度 B",
+  L_m: "基腳長向（或縱向）長度 L",
+  thickness_m: "基腳版厚或該土層厚度",
+  column_b_m: "基腳上方柱寬度",
+  column_l_m: "基腳上方柱長度",
+  Q_allow_kN: "單支基樁之垂直容許承載力",
+  x_m: "平面 X 座標（m）",
+  y_m: "平面 Y 座標（m）",
+  q_kpa: "該基腳作用於地基之淨基底接觸壓力",
+  initial_effective_stress_kpa: "壓密土層中點之有效覆土應力 σ′₀",
+  compression_index: "正常壓密黏土之壓縮指數 Cc（常取 0.15～0.40）",
+  recompression_index: "過壓密黏土之再壓指數 Cs（約 Cc 之 1/5～1/10）",
+  preconsolidation_stress_kpa: "前期最大預壓密應力 σ′c",
+  void_ratio: "土層初始孔隙比 e₀（常取 0.6～1.2）",
+  secondary_compression_index: "次壓縮指數 Cα（常取 0.001～0.005）",
+  consolidation_start_year: "主壓密完成時間 t₁（年）",
+  assessment_end_year: "次壓縮評估目標年限 t₂（年）",
+  Mu_kNm: "計入載重因數後之設計極限彎矩 Mu",
+  Vu_kN: "計入載重因數後之設計極限剪力 Vu",
+  Pu_kN: "計入載重因數後之設計極限軸壓力 Pu",
+  b_mm: "RC 構材斷面寬度 b（mm）",
+  h_mm: "RC 構材斷面全深 h（mm）",
+  fc_mpa: "混凝土規定抗壓強度 fc′（210 kgf/cm² ≈ 21 MPa；280 ≈ 28 MPa）",
+  fy_mpa: "鋼筋或鋼材規定降伏強度 fy（SD420W 為 420 MPa）",
+  cover_mm: "混凝土保護層厚度（梁柱常取 40 mm，接觸土壤取 75 mm）",
+  strands: "每處地錨包含之鋼絞線股數",
+  drill_diameter_mm: "地錨鑽孔直徑 D（常取 115～150 mm）",
+  bearing_plate_m: "地錨孔口正方形鋼承壓鈑邊長",
+  counterfort_thickness_m: "牆後垂直扶壁肋版之厚度（常取 0.30～0.50 m）",
+  first_layer_m: "最底層加勁材距離牆底之高程",
+  id: "識別代號（如 F1、A、L1）",
+  from: "管渠起點（上游）節點編號",
+  to: "管渠終點（下游）節點編號",
+  inflow_m3s: "由集水區直接匯入該節點之流量（無則填 0）"
+};
+
+const SECTION_META = {
+  geometry: { desc: "結構主要幾何尺寸", adv: false },
+  load: { desc: "外力與載重條件", adv: false },
+  loads: { desc: "外力與車載條件", adv: false },
+  basin: { desc: "池體幾何與控制高程", adv: false },
+  outlet: { desc: "放流孔口尺寸", adv: false },
+  orifice: { desc: "孔口水理參數", adv: false },
+  inflow: { desc: "入流洪峰歷線參數", adv: false },
+  column: { desc: "鋼柱斷面、長度與內力", adv: false },
+  section: { desc: "H 型鋼斷面尺寸", adv: false },
+  base_plate: { desc: "柱腳基板與承台尺寸", adv: false },
+  anchors: { desc: "基礎錨栓規格與配置", adv: false },
+  soil: { desc: "土壤力學與基底承載假設（可依鑽探報告調整）", adv: true },
+  concrete: { desc: "混凝土與鋼筋材料強度（預設採常用規格）", adv: true },
+  materials: { desc: "混凝土與鋼筋材料常數（預設採常用規格）", adv: true },
+  slab: { desc: "配筋號數與間距指定（留空即由程式自動設計）", adv: true },
+  connection: { desc: "植筋錨定與新舊界面參數（預設採規範保守值）", adv: true },
+  settlement: { desc: "基腳下方壓縮土層參數（選填，用於估算沉陷）", adv: true }
+};
+
+const NETWORK_LINK_DEFAULTS = {
+  channel: { inner_width_m: 1.0, depth_m: 1.0, slope: 0.004, manning_n: 0.014 },
+  pipe: { diameter_m: 0.8, slope: 0.005, manning_n: 0.013, max_fill_ratio: 0.75 },
+  box: { cell_count: 1, clear_width_m: 1.5, clear_height_m: 1.5, wall_thickness_m: 0.25, top_slab_thickness_m: 0.25, bottom_slab_thickness_m: 0.30, slope: 0.004, manning_n: 0.014 },
+  fixed: { capacity_m3s: 2.0 }
+};
+
+const AUTOSIZE_CALCULATORS = new Set(["wall_stability", "counterfort_wall", "channel_hydraulics", "channel_cover"]);
+
+const SCENARIO_PRESETS = {
+  wall_stability: [
+    { label: "情境 A：3.0m 懸臂式 RC 牆（平時工況）", patch: { wall_type: "cantilever", height_m: 3.0, stem_thickness_m: 0.35, base_width_m: 1.95, base_thickness_m: 0.36, kh: 0.0 } },
+    { label: "情境 B：4.5m 懸臂式 RC 牆（地震 kh=0.15）", patch: { wall_type: "cantilever", height_m: 4.5, stem_thickness_m: 0.40, base_width_m: 3.10, base_thickness_m: 0.45, kh: 0.15 } },
+    { label: "情境 C：2.5m 重力式擋土牆（農路邊坡）", patch: { wall_type: "gravity", height_m: 2.5, stem_thickness_m: 0.45, base_width_m: 1.65, base_thickness_m: 0.0, kh: 0.0 } },
+    { label: "情境 D：3.2m 半重力式擋土牆（厚底板）", patch: { wall_type: "semigravity", height_m: 3.2, top_width_m: 0.35, front_batter_ratio: 0.2, back_batter_ratio: 0.0, base_width_m: 1.75, base_thickness_m: 0.55, toe_projection_m: 0.3, kh: 0.15 } }
+  ],
+  block_wall: [
+    { label: "情境 A：3 層蛇籠擋土牆（總高 3.0m、埋深 0.5m）", patch: { wall_type: "gabion", step_side: "front", course_count: 3, course_height_m: 1.0, base_width_m: 2.5, width_decrement_m: 0.5, embedment_m: 0.5, kh: 0.1 } },
+    { label: "情境 B：4 層格籠擋土牆（總高 4.0m、埋深 0.6m）", patch: { wall_type: "crib", step_side: "front", course_count: 4, course_height_m: 1.0, base_width_m: 3.0, width_decrement_m: 0.4, embedment_m: 0.6, kh: 0.1 } }
+  ],
+  counterfort_wall: [
+    { label: "情境 A：8.0m 扶壁式擋土牆（間距 3.0m、地震 kh=0.15）", patch: { height_m: 8.0, stem_thickness_m: 0.30, base_width_m: 6.6, base_thickness_m: 0.60, toe_length_m: 1.98, counterfort_spacing_m: 3.0, kh: 0.15 } },
+    { label: "情境 B：6.5m 扶壁式擋土牆（間距 2.5m、平時）", patch: { height_m: 6.5, stem_thickness_m: 0.28, base_width_m: 4.5, base_thickness_m: 0.50, toe_length_m: 1.2, counterfort_spacing_m: 2.5, kh: 0.0 } }
+  ],
+  mse_wall: [
+    { label: "情境 A：6.0m 地工格網加勁牆（加勁長 5.4m、Sv=0.6m）", patch: { height_m: 6.0, reinforcement_type: "geogrid", reinforcement_length_m: 5.4, vertical_spacing_m: 0.6, kh: 0.15 } },
+    { label: "情境 B：4.5m 金屬條帶加勁牆（加勁長 3.6m、Sv=0.5m）", patch: { height_m: 4.5, reinforcement_type: "metal_strip", reinforcement_length_m: 3.6, vertical_spacing_m: 0.5, kh: 0.10 } }
+  ],
+  box_culvert: [
+    { label: "情境 A：單孔箱涵 2.0×2.0m（過路農水路 Q=4.5 cms）", patch: { cell_count: 1, clear_width_m: 2.0, clear_height_m: 2.0, cover_depth_m: 1.2, design_flow_m3s: 4.5 } },
+    { label: "情境 B：雙孔箱涵 2.5×2.2m（區域排水 Q=14 cms）", patch: { cell_count: 2, clear_width_m: 2.5, clear_height_m: 2.2, cover_depth_m: 1.5, design_flow_m3s: 14.0 } },
+    { label: "情境 C：三孔箱涵 2.4×2.2m（大流量幹線 Q=25 cms）", patch: { cell_count: 3, clear_width_m: 2.4, clear_height_m: 2.2, cover_depth_m: 1.5, design_flow_m3s: 25.0 } }
+  ],
+  channel_hydraulics: [
+    { label: "情境 A：路側小型 U 型溝（b=0.5m, h=0.7m, Q=0.35 cms）", patch: { design_flow_m3s: 0.35, inner_width_m: 0.50, depth_m: 0.70, slope: 0.005, manning_n: 0.014 } },
+    { label: "情境 B：農路排水溝（b=0.8m, h=0.9m, Q=1.10 cms）", patch: { design_flow_m3s: 1.10, inner_width_m: 0.80, depth_m: 0.90, slope: 0.008, manning_n: 0.014 } },
+    { label: "情境 C：山坡地陡坡排水溝（b=1.0m, h=1.0m, S=2.5%）", patch: { design_flow_m3s: 2.20, inner_width_m: 1.00, depth_m: 1.00, slope: 0.025, manning_n: 0.015 } }
+  ],
+  channel_cover: [
+    { label: "情境 A：淨寬 60cm 既有明溝加蓋（HS20×1.25 重車、版厚 250mm）", patch: { geometry: { clear_width_m: 0.60, wall_thickness_m: 0.20, slab_thickness_mm: 250, cover_mm: 50 }, loads: { vehicle: "hs20_1_25", live_load_factor: 1.67, deck_beta_1_0: false, wearing_surface_kpa: 0, uplift_factor: 0.10, horizontal_force_kN_m: 0 } } },
+    { label: "情境 B：淨寬 100cm 路側暗溝加蓋（HS20×1.25 重車、版厚 280mm）", patch: { geometry: { clear_width_m: 1.00, wall_thickness_m: 0.25, slab_thickness_mm: 280, cover_mm: 50 }, loads: { vehicle: "hs20_1_25", live_load_factor: 1.67, deck_beta_1_0: false, wearing_surface_kpa: 1.5, uplift_factor: 0.10, horizontal_force_kN_m: 0 } } }
+  ],
+  slope_stability: [
+    { label: "情境 A：永久性挖方邊坡（平時工況 FS ≥ 1.5）", patch: { height_m: 5.0, slope_angle_deg: 25.0, cohesion_kpa: 2.0, friction_deg: 35.0, stage: "永久性", condition: "平時" } },
+    { label: "情境 B：山坡地暴雨校核（永久性暴雨 FS ≥ 1.1）", patch: { height_m: 6.0, slope_angle_deg: 28.0, cohesion_kpa: 5.0, friction_deg: 32.0, stage: "永久性", condition: "暴雨" } },
+    { label: "情境 C：施工期臨時開挖邊坡（臨時性平時 FS ≥ 1.2）", patch: { height_m: 4.0, slope_angle_deg: 32.0, cohesion_kpa: 4.0, friction_deg: 30.0, stage: "臨時性", condition: "平時" } }
+  ],
+  rc_beam: [
+    { label: "情境 A：一般樓版大梁 350×750mm（Mu=180 kN·m, Vu=120 kN）", patch: { Mu_kNm: 180.0, Vu_kN: 120.0, b_mm: 350.0, h_mm: 750.0, fc_mpa: 28.0, fy_mpa: 420.0 } },
+    { label: "情境 B：小跨度次梁 300×550mm（Mu=95 kN·m, Vu=75 kN）", patch: { Mu_kNm: 95.0, Vu_kN: 75.0, b_mm: 300.0, h_mm: 550.0, fc_mpa: 21.0, fy_mpa: 420.0 } },
+    { label: "情境 C：重載地梁 450×900mm（Mu=360 kN·m, Vu=240 kN）", patch: { Mu_kNm: 360.0, Vu_kN: 240.0, b_mm: 450.0, h_mm: 900.0, fc_mpa: 28.0, fy_mpa: 420.0 } }
+  ],
+  rc_column: [
+    { label: "情境 A：標準建築內柱 450×450mm（Pu=1600 kN, Mu=280 kN·m）", patch: { Pu_kN: 1600.0, Mu_kNm: 280.0, b_mm: 450.0, h_mm: 450.0, fc_mpa: 28.0, fy_mpa: 420.0 } },
+    { label: "情境 B：低層邊柱偏心彎矩 500×500mm（Pu=900 kN, Mu=380 kN·m）", patch: { Pu_kN: 900.0, Mu_kNm: 380.0, b_mm: 500.0, h_mm: 500.0, fc_mpa: 28.0, fy_mpa: 420.0 } }
+  ]
+};
+
+const HISTORY_STORAGE_KEY = "civil-workbench-history-v1";
 let catalog = [];
 let current = null;
 let payload = {};
 let presetSelections = {};
 let lastResult = null;
 let currentRules = {};
+let advCollapsed = false;
+let runHistory = [];
+let pyodideReadyPromise = null;
+
+function loadHistoryFromStorage() {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) runHistory = parsed.slice(0, 20);
+    }
+  } catch (e) {}
+}
+
+function saveHistoryToStorage() {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(runHistory.slice(0, 20)));
+  } catch (e) {}
+}
+
+async function fetchCatalogData() {
+  try {
+    const r = await fetch("/api/design/catalog");
+    if (r.ok) return await r.json();
+  } catch (e) {}
+  const r2 = await fetch("/api/design/catalog.json");
+  return await r2.json();
+}
+
+async function ensurePyodideEngine() {
+  if (pyodideReadyPromise) return pyodideReadyPromise;
+  pyodideReadyPromise = (async () => {
+    const hint = $("#runtimehint");
+    if (hint) hint.textContent = "首次啟動雲端 Python 引擎（Pyodide WebAssembly）…";
+    if (!window.loadPyodide) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+        s.onload = resolve;
+        s.onerror = () => reject(new Error("無法載入 Pyodide WebAssembly 引擎"));
+        document.head.appendChild(s);
+      });
+    }
+    const pyodide = await window.loadPyodide({
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
+    });
+    const bundle = await fetch("/api/design/py_bundle.json").then(r => {
+      if (!r.ok) throw new Error("無法載入 /api/design/py_bundle.json");
+      return r.json();
+    });
+    pyodide.FS.mkdirTree("/app/tools/design");
+    pyodide.FS.mkdirTree("/app/tools/regs/verified");
+    for (const [relPath, content] of Object.entries(bundle.files || {})) {
+      const fullPath = "/app/" + relPath;
+      const dir = fullPath.substring(0, fullPath.lastIndexOf("/"));
+      pyodide.FS.mkdirTree(dir);
+      pyodide.FS.writeFile(fullPath, content, { encoding: "utf8" });
+    }
+    await pyodide.runPythonAsync(`
+import sys, os
+os.environ["CIVIL_AI_ROOT"] = "/app"
+for p in ("/app/tools/design", "/app/tools/regs", "/app/tools"):
+    if p not in sys.path:
+        sys.path.insert(0, p)
+import design_api
+`);
+    if (hint) hint.textContent = "雲端 WebAssembly 引擎已就緒 · Ctrl + Enter 執行";
+    return pyodide;
+  })();
+  return pyodideReadyPromise;
+}
+
+async function executeDesignRun(calcId, reqPayload) {
+  try {
+    const res = await fetch("/api/design/run", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({calculator: calcId, payload: reqPayload})
+    });
+    const ct = res.headers.get("content-type") || "";
+    if (res.ok && ct.includes("application/json")) {
+      return await res.json();
+    }
+  } catch (e) {}
+  // Fallback to in-browser Pyodide execution (Cloudflare edge / static mode)
+  const pyodide = await ensurePyodideEngine();
+  pyodide.globals.set("_req_calc_id", calcId);
+  pyodide.globals.set("_req_payload_json", JSON.stringify(reqPayload));
+  const outJson = await pyodide.runPythonAsync(`
+import json, design_api
+_res = design_api.run_calculation(_req_calc_id, json.loads(_req_payload_json), persist=False)
+json.dumps(_res, ensure_ascii=False)
+`);
+  return JSON.parse(outJson);
+}
+
+function getScenarioPresetsFor(calc) {
+  const custom = SCENARIO_PRESETS[calc.id] || [];
+  return [
+    { label: `預設範例：${calc.title}標準參數`, full: clone(calc.example) },
+    ...custom
+  ];
+}
+
+function filterCatalog(query) {
+  const q = String(query || "").trim().toLowerCase();
+  let visibleCount = 0;
+  document.querySelectorAll("#catalog .group").forEach(groupEl => {
+    let groupVisible = 0;
+    groupEl.querySelectorAll("button[data-id]").forEach(btn => {
+      const c = catalog.find(item => item.id === btn.dataset.id);
+      if (!c) return;
+      const hay = [c.title, c.group, c.description, c.id, ...(c.oral || []), ...(c.codes || [])].join(" ").toLowerCase();
+      const match = !q || hay.includes(q);
+      btn.hidden = !match;
+      if (match) {
+        groupVisible++;
+        visibleCount++;
+      }
+    });
+    groupEl.hidden = groupVisible === 0;
+  });
+  const emptyEl = $("#catalogempty");
+  if (emptyEl) emptyEl.hidden = visibleCount > 0;
+}
 
 async function boot() {
-  const data = await fetch("/api/design/catalog").then(r => r.json());
+  loadHistoryFromStorage();
+  const data = await fetchCatalogData();
   catalog = data.calculators;
   const groups = new Map();
   for (const c of catalog) {
@@ -940,15 +1714,50 @@ async function boot() {
     groups.get(c.group).push(c);
   }
   $("#catalog").innerHTML = [...groups].map(([g, rows]) =>
-    `<div class="group"><h3>${esc(g)}</h3>${rows.map(c => `<button data-id="${esc(c.id)}">${esc(c.title)}</button>`).join("")}</div>`
+    `<div class="group"><h3>${esc(g)}</h3>${rows.map(c => `<button data-id="${esc(c.id)}" title="${esc((c.oral || []).join('、'))}">${esc(c.title)}</button>`).join("")}</div>`
   ).join("");
   $("#meta").innerHTML = `<b>${catalog.length}</b> 個計算器<br><b>${new Set(catalog.map(c=>c.engine)).size}</b> 支引擎`;
   document.querySelectorAll("#catalog button").forEach(b => b.onclick = () => select(b.dataset.id));
+  const searchInput = $("#calcsearch");
+  if (searchInput) {
+    searchInput.oninput = () => filterCatalog(searchInput.value);
+  }
   const preferred = new URLSearchParams(location.search).get("calc") || "wall_stability";
   select(catalog.some(c => c.id === preferred) ? preferred : catalog[0].id);
 }
 
 function clone(v) { return JSON.parse(JSON.stringify(v)); }
+
+function deepMerge(target, source) {
+  for (const [k, v] of Object.entries(source || {})) {
+    if (v && typeof v === "object" && !Array.isArray(v) && target[k] && typeof target[k] === "object" && !Array.isArray(target[k])) {
+      deepMerge(target[k], v);
+    } else {
+      target[k] = clone(v);
+    }
+  }
+  return target;
+}
+
+function updateScenarioDropdown() {
+  const sel = $("#scenariopreset");
+  if (!sel || !current) return;
+  const presets = getScenarioPresetsFor(current);
+  sel.innerHTML = `<option value="">✨ 快速套用常見工程情境（共 ${presets.length} 組）…</option>` +
+    presets.map((p, idx) => `<option value="${idx}">${esc(p.label)}</option>`).join("");
+  sel.onchange = () => {
+    const idx = Number(sel.value);
+    if (sel.value === "" || !Number.isFinite(idx) || !presets[idx]) return;
+    const chosen = presets[idx];
+    payload = clone(current.example);
+    if (chosen.full) payload = clone(chosen.full);
+    else if (chosen.patch) deepMerge(payload, chosen.patch);
+    $("#json").value = JSON.stringify(payload, null, 2);
+    $("#runstate").textContent = "已套用情境";
+    renderForm();
+    sel.value = "";
+  };
+}
 
 function select(id) {
   current = catalog.find(c => c.id === id) || catalog[0];
@@ -964,15 +1773,17 @@ function select(id) {
   $("#status").dataset.state = "ready";
   $("#runstate").textContent = "未執行";
   $("#json").value = JSON.stringify(payload, null, 2);
-  $("#result").innerHTML = `<div class="empty-result"><span class="empty-kicker">READY</span><p class="empty-title">參數已載入</p><p class="empty-sub">按「執行計算」取得檢核結果</p></div>`;
+  const autoBtn = $("#autosize");
+  if (autoBtn) autoBtn.hidden = !AUTOSIZE_CALCULATORS.has(current.id);
+  updateScenarioDropdown();
+  $("#result").innerHTML = `<div class="empty-result"><span class="empty-kicker">READY</span><p class="empty-title">參數已載入</p><p class="empty-sub">確認上方幾何示意圖與參數後，按「執行計算」取得檢核結果</p></div>`;
   renderForm();
   history.replaceState(null, "", `?calc=${encodeURIComponent(id)}`);
 }
 
 function isSimpleObjectArray(value) {
   return Array.isArray(value) && value.length > 0 && value.every(item =>
-    item && typeof item === "object" && !Array.isArray(item) &&
-    Object.values(item).every(v => v === null || typeof v !== "object"));
+    item && typeof item === "object" && !Array.isArray(item));
 }
 
 function nextListId(rows, key) {
@@ -996,24 +1807,30 @@ function newListRow(path, rows) {
     }
   }
   const row = {};
+  const sample = rows[0] || {};
   for (const key of keys) {
-    const rule = currentRules[`${path}[].${key}`] || currentRules[key];
+    const sampleVal = sample[key];
+    const rule = currentRules[`${path}[].${key}`] || currentRules[`${normalizeRulePath(path)}[].${key}`] || currentRules[key];
     if (key === "id") {
-      row[key] = nextListId(rows, key);
+      row[key] = nextListId(rows, key) || `項目${rows.length + 1}`;
+    } else if (Array.isArray(sampleVal)) {
+      row[key] = clone(sampleVal);
+    } else if (sampleVal && typeof sampleVal === "object") {
+      row[key] = clone(sampleVal);
     } else if (rule?.type === "select") {
       row[key] = rule.choices?.[0]?.value ?? "";
-    } else if (typeof rows[0]?.[key] === "boolean") {
+    } else if (typeof sampleVal === "boolean") {
       row[key] = false;
-    } else if (typeof rows[0]?.[key] === "number" || NUMERIC_HINT.has(key)) {
-      row[key] = null;
+    } else if (typeof sampleVal === "number" || NUMERIC_HINT.has(key)) {
+      row[key] = sampleVal ?? 0;
     } else {
-      row[key] = "";
+      row[key] = sampleVal ?? "";
     }
   }
   return row;
 }
 
-function listEditorHtml(path, key, rows) {
+function listEditorHtml(path, key, rows, depth = 0) {
   const label = LABELS[key] || key;
   const allKeys = [];
   for (const row of rows) {
@@ -1022,13 +1839,27 @@ function listEditorHtml(path, key, rows) {
     }
   }
   const cards = rows.map((row, index) => {
-    const fields = allKeys
-      .filter(itemKey => Object.prototype.hasOwnProperty.call(row, itemKey))
-      .map(itemKey => fieldHtml(`${path}.${index}.${itemKey}`, itemKey, row[itemKey]))
-      .join("");
-    return `<div class="list-row" data-index="${index}"><div class="list-row-head"><b>${esc(label)} ${index + 1}</b><button type="button" class="btn small" data-list-remove="${esc(path)}" data-index="${index}">移除</button></div><div class="list-grid">${fields}</div></div>`;
+    const scalarFields = [];
+    const nestedLists = [];
+    for (const itemKey of allKeys) {
+      if (!Object.prototype.hasOwnProperty.call(row, itemKey)) continue;
+      const itemVal = row[itemKey];
+      const itemPath = `${path}.${index}.${itemKey}`;
+      if (isSimpleObjectArray(itemVal)) {
+        const subLabel = LABELS[itemKey] || itemKey;
+        nestedLists.push(
+          `<details class="sublist-wrap" style="grid-column:1/-1" ${depth === 0 ? "" : ""}><summary>${esc(subLabel)}（共 ${itemVal.length} 層，點擊展開編輯）</summary><div class="sublist-body">${listEditorHtml(itemPath, itemKey, itemVal, depth + 1)}</div></details>`
+        );
+      } else if (Array.isArray(itemVal) && itemVal.every(v => typeof v !== "object")) {
+        scalarFields.push(fieldHtml(itemPath, itemKey, itemVal.join(", "), "array-scalar"));
+      } else if (!Array.isArray(itemVal) && typeof itemVal !== "object") {
+        scalarFields.push(fieldHtml(itemPath, itemKey, itemVal));
+      }
+    }
+    const rowTitle = row.id ? `${label} ${index + 1}（${row.id}）` : `${label} ${index + 1}`;
+    return `<div class="list-row" data-index="${index}"><div class="list-row-head"><b>${esc(rowTitle)}</b><button type="button" class="btn small" data-list-remove="${esc(path)}" data-index="${index}">移除</button></div><div class="list-grid">${scalarFields.join("")}${nestedLists.join("")}</div></div>`;
   }).join("");
-  return `<div class="list-editor" data-list="${esc(path)}">${cards || `<p class="list-empty">目前沒有資料列。</p>`}<button type="button" class="btn small" data-list-add="${esc(path)}">＋ 新增一列</button><p class="hint">固定選項以選單選取；新增列後請補齊該列所需數值。</p></div>`;
+  return `<div class="list-editor" data-list="${esc(path)}">${cards || `<p class="list-empty">目前沒有資料列。</p>`}<button type="button" class="btn small" data-list-add="${esc(path)}">＋ 新增一列${esc(label)}</button><p class="hint">可自由新增或移除列；下拉選單切換型式時會自動帶入對應欄位。</p></div>`;
 }
 
 function walk(obj, prefix = "") {
@@ -1036,17 +1867,24 @@ function walk(obj, prefix = "") {
   for (const [key, value] of Object.entries(obj)) {
     const path = prefix ? `${prefix}.${key}` : key;
     if (value && typeof value === "object" && !Array.isArray(value)) {
-      rows.push(`<div class="section-title">${esc(LABELS[key] || key)} <small>${esc(key)}</small></div>`);
-      rows.push(...walk(value, path));
+      const meta = SECTION_META[key];
+      const sectionLabel = LABELS[key] || key;
+      const subDesc = meta?.desc ? `<small>— ${esc(meta.desc)}</small>` : "";
+      if (!prefix && meta?.adv) {
+        rows.push(`<details class="adv-group" data-adv-section="${esc(key)}" ${advCollapsed ? "" : "open"}><summary>${esc(sectionLabel)} ${subDesc}</summary><div class="adv-group-body">${walk(value, path).join("")}</div></details>`);
+      } else {
+        rows.push(`<div class="section-title">${esc(sectionLabel)} ${subDesc}</div>`);
+        rows.push(...walk(value, path));
+      }
     } else if (Array.isArray(value) && value.every(v => typeof v !== "object")) {
       rows.push(fieldHtml(path, key, value.join(", "), "array-scalar"));
     } else if (isSimpleObjectArray(value)) {
-      rows.push(`<div class="section-title">${esc(LABELS[key] || key)} <small>${esc(key)}</small></div>`);
+      const meta = SECTION_META[key];
+      const subDesc = meta?.desc ? `<small>— ${esc(meta.desc)}</small>` : "";
+      rows.push(`<div class="section-title">${esc(LABELS[key] || key)} ${subDesc}</div>`);
       rows.push(listEditorHtml(path, key, value));
     } else if (!Array.isArray(value) && typeof value !== "object") {
       rows.push(fieldHtml(path, key, value));
-    } else {
-      rows.push(`<div class="field" style="grid-column:1/-1"><label>${esc(LABELS[key] || key)}（巢狀陣列，請用下方完整 JSON）</label><div class="hint">${esc(key)}：${value.length ?? ""} 筆；含巢狀土層或子陣列，表單不拆解。</div></div>`);
     }
   }
   return rows;
@@ -1067,12 +1905,10 @@ function normalizeRulePath(path) {
 function ruleFor(path, key) {
   const rule = currentRules[path] || currentRules[normalizeRulePath(path)] || currentRules[key];
   if (!rule) return null;
-  // 固定上限（不依其他欄位切換）：用 rule.limit，行為與 max_by 選中的限制相同
   if (!rule.max_by) return rule.limit ? {...rule, selected: rule.limit} : {...rule};
   const sourcePath = String(rule.max_by).split(".");
   const sourceValue = getPath(payload, sourcePath);
   let selected = rule.limits?.[sourceValue];
-  // 第二層切換：上限再依另一欄位而定（例：三明治式依開挖／填方坡面）
   if (selected?.max_by && selected.limits) {
     const subValue = getPath(payload, String(selected.max_by).split("."));
     selected = selected.limits[subValue] || null;
@@ -1098,38 +1934,67 @@ function ruleHint(rule) {
     return `上限 ${fmt(max)}${rule.unit ? " " + rule.unit : ""}${basis ? "；" + basis : ""}`;
   }
   if (rule.hint) return rule.hint;
-  if (rule.type === "select") return "請選擇項目";
   return "";
+}
+
+function defaultFieldHint(path, key, arrayMode) {
+  const norm = normalizeRulePath(path);
+  const text = FIELD_HINTS[path] || FIELD_HINTS[norm] || FIELD_HINTS[key] || "";
+  if (arrayMode) return text ? `${text}（多筆請用逗號分隔）` : "多筆數值請用逗號分隔";
+  return text;
+}
+
+function fieldHintText(path, key, rule, arrayMode) {
+  const rHint = ruleHint(rule);
+  const dHint = defaultFieldHint(path, key, arrayMode);
+  if (rHint && dHint && !rHint.includes(dHint)) return `${rHint}（${dHint}）`;
+  return rHint || dHint || (rule?.type === "select" ? "請由下拉選單選擇" : "");
 }
 
 function fieldHtml(path, key, value, arrayMode) {
   const rule = ruleFor(path, key);
   const label = rule?.label || LABELS[key] || key;
-  const hint = key !== label ? key : "";
+  const hint = fieldHintText(path, key, rule, arrayMode);
+  const titleAttr = `title="參數鍵名：${esc(path)}"`;
   if (typeof value === "boolean") {
-    return `<div class="field checkline"><input type="checkbox" data-path="${esc(path)}" ${value ? "checked" : ""}><label>${esc(label)} <span class="hint">${esc(hint)}</span></label></div>`;
+    return `<div class="field checkline"><input type="checkbox" data-path="${esc(path)}" ${value ? "checked" : ""}><label ${titleAttr}>${esc(label)}${hint ? ` <span class="hint">— ${esc(hint)}</span>` : ""}</label></div>`;
   }
   if (rule?.type === "number_with_presets") {
     const options = (rule.choices || []).map(choice =>
       `<option value="${esc(choice.value)}" data-label="${esc(choice.label || choice.value)}" ${(choice.label || String(choice.value)) === presetSelections[path] ? "selected" : ""}>${esc(choice.label || choice.value)}</option>`
     ).join("");
-    return `<div class="field"><label>${esc(label)}</label><div class="preset-row"><select data-preset-for="${esc(path)}" aria-label="${esc(label)}材料預設"><option value="">選擇材料預設…</option>${options}</select><input type="number" step="${esc(rule?.step || "any")}" data-path="${esc(path)}" value="${esc(value)}"></div><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
+    return `<div class="field"><label ${titleAttr}>${esc(label)}</label><div class="preset-row"><select data-preset-for="${esc(path)}" aria-label="${esc(label)}材料預設"><option value="">選擇材料預設…</option>${options}</select><input type="number" step="${esc(rule?.step || "any")}" data-path="${esc(path)}" value="${esc(value ?? "")}"></div><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
   }
   if (rule?.type === "select") {
     const options = (rule.choices || []).map(choice =>
       `<option value="${esc(choice.value)}" ${String(choice.value) === String(value) ? "selected" : ""}>${esc(choice.label || choice.value)}</option>`
     ).join("");
-    return `<div class="field"><label>${esc(label)}</label><select data-path="${esc(path)}" data-rule="${rule.on_change === "rerender" ? "rerender" : ""}">${options}</select><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
+    const needsRerender = rule.on_change === "rerender" || normalizeRulePath(path) === "links[].type" || key === "cell_count" || key === "step_side";
+    return `<div class="field"><label ${titleAttr}>${esc(label)}</label><select data-path="${esc(path)}" data-rule="${needsRerender ? "rerender" : ""}">${options}</select><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
   }
-  const type = (arrayMode || typeof value === "number" || NUMERIC_HINT.has(key)) ? "number" : "text";
-  if (type === "number" && !arrayMode) {
-    return `<div class="field"><label>${esc(label)}</label><input type="number" step="${esc(rule?.step || "any")}" data-path="${esc(path)}" value="${esc(value)}"><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
+  const type = (!arrayMode && (typeof value === "number" || NUMERIC_HINT.has(key))) ? "number" : "text";
+  if (type === "number") {
+    return `<div class="field"><label ${titleAttr}>${esc(label)}</label><input type="number" step="${esc(rule?.step || "any")}" data-path="${esc(path)}" value="${esc(value ?? "")}"><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
   }
-  return `<div class="field"><label>${esc(label)}</label><input type="text" data-path="${esc(path)}" value="${esc(value)}"><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}${arrayMode ? " 逗號分隔" : ""}</div></div>`;
+  return `<div class="field"><label ${titleAttr}>${esc(label)}</label><input type="text" data-path="${esc(path)}" value="${esc(value ?? "")}"><div class="hint" data-hint-for="${esc(path)}">${esc(hint)}</div></div>`;
+}
+
+function updateAdvToggleButton() {
+  const btn = $("#toggleadv");
+  if (!btn) return;
+  const groups = document.querySelectorAll("#form details.adv-group");
+  if (!groups.length) {
+    btn.hidden = true;
+    return;
+  }
+  btn.hidden = false;
+  btn.textContent = advCollapsed ? "展開進階／材料參數" : "收合進階／材料參數";
 }
 
 function renderForm() {
   $("#form").innerHTML = walk(payload).join("");
+  updateAdvToggleButton();
+  renderSchema();
   document.querySelectorAll("#form [data-path]").forEach(el => {
     el.oninput = el.onchange = () => {
       const path = el.dataset.path.split(".");
@@ -1142,16 +2007,26 @@ function renderForm() {
       else if (typeof old === "number") value = el.value === "" ? null : Number(el.value);
       else value = el.value;
       setPath(payload, path, value);
+      if (normalizeRulePath(el.dataset.path) === "links[].type") {
+        const linkObj = getPath(payload, path.slice(0, -1));
+        if (linkObj && typeof linkObj === "object") {
+          const keep = { id: linkObj.id || "L1", from: linkObj.from || "A", to: linkObj.to || "C", type: value };
+          for (const k of Object.keys(linkObj)) delete linkObj[k];
+          Object.assign(linkObj, keep, clone(NETWORK_LINK_DEFAULTS[value] || {}));
+        }
+      }
       $("#json").value = JSON.stringify(payload, null, 2);
       if (el.dataset.rule === "rerender") {
-        const changingRule = ruleFor(path, key);
+        const changingRule = ruleFor(el.dataset.path, key);
         for (const field of changingRule?.clear_on_change || []) delete payload[field];
         const choice = (changingRule?.choices || []).find(c => String(c.value) === String(value));
         if (choice?.defaults) Object.assign(payload, clone(choice.defaults));
+        $("#json").value = JSON.stringify(payload, null, 2);
         renderForm();
         return;
       }
       applyFieldConstraints();
+      renderSchema();
     };
   });
   document.querySelectorAll("#form [data-preset-for]").forEach(el => {
@@ -1195,9 +2070,8 @@ function applyFieldConstraints() {
     const path = el.dataset.path;
     const key = path.split(".").at(-1);
     const rule = ruleFor(path, key);
-    if (!rule) return;
     const hintEl = document.querySelector(`[data-hint-for="${CSS.escape(path)}"]`);
-    if (el.type === "number" && rule.selected) {
+    if (rule && el.type === "number" && rule.selected) {
       const value = Number(el.value);
       const offset = ruleInputOffset(rule);
       const effective = value - offset;
@@ -1205,19 +2079,651 @@ function applyFieldConstraints() {
       el.max = Number(rule.selected.max) + offset;
       el.setAttribute("aria-invalid", invalid ? "true" : "false");
       if (hintEl) {
-        const base = key !== (LABELS[key] || key) ? key : "";
         const effectiveHint = offset
-          ? `有效高 ${fmt(effective)} m；上限 ${fmt(rule.selected.max)} m；已扣${rule.selected.offset_label || "底板厚"} ${fmt(offset)} m`
+          ? `有效高 ${fmt(effective)} m；上限 ${fmt(rule.selected.max)} m（已扣${rule.selected.offset_label || "底板厚"} ${fmt(offset)} m）`
           : ruleHint(rule);
-        hintEl.textContent = [base, effectiveHint, invalid ? "有效高超過上限" : ""]
+        const dHint = defaultFieldHint(path, key, false);
+        hintEl.textContent = [effectiveHint, dHint, invalid ? "⚠ 有效高超過規範上限" : ""]
           .filter(Boolean).join("；");
         hintEl.classList.toggle("invalid", invalid);
       }
     } else if (hintEl) {
-      const base = key !== (LABELS[key] || key) ? key : "";
-      hintEl.textContent = [base, ruleHint(rule)].filter(Boolean).join("；");
+      hintEl.textContent = fieldHintText(path, key, rule, false);
     }
   });
+}
+
+function svgDim(x1, y1, x2, y2, text, offset = 0, color = "var(--accent)") {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len;
+  const ax1 = x1 + nx * offset, ay1 = y1 + ny * offset;
+  const ax2 = x2 + nx * offset, ay2 = y2 + ny * offset;
+  const mx = (ax1 + ax2) / 2 + nx * 10, my = (ay1 + ay2) / 2 + ny * 10;
+  return `<g stroke="${color}" fill="${color}" stroke-width="1.3">
+    <line x1="${ax1}" y1="${ay1}" x2="${ax2}" y2="${ay2}"/>
+    <circle cx="${ax1}" cy="${ay1}" r="2"/>
+    <circle cx="${ax2}" cy="${ay2}" r="2"/>
+    <text x="${mx}" y="${my + 3}" text-anchor="middle" stroke="none" font-size="11" font-weight="600">${esc(text)}</text>
+  </g>`;
+}
+
+function buildSchemaData(id, p) {
+  const v = (k, d = "—") => {
+    const val = getPath(p, String(k).split("."));
+    return val === null || val === undefined || val === "" ? d : fmt(val);
+  };
+  if (id === "wall_stability") {
+    const wt = p.wall_type || "cantilever";
+    if (wt === "gravity") {
+      return {
+        title: "重力式擋土牆斷面示意圖（有效高 ≤ 4.0 m）",
+        orient: "右側為背填土側（主動土壓 Pa），左側為牆趾臨空側；依靠混凝土牆體自重抗滑與抗傾倒。",
+        items: [
+          ["H", "牆總高（牆頂至基底）", `${v("height_m")} m`],
+          ["T", "牆頂厚度", `${v("stem_thickness_m")} m`],
+          ["BL", "基底全寬", `${v("base_width_m")} m`],
+          ["D", "牆趾覆土深（基底起算）", `${v("toe_soil_depth_m")} m`]
+        ],
+        svg: `<svg viewBox="0 0 340 190">
+          <rect x="195" y="32" width="115" height="128" fill="var(--accent-soft)" stroke="none"/>
+          <line x1="195" y1="32" x2="310" y2="32" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <rect x="30" y="128" width="95" height="32" fill="var(--jade-soft)"/>
+          <line x1="30" y1="128" x2="125" y2="128" stroke="var(--jade)" stroke-width="1.5"/>
+          <polygon points="150,32 195,32 195,160 115,160" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+          <text x="255" y="95" fill="var(--amber)" font-size="11" text-anchor="middle">背填土 Pa ◀</text>
+          ${svgDim(88, 32, 88, 160, `H=${v("height_m")}m`, 0)}
+          ${svgDim(150, 22, 195, 22, `T=${v("stem_thickness_m")}m`, 0)}
+          ${svgDim(115, 175, 195, 175, `BL=${v("base_width_m")}m`, 0)}
+          ${svgDim(55, 128, 55, 160, `D=${v("toe_soil_depth_m")}m`, 0, "var(--jade)")}
+        </svg>`
+      };
+    }
+    if (wt === "semigravity") {
+      const eff = Number(p.height_m || 0) - Number(p.base_thickness_m || 0);
+      return {
+        title: "半重力式擋土牆斷面示意圖（有效高 H−BT ≤ 4.0 m）",
+        orient: "牆身前坡傾斜 1:m、底部設厚底板 BT 與趾板突出；規範有效高為牆總高扣除底板厚 BT。",
+        items: [
+          ["H", "輸入總牆高（含底板）", `${v("height_m")} m（有效 ${fmt(eff)} m）`],
+          ["BL×BT", "底板全寬 × 底板厚", `${v("base_width_m")} × ${v("base_thickness_m")} m`],
+          ["1:m", "牆面前坡比", `1 : ${v("front_batter_ratio")}`],
+          ["D", "牆趾覆土深（基底起算）", `${v("toe_soil_depth_m")} m`]
+        ],
+        svg: `<svg viewBox="0 0 340 190">
+          <rect x="210" y="28" width="100" height="132" fill="var(--accent-soft)"/>
+          <rect x="25" y="118" width="85" height="42" fill="var(--jade-soft)"/>
+          <polygon points="168,28 210,28 210,132 110,132 110,160 210,160 210,132 135,132" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+          <rect x="110" y="132" width="100" height="28" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+          <polygon points="168,28 210,28 210,132 135,132" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+          <text x="142" y="82" fill="var(--text-2)" font-size="10" text-anchor="end">前坡 1:${esc(v("front_batter_ratio"))}</text>
+          ${svgDim(82, 28, 82, 160, `H=${v("height_m")}m`, 0)}
+          ${svgDim(110, 175, 210, 175, `BL=${v("base_width_m")}m`, 0)}
+          ${svgDim(228, 132, 228, 160, `BT=${v("base_thickness_m")}`, 0)}
+          ${svgDim(45, 118, 45, 160, `D=${v("toe_soil_depth_m")}m`, 0, "var(--jade)")}
+        </svg>`
+      };
+    }
+    return {
+      title: "懸臂式 RC 擋土牆斷面示意圖（有效高 ≤ 8.0 m）",
+      orient: "倒 T 型 RC 牆：利用踵板上方背填土自重 W_soil 協助抗傾倒與抗滑動；右側為背填土側，左側為牆趾。",
+      items: [
+        ["H", "牆總高（牆頂至底板底）", `${v("height_m")} m`],
+        ["T", "牆身厚（莖版）", `${v("stem_thickness_m")} m`],
+        ["BL×BT", "底板全寬 × 底板厚", `${v("base_width_m")} × ${v("base_thickness_m")} m`],
+        ["D", "牆趾覆土深（基底起算）", `${v("toe_soil_depth_m")} m`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="166" y="30" width="140" height="108" fill="var(--accent-soft)"/>
+        <line x1="166" y1="30" x2="306" y2="30" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <rect x="30" y="122" width="112" height="38" fill="var(--jade-soft)"/>
+        <line x1="30" y1="122" x2="142" y2="122" stroke="var(--jade)" stroke-width="1.5"/>
+        <path d="M142,30 H166 V138 H245 V160 H105 V138 H142 Z" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <text x="225" y="82" fill="var(--amber)" font-size="11" text-anchor="middle">踵板覆土重 W↓</text>
+        <text x="275" y="108" fill="var(--amber)" font-size="11" text-anchor="middle">Pa ◀</text>
+        ${svgDim(82, 30, 82, 160, `H=${v("height_m")}m`, 0)}
+        ${svgDim(142, 20, 166, 20, `T=${v("stem_thickness_m")}m`, 0)}
+        ${svgDim(105, 175, 245, 175, `BL=${v("base_width_m")}m`, 0)}
+        ${svgDim(262, 138, 262, 160, `BT=${v("base_thickness_m")}`, 0)}
+        ${svgDim(48, 122, 48, 160, `D=${v("toe_soil_depth_m")}m`, 0, "var(--jade)")}
+      </svg>`
+    };
+  }
+
+  if (id === "block_wall") {
+    const wt = p.wall_type || "gabion";
+    const isStep = wt === "gabion" || wt === "crib";
+    if (isStep) {
+      const n = Math.min(Math.max(Number(p.course_count) || 3, 1), 5);
+      const frontStep = (p.step_side || "front") === "front";
+      let rects = "";
+      for (let i = 0; i < n; i++) {
+        const w = 110 - i * 18;
+        const h = Math.floor(115 / n);
+        const y = 155 - (i + 1) * h;
+        const x = frontStep ? (115 + i * 18) : 115;
+        rects += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--surface-3)" stroke="var(--text)" stroke-width="1.8"/>`;
+      }
+      return {
+        title: `${wt === "gabion" ? "蛇籠（箱籠）" : "格籠"}階梯式擋土牆示意圖`,
+        orient: "逐層疊砌並檢核每層界面與基底滑動／傾倒；有效高＝總高（層數×層高）扣除埋入深度 D。",
+        items: [
+          ["層數×層高", "疊砌規模", `${v("course_count")} 層 × ${v("course_height_m")} m`],
+          ["BL", "最底層寬度", `${v("base_width_m")} m`],
+          ["ΔB", "每往上一層縮減寬", `${v("width_decrement_m")} m`],
+          ["埋深 D", "地面以下埋入深度", `${v("embedment_m")} m`]
+        ],
+        svg: `<svg viewBox="0 0 340 190">
+          <rect x="225" y="38" width="90" height="117" fill="var(--accent-soft)"/>
+          <rect x="30" y="130" width="85" height="25" fill="var(--jade-soft)"/>
+          <line x1="30" y1="130" x2="115" y2="130" stroke="var(--jade)" stroke-width="1.5"/>
+          ${rects}
+          <text x="270" y="95" fill="var(--amber)" font-size="11" text-anchor="middle">背填土 Pa ◀</text>
+          ${svgDim(85, 40, 85, 155, `${v("course_count")}層`, 0)}
+          ${svgDim(115, 172, 225, 172, `底寬 BL=${v("base_width_m")}m`, 0)}
+          ${svgDim(52, 130, 52, 155, `D=${v("embedment_m")}m`, 0, "var(--jade)")}
+        </svg>`
+      };
+    }
+    return {
+      title: "漿砌／乾砌石與三明治式擋土牆示意圖",
+      orient: "檢核 §118 有效高（牆總高 H − 埋入深度 D）、牆面坡度 1:n（n ≥ 0.3）與底層石材長徑比。",
+      items: [
+        ["H", "牆總高（含埋深）", `${v("height_m")} m`],
+        ["頂寬", "牆頂厚度", `${v("top_width_m")} m`],
+        ["前坡/背坡", "牆面與背面坡比", `1:${v("front_batter_ratio")} / 1:${v("back_batter_ratio")}`],
+        ["埋深 D", "地面以下埋入深", `${v("embedment_m")} m`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="200" y="32" width="110" height="125" fill="var(--accent-soft)"/>
+        <rect x="30" y="130" width="90" height="27" fill="var(--jade-soft)"/>
+        <polygon points="155,32 195,32 215,157 120,157" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <text x="112" y="88" fill="var(--text-2)" font-size="10" text-anchor="end">前坡 1:${esc(v("front_batter_ratio"))}</text>
+        ${svgDim(75, 32, 75, 157, `H=${v("height_m")}m`, 0)}
+        ${svgDim(155, 20, 195, 20, `頂寬=${v("top_width_m")}m`, 0)}
+        ${svgDim(48, 130, 48, 157, `D=${v("embedment_m")}m`, 0, "var(--jade)")}
+      </svg>`
+    };
+  }
+
+  if (id === "counterfort_wall") {
+    return {
+      title: "扶壁式 RC 擋土牆斷面示意圖（有效高 ≤ 10.0 m）",
+      orient: "每隔間距 S 配置三角形／梯形扶壁肋版，將牆板與踵板轉為三帶連續版支承，適合高擋土牆。",
+      items: [
+        ["H", "牆板高（有效高扣覆土）", `${v("height_m")} m`],
+        ["BL×BT", "底板寬 × 底板厚", `${v("base_width_m")} × ${v("base_thickness_m")} m`],
+        ["扶壁 S", "扶壁中心間距 × 厚度", `${v("counterfort_spacing_m")} × ${v("counterfort_thickness_m")} m`],
+        ["前趾覆土", "牆前覆土深 D", `${v("front_soil_depth_m")} m`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <polygon points="154,28 172,28 250,136 154,136" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="4 2"/>
+        <path d="M138,28 H154 V136 H250 V158 H95 V136 H138 Z" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="28" y="116" width="67" height="42" fill="var(--jade-soft)"/>
+        <text x="205" y="95" fill="var(--accent)" font-size="11" font-weight="600">扶壁肋版 (@S=${esc(v("counterfort_spacing_m"))}m)</text>
+        ${svgDim(72, 28, 72, 158, `H=${v("height_m")}m`, 0)}
+        ${svgDim(95, 174, 250, 174, `BL=${v("base_width_m")}m`, 0)}
+        ${svgDim(95, 126, 138, 126, `趾=${v("toe_length_m")}`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "mse_wall") {
+    return {
+      title: "加勁擋土牆（MSE Wall）斷面示意圖（有效高 ≤ 8.0 m）",
+      orient: "牆面版後分層鋪設水平加勁格網／條帶（長度 L、垂直間距 Sv），檢核外部穩定與逐層拉斷／拉出。",
+      items: [
+        ["H / Dm", "牆總高 / 埋入深度", `${v("height_m")} m / ${v("embedment_m")} m`],
+        ["L", "加勁材鋪設長度（≥0.7H）", `${v("reinforcement_length_m")} m`],
+        ["Sv", "加勁層垂直間距（≤1.0m）", `${v("vertical_spacing_m")} m`],
+        ["Tal", "加勁材長期設計強度", `${v("long_term_strength_kN_per_m")} kN/m`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="110" y="32" width="150" height="124" fill="var(--accent-soft)" stroke="var(--line-strong)"/>
+        <rect x="260" y="32" width="55" height="124" fill="var(--surface-3)"/>
+        <rect x="98" y="32" width="12" height="124" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <g stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 3">
+          <line x1="110" y1="52" x2="255" y2="52"/><line x1="110" y1="76" x2="255" y2="76"/>
+          <line x1="110" y1="100" x2="255" y2="100"/><line x1="110" y1="124" x2="255" y2="124"/>
+          <line x1="110" y1="146" x2="255" y2="146"/>
+        </g>
+        <text x="185" y="45" fill="var(--text)" font-size="10" text-anchor="middle">加勁區 (Sv=${esc(v("vertical_spacing_m"))}m)</text>
+        <text x="288" y="95" fill="var(--text-2)" font-size="10" text-anchor="middle">保留區</text>
+        ${svgDim(68, 32, 68, 156, `H=${v("height_m")}m`, 0)}
+        ${svgDim(110, 172, 255, 172, `加勁長 L=${v("reinforcement_length_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "anchored_wall") {
+    return {
+      title: "地錨背拉擋土牆斷面示意圖",
+      orient: "RC 牆面以多排傾斜地錨穿過潛在滑動面（自由段 Lf）並錨入穩定地層（錨碇段 Lb）。",
+      items: [
+        ["H×t", "牆高 × 牆面厚度", `${v("height_m")} × ${v("wall_thickness_m")} m`],
+        ["地錨排", "各排深度（自牆頂起算）", `${v("anchor_depths_m")} m`],
+        ["Lf+Lb", "自由段長 ＋ 錨碇段長", `${v("free_length_m")} + ${v("bond_length_m")} m`],
+        ["α / Sh", "俯角 / 水平間距", `${v("inclination_deg")}° / ${v("horizontal_spacing_m")} m`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="115" y="26" width="195" height="132" fill="var(--accent-soft)"/>
+        <path d="M115,158 Q185,115 235,26" fill="none" stroke="var(--rust)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <path d="M98,26 H115 V144 H140 V158 H85 V144 H98 Z" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <g stroke="var(--text)" stroke-width="1.8">
+          <line x1="115" y1="55" x2="215" y2="88"/><line x1="115" y1="95" x2="215" y2="128"/>
+        </g>
+        <g stroke="var(--jade)" stroke-width="4" stroke-linecap="round">
+          <line x1="215" y1="88" x2="285" y2="111"/><line x1="215" y1="128" x2="285" y2="151"/>
+        </g>
+        <text x="175" y="65" fill="var(--text-2)" font-size="10">自由段 Lf</text>
+        <text x="255" y="92" fill="var(--jade)" font-size="10" font-weight="600">錨碇段 Lb</text>
+        ${svgDim(62, 26, 62, 158, `H=${v("height_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "box_culvert") {
+    const cells = Math.min(Math.max(Number(p.cell_count) || 1, 1), 3);
+    const totalW = 198, cellW = Math.floor((totalW - (cells + 1) * 10) / cells);
+    let openings = "";
+    for (let i = 0; i < cells; i++) {
+      const cx = 71 + 10 + i * (cellW + 10);
+      openings += `<rect x="${cx}" y="66" width="${cellW}" height="68" fill="var(--bg)" stroke="var(--text)" stroke-width="1.5"/>
+      <rect x="${cx}" y="102" width="${cellW}" height="32" fill="var(--jade-soft)"/>`;
+    }
+    return {
+      title: `${cells} 孔 RC 箱涵斷面與水理示意圖`,
+      orient: "同時檢核平面剛架結構（頂版／底版／外牆／內牆）與公路排水規範進／出口控制上游水深 HW。",
+      items: [
+        ["孔數×B×H", "孔數 × 單孔淨寬 × 淨高", `${cells} 孔 × ${v("clear_width_m")} × ${v("clear_height_m")} m`],
+        ["頂/底/外牆", "版牆厚度", `${v("top_slab_thickness_m")} / ${v("bottom_slab_thickness_m")} / ${v("wall_thickness_m")} m`],
+        ["覆土深", "頂版上方覆土厚", `${v("cover_depth_m")} m`],
+        ["Q / HWmax", "設計流量 / 容許頭水深", `${v("design_flow_m3s")} cms / ${v("allowable_headwater_m")} m`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="45" y="28" width="250" height="26" fill="var(--accent-soft)"/>
+        <line x1="45" y1="28" x2="295" y2="28" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <rect x="71" y="54" width="${totalW}" height="94" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        ${openings}
+        <text x="170" y="44" fill="var(--amber)" font-size="10" text-anchor="middle">覆土深 = ${esc(v("cover_depth_m"))} m</text>
+        ${svgDim(71 + 10, 92, 71 + 10 + cellW, 92, `B=${v("clear_width_m")}m`, 0)}
+        ${svgDim(42, 66, 42, 134, `H=${v("clear_height_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "channel_hydraulics") {
+    return {
+      title: "矩形明渠水力檢核斷面示意圖",
+      orient: "依水土保持技術規範 §78、§83～86 曼寧公式計算正常水深 yn、流速 V、福祿數 Fr 與出水高 FB。",
+      items: [
+        ["B × D", "溝內淨寬 × 總溝深", `${v("inner_width_m")} × ${v("depth_m")} m`],
+        ["Q", "設計流量", `${v("design_flow_m3s")} m³/s`],
+        ["S", "渠底縱坡", `${v("slope")}`],
+        ["n", "曼寧粗糙係數", `${v("manning_n")}`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <path d="M95,36 H115 V138 H225 V36 H245 V158 H95 Z" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="115" y="72" width="110" height="66" fill="var(--jade-soft)"/>
+        <line x1="115" y1="72" x2="225" y2="72" stroke="var(--jade)" stroke-width="2"/>
+        <text x="170" y="110" fill="var(--jade)" font-size="11" font-weight="600" text-anchor="middle">水流 Q=${esc(v("design_flow_m3s"))} cms</text>
+        ${svgDim(115, 174, 225, 174, `淨寬 B=${v("inner_width_m")}m`, 0)}
+        ${svgDim(68, 36, 68, 138, `總深 D=${v("depth_m")}m`, 0)}
+        ${svgDim(268, 36, 268, 72, "出水高 FB", 0, "var(--jade)")}
+      </svg>`
+    };
+  }
+
+  if (id === "channel_profile") {
+    return {
+      title: "明渠標準步法水面線（迴水）縱剖面示意圖",
+      orient: "由下游控制斷面（水深 yc）往上游每隔 Δx 推算沿程水深 y(x)，檢核全線是否滿足最小出水高。",
+      items: [
+        ["B × D", "渠底寬 × 渠道總深", `${v("bottom_width_m")} × ${v("channel_depth_m")} m`],
+        ["L / Δx", "演算總長 / 步距", `${v("reach_length_m")} m / ${v("step_m")} m`],
+        ["下游水深", "控制水深（空白取臨界）", `${v("control_depth_m")} m`],
+        ["Q / S", "設計流量 / 縱坡", `${v("design_flow_m3s")} cms / ${v("slope")}`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <line x1="40" y1="115" x2="300" y2="152" stroke="var(--text)" stroke-width="3"/>
+        <line x1="40" y1="55" x2="300" y2="92" stroke="var(--text-3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <path d="M40,82 Q180,98 300,112" fill="none" stroke="var(--jade)" stroke-width="2.5"/>
+        <text x="75" y="46" fill="var(--text-2)" font-size="10">上游 (x=L)</text>
+        <text x="255" y="82" fill="var(--text-2)" font-size="10">下游控制 (x=0)</text>
+        <text x="170" y="92" fill="var(--jade)" font-size="11" font-weight="600" text-anchor="middle">水面線 y(x) ──▶</text>
+        ${svgDim(40, 168, 300, 168, `演算長度 L=${v("reach_length_m")}m (步距 Δx=${v("step_m")}m)`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "channel_cover") {
+    return {
+      title: "RC 路側溝加蓋（溝蓋版＋植筋）斷面示意圖",
+      orient: "於既有 U 型溝壁頂加設 RC 溝蓋版承受 HS20 車輪載重 P，並以黏結式植筋（埋深 hef）抗掀與抗剪。",
+      items: [
+        ["淨寬 B", "溝壁內側淨寬", `${v("geometry.clear_width_m")} m`],
+        ["壁厚 tw", "既有兩側溝壁厚", `${v("geometry.wall_thickness_m")} m`],
+        ["版厚 ts", "溝蓋版厚", `${v("geometry.slab_thickness_mm")} mm`],
+        ["植筋", "號數 @ 間距（埋深 hef）", `${v("connection.bar")} @ ${v("connection.spacing_mm")} mm`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="82" y="48" width="176" height="28" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <path d="M82,76 H112 V146 H228 V76 H258 V164 H82 Z" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <line x1="97" y1="56" x2="97" y2="108" stroke="var(--rust)" stroke-width="3"/>
+        <line x1="243" y1="56" x2="243" y2="108" stroke="var(--rust)" stroke-width="3"/>
+        <text x="170" y="36" fill="var(--amber)" font-size="11" font-weight="600" text-anchor="middle">▼ HS20 輪載 P</text>
+        <text x="266" y="96" fill="var(--rust)" font-size="10">植筋 hef</text>
+        ${svgDim(112, 125, 228, 125, `淨寬=${v("geometry.clear_width_m")}m`, 0)}
+        ${svgDim(55, 48, 55, 76, `ts=${v("geometry.slab_thickness_mm")}mm`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "drainage_network") {
+    const nCount = (p.nodes || []).length;
+    const lCount = (p.links || []).length;
+    return {
+      title: "排水系統節點—管渠網路示意圖",
+      orient: "設定各匯流節點入流 Qin 與管渠連線（明渠／圓管／箱涵／固定容量），自動拓樸演算各段流量與容量比。",
+      items: [
+        ["節點數", "匯流／分流節點", `共 ${nCount} 個節點`],
+        ["管渠數", "連線段數", `共 ${lCount} 段連線`],
+        ["支援型式", "連線斷面型式", "明渠 / 圓管 / 箱涵 / 指定容量"],
+        ["檢核準則", "通水能力", "各段設計流量 Q ≤ 滿管或容許容量"]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <line x1="85" y1="55" x2="235" y2="95" stroke="var(--accent)" stroke-width="3"/>
+        <line x1="85" y1="135" x2="235" y2="95" stroke="var(--jade)" stroke-width="3"/>
+        <circle cx="85" cy="55" r="18" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <circle cx="85" cy="135" r="18" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <circle cx="235" cy="95" r="22" fill="var(--surface-3)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="85" y="59" fill="var(--text)" font-size="12" font-weight="700" text-anchor="middle">A</text>
+        <text x="85" y="139" fill="var(--text)" font-size="12" font-weight="700" text-anchor="middle">B</text>
+        <text x="235" y="99" fill="var(--accent)" font-size="12" font-weight="700" text-anchor="middle">C</text>
+        <text x="160" y="65" fill="var(--accent)" font-size="11" text-anchor="middle">L1 ▶</text>
+        <text x="160" y="132" fill="var(--jade)" font-size="11" text-anchor="middle">L2 ▶</text>
+      </svg>`
+    };
+  }
+
+  if (id === "detention_basin") {
+    return {
+      title: "滯洪池調洪演算（Modified Puls）示意圖",
+      orient: "輸入梯形池體尺寸與底部放流孔口（直徑 d），演算入流洪峰歷線經調蓄後之最高水位與最大出流。",
+      items: [
+        ["池底 L×W", "池底長 × 寬（側坡 z:1）", `${v("basin.bottom_length_m")} × ${v("basin.bottom_width_m")} m`],
+        ["池頂 / 出水高", "池頂高程 / 最小出水高", `${v("basin.dam_crest_m")} m / ${v("basin.freeboard_min_m")} m`],
+        ["放流孔口", "孔徑 d（孔底高程）", `D=${v("outlet.orifice.diameter_m")} m`],
+        ["尖峰入/容許出", "Qp 入流 / Qallow 出流", `${v("inflow.peak_m3s")} / ${v("allowable_outflow_m3s")} cms`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <polygon points="55,45 95,148 245,148 285,45" fill="none" stroke="var(--text)" stroke-width="2.5"/>
+        <polygon points="71,86 95,148 245,148 269,86" fill="var(--jade-soft)"/>
+        <line x1="71" y1="86" x2="269" y2="86" stroke="var(--jade)" stroke-width="2"/>
+        <circle cx="248" cy="140" r="7" fill="var(--bg)" stroke="var(--accent)" stroke-width="2"/>
+        <line x1="255" y1="140" x2="305" y2="140" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="170" y="118" fill="var(--jade)" font-size="11" font-weight="600" text-anchor="middle">最高蓄水位 Hmax</text>
+        <text x="290" y="128" fill="var(--accent)" font-size="10" text-anchor="middle">孔口 d=${esc(v("outlet.orifice.diameter_m"))}m ▶</text>
+        ${svgDim(95, 168, 245, 168, `池底 ${v("basin.bottom_length_m")}×${v("basin.bottom_width_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "building_frame") {
+    return {
+      title: "建築 2D RC 平面剛架示意圖",
+      orient: "依 X 軸柱距與各層樓高建立平面剛架，組合靜載、活載與等值地震橫力，檢核梁柱配筋與層間位移角。",
+      items: [
+        ["X 軸柱線", "各柱位座標", `${v("geometry.x_grid_m")} m`],
+        ["各層樓高", "由下而上層高", `${v("geometry.storey_heights_m")} m`],
+        ["梁 b×h", "RC 梁寬 × 梁深", `${v("geometry.beam_width_mm")} × ${v("geometry.beam_depth_mm")} mm`],
+        ["柱 b×h", "RC 柱寬 × 柱深", `${v("geometry.column_width_mm")} × ${v("geometry.column_depth_mm")} mm`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <g stroke="var(--text)" stroke-width="2.5">
+          <line x1="90" y1="35" x2="90" y2="155"/><line x1="175" y1="35" x2="175" y2="155"/><line x1="260" y1="35" x2="260" y2="155"/>
+          <line x1="90" y1="35" x2="260" y2="35"/><line x1="90" y1="75" x2="260" y2="75"/><line x1="90" y1="115" x2="260" y2="115"/>
+        </g>
+        <line x1="65" y1="155" x2="285" y2="155" stroke="var(--text-3)" stroke-width="2"/>
+        <g stroke="var(--amber)" stroke-width="2">
+          <line x1="42" y1="35" x2="82" y2="35"/><line x1="48" y1="75" x2="82" y2="75"/><line x1="56" y1="115" x2="82" y2="115"/>
+        </g>
+        <text x="58" y="26" fill="var(--amber)" font-size="10">地震力 ▶</text>
+        ${svgDim(90, 172, 260, 172, `X 軸網格: ${v("geometry.x_grid_m")} m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "foundation_isolated") {
+    return {
+      title: "RC 獨立基腳斷面與下方土層示意圖",
+      orient: "檢核柱載重（P, Mx, My）下之基底承載應力、單向剪力、雙向沖剪、彎矩配筋與分層沉陷。",
+      items: [
+        ["基腳 B×L×t", "寬 × 長 × 版厚", `${v("geometry.B_m")} × ${v("geometry.L_m")} × ${v("geometry.thickness_m")} m`],
+        ["柱 bc×lc", "柱斷面尺寸", `${v("geometry.column_b_m")} × ${v("geometry.column_l_m")} m`],
+        ["載重 P", "垂直軸力（彎矩 Mx/My）", `${v("load.P_kN")} kN（${v("load.Mx_kNm")}/${v("load.My_kNm")}）`],
+        ["容許承載 qa", "地基容許承載力", `${v("q_allow_kpa")} kPa`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="65" y="122" width="210" height="44" fill="var(--accent-soft)" stroke="var(--line-strong)"/>
+        <path d="M150,42 H190 V94 H245 V122 H95 V94 H150 Z" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <text x="170" y="32" fill="var(--amber)" font-size="11" font-weight="600" text-anchor="middle">▼ P=${esc(v("load.P_kN"))} kN</text>
+        <text x="170" y="148" fill="var(--text-2)" font-size="11" text-anchor="middle">壓縮土層（qa = ${esc(v("q_allow_kpa"))} kPa）</text>
+        ${svgDim(95, 176, 245, 176, `B=${v("geometry.B_m")}m × L=${v("geometry.L_m")}m`, 0)}
+        ${svgDim(268, 94, 268, 122, `t=${v("geometry.thickness_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "foundation_combined") {
+    return {
+      title: "RC 聯合基腳（雙柱共用基礎）示意圖",
+      orient: "當相鄰兩柱距離近或靠近地界時共用同一基礎版，檢核線性基底反力、縱向正負彎矩與沖剪。",
+      items: [
+        ["基腳 B×L×t", "寬 × 長 × 版厚", `${v("B_m")} × ${v("L_m")} × ${v("thickness_m")} m`],
+        ["柱 1", "位置 x1 / 軸力 P1", `x=${v("columns.0.x_m")} m / P=${v("columns.0.P_kN")} kN`],
+        ["柱 2", "位置 x2 / 軸力 P2", `x=${v("columns.1.x_m")} m / P=${v("columns.1.P_kN")} kN`],
+        ["容許承載 qa", "地基容許承載力", `${v("q_allow_kpa")} kPa`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="65" y="102" width="210" height="28" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="100" y="52" width="26" height="50" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="214" y="52" width="26" height="50" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <text x="113" y="42" fill="var(--amber)" font-size="11" text-anchor="middle">▼ P1=${esc(v("columns.0.P_kN"))}</text>
+        <text x="227" y="42" fill="var(--amber)" font-size="11" text-anchor="middle">▼ P2=${esc(v("columns.1.P_kN"))}</text>
+        ${svgDim(65, 152, 275, 152, `基腳長 L=${v("L_m")}m × 寬 B=${v("B_m")}m`, 0)}
+        ${svgDim(295, 102, 295, 130, `t=${v("thickness_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "foundation_pile") {
+    const pCount = (p.piles || []).length;
+    return {
+      title: "剛性樁帽與群樁軸力分配示意圖",
+      orient: "依剛性樁帽假設與各基樁平面座標 (xi, yi)，計算軸力 P 與雙向彎矩 Mx, My 下每支樁之反力。",
+      items: [
+        ["基樁支數", "樁位座標陣列", `共 ${pCount} 支樁`],
+        ["柱底軸力 P", "垂直總載重", `${v("P_kN")} kN`],
+        ["雙向彎矩", "Mx / My", `${v("Mx_kNm")} / ${v("My_kNm")} kN·m`],
+        ["單樁容許力", "Q_allow", `${v("Q_allow_kN")} kN`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="85" y="56" width="170" height="32" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="150" y="26" width="40" height="30" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <g fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2">
+          <rect x="105" y="88" width="18" height="68"/><rect x="161" y="88" width="18" height="68"/><rect x="217" y="88" width="18" height="68"/>
+        </g>
+        <text x="170" y="18" fill="var(--amber)" font-size="11" font-weight="600" text-anchor="middle">▼ P=${esc(v("P_kN"))} kN</text>
+        <text x="170" y="176" fill="var(--text-2)" font-size="11" text-anchor="middle">單樁容許力 Qallow = ${esc(v("Q_allow_kN"))} kN（共 ${pCount} 支）</text>
+      </svg>`
+    };
+  }
+
+  if (id === "settlement_assessment") {
+    const fCount = (p.footings || []).length;
+    return {
+      title: "多基礎總沉陷、差異沉陷與角變量（δ/L）示意圖",
+      orient: "分層累加各基腳之瞬時沉陷、主壓密與次壓縮沉陷，並扣除整體剛體傾斜後檢核相鄰基腳角變量 δ/L。",
+      items: [
+        ["基腳數量", "評估之獨立／聯合基腳", `共 ${fCount} 座基腳（可展開編輯土層）`],
+        ["角變量上限", "δ/L 容許值（§4.5.4）", `${v("angular_distortion_limit")}（預設 1/500）`],
+        ["基礎型式", "決定總沉陷上限", `${v("default_foundation_type")}`],
+        ["土層編輯", "瞬時＋壓密土層", "已改為卡片內摺疊清單，免寫 JSON"]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="45" y="100" width="250" height="32" fill="var(--accent-soft)" stroke="var(--line-strong)"/>
+        <rect x="45" y="132" width="250" height="34" fill="var(--jade-soft)" stroke="var(--line-strong)"/>
+        <rect x="75" y="62" width="55" height="22" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="205" y="76" width="55" height="22" fill="var(--surface-3)" stroke="var(--accent)" stroke-width="2"/>
+        <line x1="102" y1="84" x2="232" y2="98" stroke="var(--rust)" stroke-width="2" stroke-dasharray="4 2"/>
+        <text x="170" y="68" fill="var(--rust)" font-size="11" font-weight="600" text-anchor="middle">角變量 δ/L ≤ ${esc(v("angular_distortion_limit"))}</text>
+        <text x="170" y="120" fill="var(--text)" font-size="10" text-anchor="middle">瞬時沉陷土層 (immediate_layers)</text>
+        <text x="170" y="153" fill="var(--jade)" font-size="10" text-anchor="middle">壓密與次壓縮土層 (consolidation_layers)</text>
+      </svg>`
+    };
+  }
+
+  if (id === "hydrology") {
+    return {
+      title: "集水區水文分析（水保規範 §16～19 合理化公式）示意圖",
+      orient: "由漫地流（l, v）與溪流（L, H）求集流時間 tc，結合重現期 T 與年雨量 P 求降雨強度 I，再算 Qp = 1/360·C·I·A。",
+      items: [
+        ["A / C", "集水區面積 / 地表條件", `${v("area_ha")} ha / ${v("condition")}`],
+        ["P / T", "年平均雨量 / 重現期", `${v("P_mm")} mm / ${v("return_period_yr")} 年`],
+        ["漫地流", "長度 l / 流速 v", `${v("l_m")} m / ${v("v_ms")} m/s`],
+        ["溪流段", "長度 L / 高程差 H", `${v("L_km")} km / ${v("H_km")} km`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <polygon points="55,95 145,42 265,62 285,135 135,152" fill="var(--jade-soft)" stroke="var(--jade)" stroke-width="2"/>
+        <path d="M95,88 Q165,105 278,100" fill="none" stroke="var(--accent)" stroke-width="3"/>
+        <text x="170" y="76" fill="var(--text)" font-size="11" font-weight="600" text-anchor="middle">集水區 A = ${esc(v("area_ha"))} ha</text>
+        <text x="170" y="125" fill="var(--accent)" font-size="11" font-weight="600" text-anchor="middle">漫地流 l=${esc(v("l_m"))}m ──▶ 出口 Qp</text>
+      </svg>`
+    };
+  }
+
+  if (id === "sediment_basin") {
+    return {
+      title: "水保沉砂池容量（§35、§92～93）示意圖",
+      orient: "依 USLE 通用土壤流失公式與 §92 下限計算泥砂生產量，臨時性沉砂池依 §93 再乘 1.5 倍安全容量。",
+      items: [
+        ["集水區 A", "總面積（開挖整地）", `${v("area_ha")} ha（開挖 ${v("excavated_ha")} ha）`],
+        ["性質 / 年期", "臨時或永久 / 設計年期", `${v("kind")} / ${v("years")} 年`],
+        ["土壤流失 Am", "單位面積年流失量", `${v("Am")} t/ha/yr`],
+        ["池深 D", "設計有效池深（1.5～3.5m）", `${v("depth_m")} m`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <path d="M55,55 H85 L105,148 H235 L255,55 H285" fill="none" stroke="var(--text)" stroke-width="2.5"/>
+        <polygon points="98,112 105,148 235,148 242,112" fill="var(--amber-soft)"/>
+        <polygon points="89,74 98,112 242,112 251,74" fill="var(--jade-soft)"/>
+        <text x="170" y="135" fill="var(--amber)" font-size="11" font-weight="600" text-anchor="middle">設計沉砂容量 Vs (Am=${esc(v("Am"))})</text>
+        ${svgDim(268, 55, 268, 148, `池深 D=${v("depth_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "slope_stability") {
+    return {
+      title: "邊坡穩定分析（無限邊坡法＋Fellenius 坡趾圓）示意圖",
+      orient: "同時計算淺層無限邊坡滑動與圓弧滑動安全係數 FS，並依水保 §73（永久／臨時 × 平時／地震／暴雨）判定。",
+      items: [
+        ["H / β", "坡高 / 坡面傾角", `${v("height_m")} m / ${v("slope_angle_deg")}°`],
+        ["c / φ", "土壤凝聚力 / 內摩擦角", `${v("cohesion_kpa")} kPa / ${v("friction_deg")}°`],
+        ["γ", "土壤單位重", `${v("unit_weight_kn_m3")} kN/m³`],
+        ["階段 / 工況", "決定最小需求 FS", `${v("stage")} / ${v("condition")}`]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <polygon points="45,152 105,152 235,45 295,45 295,152" fill="var(--accent-soft)"/>
+        <polyline points="45,152 105,152 235,45 295,45" fill="none" stroke="var(--text)" stroke-width="2.5"/>
+        <path d="M105,152 Q215,142 255,45" fill="none" stroke="var(--rust)" stroke-width="2" stroke-dasharray="5 3"/>
+        <text x="145" y="142" fill="var(--accent)" font-size="11" font-weight="600">β=${esc(v("slope_angle_deg"))}°</text>
+        <text x="215" y="118" fill="var(--rust)" font-size="10">圓弧滑動面</text>
+        ${svgDim(278, 45, 278, 152, `坡高 H=${v("height_m")}m`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "rc_beam") {
+    return {
+      title: "RC 矩形梁斷面配筋（撓曲＋剪力＋裂縫）示意圖",
+      orient: "檢核極限彎矩 Mu 與剪力 Vu，依實際鋼筋應變 εt 計算折減係數 φ，並輸出主筋與閉合箍筋配置。",
+      items: [
+        ["b × h", "梁寬 × 梁全深", `${v("b_mm")} × ${v("h_mm")} mm`],
+        ["Mu / Vu", "設計彎矩 / 設計剪力", `${v("Mu_kNm")} kN·m / ${v("Vu_kN")} kN`],
+        ["fc′ / fy", "混凝土 / 鋼筋強度", `${v("fc_mpa")} / ${v("fy_mpa")} MPa`],
+        ["檢核範圍", "混凝土結構設計規範", "φMn ≥ Mu、φVn ≥ Vu、裂縫 ≤ 0.3mm"]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="115" y="26" width="110" height="134" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="127" y="38" width="86" height="110" fill="none" stroke="var(--accent)" stroke-width="1.5" rx="4"/>
+        <g fill="var(--rust)">
+          <circle cx="137" cy="140" r="5"/><circle cx="159" cy="140" r="5"/><circle cx="181" cy="140" r="5"/><circle cx="203" cy="140" r="5"/>
+        </g>
+        ${svgDim(115, 174, 225, 174, `梁寬 b=${v("b_mm")}mm`, 0)}
+        ${svgDim(82, 26, 82, 160, `梁深 h=${v("h_mm")}mm`, 0)}
+      </svg>`
+    };
+  }
+
+  if (id === "rc_column") {
+    return {
+      title: "RC 矩形柱軸彎互制（P-M Interaction）斷面示意圖",
+      orient: "檢核對稱配筋矩形柱在設計軸壓力 Pu 與單軸彎矩 Mu 共同作用下之軸彎互制包絡強度。",
+      items: [
+        ["b × h", "柱寬 × 柱深", `${v("b_mm")} × ${v("h_mm")} mm`],
+        ["Pu / Mu", "設計軸力 / 設計彎矩", `${v("Pu_kN")} kN / ${v("Mu_kNm")} kN·m`],
+        ["fc′ / fy", "混凝土 / 鋼筋強度", `${v("fc_mpa")} / ${v("fy_mpa")} MPa`],
+        ["配筋配置", "對稱主筋配置", "自動選配滿足 P-M 包絡之鋼筋比 ρg"]
+      ],
+      svg: `<svg viewBox="0 0 340 190">
+        <rect x="110" y="32" width="120" height="120" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+        <rect x="124" y="46" width="92" height="92" fill="none" stroke="var(--accent)" stroke-width="1.5" rx="4"/>
+        <g fill="var(--rust)">
+          <circle cx="132" cy="54" r="5"/><circle cx="170" cy="54" r="5"/><circle cx="208" cy="54" r="5"/>
+          <circle cx="132" cy="130" r="5"/><circle cx="170" cy="130" r="5"/><circle cx="208" cy="130" r="5"/>
+        </g>
+        ${svgDim(110, 168, 230, 168, `b=${v("b_mm")} × h=${v("h_mm")} mm`, 0)}
+      </svg>`
+    };
+  }
+
+  return {
+    title: "H 型鋼柱、柱腳基板與基礎錨栓示意圖",
+    orient: "聯合檢核 H 型鋼柱軸彎互制（LRFD/ASD）、柱腳基板厚度、混凝土承壓，以及錨栓群拉剪與應力錐。",
+    items: [
+      ["H 鋼柱", "h × b × tw × tf", `${v("column.section.h_mm")}×${v("column.section.b_mm")}×${v("column.section.tw_mm")}×${v("column.section.tf_mm")} mm`],
+      ["基板 B×N×t", "基板長 × 寬 × 厚", `${v("base_plate.plate_B_m")} × ${v("base_plate.plate_N_m")} m × ${v("base_plate.plate_t_mm")} mm`],
+      ["錨栓規格", "直徑 da / 埋深 hef", `D${v("anchors.diameter_mm")} / hef=${v("anchors.embedment_mm")} mm`],
+      ["設計內力", "P / Mx / Vx", `${v("column.axial_P_kN")} kN / ${v("column.moment_Mx_kNm")} kN·m / ${v("column.shear_Vx_kN")} kN`]
+    ],
+    svg: `<svg viewBox="0 0 340 190">
+      <rect x="75" y="128" width="190" height="40" fill="var(--surface-3)" stroke="var(--line-strong)"/>
+      <rect x="100" y="112" width="140" height="16" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+      <rect x="150" y="34" width="40" height="78" fill="var(--surface-3)" stroke="var(--text)" stroke-width="2"/>
+      <line x1="115" y1="104" x2="115" y2="158" stroke="var(--rust)" stroke-width="3"/>
+      <line x1="225" y1="104" x2="225" y2="158" stroke="var(--rust)" stroke-width="3"/>
+      <text x="170" y="24" fill="var(--amber)" font-size="11" font-weight="600" text-anchor="middle">▼ P=${esc(v("column.axial_P_kN"))} kN, Mx=${esc(v("column.moment_Mx_kNm"))}</text>
+      ${svgDim(100, 180, 240, 180, `基板 ${v("base_plate.plate_B_m")}×${v("base_plate.plate_N_m")}m (t=${v("base_plate.plate_t_mm")}mm)`, 0)}
+    </svg>`
+  };
+}
+
+function renderSchema() {
+  const box = $("#schema");
+  if (!box || !current) return;
+  const info = buildSchemaData(current.id, payload);
+  const itemsHtml = (info.items || []).map(([tag, desc, val]) =>
+    `<li><span class="schema-tag">${esc(tag)}</span><span>${esc(desc)}</span><span class="schema-val">${esc(val)}</span></li>`
+  ).join("");
+  box.innerHTML = `
+    <div class="schema-svg-wrap">${info.svg}</div>
+    <div class="schema-info">
+      <h4>${esc(info.title)}</h4>
+      <p class="schema-orient">${esc(info.orient)}</p>
+      <ul class="schema-legend">${itemsHtml}</ul>
+    </div>
+  `;
 }
 
 function validateFieldRules() {
@@ -1243,7 +2749,8 @@ function setPath(obj, parts, value) {
   p[parts[parts.length - 1]] = value;
 }
 
-async function run() {
+async function run(opts = {}) {
+  const autoSize = !!(opts && opts.autoSize);
   const ruleErrors = validateFieldRules();
   if (ruleErrors.length) {
     $("#status").textContent = "INPUT ERROR";
@@ -1252,19 +2759,29 @@ async function run() {
     $("#result").innerHTML = `<div class="error">${ruleErrors.map(esc).join("<br>")}</div>`;
     return;
   }
-  $("#run").disabled = true;
-  $("#run").textContent = "計算中…";
+  const runBtn = $("#run");
+  const autoBtn = $("#autosize");
+  runBtn.disabled = true;
+  if (autoBtn) autoBtn.disabled = true;
+  runBtn.textContent = autoSize ? "自動試算中…" : "計算中…";
   $("#status").textContent = "RUNNING";
   $("#status").dataset.state = "run";
-  $("#runstate").textContent = "計算中…";
+  $("#runstate").textContent = autoSize ? "搜尋斷面中…" : "計算中…";
   try {
-    const res = await fetch("/api/design/run", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({calculator: current.id, payload})
-    });
-    const data = await res.json();
+    const reqPayload = clone(payload);
+    if (autoSize) reqPayload.size = true;
+    const data = await executeDesignRun(current.id, reqPayload);
+    if (autoSize && data.result && data.result.sized_section && !data.error) {
+      for (const [k, v] of Object.entries(data.result.sized_section)) {
+        if (k.includes(".")) setPath(payload, k.split("."), v);
+        else payload[k] = v;
+      }
+      if ("size" in payload) payload.size = false;
+      $("#json").value = JSON.stringify(payload, null, 2);
+      renderForm();
+    }
     lastResult = data;
+    if (!data.error) recordRunHistory(current.id, payload, data);
     renderResult(data);
   } catch (e) {
     $("#result").innerHTML = `<div class="error">連線或格式錯誤：${esc(e.message)}</div>`;
@@ -1272,8 +2789,9 @@ async function run() {
     $("#status").dataset.state = "error";
     $("#runstate").textContent = "失敗";
   } finally {
-    $("#run").disabled = false;
-    $("#run").textContent = "執行計算";
+    runBtn.disabled = false;
+    if (autoBtn) autoBtn.disabled = false;
+    runBtn.textContent = "執行計算";
   }
 }
 
@@ -1284,7 +2802,324 @@ function relationText(c) {
   return fmt(c.limit);
 }
 
+function computeCheckMargin(c) {
+  const val = Number(c.value);
+  if (!Number.isFinite(val)) return { pct: c.ok ? 40 : 100, text: c.ok ? "符合" : "未達標", cls: c.ok ? "ok" : "ng" };
+  if (Array.isArray(c.limit) && c.limit.length === 2) {
+    const lo = Number(c.limit[0]), hi = Number(c.limit[1]);
+    if (Number.isFinite(lo) && Number.isFinite(hi) && hi > lo) {
+      const mid = (lo + hi) / 2;
+      const half = (hi - lo) / 2;
+      const ratio = Math.abs(val - mid) / half;
+      const pct = Math.min(100, Math.max(8, Math.round(ratio * 100)));
+      const cls = !c.ok ? "ng" : (ratio > 0.85 ? "warn" : "ok");
+      return { pct, text: c.ok ? `區間內 (${Math.round(ratio * 100)}%)` : "偏離中段區間", cls };
+    }
+  }
+  const lim = Number(c.limit);
+  if (!Number.isFinite(lim) || lim === 0) {
+    return { pct: c.ok ? 45 : 100, text: c.ok ? "OK" : "NG", cls: c.ok ? "ok" : "ng" };
+  }
+  const rel = c.relation || (String(c.unit || "").includes("FS") ? "ge" : "ge");
+  if (rel === "le") {
+    // Demand / Capacity <= 1.0
+    const dcr = val / lim;
+    const pct = Math.min(100, Math.max(6, Math.round(Math.abs(dcr) * 100)));
+    const cls = !c.ok ? "ng" : (dcr > 0.88 ? "warn" : "ok");
+    return { pct, text: `使用率 ${(dcr * 100).toFixed(0)}%`, cls };
+  }
+  // Capacity / Required >= 1.0 (e.g. FS >= 1.5)
+  const ratio = val / lim;
+  const util = ratio > 0 ? (1 / ratio) : 1.5;
+  const pct = Math.min(100, Math.max(10, Math.round(Math.min(util, 1.2) * 85)));
+  const marginPct = (ratio - 1) * 100;
+  const cls = !c.ok ? "ng" : (ratio < 1.12 ? "warn" : "ok");
+  return {
+    pct: c.ok ? pct : 100,
+    text: marginPct >= 0 ? `裕度 +${marginPct.toFixed(0)}%` : `不足 ${marginPct.toFixed(0)}%`,
+    cls
+  };
+}
+
+function diagnoseCheckFailure(calcId, c) {
+  if (c.ok) return "";
+  const item = String(c.item || "");
+  if (item.includes("滑動")) {
+    return "可加大「底寬 BL (base_width_m)」、提高基底摩擦係數，或填入「牆趾覆土深 D」並勾選「計入被動土壓」；亦可使用上方「⚡ 自動試算合格斷面」。";
+  }
+  if (item.includes("傾倒") || item.includes("偏心") || item.includes("合力作用點")) {
+    return "傾倒力矩過大：請優先加寬「底寬 BL (base_width_m)」或加長踵板以增加覆土穩定力矩。";
+  }
+  if (item.includes("承載") || item.includes("基底最大應力") || item.includes("應力")) {
+    return "基底接觸應力超限：請加寬基礎底寬 B/BL 以分散反力，或確認鑽探報告之容許承載力 qa。";
+  }
+  if (item.includes("通水") || item.includes("容量") || item.includes("出水高") || item.includes("水深")) {
+    return "通水能力或出水高不足：請加大「內寬 B」或「溝深／涵高 D」，或點擊「⚡ 自動試算合格斷面」。";
+  }
+  if (item.includes("流速")) {
+    return "流速超出規範範圍（水保 §85 為 0.8～4.57 m/s）：流速過快請調緩縱坡 S 或設跌水消能；過慢請加大坡度或縮小底寬。";
+  }
+  if (item.includes("撓曲") || item.includes("彎矩") || item.includes("軸彎")) {
+    return "抗彎強度不足：請加厚構材深度 h／版厚 ts、提高混凝土 fc′，或加密主筋間距／加大鋼筋號數。";
+  }
+  if (item.includes("剪力") || item.includes("沖剪")) {
+    return "抗剪強度不足：請增加版厚／梁深 d、提高混凝土強度 fc′，或加密箍筋間距。";
+  }
+  if (item.includes("裂縫") || item.includes("間距")) {
+    return "裂縫或鋼筋間距超限：請加密主筋間距 s（改用較小號數密配）或增加斷面厚度。";
+  }
+  if (item.includes("拉斷") || item.includes("拉出") || item.includes("握裹") || item.includes("地錨") || item.includes("植筋")) {
+    return "錨定或加勁抗力不足：請增加錨碇段長／埋深 hef、加密間距，或提高加勁材設計強度 Tal。";
+  }
+  if (item.includes("邊坡") || item.includes("圓弧") || item.includes("無限邊坡")) {
+    return "邊坡安全係數不足：請放緩坡角 β（削坡）、降低坡高分階設平台，或增設擋土／護坡設施。";
+  }
+  if (item.includes("沉陷") || item.includes("角變量")) {
+    return "沉陷或差異變形超限：請加大沉陷較大側之基腳面積以降低基底壓力 q，或改採聯合基腳／樁基礎。";
+  }
+  return "請依準則方向微調對應幾何尺寸或降低設計外力後重新計算。";
+}
+
+function recordRunHistory(calcId, p, d) {
+  const entry = {
+    uid: Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+    calcId,
+    title: current?.title || calcId,
+    timestamp: new Date().toLocaleTimeString("zh-TW", { hour12: false }),
+    ok: !!d.ok,
+    payload: clone(p),
+    checks: clone(d.checks || []),
+    summaryFirstLine: String(d.summary || "").split("\n")[0] || ""
+  };
+  runHistory.unshift(entry);
+  if (runHistory.length > 20) runHistory = runHistory.slice(0, 20);
+  saveHistoryToStorage();
+}
+
+function buildCaseExport(calcId, p, d) {
+  const categoryMap = {
+    wall_stability: "wall", block_wall: "wall", counterfort_wall: "wall", mse_wall: "wall", anchored_wall: "wall",
+    channel_hydraulics: "channel", channel_profile: "channel", channel_cover: "channel", box_culvert: "channel",
+    slope_stability: "slope"
+  };
+  const cat = categoryMap[calcId] || "wall";
+  const caseObj = {
+    schema: "civil-case/1",
+    case_id: `案名_${calcId}`,
+    title: `${current?.title || calcId}設計案`,
+    category: cat,
+    design_workbench_source: {
+      calculator: calcId,
+      engine: d.engine,
+      generated_at: d.generated_at,
+      ok: d.ok
+    },
+    quantities: {
+      model: cat,
+      values: clone(p)
+    },
+    soil: clone(p.soil || {}),
+    seismic: { kh: Number(p.kh ?? p.seismic?.kh ?? 0) }
+  };
+  let cliCmd = `# 1. 將下方 JSON 存為 cases\<案名>\case.json，執行全案打包（斷面圖＋預算書＋設計報告）：
+C:\Python312\python.exe -E -P -X utf8 tools/case_package/case_package.py cases/<案名>/case.json --out out/<案名>`;
+  if (calcId === "wall_stability") {
+    cliCmd = `# 直接呼叫擋土牆穩定與斷面出圖工具：
+C:\Python312\python.exe -E -P -X utf8 tools/design/retaining_wall.py cases/<案名>/case.json
+` + cliCmd;
+  } else if (calcId === "channel_hydraulics") {
+    cliCmd = `# 直接呼叫明渠水力與斷面出圖工具：
+C:\Python312\python.exe -E -P -X utf8 tools/design/channel_hydraulics.py
+` + cliCmd;
+  }
+  return { caseObj, cliCmd };
+}
+
+function renderCompareHtml(calcId, idxA, idxB) {
+  const sameCalcRuns = runHistory.filter(r => r.calcId === calcId);
+  const runA = sameCalcRuns[idxA] || sameCalcRuns[0];
+  const runB = sameCalcRuns[idxB] || sameCalcRuns[1];
+  if (!runA || !runB) return `<p class="hint">尚需至少 2 次同計算器的試算紀錄即可並排比較。</p>`;
+
+  // Collect scalar input differences
+  const flat = (obj, prefix = "", out = {}) => {
+    for (const [k, v] of Object.entries(obj || {})) {
+      const path = prefix ? `${prefix}.${k}` : k;
+      if (v && typeof v === "object" && !Array.isArray(v)) flat(v, path, out);
+      else if (!Array.isArray(v)) out[path] = v;
+    }
+    return out;
+  };
+  const flatA = flat(runA.payload);
+  const flatB = flat(runB.payload);
+  const allKeys = [...new Set([...Object.keys(flatA), ...Object.keys(flatB)])];
+  const diffInputs = allKeys.filter(k => String(flatA[k]) !== String(flatB[k]));
+
+  const inputRows = (diffInputs.length ? diffInputs : allKeys.slice(0, 6)).map(k => {
+    const shortKey = k.split(".").at(-1);
+    const label = LABELS[shortKey] || k;
+    const changed = String(flatA[k]) !== String(flatB[k]);
+    return `<tr class="${changed ? "diff-changed" : ""}"><td>輸入：${esc(label)}</td><td class="num">${esc(fmt(flatA[k]))}</td><td class="num">${esc(fmt(flatB[k]))}</td></tr>`;
+  }).join("");
+
+  const checkRows = (runA.checks || []).map((cA, i) => {
+    const cB = (runB.checks || []).find(x => x.item === cA.item) || (runB.checks || [])[i] || {};
+    const vA = fmt(cA.value), vB = fmt(cB.value);
+    const changed = String(vA) !== String(vB);
+    return `<tr class="${changed ? "diff-changed" : ""}">
+      <td>檢核：${esc(cA.item)} (${esc(relationText(cA))})</td>
+      <td class="num">${esc(vA)} <strong class="${cA.ok ? "ok" : "ng"}">[${cA.ok ? "OK" : "NG"}]</strong></td>
+      <td class="num">${esc(vB)} <strong class="${cB.ok ? "ok" : "ng"}">[${cB.ok ? "OK" : "NG"}]</strong></td>
+    </tr>`;
+  }).join("");
+
+  return `
+    <div class="table-wrap" style="margin-top:8px">
+      <table>
+        <thead>
+          <tr>
+            <th>比較項目（底色標示差異項）</th>
+            <th>方案 A（${esc(runA.timestamp)} · ${runA.ok ? "通過" : "未過"}）</th>
+            <th>方案 B（${esc(runB.timestamp)} · ${runB.ok ? "通過" : "未過"}）</th>
+          </tr>
+        </thead>
+        <tbody>${inputRows}${checkRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+let _katexPromise = null;
+function ensureKatexLoaded() {
+  if (window.katex) return Promise.resolve(window.katex);
+  if (_katexPromise) return _katexPromise;
+  const loadScript = src => new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => resolve(window.katex);
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  _katexPromise = loadScript("/vendor/katex/katex.min.js")
+    .catch(() => loadScript("https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"))
+    .catch(() => null);
+  return _katexPromise;
+}
+
+function humanizeMathFallback(rawLatex, rawExpr, outputName) {
+  let s = String(rawLatex || rawExpr || "").trim();
+  if (!s) return "";
+  if (!rawLatex && outputName && !s.includes("=")) {
+    s = `${outputName} = ${s}`;
+  }
+  return s
+    .replace(/\\left\s*([(\[{|])/g, "$1")
+    .replace(/\\right\s*([)\]}|])/g, "$1")
+    .replace(/\\text\{([^}]*)\}/g, "$1")
+    .replace(/\\mathrm\{([^}]*)\}/g, "$1")
+    .replace(/\\operatorname\{([^}]*)\}/g, "$1")
+    .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1) / ($2)")
+    .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1) / ($2)")
+    .replace(/\\sqrt\{([^{}]+)\}/g, "√($1)")
+    .replace(/\\le(?:q)?\b/g, " ≤ ")
+    .replace(/\\ge(?:q)?\b/g, " ≥ ")
+    .replace(/\\ne(?:q)?\b/g, " ≠ ")
+    .replace(/\\times\b/g, " × ")
+    .replace(/\\cdot\b/g, " · ")
+    .replace(/\\pm\b/g, " ± ")
+    .replace(/\\alpha\b/g, "α").replace(/\\beta\b/g, "β").replace(/\\gamma\b/g, "γ")
+    .replace(/\\delta\b/g, "δ").replace(/\\varepsilon\b/g, "ε").replace(/\\epsilon\b/g, "ε")
+    .replace(/\\theta\b/g, "θ").replace(/\\lambda\b/g, "λ").replace(/\\mu\b/g, "μ")
+    .replace(/\\nu\b/g, "ν").replace(/\\pi\b/g, "π").replace(/\\rho\b/g, "ρ")
+    .replace(/\\sigma\b/g, "σ").replace(/\\tau\b/g, "τ").replace(/\\varphi\b/g, "φ")
+    .replace(/\\phi\b/g, "φ").replace(/\\psi\b/g, "ψ").replace(/\\omega\b/g, "ω")
+    .replace(/\\Delta\b/g, "Δ").replace(/\\Sigma\b/g, "Σ").replace(/\\/g, "")
+    .replace(/\\[,;:!]/g, " ")
+    .replace(/\^\{([^{}]+)\}/g, "^($1)")
+    .replace(/_\{([^{}]+)\}/g, "_$1")
+    .replace(/\*\*2\b/g, "²").replace(/\*\*3\b/g, "³")
+    .replace(/\*\*/g, "^")
+    .replace(/\bsqrt\(/g, "√(");
+}
+
+function renderRefTablePreview(r) {
+  const cols = r.columns || [];
+  const rows = r.rows || [];
+  if (!rows.length) return "";
+  const head = cols.length ? `<thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>` : "";
+  const body = rows.slice(0, 5).map(row => {
+    if (Array.isArray(row)) {
+      return `<tr>${row.map(v => `<td>${esc(fmt(v))}</td>`).join("")}</tr>`;
+    }
+    if (row && typeof row === "object") {
+      const k = row.key ?? row.x ?? "";
+      const vals = row.values && typeof row.values === "object"
+        ? Object.entries(row.values).map(([vk, vv]) => `${vk}: ${Array.isArray(vv) ? vv.join("~") : vv}`).join("、")
+        : JSON.stringify(row.values ?? "");
+      return `<tr><td><b>${esc(String(k))}</b></td><td>${esc(vals)}</td></tr>`;
+    }
+    return "";
+  }).join("");
+  return `<table class="ref-mini-table">${head}<tbody>${body}</tbody></table>`;
+}
+
+function renderRefCardHtml(r) {
+  const hasMath = !!(r.latex || r.expr);
+  const fallbackText = humanizeMathFallback(r.latex, r.expr, r.output);
+  let mathHtml = "";
+  if (hasMath) {
+    if (window.katex && r.latex) {
+      try {
+        mathHtml = `<div class="ref-math">${window.katex.renderToString(r.latex, { throwOnError: false, displayMode: false })}</div>`;
+      } catch (e) {
+        mathHtml = `<div class="ref-math">${esc(fallbackText)}</div>`;
+      }
+    } else {
+      mathHtml = `<div class="ref-math" ${r.latex ? `data-latex="${esc(r.latex)}"` : ""}>${esc(fallbackText)}</div>`;
+    }
+  }
+  const varEntries = Object.entries(r.vars || {});
+  const varsHtml = varEntries.length ? `
+    <div class="ref-vars">
+      ${varEntries.slice(0, 6).map(([vk, vd]) => `<span><b>${esc(vk)}</b>：${esc(vd.desc || vk)}${vd.unit && vd.unit !== "-" ? ` (${esc(vd.unit)})` : ""}</span>`).join("")}
+    </div>
+  ` : "";
+  const tableHtml = r.kind === "table" ? renderRefTablePreview(r) : "";
+  return `
+    <div class="ref-card">
+      <div class="ref-card-head">
+        <span class="ref-badge">${r.kind === "table" ? "規範表格" : "規範公式"} · ${esc(r.status)}</span>
+        <a class="ref-src" href="/?q=${encodeURIComponent(r.src + " " + r.clause)}" target="_blank">${esc(r.src)} ${esc(r.clause)}${r.page ? ` (p.${esc(r.page)})` : ""} ↗</a>
+      </div>
+      <div><b>${esc(r.title)}</b>${r.unit && r.unit !== "-" ? ` <span class="hint">[單位：${esc(r.unit)}]</span>` : ""}</div>
+      ${mathHtml}
+      ${varsHtml}
+      ${tableHtml}
+      ${r.notes ? `<div class="ref-note">${esc(r.notes)}</div>` : ""}
+    </div>
+  `;
+}
+
+function upgradeRefMathWithKatex() {
+  const nodes = document.querySelectorAll(".ref-math[data-latex]");
+  if (!nodes.length) return;
+  ensureKatexLoaded().then(katex => {
+    if (!katex) return;
+    nodes.forEach(node => {
+      const tex = node.getAttribute("data-latex");
+      if (!tex) return;
+      try {
+        node.innerHTML = katex.renderToString(tex, { throwOnError: false, displayMode: false });
+        node.removeAttribute("data-latex");
+      } catch (e) {}
+    });
+  });
+}
+
 function renderResult(d) {
+  const tsEl = $("#printtimestamp");
+  if (tsEl) tsEl.innerHTML = `列印時間：${esc(d.generated_at || new Date().toISOString())}<br>計算引擎：${esc(d.engine || current?.engine || "")}`;
+
   if (d.error) {
     $("#status").textContent = "INPUT ERROR";
     $("#status").dataset.state = "error";
@@ -1301,24 +3136,105 @@ function renderResult(d) {
     const advisory = c.severity === "advisory";
     const state = c.ok ? "OK" : (advisory ? "NOTE" : "NG");
     const cls = advisory && !c.ok ? "note" : (c.ok ? "ok" : "ng");
-    return `<tr><td>${esc(c.item)}</td><td class="num">${fmt(c.value)}</td><td>${relationText(c)}</td><td>${esc(c.unit || "")}</td><td class="${cls}">${state}</td></tr>`;
+    const m = computeCheckMargin(c);
+    const diag = (!c.ok && !advisory) ? diagnoseCheckFailure(current.id, c) : "";
+    return `<tr>
+      <td>
+        <div>${esc(c.item)}</div>
+        ${diag ? `<div class="diag-tip"><b>💡 調參建議：</b>${esc(diag)}</div>` : ""}
+      </td>
+      <td class="num">${fmt(c.value)}</td>
+      <td>${relationText(c)}</td>
+      <td>${esc(c.unit || "")}</td>
+      <td class="margin-cell">
+        <div class="margin-wrap">
+          <div class="margin-bar"><div class="margin-fill ${m.cls}" style="width:${m.pct}%"></div></div>
+          <span class="margin-label">${esc(m.text)}</span>
+        </div>
+      </td>
+      <td class="${cls}">${state}</td>
+    </tr>`;
   }).join("");
   const warn = (d.warnings || []).filter(Boolean);
+  const refs = d.references || [];
+  const refsHtml = refs.length ? `
+    <details class="refs-panel" open>
+      <summary><span>📚 本次計算引用之已驗證規範公式／表格（共 ${refs.length} 條）</span><span class="hint">點擊收合</span></summary>
+      <div class="refs-body">
+        <div class="ref-grid">
+          ${refs.map(r => renderRefCardHtml(r)).join("")}
+        </div>
+      </div>
+    </details>
+  ` : "";
+
+  const sameCalcRuns = runHistory.filter(r => r.calcId === current.id);
+  const historyChips = sameCalcRuns.map((r, idx) => `
+    <div class="history-chip">
+      <span class="verdict-dot ${r.ok ? "ok" : "ng"}"></span>
+      <span><b>#${idx + 1}</b> (${esc(r.timestamp)})</span>
+      <button type="button" class="btn small" data-history-load="${idx}">載入參數</button>
+    </div>
+  `).join("");
+
+  const compareSelectOpts = sameCalcRuns.map((r, idx) =>
+    `<option value="${idx}">#${idx + 1} (${esc(r.timestamp)} · ${r.ok ? "通過" : "未過"})</option>`
+  ).join("");
+
+  const historyHtml = sameCalcRuns.length ? `
+    <details class="history-panel" open>
+      <summary><span>🕒 近期試算紀錄與 A/B 方案比較（本計算器共 ${sameCalcRuns.length} 筆）</span><span class="hint">自動保存在瀏覽器</span></summary>
+      <div class="history-body">
+        <div class="history-list">${historyChips}</div>
+        ${sameCalcRuns.length >= 2 ? `
+          <div class="compare-bar">
+            <b>並排比較：</b>
+            <label>方案 A <select id="cmpA">${compareSelectOpts}</select></label>
+            <span>vs</span>
+            <label>方案 B <select id="cmpB">${compareSelectOpts}</select></label>
+          </div>
+          <div id="cmptable">${renderCompareHtml(current.id, 0, 1)}</div>
+        ` : `<p class="hint">再修改參數並執行一次計算，即可在此啟動「方案 A vs 方案 B」並排比較表！</p>`}
+      </div>
+    </details>
+  ` : "";
+
+  const { caseObj, cliCmd } = buildCaseExport(current.id, payload, d);
+
   $("#result").innerHTML = `
     <div class="result-top">
       <h3>計算結果</h3>
       <span class="verdict ${ok ? "ok" : "ng"}">${ok ? "全部通過" : "有未通過項"}</span>
       <div class="result-actions">
+        <button class="btn" id="printsheet" title="列印或另存為 A4 工程計算書 PDF">🖨️ 列印／匯出 A4 計算書</button>
+        <button class="btn" id="togglecase" title="產生統一案件檔 case.json 與下游出圖／預算書指令">📦 轉為 case.json / 下游指令</button>
         <button class="btn" id="download">下載 JSON</button>
         <a class="btn" href="/?q=${encodeURIComponent(current.title)}" target="_blank">查相關規範</a>
       </div>
     </div>
+    <div class="case-panel" id="casepanel" hidden>
+      <div class="case-panel-head">
+        <span>📦 串接下游交付產線（<code>cases\&lt;案名&gt;\case.json</code> 斷面出圖＋工程預算書＋設計報告）</span>
+        <div style="display:flex;gap:6px">
+          <button type="button" class="btn small" id="copycase">複製 case.json</button>
+          <button type="button" class="btn small" id="dlcase">下載 case.json</button>
+        </div>
+      </div>
+      <div class="case-panel-body">
+        <p class="hint" style="margin:0 0 6px">將本次試算合格的尺寸直接轉為工作區標準 <code>civil-case/1</code> 格式，無須重複手填：</p>
+        <pre class="summary" style="margin-bottom:8px;font-size:12px">${esc(cliCmd)}</pre>
+        <textarea id="casejsontext" readonly style="min-height:180px;font-family:var(--mono);font-size:12px">${esc(JSON.stringify(caseObj, null, 2))}</textarea>
+      </div>
+    </div>
     <pre class="summary">${esc(d.summary)}</pre>
-    ${rows ? `<div class="table-wrap"><table><thead><tr><th>檢核項目</th><th>計算值</th><th>準則</th><th>單位</th><th>結果</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
+    ${rows ? `<div class="table-wrap"><table><thead><tr><th>檢核項目</th><th>計算值</th><th>準則</th><th>單位</th><th>安全裕度／使用率</th><th>結果</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
     ${warn.length ? `<div class="warn"><ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+    ${refsHtml}
+    ${historyHtml}
     <div class="actions"><button class="btn" id="showraw">顯示完整 JSON</button></div>
     <textarea id="rawjson" style="display:none;min-height:360px">${esc(JSON.stringify(d.result, null, 2))}</textarea>
   `;
+  upgradeRefMathWithKatex();
   $("#download").onclick = () => {
     const blob = new Blob([JSON.stringify(d, null, 2)], {type: "application/json"});
     const a = document.createElement("a");
@@ -1327,14 +3243,67 @@ function renderResult(d) {
     a.click();
     URL.revokeObjectURL(a.href);
   };
+  $("#printsheet").onclick = () => window.print();
+  $("#togglecase").onclick = () => {
+    const cp = $("#casepanel");
+    if (cp) cp.hidden = !cp.hidden;
+  };
+  if ($("#copycase")) {
+    $("#copycase").onclick = () => {
+      navigator.clipboard?.writeText($("#casejsontext").value);
+      $("#copycase").textContent = "✓ 已複製";
+      setTimeout(() => { if ($("#copycase")) $("#copycase").textContent = "複製 case.json"; }, 1500);
+    };
+  }
+  if ($("#dlcase")) {
+    $("#dlcase").onclick = () => {
+      const blob = new Blob([$("#casejsontext").value], {type: "application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "case.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+  }
+  document.querySelectorAll("[data-history-load]").forEach(btn => {
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.historyLoad);
+      const target = sameCalcRuns[idx];
+      if (!target) return;
+      payload = clone(target.payload);
+      $("#json").value = JSON.stringify(payload, null, 2);
+      $("#runstate").textContent = `已載入 #${idx + 1} 參數`;
+      renderForm();
+    };
+  });
+  const cmpA = $("#cmpA"), cmpB = $("#cmpB");
+  if (cmpA && cmpB) {
+    cmpB.value = "1";
+    const updateCmp = () => {
+      const box = $("#cmptable");
+      if (box) box.innerHTML = renderCompareHtml(current.id, Number(cmpA.value), Number(cmpB.value));
+    };
+    cmpA.onchange = updateCmp;
+    cmpB.onchange = updateCmp;
+  }
   $("#showraw").onclick = () => {
     const t = $("#rawjson");
     t.style.display = t.style.display === "none" ? "block" : "none";
   };
 }
 
-$("#run").onclick = run;
+$("#run").onclick = () => run({ autoSize: false });
+if ($("#autosize")) {
+  $("#autosize").onclick = () => run({ autoSize: true });
+}
 $("#reset").onclick = () => select(current.id);
+if ($("#toggleadv")) {
+  $("#toggleadv").onclick = () => {
+    advCollapsed = !advCollapsed;
+    document.querySelectorAll("#form details.adv-group").forEach(d => { d.open = !advCollapsed; });
+    updateAdvToggleButton();
+  };
+}
 $("#applyjson").onclick = () => {
   try {
     const v = JSON.parse($("#json").value);

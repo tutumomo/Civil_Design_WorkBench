@@ -1,9 +1,9 @@
 # 設計計算器上架 SOP
 
-> 版本：1.0（2026-11-02）
+> 版本：1.1（2026-11-02，納入工作台與規範查詢台三階段優化、深連結與 Cloudflare 雙入口發佈）
 >
-> 適用：任何要把「新的設計計算」放進工作區的人與智能體。成品一律要能在三個入口
-> （`/design` 網頁工作台、`design_cli.py`、MCP `design_run`）跑出同一個結果。
+> 適用：任何要把「新的設計計算」放進工作區的人與智能體。成品一律要能在四個入口
+> （本機 `/design` 網頁工作台、Cloudflare 線上雙入口、`design_cli.py`、MCP `design_run`）跑出同一個結果，並可由「規範查詢台」直接點卡跳轉。
 >
 > 實例：`steel_column`（鋼構柱＋柱腳基板＋基礎螺栓）即依本 SOP 上架，逐關對照見附錄 A。
 
@@ -15,14 +15,15 @@
 
 | 關卡 | 內容 | 檢核方式 | 未過的後果 |
 |---|---|---|---|
-| G1 | 引擎檔案存在且可編譯 | `design_launch_check.py` | 什麼都跑不動 |
+| G0 | 目錄與 `RUNNERS` 一致；`topics.json` 全部主題皆掛入 `TOPIC_GROUPS` | `design_launch_check.py` | 計算器漏接或主題落入未分類 |
+| G1 | 引擎檔案存在且可編譯 | 同上 | 什麼都跑不動 |
 | G2 | `CATALOG` 中介資料齊全 | 同上 | 工作台卡片空白、AI 找不到 |
 | G3 | 範例可執行且 `ok=True` | 同上 | 使用者一按就報錯 |
 | G4 | `summary`／`checks` 形狀可用 | 同上（不足為 WARN） | 結果頁看不懂 |
-| G5 | 已驗證條文連結解得開且 `verified` | 同上 | 計算書無法回溯依據 |
+| G5 | 已驗證條文連結解得開且 `verified` | 同上 | 計算書無法回溯依據、KaTeX 公式卡空白 |
 | G6 | 字串欄位一律下拉選單或有白名單 | 同上 | 使用者手打錯字，靜默算錯 |
-| G7 | `topics.json` 主題卡列了這支引擎 | 同上 | 口語查詢查不到（本次實測發現的真實缺口） |
-| G8 | 工作台標籤、文件、`--selftest` | 同上（WARN） | 可用但不好用、不好查 |
+| G7 | `topics.json` 主題卡列了這支引擎，**且 `regs_web.html` 的 `TOOL_TO_CALCS` 掛載深連結** | 同上 | 口語查詢查不到、設計依據卡無「🧮 對應工程設計計算器」跳轉按鈕 |
+| G8 | 工作台中文標籤、**SVG 幾何示意圖與情境範本**、文件、`--selftest` | 同上（WARN） | 可用但初學者看不懂幾何定義與典型值 |
 
 一鍵檢核：
 
@@ -148,12 +149,16 @@ def selftest() -> dict[str, Any]:
    巢狀欄位用完整路徑（`column.fy_mpa`），陣列用 `path[]`（`links[].type`）。
 5. 欄位標籤放 `field_rules[path].label`，不要靠前端硬編。
 
-### 4.2 `tools\design\workbench_web.html`
+### 4.2 `tools\design\workbench_web.html`（含三階段初學者友善介面契約）
 
 - `LABELS` 補中文標籤（鍵後面接 `:`，例 `design_method:"設計法"`）。
 - `NUMERIC_HINT` 補新數字鍵，讓新增列／空值仍當數字處理。
-- 純量物件陣列（例 `anchors.positions`）會自動長成清單編輯器，不必改前端程式。
-- 布林值自動變勾選框；不要為它寫 select。
+- **幾何示意圖（`CALC_SCHEMAS[<id>]`）**：必畫動態 SVG 構造示意圖（標註關鍵尺寸代號如 `H, B, t`），讓輸入變動時即時刷新數值標籤。
+- **欄位工程小幫手（`FIELD_HELP`）**：為關鍵工程參數補上 `tip`（物理意義與法規依據）與 `range`（典型常用範圍，例 `常見：210~280 kgf/cm²`）。
+- **情境範本（`SCENARIO_PRESETS[<id>]`）**：提供 2~3 組實務常見情境按鈕（如「一般山坡地農路 H=3m」「重載道路 H=5m」），方便初學者一鍵載入典型參數。
+- **選型精靈（`WIZARD_TREE`）與不通過診斷（`DIAGNOSIS_RULES`）**：把新計算器掛入頂部「🧭 不確定選哪個工具？」決策樹，並針對該計算器常見的檢核失敗項補充具體改善建議（如「加大底板踵部寬度」、「提高混凝土強度」）。
+- **（選配）自動反推最小斷面**：若引擎提供 `size_section()`／`size_channel()`，一併接入 `design_api.size_calculation()` 與 `SIZERS`，工作台會自動顯示「🪄 自動反推最小安全斷面」按鈕。
+- 純量物件陣列（例 `anchors.positions`）會自動長成清單編輯器，不必改前端程式；布林值自動變勾選框，不要為它寫 select。
 
 ### 4.3 驗收這一步的判準
 
@@ -168,7 +173,7 @@ def selftest() -> dict[str, Any]:
 
 ---
 
-## 5. 階段五：條文與口語查詢（最常被漏掉的一關）
+## 5. 階段五：條文、口語查詢與雙向深連結（最常被漏掉的一關）
 
 ### 5.1 已驗證條文連結 `tools\regs\verified\_links.json`
 
@@ -179,6 +184,7 @@ def selftest() -> dict[str, Any]:
 - 只列**引擎真的會呼叫**的 id（`refs.formula()`／`refs.table()` 用到的）。
 - 條目必須已存在於 `tools\regs\verified\*.json` 且 `status=verified`；
   **不要在 `_links.json` 裡新增公式條目**，公式要另外走《規範公式圖表入庫 SOP》。
+- `design_api._enrich_references()` 會自動由已驗證庫補齊 `latex`、`vars`、`columns/rows`，供工作台結果頁渲染 KaTeX 公式卡與展開「讀條文全文」Modal。
 - 轉錄值（尚未入庫的表列數字）不得偽裝成 verified，輸出要附「轉錄值」提醒。
 
 ### 5.2 主題卡 `tools\regs\topics.json`
@@ -203,6 +209,18 @@ def selftest() -> dict[str, Any]:
   把路由鎖住；否則日後改關鍵字會靜默失聯。
 - 加完跑 `tools\regs\regq_selftest.py`，確認索引、別名唯一性與路由測試全過。
 
+### 5.3 規範查詢台深連結與主題分組 `tools\regs\regs_web.html`
+
+為確保使用者在「規範查詢台」查到設計依據卡時，能看到**「🧮 對應工程設計計算器」**互動卡片並一鍵跳轉至 `/design?calc=<id>`（由 `design_launch_check.py` G0／G7 自動把關）：
+
+1. **`TOOL_TO_CALCS` 映射表**：在 `tools\regs\regs_web.html` 的 `TOOL_TO_CALCS` 補上 `"tools\\design\\<engine>.py"` 對應該計算器之 `{ id, title, desc }`：
+   ```javascript
+   "tools\\design\\steel_column.py": [
+     { id: "steel_column", title: "鋼構柱、柱腳基板與基礎螺栓", desc: "H 型鋼柱軸壓彎矩互制、柱腳基板厚度與錨栓拉剪檢核" }
+   ]
+   ```
+2. **`TOPIC_GROUPS` 六大工程領域分組**：若新增了主題卡，將主題名稱加入 `tools\regs\regs_web.html` 的 `TOPIC_GROUPS` 對應領域（水保與坡地／排水與箱涵／擋土與邊坡／基礎與大地／結構與抗震／道路與交通），避免落入未分類。
+
 ---
 
 ## 6. 階段六：測試（四道既有 + 一道專屬 + 一道上架）
@@ -223,10 +241,12 @@ def selftest() -> dict[str, Any]:
 
 ---
 
-## 7. 階段七：上架驗證（寫檔成功 ≠ 使用者按得動）
+## 7. 階段七：本機上架驗證與 Cloudflare 雙入口同步發佈（寫檔成功 ≠ 使用者按得動）
+
+### 7.1 本機重啟與驗收（`127.0.0.1:8765`）
 
 **`design_api` 是在請求時才 import，行程啟動後就快取在 `sys.modules`。**
-改完 `design_api.py`／`workbench_web.html` 後，只重新整理瀏覽器不會生效。
+改完 `design_api.py`／`workbench_web.html`／`regs_web.html` 後，只重新整理瀏覽器不會生效。
 
 ```powershell
 # 1. 確認舊行程是否還在（有回應就是還在）
@@ -246,10 +266,23 @@ curl.exe -s -X POST http://127.0.0.1:8765/api/design/run ^
 # 5. 開瀏覽器看表單：http://127.0.0.1:8765/design?calc=<id>
 ```
 
-驗收看三件事：①計算器出現在目錄且分組正確；②表單欄位標籤是中文、列舉是下拉；
-③按「執行計算」得到「全部通過／未通過」且檢核列可讀。
+驗收看四件事：①計算器出現在目錄且分組正確；②表單欄位標籤是中文、列舉是下拉、上方有 SVG 示意圖與情境範本；
+③按「執行計算」得到「全部通過／未通過」且檢核列與 KaTeX 條文卡可讀；④在「規範查詢台」（`/`）點對應主題卡，底部出現「🧮 對應工程設計計算器」卡片並可點卡跳轉。
 
-測試時可另開 `--port 8766`，不要打斷使用者正在看的 8765。
+### 7.2 Cloudflare Workers 線上雙入口同步發佈
+
+本工作區線上固定網址為 **`https://civil-design-workbench.foil-newsstand.workers.dev/`**（已認領綁定永久帳號 `Foil Newsstand`，Account ID：`e2c04af8447f8efcbf6ca597d6d3ad36`）。
+本機修改並驗證通過後，必須重新打包 Pyodide＋靜態規範庫並部署至該固定網址（**嚴禁加 `--temporary`**，否則會產生新的臨時網址或因舊臨時憑證失效而報 9109 錯誤）：
+
+```powershell
+# 1. 產出 Cloudflare 雙入口靜態包（輸出至 _temp\cloudflare_design\）
+& $PY -E -P -X utf8 tools\design\build_cloudflare.py
+
+# 2. 部署至已認領的 Foil Newsstand 永久帳號（勿加 --temporary）
+$env:CLOUDFLARE_ACCOUNT_ID = 'e2c04af8447f8efcbf6ca597d6d3ad36'
+Set-Location D:\Civil_Design_WorkBench\_temp\cloudflare_design
+npx wrangler deploy
+```
 
 ---
 
@@ -284,7 +317,9 @@ curl.exe -s -X POST http://127.0.0.1:8765/api/design/run ^
 | 條文連結顯示未驗證 | 條目不存在或 `status` 不是 verified | 先入庫，再寫進 `_links.json` |
 | `regression.py` 顯示基準不符 | 真的改變了設計數值 | 確認預期後才 `--update` |
 | 上架檢核 G6 FAIL | example 有新字串欄位沒給 select | 補 `field_rules`，或列入 `FREE_TEXT_FIELDS` |
+| 上架檢核 G7 FAIL | `regs_web.html` 的 `TOOL_TO_CALCS` 未掛載該引擎 | 在 `TOOL_TO_CALCS` 補上 `"tools\\design\\<engine>.py": [{ id, title, desc }]` |
 | 上架檢核 G4 WARN | 檢核列缺 `unit`／`limit` | 補欄位；純資訊列標 `advisory` |
+| Cloudflare 線上版沒看到更新或報 `9109` | 誤加 `--temporary` 吃到過期臨時憑證或產生新網址 | 移除 `--temporary`，設定 `$env:CLOUDFLARE_ACCOUNT_ID='e2c04af8447f8efcbf6ca597d6d3ad36'` 跑 `npx wrangler deploy` |
 
 ---
 

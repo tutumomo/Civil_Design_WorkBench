@@ -39,6 +39,7 @@ import design_workbench_selftest as WBS  # noqa: E402
 
 META_FIELDS = ("group", "title", "oral", "description", "engine", "codes", "limitations")
 WORKBENCH = ROOT / "tools" / "design" / "workbench_web.html"
+REGS_WEB = ROOT / "tools" / "regs" / "regs_web.html"
 TOPICS = ROOT / "tools" / "regs" / "topics.json"
 LINKS = ROOT / "tools" / "regs" / "verified" / "_links.json"
 DOCS = ROOT / "docs"
@@ -123,6 +124,23 @@ def check_global(report: Report, catalog: list[dict[str, Any]]) -> None:
             "CATALOG 與 RUNNERS 一致",
             "只在目錄：%s；只在 RUNNERS：%s" % (only_cat or "無", only_run or "無"),
         )
+
+    # 檢查 topics.json 所有主題都已掛入 regs_web.html 的 TOPIC_GROUPS
+    topics = _load_json(TOPICS, {}).get("topics", [])
+    regs_html = REGS_WEB.read_text(encoding="utf-8") if REGS_WEB.is_file() else ""
+    unclassified_topics = [
+        str(t.get("name"))
+        for t in topics
+        if t.get("name") and ('"%s"' % t.get("name")) not in regs_html
+    ]
+    if unclassified_topics:
+        report.warn_row(
+            "G0",
+            "規範查詢台 TOPIC_GROUPS 主題分組",
+            "未分組（將落入「其他工程」）：%s" % "、".join(unclassified_topics),
+        )
+    else:
+        report.ok("G0", "規範查詢台 TOPIC_GROUPS 主題分組", "%d 個主題皆已歸類" % len(topics))
 
 
 def check_calculator(calc: Mapping[str, Any], report: Report) -> None:
@@ -235,7 +253,7 @@ def check_calculator(calc: Mapping[str, Any], report: Report) -> None:
     else:
         report.ok("G6", "列舉欄位用下拉", "%d 個字串欄位皆有規則" % len([1 for _, v in _walk_example(example) if isinstance(v, str)]))
 
-    # G7 規範查詢主題卡
+    # G7 規範查詢主題卡與深連結
     topics = _load_json(TOPICS, {}).get("topics", [])
     needle = ("tools\\design\\" + engine_rel).replace("/", "\\").lower()
     hits = [
@@ -251,6 +269,17 @@ def check_calculator(calc: Mapping[str, Any], report: Report) -> None:
     else:
         report.fail("G7", "規範查詢主題卡", "%s 未被任何 topics.json 主題卡引用" % engine_rel)
 
+    regs_html = REGS_WEB.read_text(encoding="utf-8") if REGS_WEB.is_file() else ""
+    escaped_needle = ("tools\\\\design\\\\" + engine_rel).replace("/", "\\\\")
+    if (f'id: "{calc_id}"' in regs_html or f"id:'{calc_id}'" in regs_html) and escaped_needle in regs_html:
+        report.ok("G7", "規範查詢台 TOOL_TO_CALCS 深連結", f"/design?calc={calc_id}")
+    else:
+        report.fail(
+            "G7",
+            "規範查詢台 TOOL_TO_CALCS 深連結",
+            f"regs_web.html 的 TOOL_TO_CALCS 未掛載 {escaped_needle} -> {calc_id}",
+        )
+
     # G8 週邊（WARN）
     html = WORKBENCH.read_text(encoding="utf-8") if WORKBENCH.is_file() else ""
     labelled = {k for k in _example_keys(example) if ("%s:" % k) in html}
@@ -264,6 +293,11 @@ def check_calculator(calc: Mapping[str, Any], report: Report) -> None:
         report.warn_row("G8", "工作台欄位標籤", "未見：%s" % "、".join(missing_labels))
     else:
         report.ok("G8", "工作台欄位標籤", "全部欄位有中文標籤")
+
+    if (f"{calc_id}:" in html or f'"{calc_id}":' in html) and "SCENARIO_PRESETS" in html:
+        report.ok("G8", "工作台 SVG 示意圖與情境範本", f"{calc_id} 已定義")
+    else:
+        report.warn_row("G8", "工作台 SVG 示意圖與情境範本", f"workbench_web.html 未見 {calc_id} 專屬示意圖或範本")
 
     docs_hit = []
     if DOCS.is_dir():

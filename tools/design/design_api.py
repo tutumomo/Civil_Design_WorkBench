@@ -2096,6 +2096,31 @@ def _run_wall(payload: Mapping[str, Any]) -> Mapping[str, Any]:
     seismic = payload.get("seismic")
     if payload.get("kh") is not None:
         seismic = {"kh": float(payload["kh"])}
+    kh = float((seismic or {}).get("kh") or 0.0)
+    if payload.get("size"):
+        wall_type = str(q.get("wall_type") or "gravity").strip().lower()
+        if wall_type not in ("gravity", "cantilever"):
+            raise DesignAPIError("自動試算斷面目前支援重力式（gravity）或懸臂式（cantilever）；半重力式請手動微調斷面。")
+        best, tried = RW.size_section(
+            float(q.get("height_m") or 3.0),
+            soil=soil,
+            wall_type=wall_type,
+            kh=kh,
+            toe_passive={
+                k: q[k]
+                for k in ("toe_soil_depth_m", "include_passive", "passive_ratio")
+                if k in q
+            },
+        )
+        if best is None:
+            raise DesignAPIError("搜尋 %d 組斷面仍無法全部通過，請檢查土壤承載力／摩擦角或降低牆高" % tried)
+        res = dict(best["res"])
+        res["sized_section"] = dict(best["q"])
+        res["warnings"] = [
+            "已依牆高自動反推合格最小斷面（搜尋 %d 組）：%s"
+            % (tried, json.dumps(best["q"], ensure_ascii=False))
+        ] + list(res.get("warnings") or [])
+        return res
     return RW.analyse(q, soil=soil, seismic=seismic)
 
 
@@ -2188,15 +2213,32 @@ def _run_box(payload: Mapping[str, Any]) -> Mapping[str, Any]:
 def _run_channel(payload: Mapping[str, Any]) -> Mapping[str, Any]:
     import channel_hydraulics as CH
 
+    params = {
+        "manning_n": _num(payload, "manning_n", 0.014),
+        "freeboard_min_m": _num(payload, "freeboard_min_m", 0.20),
+    }
+    if payload.get("size"):
+        best, tried = CH.size_channel(
+            _num(payload, "design_flow_m3s"),
+            _num(payload, "slope"),
+            params,
+        )
+        if best is None:
+            raise DesignAPIError("搜尋 %d 組 U 型溝斷面仍無法全部通過，請檢查設計流量或縱坡（流速限制 0.8~4.57 m/s）" % tried)
+        res = dict(best["res"])
+        sized = {"inner_width_m": best["b"], "depth_m": best["h"]}
+        res["sized_section"] = sized
+        res["warnings"] = [
+            "已依設計流量自動反推最小合格斷面（搜尋 %d 組）：內寬 b=%.2f m、溝深 h=%.2f m"
+            % (tried, best["b"], best["h"])
+        ] + list(res.get("warnings") or [])
+        return res
     return CH.analyse(
         _num(payload, "design_flow_m3s"),
         _num(payload, "inner_width_m"),
         _num(payload, "depth_m"),
         _num(payload, "slope"),
-        {
-            "manning_n": _num(payload, "manning_n", 0.014),
-            "freeboard_min_m": _num(payload, "freeboard_min_m", 0.20),
-        },
+        params,
     )
 
 
@@ -2393,6 +2435,26 @@ def _run_steel_column(payload: Mapping[str, Any]) -> Mapping[str, Any]:
 def _run_channel_cover(payload: Mapping[str, Any]) -> Mapping[str, Any]:
     import channel_cover as CC
 
+    if payload.get("size"):
+        p2 = dict(payload)
+        geo = dict(payload.get("geometry") or {})
+        geo["slab_thickness_mm"] = None
+        p2["geometry"] = geo
+        p2["slab"] = {"main_bar": "", "main_spacing_mm": 0.0, "dist_bar": "", "dist_spacing_mm": 0.0}
+        res = dict(CC.analyse(p2))
+        sized = {
+            "geometry.slab_thickness_mm": (res.get("geometry") or {}).get("slab_thickness_mm", 250.0),
+            "slab.main_bar": "",
+            "slab.main_spacing_mm": 0.0,
+            "slab.dist_bar": "",
+            "slab.dist_spacing_mm": 0.0,
+        }
+        res["sized_section"] = sized
+        res["warnings"] = [
+            "已自動搜尋最小合格版厚與配筋：版厚 %.0f mm"
+            % float(sized["geometry.slab_thickness_mm"] or 250.0)
+        ] + list(res.get("warnings") or [])
+        return res
     return CC.analyse(payload)
 
 

@@ -77,12 +77,34 @@ def _brief(x):
     return {k: x.get(k) for k in ("id", "title", "src", "clause", "page", "status", "engineer_signed")}
 
 
+def _detail(x, kind):
+    return {
+        "id": x.get("id"),
+        "kind": kind,
+        "title": x.get("title", ""),
+        "src": x.get("src", ""),
+        "clause": x.get("clause", ""),
+        "page": x.get("page"),
+        "status": x.get("status", "pending"),
+        "engineer_signed": x.get("engineer_signed"),
+        "latex": x.get("latex", ""),
+        "expr": x.get("expr", ""),
+        "output": x.get("output", ""),
+        "vars": x.get("vars", {}),
+        "columns": x.get("columns", []),
+        "rows": (x.get("rows") or [])[:12],
+        "unit": x.get("unit", ""),
+        "notes": x.get("notes", ""),
+        "conditions": x.get("conditions", []),
+    }
+
+
 def for_clause(src, clause):
     """Entries restored for one clause (used to badge regs_clause output)."""
     f, t = load()
     c = str(clause)
-    return ([dict(_brief(x), kind="formula") for x in f.values() if x["src"] == src and c in (x["clause"], x.get("index_clause"))]
-            + [dict(_brief(x), kind="table") for x in t.values() if x["src"] == src and c in (x["clause"], x.get("index_clause"))])
+    return ([_detail(x, "formula") for x in f.values() if x["src"] == src and c in (x["clause"], x.get("index_clause"))]
+            + [_detail(x, "table") for x in t.values() if x["src"] == src and c in (x["clause"], x.get("index_clause"))])
 
 
 def search(q):
@@ -209,5 +231,10 @@ def references_for(calc_id):
         if x:
             out.append({"id": i, "kind": "formula" if i in fm else "table", "title": x["title"], "src": x["src"],
                         "clause": x["clause"], "page": x.get("page"), "status": x["status"],
-                        "engineer_signed": x.get("engineer_signed")})
+                        "engineer_signed": x.get("engineer_signed"),
+                        "latex": x.get("latex", ""), "expr": x.get("expr", ""),
+                        "output": x.get("output", ""), "vars": x.get("vars", {}),
+                        "columns": x.get("columns", []), "rows": (x.get("rows") or [])[:6],
+                        "unit": x.get("unit", ""), "notes": x.get("notes", ""),
+                        "conditions": x.get("conditions", [])})
     return out

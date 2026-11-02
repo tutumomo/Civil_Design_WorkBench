@@ -115,6 +115,50 @@ def mcp_checks(con):
             ),
         )
     )
+    # 2026-11-02 規範查詢台三階段優化（Step 1~3）後端與前端契約檢核
+    cd17 = regs_server.clause_data(con, "swc_tech", "17")
+    checks.append((
+        "clause_data prev/next + verified detail",
+        bool(cd17)
+        and cd17.get("prev_clause", {}).get("clause") == "16"
+        and cd17.get("next_clause", {}).get("clause") == "18"
+        and bool(cd17.get("verified"))
+        and "latex" in cd17["verified"][0]
+        and "vars" in cd17["verified"][0],
+    ))
+    dh93 = regs_server.direct_clause_hits(con, "水保 93")
+    checks.append((
+        "direct_clause_hits 水保 93 -> swc_tech 93",
+        bool(dh93) and dh93[0]["src"] == "swc_tech" and dh93[0]["clause"] == "93",
+    ))
+    bs = regs_server.browse_source_data(con, "swc_tech", n=10)
+    checks.append((
+        "browse_source_data swc_tech",
+        bs.get("browse_src") == "swc_tech" and bs.get("total", 0) > 100 and len(bs.get("hits", [])) == 10,
+    ))
+    tdata = regs_server.topics_data()
+    checks.append((
+        "topics_data includes core_count and tools",
+        len(tdata) >= 29 and "core_count" in tdata[0] and "tools" in tdata[0],
+    ))
+    web_html = (Path(__file__).resolve().parent / "regs_web.html").read_text(encoding="utf-8")
+    checks.append((
+        "regs_web.html Step 1-3 UI markers present",
+        all(
+            marker in web_html
+            for marker in (
+                "buildVerifiedPanelHtml",
+                "notes-hero",
+                "dCopyCite",
+                "TOPIC_GROUPS",
+                "topicsearch",
+                "src-filter-bar",
+                "TOOL_TO_CALCS",
+                "civil-regs-basket",
+                "basketModal",
+            )
+        ),
+    ))
     bad = 0
     for name, ok in checks:
         print(f"{'ok  ' if ok else 'FAIL'} mcp: {name}")

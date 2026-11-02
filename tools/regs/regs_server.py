@@ -39,44 +39,188 @@ def _next_page(con, sid):
     return f
 
 
+def _neighbor_clauses(con, sid, norm_clause):
+    s = regq.sources(con).get(sid)
+    if not s:
+        return None, None
+    rows = con.execute(
+        "SELECT clause, title, part, page FROM unit WHERE src=? GROUP BY clause ORDER BY MIN(rowid)",
+        (sid,),
+    ).fetchall()
+    clauses = [r["clause"] for r in rows]
+    if norm_clause not in clauses:
+        return None, None
+    idx = clauses.index(norm_clause)
+    prev_c = {"clause": rows[idx - 1]["clause"], "label": regq.label(s, rows[idx - 1])} if idx > 0 else None
+    next_c = {"clause": rows[idx + 1]["clause"], "label": regq.label(s, rows[idx + 1])} if idx + 1 < len(rows) else None
+    return prev_c, next_c
+
+
 def clause_data(con, sid, clause):
     s = regq.sources(con).get(sid)
     rows = regq.get_clause(con, sid, clause) if s else []
     if not rows:
         return None
+    norm_c = rows[0]["clause"]
     fname = con.execute("SELECT file FROM src WHERE id=?", (sid,)).fetchone()[0]
     assets = page_assets.clause_assets(fname, rows, _next_page(con, sid))
-    fml = page_assets.formula_list(sid, clause)
-    return {"src": sid, "code": s["name"], "status": s["status"], "clause": clause,
-            "verified": verified.for_clause(sid, clause),
-            "skip": regq.skip_info(sid, clause),
+    fml = page_assets.formula_list(sid, norm_c)
+    prev_c, next_c = _neighbor_clauses(con, sid, norm_c)
+    return {"src": sid, "code": s["name"], "status": s["status"], "clause": norm_c,
+            "prev_clause": prev_c, "next_clause": next_c,
+            "verified": verified.for_clause(sid, norm_c),
+            "skip": regq.skip_info(sid, norm_c),
             "formulas": [{"i": i, "tex": f["tex"]} for i, f in enumerate(fml)],
             "parts": [{"label": regq.label(s, r), "where": regq.where(s, r), "path": r["path"], "text": r["text"],
-                       "blocks": page_assets.split_blocks(r["text"], sid, clause),
+                       "blocks": page_assets.split_blocks(r["text"], sid, norm_c),
                        "part": r["part"] or "", "pdf_pages": a["pages"] if a else []}
                       for r, a in zip(rows, assets)]}
 
 
-def search_data(con, q, include_old=False, n=15, per=3):
+_DIRECT_ALIASES = {
+    "水保": ["swc_tech", "swc_handbook", "swc_audit"],
+    "水土保持": ["swc_tech", "swc_handbook"],
+    "混凝土": ["rc112", "rc100"],
+    "rc": ["rc112", "rc100"],
+    "下水道": ["sewer_std", "sewer_handbook"],
+    "公路排水": ["hw_drain"],
+    "基礎": ["found112", "found90"],
+    "農路": ["farmroad108"],
+    "橋梁": ["bridge_lrfd", "bridge_seis"],
+    "耐震": ["bldg_seis111", "bridge_seis"],
+    "鋼構": ["steel_lrfd", "steel_asd"],
+    "空污": ["airconst110"],
+}
+
+
+def direct_clause_hits(con, q, include_old=False, src_filter=""):
+    import re as _re
+    qn = regq.norm(str(q or "")).strip()
+    if not qn:
+        return []
+    m = _re.match(
+        r"^(?:(?P<prefix>[A-Za-z0-9_一-鿿]+?)\s*)?"
+        r"(?:第\s*(?P<num1>\d+(?:-\d+)?)\s*[條點]|§\s*(?P<num2>\d+(?:\.\d+)+|\d+(?:-\d+)?)|(?P<att>(?:附件|附表)[-－]?[一二三四五六七八九十\d]+)|(?P<num3>\d+(?:\.\d+)+|\d+(?:-\d+)?))$",
+        qn,
+    )
+    if not m:
+        return []
+    prefix = (m.group("prefix") or "").strip().lower()
+    raw_tok = m.group("num1") or m.group("num2") or m.group("att") or m.group("num3")
+    if not raw_tok:
+        return []
+    src_map = regq.sources(con)
+    cand_sids = []
+    if src_filter and src_filter in src_map:
+        cand_sids = [src_filter]
+    elif prefix:
+        for k, sids in _DIRECT_ALIASES.items():
+            if k in prefix or prefix in k:
+                for sid in sids:
+                    if sid in src_map and sid not in cand_sids:
+                        cand_sids.append(sid)
+        for sid, s in src_map.items():
+            if prefix == sid.lower() or prefix in s["name"].lower():
+                if sid not in cand_sids:
+                    cand_sids.append(sid)
+    else:
+        for sid in ("swc_tech", "rc112", "sewer_std", "found112", "hw_drain", "farmroad108", "bldg_seis111", "steel_lrfd"):
+            if sid in src_map:
+                cand_sids.append(sid)
+        for sid in src_map:
+            if sid not in cand_sids:
+                cand_sids.append(sid)
+
+    out = []
+    for sid in cand_sids:
+        s = src_map[sid]
+        if not include_old and not src_filter and s["status"] not in regq.CURRENT:
+            continue
+        rows = regq.get_clause(con, sid, raw_tok)
+        if rows:
+            body = " ".join(r["text"] for r in rows)[:260]
+            out.append(regq.ref_row(s, rows[0], {"note": "🎯 條號精準直達"}, body=body))
+            if len(out) >= 4:
+                break
+    return out
+
+
+def browse_source_data(con, sid, n=60):
+    s = regq.sources(con).get(sid)
+    if not s:
+        return {"terms": [sid], "total": 0, "hits": [], "browse_src": sid}
+    all_rows = con.execute(
+        "SELECT rowid, * FROM unit WHERE src=? GROUP BY clause ORDER BY MIN(rowid)",
+        (sid,),
+    ).fetchall()
+    hits = [
+        dict(regq.ref_row(s, r, {}), matched=1, snippet=regq.snippet(r["text"], [], 140))
+        for r in all_rows[:n]
+        if r["text"].strip() not in ("刪除", "")
+    ]
+    return {
+        "terms": [s["name"]],
+        "total": len(all_rows),
+        "hits": hits,
+        "browse_src": sid,
+        "browse_code": s["name"],
+        "browse_status": s["status"],
+    }
+
+
+def search_data(con, q, include_old=False, n=15, per=3, src_filter=""):
+    if src_filter and not str(q or "").strip():
+        return browse_source_data(con, src_filter, max(n, 60))
     src = regq.sources(con)
-    hits, total, terms = regq.smart_search(con, q, include_old, n, per)
-    return {"terms": terms, "total": total, "hits": [
-        dict(regq.ref_row(src[r["src"]], r, {}), matched=m, snippet=regq.snippet(r["text"], terms))
-        for m, sc, r in hits]}
+    direct = direct_clause_hits(con, q, include_old, src_filter)
+    raw_n = 200 if src_filter else n
+    raw_per = 100 if src_filter else per
+    hits, total, terms = regq.smart_search(con, q, include_old or bool(src_filter), raw_n, raw_per)
+    if src_filter:
+        hits = [(m, sc, r) for m, sc, r in hits if r["src"] == src_filter]
+        total = len(hits)
+        hits = hits[:n]
+    return {
+        "terms": terms,
+        "total": total,
+        "src_filter": src_filter,
+        "direct_hits": direct,
+        "hits": [
+            dict(regq.ref_row(src[r["src"]], r, {}), matched=m, snippet=regq.snippet(r["text"], terms))
+            for m, sc, r in hits
+        ],
+    }
 
 
-def ask_data(con, q, include_old=False, n=15, per=3):
+def ask_data(con, q, include_old=False, n=15, per=3, src_filter=""):
     """Topic card when the sentence names a topic, else keyword search."""
-    found = regq.match_topics(q, regq.load_topics())
-    if found:
-        return {"type": "card", "query": q,
-                "card": regq.card_data(con, found[0], include_old, n, per, also=found[1:])}
-    return dict(search_data(con, q, include_old, n, per), type="search", query=q)
+    if src_filter and not str(q or "").strip():
+        return dict(browse_source_data(con, src_filter, 60), type="search", query=src_filter)
+    direct = direct_clause_hits(con, q, include_old, src_filter)
+    if not src_filter:
+        found = regq.match_topics(q, regq.load_topics())
+        if found:
+            return {
+                "type": "card",
+                "query": q,
+                "direct_hits": direct,
+                "card": regq.card_data(con, found[0], include_old, n, per, also=found[1:]),
+            }
+    return dict(search_data(con, q, include_old, n, per, src_filter), type="search", query=q)
 
 
 def topics_data():
-    return [{"name": t["name"], "aliases": t.get("aliases", []), "scope": t.get("scope", "")}
-            for t in regq.load_topics()]
+    return [
+        {
+            "name": t["name"],
+            "aliases": t.get("aliases", []),
+            "scope": t.get("scope", ""),
+            "core_count": len(t.get("core", [])),
+            "prereq_count": len(t.get("prereq", [])),
+            "tools": t.get("tools", []),
+        }
+        for t in regq.load_topics()
+    ]
 
 
 def sources_data(con):
@@ -391,10 +535,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self.json(sources_data(con))
             if u.path == "/api/ask":
                 text = q.get("q", "").strip()
-                return self.json(ask_data(con, text, old) if text else {"type": "empty"})
+                sf = q.get("src", "").strip()
+                return self.json(ask_data(con, text, old, src_filter=sf) if (text or sf) else {"type": "empty"})
             if u.path == "/api/search":
+                sf = q.get("src", "").strip()
                 return self.json(dict(search_data(con, q.get("q", ""), old, int(q.get("n", 30)),
-                                                  int(q.get("per", 5))), type="search", query=q.get("q", "")))
+                                                  int(q.get("per", 5)), src_filter=sf), type="search", query=q.get("q", "")))
             if u.path in ("/api/pageimg", "/api/pagetables"):
                 row = con.execute("SELECT file FROM src WHERE id=?", (q.get("src", ""),)).fetchone()
                 pdf = page_assets.find_pdf(row[0], q.get("part", "")) if row else None

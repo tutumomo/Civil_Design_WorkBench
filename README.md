@@ -107,6 +107,17 @@ python tools/install_cad_fonts.py --apply
 > 沒有 AutoCAD（macOS／Linux）時這段可略過：DXF 仍會帶正確的字型名稱，
 > 只是用其他軟體開圖時字型由該軟體自行取代。
 
+### 步驟 3.6：解壓縮臺中市建物圖資（隨 repo 附壓縮檔，需自行解壓）
+
+本專案已隨 repo 附上 **`data/臺中市建物/臺中市建物_114.7z`**（74.5 MB，解壓後為 `data/臺中市建物/01-SHP/114中_B0001_1216n.shp` 共約 495 MB，供「現況平面底圖 `site_basemap.py`」與「地籍套繪圖 `make_cadastral_map.py`」繪製建物輪廓與樓層數使用）。Clone 或 Fork 後請先**就地解壓縮**至 `data/臺中市建物/` 目錄下：
+
+```bash
+# 使用 7-Zip 命令列（或直接在檔案總管對 data/臺中市建物/臺中市建物_114.7z 按右鍵「解壓縮至此」）
+7z x "data/臺中市建物/臺中市建物_114.7z" -o"data/臺中市建物"
+```
+
+解壓後確認 `python tools/project_paths.py` 的 `臺中建物SHP` 一欄顯示 `[OK]` 即可。
+
 ### 步驟 4：下載規範並建索引（第一次需要，之後可略）
 
 ```bash
@@ -328,7 +339,7 @@ python tools/regs/design_conformance.py        # 引擎 ↔ 已驗證庫 雙向�
 │   ├── selftest/             全案回歸
 │   ├── acad/                 accoreconsole 封裝、出圖型式 CTB
 │   └── clean_project.py      清理暫存（--dry-run / --apply）
-├── data/                     法規、圖資（不入版控，可重建）
+├── data/                     法規全文／索引、臺中市建物_114.7z（隨 repo 附，Clone/Fork 後需就地解壓）
 ├── cases/                    案件主檔
 ├── docs/                     知識文件（產線說明、法規庫、踩坑紀錄）
 ├── templates/                報告與規範條文模板
@@ -346,6 +357,7 @@ python tools/regs/design_conformance.py        # 引擎 ↔ 已驗證庫 雙向�
    13 套 ArtCraft、AutoCAD、SolidCraft、Blender、CAD 字體）。
 2. 缺 Python 套件：在虛擬環境內 `python -m pip install -r requirements.txt`。
 3. 缺規範資料：`python tools/regs/fetch_regs.py` 然後 `python tools/regs/build_index.py`。
+   若 `data/臺中市建物/臺中市建物_114.7z` 尚未解壓，請將其就地解壓縮至 `data/臺中市建物/`（產生 `01-SHP/`）。
 4. ArtCraft／AutoCAD／SolidCraft 是外部桌面程式，無法自動安裝。請列出我還缺哪幾套，
    以及該設哪個環境變數（ARTCRAFT_HOME／AUTOCAD_HOME／SOLIDCRAFT_CLI／CAD_FONTS）。
 5. 完成後跑 `python tools/regs/verified_selftest.py` 與

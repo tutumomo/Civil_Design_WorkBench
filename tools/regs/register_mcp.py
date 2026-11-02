@@ -18,6 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 _sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from project_paths import python_exe  # noqa: E402
 

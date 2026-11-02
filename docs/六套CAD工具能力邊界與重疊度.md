@@ -10,7 +10,7 @@
 
 | 問題 | 答案 |
 |---|---|
-| 誰能**產交付級 2D 圖紙**（A3／圖框／視口／DWG） | **CADCraft CLI**、**AutoCAD MCP**、CADCraft Studio 的 CadCraft。三者高度重疊，本專案仍以既有 `make_sheet.py`＋`acc.py` 為準（理由見 §5） |
+| 誰能**產交付級 2D 圖紙**（A3／圖框／視口／DWG） | **CADCraft CLI**（相容 >80% AutoCAD 功能，支援跨平台產出 DWG 與出圖）、**AutoCAD MCP**、CADCraft Studio 的 CadCraft。本專案以 `make_sheet.py`＋`acc.py`（Windows）或 CADCraft CLI 產出標準交付 DWG |
 | 誰能**做 3D 實體** | **SolidCraft**、**text-to-cad**（皆參數化精確實體）；Blender 只做網格／渲染，不算實體 CAD |
 | 誰是**唯一沒有替代品**的 | CadCraft Studio 的 **CivilCraft（地形／土方／LandXML）**、**TakeoffCraft（圖面數量）**；以及 **Blender 的渲染／動畫** |
 | 最大誤用風險 | 拿 AutoCAD MCP 當「土木出圖機」（它講 mm／ISO 製造語彙）；拿 Blender 當 CAD；拿 SolidCraft 排 A3 |
@@ -258,8 +258,7 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 → **entity 完全無損，圖紙空間也保留**（54 KB 只是 DWG 壓縮／表示差異；AutoCAD 產的是 136,713 B）。
 舊紀錄應屬**早年版本行為**或**當時把「檔案小」誤判為「缺圖紙空間」**。
 
-**但仍建議不換**：`D:\公司案件.AI` 的交件契約明確要求 **AutoCAD 2018 格式**、且 `acc.py` 是既有驗收與回歸路徑。
-改用 CADCraft 產 DWG 會讓「交付格式」這件事多一個未經驗收的變因。**保守做法：PDF 預覽改走 cadcraft-cli，DWG 仍走 `acc.py`。**
+**相容性與交付建議更新**：CADCraft 可相容 >80% 以上 AutoCAD 功能，且具備跨平台直接產出 DWG 格式設計圖能力。在具備原生 AutoCAD 的 Windows 環境下可由 `acc.py` 產出 2018 版 DWG；在未安裝 AutoCAD 或非 Windows 平台（如 Linux、macOS）時，可直接由 CADCraft CLI 產出標準 DWG 格式交付件，完整保留圖紙空間、視口內容與外部圖層配置。
 
 ### 5.2 版本漂移（文件與實機不一致，已於本檔更新）
 

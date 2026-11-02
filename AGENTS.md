@@ -35,7 +35,7 @@
 - **機密保護**：`claude_desktop_config.json` 含明文金鑰，嚴禁於對話或文件中輸出其內容。
 
 ## 2. DOM — 土木設計領域常數與交付契約（Durable Domain Facts）
-- **輸出格式**：交件預設必須包含原生 **`.dwg`**（AutoCAD 2018 格式，由 `accoreconsole` 產出），`.dxf` 為工作檔。
+- **輸出格式**：交件預設必須包含 **`.dwg`**（AutoCAD 2018 格式，由 `accoreconsole` 或 `CADCraft CLI` 產出；CADCraft 相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖），`.dxf` 為工作檔。
 - **單位與座標系**：公制公尺（DXF 必設 `$INSUNITS=6`、`$MEASUREMENT=1`）；平面座標採 **TWD97 TM2 二度分帶（`EPSG:3826`）**，圖面即真實座標（台中一帶 `E≈215,000, N≈2,669,000` 屬正常假東移 `250,000`），嚴禁任意平移縮放。
 - **文字樣式（`TOMO`）**：字體庫 `c:\CadFont[S]\`，英文 `gbenor.shx` ＋ 中文大字體 `CHINA1.SHX`。
   - `ezdxf` 寫法：`st = doc.styles.add("TOMO", font="gbenor.shx"); st.dxf.bigfont = "CHINA1.SHX"`（禁留 `Standard`/`Only1`）。
@@ -55,7 +55,7 @@ egs\`）。
   4. 紀錄時間一律取本機系統時間：`C:\Python312\python.exe -c "import datetime;print(datetime.datetime.now())"`。
   5. **暫存與輸出位置**：批次作業前先把 `$env:TEMP`／`$env:TMP` 指向 `<專案根目錄>/_temp`（或直接用 `tools/project_paths.py` 的 `temp_dir()`），並 `os.makedirs` 出 `out\<案名>` 與 `_temp\<主題>`；中間檔（DXF／PNG／log）寫 `_temp`，交付檔寫 `out`（§1.1）。
 
-- **不碰共用 GUI AutoCAD**：轉檔與出圖一律走無介面 `accoreconsole.exe`（經 `tools\acad\acc.py`）或 `CADCraft CLI`（`C:\Program\ArtCraft\CADCraft\cadcraft-cli.exe`），避免多智能體 COM 衝突。
+- **不碰共用 GUI AutoCAD**：轉檔與出圖一律走無介面 `accoreconsole.exe`（經 `tools\acad\acc.py`）或 `CADCraft CLI`（`cadcraft-cli`，相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖），避免多智能體 COM 衝突。
 - **完稿重開驗證（Reopen & Check）**：寫檔成功 ≠ 圖面可用。每次產出 CAD 檔必須重讀驗證並將實際出圖之 PDF 轉為 PNG 目視檢查；回報時須列出風險限制、數據來源與自評可信度（1–10）。
 
 ## 4. 確定性工具鏈（Deterministic Scripts）

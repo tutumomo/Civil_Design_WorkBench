@@ -4,207 +4,207 @@ check_delivery.py 基準線（第一輪六家成品實測）
 
 ======================================================================
 公司的小賤人(WorkBuddy)   rc=1
-==============================================================
-交件品管檢核：測試任務_公司的小賤人_現況平面圖_A3.dxf
-==============================================================
-  audit_errors           0
-  INSUNITS               6
-  MEASUREMENT            1
-  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
-  text_styles_used       {'TOMO': 23}
-  layout                 全區工程位置圖
-  plot_viewports         1
-  viewport               {'w': 400.24, 'h': 258.45, 'view_height': 155.07, 'scale': 600.0, 'center': [210.15, 158.22]}
-  viewport_rect          [10.03, 29.0, 410.27, 287.45]
-  model_extent           [240.1, 155.1]
-  window_needed          [240.1, 155.1]
-  window_rect            [215332.3, 2668801.8, 215572.4, 2668956.9]
-  paper_texts            36
-  added_annotations      10
-  buildings              14
-  building_hatches       14
-  layers_violating_naming []
-  has_dwg                False
-  pdf_found              ['a3_plot.pdf']
---------------------------------------------------------------
-✗ 錯誤 11 項
-   E9 「現況平面圖（自動產製，未經測量）\P坐標系統 T」跨越標題欄邊界（y=29.03）：bbox=(11.7,16.9)-(162.3,31.8)
-   E10 「繪圖」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
-   E10 「設計」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
-   E10 「工程名稱」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
-   E10 「圖    名」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
-   E10 「臺中市大雅區公所」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
-   E10 「案名」與「臺中市南區現況平面圖」疊字
-   E10 「圖名」與「現況平面圖」疊字
-   E10 「30」與「m」疊字
-   E10 「AI」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
-   E10 「小賤人」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
-△ 警告 2 項
-   W1 「N」壓在地圖視口上（建議移到圖框邊界留白區）
-   W4 沒有 .dwg 兄弟檔
---------------------------------------------------------------
+==============================================================
+交件品管檢核：測試任務_公司的小賤人_現況平面圖_A3.dxf
+==============================================================
+  audit_errors           0
+  INSUNITS               6
+  MEASUREMENT            1
+  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
+  text_styles_used       {'TOMO': 23}
+  layout                 全區工程位置圖
+  plot_viewports         1
+  viewport               {'w': 400.24, 'h': 258.45, 'view_height': 155.07, 'scale': 600.0, 'center': [210.15, 158.22]}
+  viewport_rect          [10.03, 29.0, 410.27, 287.45]
+  model_extent           [240.1, 155.1]
+  window_needed          [240.1, 155.1]
+  window_rect            [215332.3, 2668801.8, 215572.4, 2668956.9]
+  paper_texts            36
+  added_annotations      10
+  buildings              14
+  building_hatches       14
+  layers_violating_naming []
+  has_dwg                False
+  pdf_found              ['a3_plot.pdf']
+--------------------------------------------------------------
+✗ 錯誤 11 項
+   E9 「現況平面圖（自動產製，未經測量）\P坐標系統 T」跨越標題欄邊界（y=29.03）：bbox=(11.7,16.9)-(162.3,31.8)
+   E10 「繪圖」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
+   E10 「設計」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
+   E10 「工程名稱」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
+   E10 「圖    名」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
+   E10 「臺中市大雅區公所」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
+   E10 「案名」與「臺中市南區現況平面圖」疊字
+   E10 「圖名」與「現況平面圖」疊字
+   E10 「30」與「m」疊字
+   E10 「AI」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
+   E10 「小賤人」與「現況平面圖（自動產製，未經測量）\P坐標系統 T」疊字
+△ 警告 2 項
+   W1 「N」壓在地圖視口上（建議移到圖框邊界留白區）
+   W4 沒有 .dwg 兄弟檔
+--------------------------------------------------------------
 結論：不可交件，先修
 
 ======================================================================
 Antigravity   rc=1
-==============================================================
-交件品管檢核：現況平面圖.dxf
-==============================================================
-  audit_errors           0
-  INSUNITS               6
-  MEASUREMENT            1
-  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'CHINA1.SHX'}
-  text_styles_used       {'TOMO': 28}
-  layout                 全區工程位置圖
-  plot_viewports         1
-  viewport               {'w': 350.5, 'h': 255.5, 'view_height': 153.3, 'scale': 600.0, 'center': [186.75, 158.25]}
-  viewport_rect          [11.5, 30.5, 362.0, 286.0]
-  model_extent           [308.0, 308.0]
-  window_needed          [210.3, 153.3]
-  window_rect            [215347.2, 2668802.7, 215557.5, 2668956.0]
-  paper_texts            47
-  added_annotations      0
-  buildings              29
-  building_hatches       28
-  layers_violating_naming ['BUILDING', 'BUILDING_HATCH', 'FRAME_BORDER', 'RIVER_BANK', 'RIVER_HATCH', 'RIVER_HIDDEN', 'ROAD_CENTER', 'ROAD_EDGE', 'ROAD_MEDIAN', 'ROAD_MEDIAN_HATCH', 'SYMBOL', 'TEXT_LABEL']
-  has_dwg                True
-  pdf_found              ['現況平面圖.pdf']
---------------------------------------------------------------
-✗ 錯誤 1 項
-   E11 建物 29 棟但 Hatch 只有 28 個（漏 Hatch）
-△ 警告 1 項
-   W3 圖層命名不合規範（數字前綴_中文說明）：['BUILDING', 'BUILDING_HATCH', 'FRAME_BORDER', 'RIVER_BANK', 'RIVER_HATCH', 'RIVER_HIDDEN', 'ROAD_CENTER', 'ROAD_EDGE', 'ROAD_MEDIAN', 'ROAD_MEDIAN_HATCH', 'SYMBOL', 'TEXT_LABEL']
---------------------------------------------------------------
+==============================================================
+交件品管檢核：現況平面圖.dxf
+==============================================================
+  audit_errors           0
+  INSUNITS               6
+  MEASUREMENT            1
+  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'CHINA1.SHX'}
+  text_styles_used       {'TOMO': 28}
+  layout                 全區工程位置圖
+  plot_viewports         1
+  viewport               {'w': 350.5, 'h': 255.5, 'view_height': 153.3, 'scale': 600.0, 'center': [186.75, 158.25]}
+  viewport_rect          [11.5, 30.5, 362.0, 286.0]
+  model_extent           [308.0, 308.0]
+  window_needed          [210.3, 153.3]
+  window_rect            [215347.2, 2668802.7, 215557.5, 2668956.0]
+  paper_texts            47
+  added_annotations      0
+  buildings              29
+  building_hatches       28
+  layers_violating_naming ['BUILDING', 'BUILDING_HATCH', 'FRAME_BORDER', 'RIVER_BANK', 'RIVER_HATCH', 'RIVER_HIDDEN', 'ROAD_CENTER', 'ROAD_EDGE', 'ROAD_MEDIAN', 'ROAD_MEDIAN_HATCH', 'SYMBOL', 'TEXT_LABEL']
+  has_dwg                True
+  pdf_found              ['現況平面圖.pdf']
+--------------------------------------------------------------
+✗ 錯誤 1 項
+   E11 建物 29 棟但 Hatch 只有 28 個（漏 Hatch）
+△ 警告 1 項
+   W3 圖層命名不合規範（數字前綴_中文說明）：['BUILDING', 'BUILDING_HATCH', 'FRAME_BORDER', 'RIVER_BANK', 'RIVER_HATCH', 'RIVER_HIDDEN', 'ROAD_CENTER', 'ROAD_EDGE', 'ROAD_MEDIAN', 'ROAD_MEDIAN_HATCH', 'SYMBOL', 'TEXT_LABEL']
+--------------------------------------------------------------
 結論：不可交件，先修
 
 ======================================================================
 Claude   rc=0
-==============================================================
-交件品管檢核：測試任務_現況平面圖_A3_1-600.dxf
-==============================================================
-  audit_errors           0
-  INSUNITS               6
-  MEASUREMENT            1
-  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
-  text_styles_used       {'TOMO': 17}
-  layout                 全區工程位置圖
-  plot_viewports         1
-  viewport               {'w': 400.3, 'h': 258.4, 'view_height': 155.04, 'scale': 600.0, 'center': [210.15, 158.2]}
-  viewport_rect          [10.0, 29.0, 410.3, 287.4]
-  model_extent           [260.1, 175.2]
-  window_needed          [240.2, 155.0]
-  window_rect            [215332.2, 2668801.8, 215572.4, 2668956.9]
-  paper_texts            29
-  added_annotations      0
-  buildings              15
-  building_hatches       15
-  layers_violating_naming []
-  has_dwg                True
-  pdf_found              ['測試任務_現況平面圖_A3_1-600.pdf']
---------------------------------------------------------------
-✓ 錯誤 0 項
---------------------------------------------------------------
+==============================================================
+交件品管檢核：測試任務_現況平面圖_A3_1-600.dxf
+==============================================================
+  audit_errors           0
+  INSUNITS               6
+  MEASUREMENT            1
+  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
+  text_styles_used       {'TOMO': 17}
+  layout                 全區工程位置圖
+  plot_viewports         1
+  viewport               {'w': 400.3, 'h': 258.4, 'view_height': 155.04, 'scale': 600.0, 'center': [210.15, 158.2]}
+  viewport_rect          [10.0, 29.0, 410.3, 287.4]
+  model_extent           [260.1, 175.2]
+  window_needed          [240.2, 155.0]
+  window_rect            [215332.2, 2668801.8, 215572.4, 2668956.9]
+  paper_texts            29
+  added_annotations      0
+  buildings              15
+  building_hatches       15
+  layers_violating_naming []
+  has_dwg                True
+  pdf_found              ['測試任務_現況平面圖_A3_1-600.pdf']
+--------------------------------------------------------------
+✓ 錯誤 0 項
+--------------------------------------------------------------
 結論：可交件
 
 ======================================================================
 DSH   rc=1
-==============================================================
-交件品管檢核：現況平面圖.dxf
-==============================================================
-  audit_errors           0
-  INSUNITS               6
-  MEASUREMENT            1
-  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
-  text_styles_used       {'TOMO': 4}
-  layout                 全區工程位置圖
-  plot_viewports         1
-  viewport               {'w': 390.0, 'h': 251.67, 'view_height': 151.0, 'scale': 600.0, 'center': [206.0, 157.83]}
-  viewport_rect          [11.0, 32.0, 401.0, 283.67]
-  model_extent           [235.7, 152.7]
-  window_needed          [234.0, 151.0]
-  window_rect            [215335.3, 2668803.8, 215569.3, 2668954.8]
-  paper_texts            25
-  added_annotations      0
-  buildings              129
-  building_hatches       1
-  layers_violating_naming ['人行步道', '建物', '河道中心', '河道邊線', '變更設計', '路名', '道路']
-  has_dwg                False
-  pdf_found              ['現況平面圖.pdf']
---------------------------------------------------------------
-✗ 錯誤 8 項
-   E9 「N」跨越標題欄邊界（y=29.03）：bbox=(18.1,24.4)-(21.9,29.1)
-   E9 「0」跨越標題欄邊界（y=29.03）：bbox=(31.9,8.4)-(34.1,11.6)
-   E9 「10」跨越標題欄邊界（y=29.03）：bbox=(47.8,8.4)-(51.5,11.6)
-   E9 「20」跨越標題欄邊界（y=29.03）：bbox=(64.5,8.4)-(68.2,11.6)
-   E9 「30 m」跨越標題欄邊界（y=29.03）：bbox=(79.6,8.4)-(86.4,11.6)
-   E10 「日期」與「30 m」疊字
-   E10 「臺中市大雅區公所」與「比例尺 1:600」疊字
-   E11 建物 129 棟但 Hatch 只有 1 個（漏 Hatch）
-△ 警告 2 項
-   W3 圖層命名不合規範（數字前綴_中文說明）：['人行步道', '建物', '河道中心', '河道邊線', '變更設計', '路名', '道路']
-   W4 沒有 .dwg 兄弟檔
---------------------------------------------------------------
+==============================================================
+交件品管檢核：現況平面圖.dxf
+==============================================================
+  audit_errors           0
+  INSUNITS               6
+  MEASUREMENT            1
+  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
+  text_styles_used       {'TOMO': 4}
+  layout                 全區工程位置圖
+  plot_viewports         1
+  viewport               {'w': 390.0, 'h': 251.67, 'view_height': 151.0, 'scale': 600.0, 'center': [206.0, 157.83]}
+  viewport_rect          [11.0, 32.0, 401.0, 283.67]
+  model_extent           [235.7, 152.7]
+  window_needed          [234.0, 151.0]
+  window_rect            [215335.3, 2668803.8, 215569.3, 2668954.8]
+  paper_texts            25
+  added_annotations      0
+  buildings              129
+  building_hatches       1
+  layers_violating_naming ['人行步道', '建物', '河道中心', '河道邊線', '變更設計', '路名', '道路']
+  has_dwg                False
+  pdf_found              ['現況平面圖.pdf']
+--------------------------------------------------------------
+✗ 錯誤 8 項
+   E9 「N」跨越標題欄邊界（y=29.03）：bbox=(18.1,24.4)-(21.9,29.1)
+   E9 「0」跨越標題欄邊界（y=29.03）：bbox=(31.9,8.4)-(34.1,11.6)
+   E9 「10」跨越標題欄邊界（y=29.03）：bbox=(47.8,8.4)-(51.5,11.6)
+   E9 「20」跨越標題欄邊界（y=29.03）：bbox=(64.5,8.4)-(68.2,11.6)
+   E9 「30 m」跨越標題欄邊界（y=29.03）：bbox=(79.6,8.4)-(86.4,11.6)
+   E10 「日期」與「30 m」疊字
+   E10 「臺中市大雅區公所」與「比例尺 1:600」疊字
+   E11 建物 129 棟但 Hatch 只有 1 個（漏 Hatch）
+△ 警告 2 項
+   W3 圖層命名不合規範（數字前綴_中文說明）：['人行步道', '建物', '河道中心', '河道邊線', '變更設計', '路名', '道路']
+   W4 沒有 .dwg 兄弟檔
+--------------------------------------------------------------
 結論：不可交件，先修
 
 ======================================================================
 RTXA4080_bot   rc=0
-==============================================================
-交件品管檢核：完成_現況平面圖_final.dxf
-==============================================================
-  audit_errors           0
-  INSUNITS               6
-  MEASUREMENT            1
-  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
-  text_styles_used       {'TOMO': 45}
-  layout                 全區工程位置圖
-  plot_viewports         1
-  viewport               {'w': 400.3, 'h': 258.7, 'view_height': 155.22, 'scale': 600.0, 'center': [210.35, 158.35]}
-  viewport_rect          [10.2, 29.0, 410.5, 287.7]
-  model_extent           [2270.1, 2148.9]
-  window_needed          [240.2, 155.2]
-  window_rect            [215332.2, 2668801.7, 215572.4, 2668957.0]
-  paper_texts            35
-  added_annotations      10
-  buildings              8
-  building_hatches       8
-  layers_violating_naming ['圖幅範圍', '建物', '建物-填實', '指北', '比例', '水域', '河道-中心線', '河道-邊線', '註記', '道路-主要', '道路-其他', '道路-次要', '道路-路名']
-  has_dwg                False
-  pdf_found              ['預覽_A3.pdf', '預覽_A3_v2.pdf', '預覽_A3_v3.pdf']
---------------------------------------------------------------
-✓ 錯誤 0 項
-△ 警告 2 項
-   W3 圖層命名不合規範（數字前綴_中文說明）：['圖幅範圍', '建物', '建物-填實', '指北', '比例', '水域', '河道-中心線', '河道-邊線', '註記', '道路-主要', '道路-其他', '道路-次要', '道路-路名']
-   W4 沒有 .dwg 兄弟檔
---------------------------------------------------------------
+==============================================================
+交件品管檢核：完成_現況平面圖_final.dxf
+==============================================================
+  audit_errors           0
+  INSUNITS               6
+  MEASUREMENT            1
+  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
+  text_styles_used       {'TOMO': 45}
+  layout                 全區工程位置圖
+  plot_viewports         1
+  viewport               {'w': 400.3, 'h': 258.7, 'view_height': 155.22, 'scale': 600.0, 'center': [210.35, 158.35]}
+  viewport_rect          [10.2, 29.0, 410.5, 287.7]
+  model_extent           [2270.1, 2148.9]
+  window_needed          [240.2, 155.2]
+  window_rect            [215332.2, 2668801.7, 215572.4, 2668957.0]
+  paper_texts            35
+  added_annotations      10
+  buildings              8
+  building_hatches       8
+  layers_violating_naming ['圖幅範圍', '建物', '建物-填實', '指北', '比例', '水域', '河道-中心線', '河道-邊線', '註記', '道路-主要', '道路-其他', '道路-次要', '道路-路名']
+  has_dwg                False
+  pdf_found              ['預覽_A3.pdf', '預覽_A3_v2.pdf', '預覽_A3_v3.pdf']
+--------------------------------------------------------------
+✓ 錯誤 0 項
+△ 警告 2 項
+   W3 圖層命名不合規範（數字前綴_中文說明）：['圖幅範圍', '建物', '建物-填實', '指北', '比例', '水域', '河道-中心線', '河道-邊線', '註記', '道路-主要', '道路-其他', '道路-次要', '道路-路名']
+   W4 沒有 .dwg 兄弟檔
+--------------------------------------------------------------
 結論：可交件
 
 ======================================================================
 mavis   rc=0
-==============================================================
-交件品管檢核：測試任務mavis_現況平面圖_A3_1-600.dxf
-==============================================================
-  audit_errors           0
-  INSUNITS               6
-  MEASUREMENT            1
-  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
-  text_styles_used       {'TOMO': 21}
-  layout                 現況平面圖
-  plot_viewports         1
-  viewport               {'w': 392.33, 'h': 255.92, 'view_height': 153.553, 'scale': 600.0, 'center': [210.03, 158.24]}
-  viewport_rect          [13.86, 30.28, 406.2, 286.2]
-  model_extent           [231.4, 149.6]
-  window_needed          [235.4, 153.6]
-  window_rect            [215340.3, 2668795.9, 215575.7, 2668949.4]
-  paper_texts            22
-  added_annotations      0
-  buildings              9
-  building_hatches       9
-  layers_violating_naming []
-  has_dwg                True
-  pdf_found              ['測試任務mavis_現況平面圖_A3_1-600.pdf']
---------------------------------------------------------------
-✓ 錯誤 0 項
-△ 警告 1 項
-   W0 模型範圍 231.4x149.6 m 小於視口需求 235.4x153.6 m，圖面邊緣會留白
---------------------------------------------------------------
+==============================================================
+交件品管檢核：測試任務mavis_現況平面圖_A3_1-600.dxf
+==============================================================
+  audit_errors           0
+  INSUNITS               6
+  MEASUREMENT            1
+  TOMO                   {'font': 'gbenor.shx', 'bigfont': 'china1.shx'}
+  text_styles_used       {'TOMO': 21}
+  layout                 現況平面圖
+  plot_viewports         1
+  viewport               {'w': 392.33, 'h': 255.92, 'view_height': 153.553, 'scale': 600.0, 'center': [210.03, 158.24]}
+  viewport_rect          [13.86, 30.28, 406.2, 286.2]
+  model_extent           [231.4, 149.6]
+  window_needed          [235.4, 153.6]
+  window_rect            [215340.3, 2668795.9, 215575.7, 2668949.4]
+  paper_texts            22
+  added_annotations      0
+  buildings              9
+  building_hatches       9
+  layers_violating_naming []
+  has_dwg                True
+  pdf_found              ['測試任務mavis_現況平面圖_A3_1-600.pdf']
+--------------------------------------------------------------
+✓ 錯誤 0 項
+△ 警告 1 項
+   W0 模型範圍 231.4x149.6 m 小於視口需求 235.4x153.6 m，圖面邊緣會留白
+--------------------------------------------------------------
 結論：可交件

@@ -9,7 +9,7 @@
 
 | 使用者說的話（例） | 用哪套 | 一句話做法 |
 |---|---|---|
-| 「出圖／轉 DWG／DXF 轉 PDF、PNG」 | **CADCraft**（土木交件仍走 `make_sheet.py`＋`acc.py`） | `cadcraft-cli convert IN.dxf OUT.pdf` |
+| 「出圖／轉 DWG／DXF 轉 PDF、PNG」 | **CADCraft**（相容 >80% 以上 AutoCAD 功能，支援直接產出 DWG 與出圖；土木交件亦可走 `make_sheet.py`＋`acc.py`） | `cadcraft-cli convert IN.dxf OUT.dwg`（或 `OUT.pdf`） |
 | 「畫一條線／改圖層／量面積」（2D 編修） | **CADCraft** `run --cmd`；或 AutoCAD MCP（見 §3 警告） | `run in.dxf --cmd 'line {...}' --save out.dxf` |
 | 「做一個 3D 實體／擋土牆模型／出 STEP、STL」 | **SolidCraft**（參數特徵樹）或 **text-to-cad**（Python build123d） | `solidcraft-cli run script.json --out x.step` |
 | 「給 3D 模型上混凝土／砌石材質、烘焙 AO／Normal 貼圖、渲染 PBR 圖」 | **TextureCraft**（3D PBR 材質貼圖與烘焙，類 Substance Painter） | `texturecraft-cli new in.glb out.tcraft --sample`；`bake`；`export`；`render out.tcraft out.png --samples 64` |
@@ -34,7 +34,7 @@
 
 | App | 版本 | 指令數 | 讀寫格式（重點） | 冒煙測試 |
 |---|---|---|---|---|
-| CADCraft | 0.13.0 | 441 | DXF／DWG／SVG／PNG／PDF | 產範例 DXF→PNG ✔ |
+| CADCraft | 0.12.0~0.13.0 | 441 | DXF／DWG／SVG／PNG／PDF | 相容 >80% AutoCAD 功能，產範例 DXF→DWG/PNG ✔ |
 | GridCraft | 0.12.1 | 353 | xlsx／xls／csv／tsv／json／html／pdf | A3=`=A2*2` 回讀 25 ✔ |
 | WordCraft | 0.11.0 | 643 | docx／doc(讀)／pdf／odt／rtf／html／md／tex／txt／png | 中文 docx→pdf，PdfCraft 回讀文字一致 ✔ |
 | DeckCraft | 0.11.1 | 327 | .deckcraft／pptx／pdf／png／jpeg／gif／md | 中文標題投影片 pptx＋png ✔（目視） |

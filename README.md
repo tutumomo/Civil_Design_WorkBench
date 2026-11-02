@@ -38,7 +38,7 @@
 ## 五分鐘上手
 
 **支援 Windows、macOS、Linux**。核心功能（設計計算、預算書、報告書、規範查詢、公式庫）三個平台都能跑；
-差別只在「能不能產原生 DWG」（需 AutoCAD，僅 Windows）與外部桌面程式（ArtCraft／SolidCraft）有沒有該平台版本。
+出圖與 DWG 格式設計圖可由 AutoCAD（Windows）或 **CADCraft**（跨平台，相容 >80% 以上 AutoCAD 功能）產出。
 
 ### 步驟 1：安裝 Python 3.10+（建議 3.12）
 
@@ -126,6 +126,19 @@ python tools/selftest/regression.py --ignore-new # 全案回歸：7 個案件的
 python tools/regs/regq.py "設計一個沉砂池"        # 查一條規範看看
 ```
 
+### 步驟 6：啟動 Web 服務（規範查詢台與設計工作台）
+
+- **Windows**：雙擊根目錄 `規範查詢台.bat`（查詢台）或 `設計工作台.bat`（設計工作台）
+- **Linux / macOS**：
+  ```bash
+  ./規範查詢台.sh     # 啟動並開啟規範查詢台 (http://127.0.0.1:8765/)
+  ./設計工作台.sh     # 啟動並開啟工程設計工作台 (http://127.0.0.1:8765/design)
+  # 或使用通用管理指令：
+  ./web.sh status    # 檢查服務執行狀態
+  ./web.sh stop      # 停止背景服務
+  ./web.sh restart   # 重新啟動服務
+  ```
+
 三軸交付（需要 `cases/<案名>/case.json`）：
 
 ```bash
@@ -154,7 +167,7 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 
 | 項目 | 用途 | 沒有會怎樣 | 平台 |
 |---|---|---|---|
-| **AutoCAD 2020+**（`accoreconsole`） | DXF → **DWG**、PDF 出圖 | 只能交 DXF | **僅 Windows** |
+| **AutoCAD 2020+** 或 **CADCraft** | DXF → **DWG**、PDF 出圖（CADCraft 可相容 >80% AutoCAD 功能） | 兩者皆無時只能交 DXF | AutoCAD 僅 Windows；CADCraft 支援跨平台 |
 | **CAD 字體**（`gbenor.shx`、`CHINA1.SHX`） | TOMO 中文文字樣式 | 圖面中文變替代字體 | **已隨 repo 附於 `CAD_FONTS/`**；安裝見步驟 3.5 |
 | **ArtCraft**（CADCraft／GridCraft／WordCraft 為交付必要，其餘選用） | 預算書 xlsx、報告 docx、轉檔 | 對應產出需改用其他方式 | 依該套是否有該平台版本 |
 | SolidCraft／Blender | 3D 模型與渲染 | 3D 軸停用 | Blender 有 macOS／Linux 版 |
@@ -165,11 +178,11 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 |---|---|---|---|
 | 設計計算、預算書、報告書、規範查詢、公式庫 | ✅ | ✅ | ✅ |
 | 出 DXF／PNG／SVG | ✅ | ✅ | ✅ |
-| 出**原生 DWG** | ✅（AutoCAD） | ❌ | ❌ |
-| AutoCAD 出 PDF | ✅ | ❌ | ❌ |
+| 出 **DWG 格式設計圖** | ✅（AutoCAD 或 CADCraft） | ✅（CADCraft） | ✅（CADCraft） |
+| 出 PDF（配置出圖） | ✅（AutoCAD 或 CADCraft） | ✅（CADCraft） | ✅（CADCraft） |
 
-> macOS／Linux 若一定要 DWG，可先用 [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter)
-> 把 DXF 轉成 DWG（非 AutoCAD 原生，但多數 CAD 可讀）。PDF 可用 ezdxf 的 matplotlib 後端輸出，線粗略有差異。
+> 本機安裝 **CADCraft** 後，可相容 >80% 以上 AutoCAD 功能，各平台皆可直接產出 DWG 與出圖。
+> 若環境兩者皆無，macOS／Linux 亦可先用 [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter) 將 DXF 轉為 DWG。
 
 ### 環境變數（想改路徑時才需要，程式不必改）
 
@@ -196,7 +209,7 @@ macOS／Linux：寫進 `~/.bashrc` 或 `~/.zshrc` 的 `export ARTCRAFT_HOME=...`
 | 中文變問號／方框 | AutoCAD 找不到 SHX 字型。字型已隨 repo 附於 `CAD_FONTS/`，執行 `python tools/install_cad_fonts.py --apply`（需系統管理員權限），或在 AutoCAD 的 OPTIONS → 字型檔名把該資料夾加入搜尋路徑 |
 | `規範索引 missing` | 還沒跑 `python tools/regs/build_index.py`（需先 `fetch_regs.py`） |
 | `找不到 ArtCraft` | 未安裝或路徑非預設，設 `ARTCRAFT_HOME` |
-| 產不出 DWG | 平台沒有 AutoCAD，或 `accoreconsole` 不在預設路徑，設 `AUTOCAD_HOME` |
+| 產不出 DWG | 平台未安裝 AutoCAD 或 CADCraft，或 `accoreconsole` 不在預設路徑。可設 `AUTOCAD_HOME` 或安裝/指定 `CADCraft` |
 
 完整清單（13 套 ArtCraft 對照、MCP 伺服器、Skills、資料取得方式、給智能體的自動配置指令範本）見
 **[`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)**。
@@ -340,7 +353,7 @@ python tools/regs/design_conformance.py        # 引擎 ↔ 已驗證庫 雙向�
 限制：不要改 tools/ 內的程式；不要上傳 data/、out/、_temp/ 內任何檔案。
 ```
 
-環境變數與各平台的差異（例如 macOS／Linux 沒有 AutoCAD 命令列核心，因此無法產原生 DWG）
+環境變數與各平台的差異（例如 AutoCAD 與 CADCraft 的出圖配置）
 一律記在 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)。
 
 ## 資料來源與授權

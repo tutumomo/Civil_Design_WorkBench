@@ -293,7 +293,13 @@ def main(argv=None) -> int:
     print(f"ArtCraft   : {info['artcraft_home'] or '（未安裝，或設定 ARTCRAFT_HOME）'}")
     for k, v in info["artcraft"].items():
         print(f"  {k:<12} {'OK  ' + v if v else '—'}")
-    print(f"accoreconsole: {info['accoreconsole'] or '—（AutoCAD 僅 Windows；沒有也能產 DXF，只是不能轉 DWG）'}")
+    acc_desc = info['accoreconsole']
+    if not acc_desc:
+        if info["artcraft"].get("CADCraft"):
+            acc_desc = "—（未安裝 AutoCAD；已安裝 CADCraft，可相容>80%功能並產出 DWG 與出圖）"
+        else:
+            acc_desc = "—（未安裝 AutoCAD；沒有也能產 DXF，但缺少 DWG 轉檔工具）"
+    print(f"accoreconsole: {acc_desc}")
     print(f"SolidCraft   : {info['solidcraft'] or '—（選用）'}")
     print(f"Blender      : {info['blender'] or '—（選用）'}")
     print(f"CAD 字體庫   : {info['cad_fonts'] or '—（TOMO 樣式的 gbenor.shx / CHINA1.SHX 找不到）'}")

@@ -3,7 +3,9 @@ setlocal
 rem Design-code lookup web page. Double-click to open; the server keeps running in a minimized window.
 rem 需要 PATH 上有 Python 3.10+（Windows 可用 "py -3"）。若沒裝，請先安裝並勾選 Add to PATH。
 set "PYEXE="
-where python >nul 2>&1 && set "PYEXE=python"
+if defined CIVIL_AI_PYTHON if exist "%CIVIL_AI_PYTHON%" set "PYEXE=%CIVIL_AI_PYTHON%"
+if not defined PYEXE if exist "%~dp0.venv\Scripts\python.exe" set "PYEXE=%~dp0.venv\Scripts\python.exe"
+if not defined PYEXE where python >nul 2>&1 && set "PYEXE=python"
 if not defined PYEXE (where py >nul 2>&1 && set "PYEXE=py -3")
 if not defined PYEXE (
   echo [錯誤] 找不到 Python。請安裝 Python 3.10+ 並加入 PATH，或先啟用虛擬環境。

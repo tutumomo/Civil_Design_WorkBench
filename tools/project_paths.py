@@ -255,6 +255,9 @@ def cad_font(name: str) -> Path | None:
 def report() -> dict:
     """把解析結果整理成 dict（給 `--json` 與安裝檢查腳本用）。"""
     art = artcraft_home()
+    bldg_dir = DATA / "臺中市建物"
+    bldg_archive = bldg_dir / "臺中市建物_114.7z"
+    bldg_shps = list(bldg_dir.rglob("*.shp")) if bldg_dir.is_dir() else []
     return {
         "root": str(ROOT),
         "python": python_exe(),
@@ -264,6 +267,8 @@ def report() -> dict:
         "regs_db_exists": regs_db().exists(),
         "verified_dir": str(verified_dir()),
         "verified_exists": verified_dir().is_dir(),
+        "taichung_bldg_archive": str(bldg_archive) if bldg_archive.is_file() else None,
+        "taichung_bldg_shp": str(bldg_shps[0]) if bldg_shps else None,
         "temp": str(TEMP),
         "out": str(OUT),
         "artcraft_home": str(art) if art else None,
@@ -290,6 +295,12 @@ def main(argv=None) -> int:
     print(f"Python     : {info['python']}  ({info['python_version']}, {info['platform']})")
     print(f"規範索引   : {info['regs_db']}  [{'OK' if info['regs_db_exists'] else '缺少，請先跑 tools/regs/build_index.py'}]")
     print(f"已驗證庫   : {info['verified_dir']}  [{'OK' if info['verified_exists'] else '缺少'}]")
+    if info["taichung_bldg_shp"]:
+        print(f"臺中建物SHP: {info['taichung_bldg_shp']}  [OK]")
+    elif info["taichung_bldg_archive"]:
+        print(f"臺中建物SHP: 待解壓！隨 repo 已附 {info['taichung_bldg_archive']}，請就地解壓縮至 data/臺中市建物/")
+    else:
+        print("臺中建物SHP: —（缺少 data/臺中市建物/臺中市建物_114.7z）")
     print(f"ArtCraft   : {info['artcraft_home'] or '（未安裝，或設定 ARTCRAFT_HOME）'}")
     for k, v in info["artcraft"].items():
         print(f"  {k:<12} {'OK  ' + v if v else '—'}")

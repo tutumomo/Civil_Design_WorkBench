@@ -133,6 +133,7 @@
 | **EXP-G27** | `AGENTS.md` 同時含他人（字型／MCP／INGETRAZO）與本輪（擋土牆）hunk，整檔 stage 會混入無關工作 | 從 `git diff -- AGENTS.md` 取出本次 hunk 另存 patch，`git apply --cached <patch>` 只進 index；再以 `git diff --cached` 確認。**檔案不是最小單位，hunk 才是**。 | 本輪只 stage 擋土牆分流與 SOP 觸發器 2 個 hunk，其餘留在工作區 | `§AC.3` |
 | **EXP-G28** | 子代理回報「三案全軸通過」，但沒有可重跑指令，數字也無法對帳 | 收到完成回報後自行：①重跑測試看退出碼；②看 `out\<案名>\` 時間戳；③抽看 PDF→PNG；④與基準／報告／預算三處對帳。完成回報是待審文件，不是驗收證明。 | 本輪重跑 regression 11 案、design selftest 155 項後才 commit | `§AC.4` |
 | **EXP-G29** | 兩個 agent 同時改 `tools\design\`，後寫的 patch 以舊版為底，吃掉前一個修正 | 開工先認領 ownership；動筆前 `git diff -- <file>`；共用檔只改最小 hunk；改完立刻跑該模組 selftest 並回報「改了哪些、沒動哪些」。共享目錄不會自動合併語意。 | 本輪以 `wall_system.py` 單一入口收斂六型，避免各檔重複實作 | `§AC.5` |
+| **EXP-G30** | 原工作區 regression 11 案全綠，push 後乾淨 checkout 只剩 2 案過 | 收工必跑「乾淨 checkout 驗收」：`git worktree add --detach _temp\cleancheck HEAD` → 在該目錄重跑 `regression.py`。失敗即代表有檔案沒進 commit；看 `out\<案名>\_log_*.txt` 的 `CMD:` 與 traceback 回溯。 | 本輪抓到 `boq_build`／`make_report` 的 `parents[1]` 與 3 m 重力式 `scale:auto` 未進版；補齊後 11 案全綠 | `§AC.6`、SOP §4.1 |
 
 ## 8. 智能體作業環境（Harness — 回合中斷／成本）
 

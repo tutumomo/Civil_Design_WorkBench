@@ -428,8 +428,17 @@ def build_sheet(doc, E, N, A, adm, center_p, n_parcel, n_bldg):
     loc = "%s%s%s" % (adm.get("ctyName", ""), adm.get("townName", ""), adm.get("villageName", ""))
     sect = (center_p["kcnt"] if center_p else "") or "－"
     no = fmt_no(center_p["aa49"]) if center_p else "－"
-    for s_ in [loc or "（行政區查詢失敗）", "地段：%s" % sect, "地號：%s" % no,
-               "E %.3f" % E, "N %.3f" % N, "半徑 %g m" % A.radius]:
+    # 案址欄自帶地籍面積（坪為台灣常用換算；字元一律用中文＋阿拉伯數字，避免 SHX 缺字）
+    if center_p:
+        area_line = "面積 %s m2" % format(center_p["area"], ",.2f")
+        ping_line = "（約 %s 坪）" % format(center_p["area"] / 3.305785, ",.1f")
+    else:
+        area_line, ping_line = "面積 －", ""
+    rows = [loc or "（行政區查詢失敗）", "地段：%s" % sect, "地號：%s" % no, area_line]
+    if ping_line:
+        rows.append(ping_line)
+    rows += ["E %.3f" % E, "N %.3f" % N, "半徑 %g m" % A.radius]
+    for s_ in rows:
         t(s_, CX + 2.5, yy, H_BODY, TA.MIDDLE_LEFT)
         yy -= 5.0
     assert yy > SY + 2, "右側欄內容超出技師圖記區（yy=%.1f）" % yy
@@ -630,7 +639,7 @@ def main():
         "area_max_rel_diff": round(dmax, 6),
         "parcel_area_sum_m2": round(sum(p["area"] for p in parcels), 2),
         "source": {"cadastre": ARCGIS + "/TCLandType/MapServer (Land_O / Sect_O)",
-                   "building": SHP_BLDG,
+                   "building": str(SHP_BLDG),
                    "admin": "https://api.nlsc.gov.tw/other/TownVillagePointQuery"},
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "audit_errors": len(errs),

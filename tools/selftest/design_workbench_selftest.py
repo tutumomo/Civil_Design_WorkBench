@@ -307,6 +307,15 @@ def main() -> int:
         cell_rule.get("type") == "select"
         and [c.get("value") for c in cell_rule.get("choices", [])] == [1, 2, 3],
     )
+    traffic_rule = _rule("box_culvert", "traffic_type")
+    checks.check(
+        "box culvert traffic standard is a select",
+        traffic_rule.get("type") == "select"
+        and {
+            c.get("value") for c in traffic_rule.get("choices", [])
+        }
+        >= {"none", "h20", "h20_s16", "trailer_40t", "custom"},
+    )
     checks.check(
         "settlement foundation type is a select",
         _rule("settlement_assessment", "default_foundation_type").get("type") == "select"

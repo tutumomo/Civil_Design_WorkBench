@@ -313,10 +313,10 @@ MODELS = {
              "verify_tol_pct": 0,
              "note": "頂版以上覆土體積（不含路面結構）"},
             {"key": "formwork_m2", "expr":
-                "cell_count * (2 * clear_height_m + clear_width_m) * length_m"
+                "cell_count * (2 * clear_height_m + 2 * clear_width_m) * length_m"
                 " + 2 * concrete_area_m2",
              "verify_tol_pct": 0,
-             "note": "各孔內壁＋底板頂面＋兩端斷面；外側埋土面不計"},
+             "note": "頂版底面＋底板頂面＋牆內面＝2n(B+H)，另加兩端斷面；外側埋土面不計"},
             {"key": "excavation_m3", "expr":
                 "(outer_width_m + 2 * excavation_work_m)"
                 " * (outer_height_m + excavation_depth_m) * length_m",
@@ -359,7 +359,7 @@ MODELS = {
                 {"label": "混凝土體積", "key": "concrete_volume_m3", "unit": "m³", "decimals": 2,
                  "basis": "斷面積×涵長"},
                 {"label": "模板", "key": "formwork_m2", "unit": "m²", "decimals": 2,
-                 "basis": "孔內壁＋底板頂面＋兩端"},
+                 "basis": "頂版底面＋底板頂面＋牆內面＋兩端"},
                 {"label": "基礎開挖", "key": "excavation_m3", "unit": "m³", "decimals": 2,
                  "basis": "含工作面與超挖"},
                 {"label": "頂版覆土", "key": "soil_cover_volume_m3", "unit": "m³", "decimals": 2,
@@ -374,7 +374,9 @@ MODELS = {
         "notes": [
             "箱涵以每米斷面的二維平面剛架分析，孔數只改變構架拓樸。",
             "混凝土量採外框減孔洞的精確公式，不得用桿件中心線長度相加。",
-            "鋼筋含鋼量預設 90 kg/m³ 僅為數量初估，須以構架內力配筋結果覆核。",
+            "鋼筋含鋼量預設 90 kg/m³ 僅為數量初估；構架配筋完成後會另給"
+            " rebar_kg_design（含 6% 損耗）與 formwork_m2_design，"
+            "預算可改用 qty_from 指向設計值。",
         ],
     },
 

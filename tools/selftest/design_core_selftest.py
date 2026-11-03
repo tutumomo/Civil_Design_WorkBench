@@ -6,6 +6,7 @@ Run:
 
 from __future__ import annotations
 
+from dataclasses import replace
 import math
 from pathlib import Path
 import sys
@@ -983,6 +984,146 @@ class BoxCulvertTests(unittest.TestCase):
                 places=9,
             )
 
+    def test_face_reinforcement_covers_inner_outer_and_distribution(self) -> None:
+        result = BC.analyse(self.section(3), design_flow_m3s=5.0)
+        rep = result["reinforcement"]
+        labels = {e["label"] for e in rep["elements"]}
+        for expected in (
+            "頂版外側（覆土側）",
+            "頂版內側（涵內側）",
+            "底版外側（基礎土側）",
+            "底版內側（涵內側）",
+            "外側牆外側（背土側）",
+            "外側牆內側（涵內側）",
+            "中間牆左面（涵內側）",
+            "中間牆右面（涵內側）",
+        ):
+            self.assertIn(expected, labels)
+        self.assertEqual(len(rep["elements"]), 8)
+        for face in rep["elements"]:
+            self.assertIn(face["flexure"]["bar"], BC.RC.REBAR_SIZES)
+            self.assertGreater(face["flexure"]["As_prov_mm2"], 0.0)
+            self.assertGreater(face["flexure"]["phiMn_kNm"], 0.0)
+            self.assertTrue(face["ok"], face["label"])
+        self.assertEqual(len(rep["distribution"]), 4)
+        self.assertTrue(all(d["ok"] for d in rep["distribution"]))
+        self.assertGreater(rep["quantity"]["total_kg"], 1000.0)
+        self.assertAlmostEqual(
+            rep["quantity"]["total_kg_per_m"],
+            rep["quantity"]["total_kg"] / self.section(3).length_m,
+            places=1,
+        )
+        self.assertTrue(all(c["ok"] for c in result["checks"]))
+
+    def test_one_cell_has_no_interior_wall_faces(self) -> None:
+        result = BC.analyse(self.section(1), design_flow_m3s=1.0)
+        self.assertFalse(
+            any(e["key"] == "interior_wall" for e in result["reinforcement"]["elements"])
+        )
+        self.assertEqual(len(result["reinforcement"]["elements"]), 6)
+        self.assertEqual(len(result["reinforcement"]["distribution"]), 3)
+
+    def test_cover_and_bar_preference_are_exposed(self) -> None:
+        base = BC.analyse(self.section(3), design_flow_m3s=1.0, cover_mm=50.0)
+        thick = BC.analyse(self.section(3), design_flow_m3s=1.0, cover_mm=75.0)
+        self.assertEqual(base["section"]["cover_mm"], 50.0)
+        self.assertEqual(thick["section"]["cover_mm"], 75.0)
+        base_outer = next(
+            e for e in base["reinforcement"]["elements"]
+            if e["label"].startswith("頂版外側")
+        )
+        thick_outer = next(
+            e for e in thick["reinforcement"]["elements"]
+            if e["label"].startswith("頂版外側")
+        )
+        self.assertLess(
+            thick_outer["flexure"]["d_mm"],
+            base_outer["flexure"]["d_mm"],
+        )
+        self.assertLessEqual(
+            thick_outer["flexure"]["spacing_max_mm"],
+            base_outer["flexure"]["spacing_max_mm"],
+        )
+        fine = BC.analyse(
+            self.section(3), design_flow_m3s=1.0, bar_preference="fine"
+        )
+        self.assertEqual(fine["reinforcement"]["bar_preference"][0], "D13")
+
+    def test_shear_stirrups_are_not_reported_when_concrete_capacity_is_enough(self) -> None:
+        result = BC.analyse(self.section(3), design_flow_m3s=1.0)
+        self.assertTrue(
+            all(m["shear"].get("required") is False for m in result["members"])
+        )
+
+    def test_axial_flexure_follows_the_governing_tension_face(self) -> None:
+        # 6 m 覆土時頂版外側受拉、內側受壓；兩面配筋不同。
+        # 若兩個彎曲方向取較小值，會得到約 199 kN·m/m 而誤判 NG；
+        # 依實際受拉面定向後，容量應高於 240 kN·m/m。
+        heavy = replace(self.section(3), cover_depth_m=6.0)
+        result = BC.analyse(heavy, design_flow_m3s=5.0)
+        top = next(
+            a for a in result["reinforcement"]["axial_flexure"]
+            if a["key"] == "top_slab"
+        )
+        self.assertEqual(top["tension_face"], "outer")
+        self.assertGreater(top["phiMn_available_kNm"], 240.0)
+        self.assertTrue(top["ok"])
+        self.assertTrue(result["pass"])
+
+    def test_h20_vehicle_load_matches_workbook(self) -> None:
+        section = replace(self.section(1), cover_depth_m=0.0)
+        traffic = BC.resolve_traffic_load(section, "h20")
+        # 箱涵(單孔、雙孔、四孔).xls：7.25×1.30/[(1.065+0.707×0)×3.30]
+        self.assertAlmostEqual(traffic.uniform_pressure_kpa / 9.80665, 2.6817, places=3)
+        self.assertAlmostEqual(traffic.impact_factor, 0.30, places=12)
+        result = BC.analyse(section, design_flow_m3s=0.0, traffic_type="h20")
+        self.assertEqual(result["loads"]["traffic_type"], "h20")
+        self.assertGreater(result["loads"]["traffic_equivalent_kpa"], 26.0)
+
+    def test_h20_s16_lane_formula_matches_workbook(self) -> None:
+        section = replace(self.section(2), clear_width_m=2.9, cover_depth_m=2.0)
+        traffic = BC.resolve_traffic_load(
+            section, "h20_s16", traffic_lanes=4
+        )
+        # 箱涵(雙孔、三孔).xls：4×4×7.3/(3.5×10.9125)=3.0581 t/m²
+        self.assertAlmostEqual(
+            traffic.uniform_pressure_kpa / 9.80665, 3.0581, places=4
+        )
+        self.assertEqual(traffic.lanes, 4)
+        self.assertAlmostEqual(traffic.details["W_m"], 10.9125, places=4)
+
+    def test_trailer_40t_uses_partial_patch_and_increases_steel(self) -> None:
+        none = BC.analyse(self.section(3), design_flow_m3s=1.0, traffic_type="none")
+        trailer = BC.analyse(
+            self.section(3), design_flow_m3s=1.0, traffic_type="trailer_40t"
+        )
+        self.assertGreater(trailer["loads"]["traffic_patch_total_kn_m"], 0.0)
+        self.assertGreater(
+            trailer["loads"]["traffic_equivalent_kpa"],
+            none["loads"]["traffic_equivalent_kpa"],
+        )
+        self.assertGreater(
+            trailer["reinforcement"]["quantity"]["total_kg_per_m"],
+            none["reinforcement"]["quantity"]["total_kg_per_m"],
+        )
+        top_face = next(
+            e for e in trailer["reinforcement"]["elements"]
+            if e["label"].startswith("頂版")
+        )
+        self.assertGreater(top_face["Mu_kNm"], 0.0)
+
+    def test_no_traffic_must_be_explicit_and_lane_count_is_checked(self) -> None:
+        result = BC.analyse(self.section(1), design_flow_m3s=0.0, traffic_type="none")
+        self.assertEqual(result["loads"]["traffic_equivalent_kpa"], 0.0)
+        self.assertTrue(any("未指定車載重" in w for w in result["warnings"]))
+        with self.assertRaisesRegex(BC.BoxCulvertError, "traffic_lanes"):
+            BC.analyse(
+                self.section(2),
+                design_flow_m3s=0.0,
+                traffic_type="h20_s16",
+                traffic_lanes=5,
+            )
+
 
 class CulvertHydraulicsTests(unittest.TestCase):
     """公路排水設計規範 §6.2／附錄 N、O 的獨立手算對帳。"""
@@ -1117,7 +1258,7 @@ class CulvertHydraulicsTests(unittest.TestCase):
         self.assertEqual(result["control"]["engine"], "culvert_hydraulics")
         items = [c["item"] for c in result["checks"]]
         self.assertTrue(any("最高容許上游水深" in i for i in items))
-        self.assertEqual(result["version"], "0.3")
+        self.assertEqual(result["version"], "0.5")
 
 
 class ChannelProfileTests(unittest.TestCase):

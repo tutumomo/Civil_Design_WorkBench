@@ -73,9 +73,9 @@
 
 ---
 
-## 6. 工具能力邊界與選型（2026-10-28 六套實測）
+## 6. 工具能力邊界與選型（2026-10-28 六套實測；2026-11-03 追加 IngeTrazo）
 
-> 完整評估（含重疊度矩陣、決策表、紅線）見 [`docs\六套CAD工具能力邊界與重疊度.md`](六套CAD工具能力邊界與重疊度.md)。
+> 完整評估（含重疊度矩陣、決策表、紅線）見 [`docs\七套CAD工具能力邊界與重疊度.md`](七套CAD工具能力邊界與重疊度.md)。
 
 | ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
 |---|---|---|---|---|
@@ -85,12 +85,15 @@
 | **EXP-G1** | AutoCAD MCP `drawing_understand` 回報 `agree:false`、把公尺圖判為英寸 | 單位推論以建築特徵（門扇寬）為準，土木圖的圓弧會被誤判。以 `$INSUNITS=6` 為準，忽略推論；量測工具本身數值正確。 | `docs/AutoCAD_MCP操作指引.md` | 實測 2026-10-28 |
 | **EXP-G2** | AutoCAD MCP `drawing_export_dwg` 報需 ODA File Converter；或建不出 TOMO 中文字型 | ezdxf 後端寫 DWG 需 ODA → 改用 `acc.py publish(pdf=False)`。`textstyle_create` 無 bigfont 參數 → 存檔後用 ezdxf 補 TOMO（gbenor.shx＋CHINA1.SHX）。 | AutoCAD 回讀圖元完整 | 實測 2026-10-28 |
 | **EXP-G3** | `acc.py publish(pdf=True)` 對只有模型空間的 DXF 逾時 | 出圖腳本的提示順序是圖紙配置用；模型空間圖改 `pdf=False` 只轉 DWG，或先用 `make_sheet.py` 配置 A3。 | `_autocad_mcp測試\mcp繪圖測試.dwg` | 實測 2026-10-28 |
-| **EXP-G4** | AutoCAD MCP 在 Codex 端（另一份安裝 `~\.agents\mcp\autocad-mcp-pro`）預設 `AUTOCAD_MCP_BACKEND="com"` 且**未設 `ALLOWED_PATHS`** → 可操作共用 GUI AutoCAD、可寫入電腦任何位置 | 與 Claude Code／Desktop 對齊：`config.toml` 的 `[mcp_servers.autocad.env]` 改 `AUTOCAD_MCP_BACKEND="ezdxf"`、加 `ALLOWED_PATHS='D:\公司案件.AI'`、移除 `CAD_PROGID`、加 `PYTHONIOENCODING="utf-8"`；改前備份。**改了 config.toml 必須重啟 Codex** 才生效。驗證方式：以 `mcp` stdio client 帶同一組 env 直啟 `autocad-mcp.exe`，驗 `system_status.active_backend=="ezdxf"`、工作區內可寫、區外 `drawing_save_as`／`drawing_open` 被拒。 | `docs\AutoCAD_MCP操作指引.md` §2.1、`~\.agents\mcp\autocad-mcp-pro\codex_ezdxf_test.py`（1.7.0，243 工具，越權寫入被拒且該處無檔案） | 實測 2026-10-28 |
+| **EXP-G4** | AutoCAD MCP 在 Codex 端（另一份安裝 `~\.agents\mcp\autocad-mcp-pro`）預設 `AUTOCAD_MCP_BACKEND="com"` 且**未設 `ALLOWED_PATHS`** → 可操作共用 GUI AutoCAD、可寫入電腦任何位置 | 與 Claude Code／Desktop 對齊：`config.toml` 的 `[mcp_servers.autocad.env]` 改 `AUTOCAD_MCP_BACKEND="ezdxf"`、加 `ALLOWED_PATHS='<專案根目錄>'`、移除 `CAD_PROGID`、加 `PYTHONIOENCODING="utf-8"`；改前備份。**改了 config.toml 必須重啟 Codex** 才生效。驗證方式：以 `mcp` stdio client 帶同一組 env 直啟 `autocad-mcp.exe`，驗 `system_status.active_backend=="ezdxf"`、工作區內可寫、區外 `drawing_save_as`／`drawing_open` 被拒。 | `docs\AutoCAD_MCP操作指引.md` §2.1、`~\.agents\mcp\autocad-mcp-pro\codex_ezdxf_test.py`（1.7.0，243 工具，越權寫入被拒且該處無檔案） | 實測 2026-10-28 |
 | **EXP-G5** | 對 autocad-mcp-pro 做 MCP 端到端測試時 `stdio_client` 報 `Attempted to exit cancel scope in a different task than it was entered in` | 不要手動 `__aenter__`/`__aexit__` 分開管理 `stdio_client` 與 `ClientSession`；每個測試階段用單一 `async with stdio_client(...)` ＋ 內層 `async with ClientSession(...)`，階段結束即整段退出。 | `codex_ezdxf_test.py` 三階段（IN-SCOPE／OUT-OF-SCOPE／OUT-OF-SCOPE-OPEN）皆跑通 | 實測 2026-10-28 |
 | **EXP-H1** | 需要「出 PDF／PNG 預覽」但不想叫 AutoCAD（怕 COM 衝突、怕逾時） | `cadcraft-cli run <A3.dxf> --cmd 'plot {"path":"out.pdf","layout":"全區工程位置圖","landscape":true,"plotArea":"layout","fit":false,"scale":1.0}'`，再用 PyMuPDF 轉 PNG。實測能完整重現本專案 A3 交付圖（視口內容／圖框／標題欄／技師圖記區／中文全正常）。**DWG 交件仍走 `acc.py`。** | `_cad_assess\cadcraft_plot.pdf`（86,510 B、墨量 4.45% vs AutoCAD 4.17%） | `§H` |
 | **EXP-H2** | 看到 `docs\踩坑紀錄.md` §L／EXP-B1 說「`cadcraft-cli convert` 的 DWG 缺圖紙空間」而想放棄它 | **該記錄已不成立（CADCraft CLI 0.13.0 實測）**：A3 DXF→DWG 54,398 B，`acc.py todxf` 回讀 model 68／layout 100 entity、3 IMAGE、23 圖層、TOMO、`$INSUNITS=6` 全一致；純模型圖亦保留 `Layout1`。檔案較小是 DWG 表示差異，非缺件。**但交件 DWG 仍用 `acc.py`**（契約要求 AutoCAD 2018 且已有驗收路徑）。 | `_cad_assess\cadcraft_conv.dwg`、`cadcraft_conv_回讀.dxf`、`model_only*` | `§H` |
-| **EXP-H3** | 想用 AutoCAD MCP 直接出本專案的交件圖／以為它能取代產線 | **它不懂本專案語彙**：預設是 mm／ISO／製造＋建築＋機械＋P&ID（`titleblock_apply_iso_a3`、`drawing_apply_iso_layers`、`mech_*`／`gear_*`／`weld_*`／`pid_*`／`arch_*`／`bom_*`，242 tools），**沒有 TOMO／TWD97／`數字_中文` 圖層／A3 1:600 契約**。定位＝**讀別人圖＋量測盤點＋補畫標註**，不取代 `site_basemap`／`make_sheet`／`acc.py`／`check_delivery`。 | 以 `tools/list` 實測 242 工具與其分佈；`docs\六套CAD工具能力邊界與重疊度.md` §2.4 | `§H` |
+| **EXP-H3** | 想用 AutoCAD MCP 直接出本專案的交件圖／以為它能取代產線 | **它不懂本專案語彙**：預設是 mm／ISO／製造＋建築＋機械＋P&ID（`titleblock_apply_iso_a3`、`drawing_apply_iso_layers`、`mech_*`／`gear_*`／`weld_*`／`pid_*`／`arch_*`／`bom_*`，242 tools），**沒有 TOMO／TWD97／`數字_中文` 圖層／A3 1:600 契約**。定位＝**讀別人圖＋量測盤點＋補畫標註**，不取代 `site_basemap`／`make_sheet`／`acc.py`／`check_delivery`。 | 以 `tools/list` 實測 242 工具與其分佈；`docs\七套CAD工具能力邊界與重疊度.md` §2.4 | `§H` |
 | **EXP-H4** | 需要在「SolidCraft」與「text-to-cad（cadgen）」之間選 3D 參數化工具 | 兩者重疊約 70%（皆參數→精確實體→STEP）。**選 SolidCraft**：完全離線、本專案已有 U 型溝／擋土牆範本與體積自檢流程（`sc_build.py`）。**選 cadgen**：模型要進 git、要 code review、要純 Python 表達（`@step` 裝飾器）→ 但首次需 `uvx` 連網下載，離線案場不可用。Blender 不是選項（網格、無 STEP、無工程圖）。 | `docs\SolidCraft操作指引.md`、`~\.agents\skills\cad\SKILL.md` | `§H` |
+| **EXP-I1** | `ingetrazo` MCP 的 `tools/list` 正常，但 `run_python`／`query_model` 一直失敗或說「請先啟動 AI Bridge」 | **`tools/list` 只證明 exe 活著**。橋是 GUI 的附屬：開 IngeTrazo → **開文件** → Extensões ▸ **AI Bridge (MCP)** → 再啟動客戶端；一次只接受一個客戶端。用 `python tools\ingetrazo\ingetrazo_check.py --call` 驗證（會實際呼叫 `query_model`）；只跑 `mcp_probe.py` 會給假安全感。 | `tools\ingetrazo\ingetrazo_check.py`、`docs\IngeTrazo操作指引.md` §3 | 2026-11-03 原始碼＋官方手冊 |
+| **EXP-I2** | 把 IngeTrazo 的地形／GPS 座標帶進本專案圖面，位置整體偏移；或想把它的 PDF／DXF 直接交件 | IngeTrazo 走 **UTM WGS84**，本專案是 **TWD97 TM2 `EPSG:3826`** → 必須用 `pyproj` 轉換並記錄參數。它的 PDF／DXF 沒有 TOMO、`數字_中文` 圖層、`A3圖框.dwt`、DWG 2018，**只能當參考圖／中間幾何**；交件回 `make_sheet.py`→`acc.py`→`check_delivery.py`。 | `docs\七套CAD工具能力邊界與重疊度.md` §2.7、§4.1 紅線 8–9 | 本專案契約 |
+| **EXP-I3** | `run_python` 回 `ROLLED BACK — the document is unchanged` | 這是**交易保護**，不是壞掉：每次呼叫＝一個 undo 步驟，腳本丟錯就整批回滾。讀 `error`／`stderr` 修腳本後重跑即可，**不要用補丁式多次呼叫硬疊**（會多出 undo 步驟、也難對帳）。 | `_internal\scripts\ingetrazo_mcp.py`（`run_python` 回傳格式） | 2026-11-03 原始碼 |
 
 
 ---
@@ -99,6 +102,10 @@
 
 > 箱涵的完整計算流程、車載五型、逐面配筋與每延米數量，見
 > [`docs/箱涵計算SOP.md`](箱涵計算SOP.md)。
+>
+> 擋土牆六型（重力／半重力／懸臂／扶壁／錨定／加勁）的配筋、數量、
+> S-01／S-02 與六道閘門，見
+> [`docs/擋土牆配筋設計SOP.md`](擋土牆配筋設計SOP.md)。
 
 | ID | Cue（觸發情境／錯誤特徵） | Lesson（標準可執行操作） | Evidence / 確定性元件 | Ref |
 |---|---|---|---|---|
@@ -109,6 +116,23 @@
 | **EXP-G10** | 箱涵配筋被說「有缺漏」或某些面永遠 NG | 配筋是**面**的屬性：頂版外側／內側、底版外側／內側、外牆背土面／涵內面、中牆左／右面分開設計；軸彎互制以彎矩最大面為受拉面建 `layer_areas`。分佈筋 `0.0018bh`／`0.0020bh` 是**總量分兩面**，不是每面一份。 | 三孔實測：頂版外側 D16@140、底版外側 D16@80、外牆外側 D16@70；核心 142 tests OK | `§AA.4`, `§AA.5` |
 | **EXP-G11** | 改了鋼筋損耗率（12%→6%）或模板公式後，`regression.py` 基準不符 | 先算比例確認是否為**刻意變更**（933.33×1.06/1.12＝883.33），確認後才 `--update`；引擎與 `qty_models` 同一數量只能有一份定義，改一邊一定改另一邊。 | 箱涵三孔測試：鋼筋 933.33→883.33 kg/m、模板 504.01→684.01 m² | `§AA.6`, `§AA.7` |
 | **EXP-G12** | 上架檢核 G4 WARN「缺 limit」，但該列只是顯示用 | `checks` 只放有通過／不通過判準的項目；資訊性數字（如車載換算均佈）移到 `summary`／`result`。真要留在 `checks`，至少 `severity:"advisory"` 且補 `unit`。 | 箱涵檢核數 42→41 後，上架回到 0 FAIL／10 WARN | `§AA.8` |
+| **EXP-G13** | 工具被 `case_package` 呼叫時正常，單獨執行卻 `ModuleNotFoundError: project_paths` | 位在 `tools\<子資料夾>\` 的檔案，專案根是 `parents[1]` 不是 `parents[2]`（後者是 `tools\`）。驗收指令：`python tools\boq\boq_build.py -h`、`python tools\report\make_report.py -h` 都要能獨立跑。 | `boq_build.py`、`make_report.py` 2026-11-03 修正 | `§AA.9` |
+| **EXP-G14** | 回歸顯示全數 ✓，但 `out\<案名>\` 的檔案時間戳是舊的 | `regression.py` 必須顯式 `--out-dir out\<案名>`，且 `ok` 只看本次退出碼與本次各軸 `[OK]/[FAIL]`；不可讀 `cases\<案名>\out\交付狀態.json` 覆蓋。 | 2026-11-03 修正前曾以舊狀態判 ok | `§AA.10` |
+| **EXP-G15** | 道路案刨鋪面積回歸變「無值」，但刨鋪範圍 DXF 還在 | 三段式：有 `model\road_edges_meta.json` 就重生；沒有但既有 `*_刨鋪範圍_TWD97.dxf` 存在就沿用並重跑 `dxf_takeoff.py`；兩者都沒有才 `exit 1`。沿用既有圖**必須重新量測**，不可抄舊 JSON。 | AC 案 851.09 m² 恢復對帳；`case_package.run_drawing()` | `§AA.11` |
+| **EXP-G16** | 全案回歸永遠 exit 1，新失敗被既有 NG 蓋掉 | 基準已記錄 `ok=false` 的案件列「既有未通過」，仍印出但不計入本次失敗；基準 ok=true 或基準沒有的案件變紅才 exit 1。 | 北屯民政里（`boq.items` 空）列既有 NG；其餘 6 案基準相符 | `§AA.12` |
+| **EXP-G17** | 既有案件已改好，但新建案件又回到舊的假設鋼筋量／假車載 | 修正產線要同步 `case_new.py` 樣板：BOQ 用 `qty_from: "rebar_kg_design"`，`culvert` 明確 `traffic_type:"h20"`、`traffic_lanes:4`、`traffic_load_kpa:0`。 | 2026-11-03 樣板修正；三孔測試 BOQ 鋼筋 17,666.7 kg | `§AA.13` |
+| **EXP-G18** | 扶壁式主筋算出 `d=4023 mm`、7-D32，數量卻比修正後少 | 扶壁是豎向懸臂 T 梁，d 是**水平**由牆板前面量到扶壁背面（`ts+heel`），不可乘斜背傾角；舊式少 12%。修正後 H=8 m 案 d=4,515 mm、8-D32，並依 ACI 318 §11.4.6.1 補 D13@600 最少剪力筋。 | 扶壁 H=8 m：621.47 kg/m、12,429 kg；`design_core_selftest` 155 tests OK | `§AB.1` |
+| **EXP-G19** | 扶壁式 S-01 圖面面積 6.36 m²、數量模型 8.824 m²，對帳差 27.9% | S-01／S-02 畫的是**兩扶壁間**標準斷面，扶壁以虛線表示；混凝土體積仍含扶壁分攤。`qty_models` 新增實體斷面面積派生鍵給 `dxf_takeoff` 對帳，不可拿總量比典型斷面。 | 8 m 案 6.36／6.36 m²/m，0.0000% | `§AB.2` |
+| **EXP-G20** | 錨定式 S-02 畫了基腳上下層筋，配筋量卻只有牆面四向筋 | 圖上畫了鋼筋，數量表就必須有那一列：基腳依 `0.0018bh` 配 D16@220 上下層＋縱向分布筋，`base_rebar` 同步給配筋表與 `spacing_candidates()`。 | 錨定 H=7 m：288.25→326.43 kg/m | `§AB.3` |
+| **EXP-G21** | 3 m 重力式 auto scale 選 1:20，出圖前才因視口 189.4 mm > 183 mm 失敗 | auto scale 要估整張圖 bbox（含背填、尺寸線、鋼筋標註），不是只估混凝土多邊形；右側餘裕由 0.50 改 0.95 m，加勁式納入 L、錨定式納入前 2 m 地錨。 | 重力式改採 1:25 後 E1~E18 零錯誤 | `§AB.4` |
+| **EXP-G22** | 加勁式 S-01 圖例出現「底板筋」、保護層 75 mm，與同圖「面版保護層 50 mm」矛盾；「4 基礎埋入段」標在加勁區中段 | 圖例要依牆型分流：MSE 只有面版水平筋／豎向筋，沒有底板；`_cover_default` 由牆型決定（MSE／排水溝 50、其餘牆 75）；`4` 改標地面線以下的面版埋入段。 | MSE S-01／S-02 實測；`check_delivery` E1~E18 全過 | `§AB.5` |
+| **EXP-G23** | 設計報告第 12 章圖說寫「1:auto（自動）」，不是實際比例 | `section.scale` 常是 `"auto"`；實際比例在出圖時才決定。`_attach_section_figure()` 從 DXF 各版面以 `1:N` 正規式讀回眾數，讀不到才退回 1:20。 | 8 m 扶壁式報告 p17「圖 1 標準斷面圖（A3，1:50）」 | `§AB.6` |
+| **EXP-G24** | 回歸對扶壁／錨定／加勁只記 `design_error`，沒有 FS 與鋼筋量 | `regression.py` 改走 `wall_system.analyse()`／`rebar_design()`；以 `unit=="FS"` 辨識安全係數、`kPa` 另記承載應力，避免把容許承載力誤當 FS。基準已 `--update` 納入六型。 | 三案基準：621.47／326.43／51.54 kg/m；FS 2.171／13.621／3.291 | `§AB.7` |
+| **EXP-G25** | 交接摘要的 commit 白名單漏掉 `cases\擋土牆4m半重力式\`，但該案已在 `baseline.json` 且 `ok=true` | 收工前用 `baseline.json` 的案件鍵**反查** `cases\`，逐案確認追蹤狀態；untracked 案件要整包納入，不能只 stage `case.json`。摘要只用來起點，權威順序是「基準 → 檔案 → 測試 → 摘要」。 | 本輪漏列 1 案（4 m 半重力式）；補入後 clean clone 回歸才完整 | `§AC.1` |
+| **EXP-G26** | 共用工作區 `git status` 有 60 幾筆他人變更，差點用 `git add -A` 全掃進 commit | 先寫「納入／保留」兩張清單，只 `git add -- <白名單路徑>`；commit 前 `git diff --cached --name-only` 逐筆核對。多 agent 工作區禁用 `git add -A`。 | 本輪保留字型、MCP、Blender、IngeTrazo、`tools.excel`、`.bak` 等數十檔 | `§AC.2` |
+| **EXP-G27** | `AGENTS.md` 同時含他人（字型／MCP／INGETRAZO）與本輪（擋土牆）hunk，整檔 stage 會混入無關工作 | 從 `git diff -- AGENTS.md` 取出本次 hunk 另存 patch，`git apply --cached <patch>` 只進 index；再以 `git diff --cached` 確認。**檔案不是最小單位，hunk 才是**。 | 本輪只 stage 擋土牆分流與 SOP 觸發器 2 個 hunk，其餘留在工作區 | `§AC.3` |
+| **EXP-G28** | 子代理回報「三案全軸通過」，但沒有可重跑指令，數字也無法對帳 | 收到完成回報後自行：①重跑測試看退出碼；②看 `out\<案名>\` 時間戳；③抽看 PDF→PNG；④與基準／報告／預算三處對帳。完成回報是待審文件，不是驗收證明。 | 本輪重跑 regression 11 案、design selftest 155 項後才 commit | `§AC.4` |
+| **EXP-G29** | 兩個 agent 同時改 `tools\design\`，後寫的 patch 以舊版為底，吃掉前一個修正 | 開工先認領 ownership；動筆前 `git diff -- <file>`；共用檔只改最小 hunk；改完立刻跑該模組 selftest 並回報「改了哪些、沒動哪些」。共享目錄不會自動合併語意。 | 本輪以 `wall_system.py` 單一入口收斂六型，避免各檔重複實作 | `§AC.5` |
 
 ## 8. 智能體作業環境（Harness — 回合中斷／成本）
 

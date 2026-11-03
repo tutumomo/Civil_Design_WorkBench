@@ -15,6 +15,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "design"))
+sys.path.insert(0, str(ROOT / "tools" / "case_package"))
 
 import earth_pressure as EP  # noqa: E402
 import anchored_wall as AW  # noqa: E402
@@ -36,6 +37,7 @@ import rc_design as RC  # noqa: E402
 import retaining_wall as RW  # noqa: E402
 import steel_column as SC  # noqa: E402
 import wall_geometry as WG  # noqa: E402
+import case_core as CASE  # noqa: E402
 
 
 class ChannelCoverTests(unittest.TestCase):
@@ -367,6 +369,170 @@ class WallGeometryTests(unittest.TestCase):
         )
 
 
+class WallRebarTests(unittest.TestCase):
+    """擋土牆配筋分流：重力式／半重力式走名目構造鋼筋，懸臂式才做撓曲配筋。
+
+    先前所有 wall 一律套 design_cantilever_stem()，3 m 重力式被算出
+    66.8 kg/m（虛構的撓曲主筋）；改為分流後應為約 43.9 kg/m 的構造鋼筋。
+    """
+
+    GRAVITY = {
+        "wall_type": "gravity",
+        "height_m": 3.0,
+        "stem_thickness_m": 0.30,
+        "base_width_m": 1.95,
+    }
+    CANTILEVER = {
+        "wall_type": "cantilever",
+        "height_m": 3.0,
+        "stem_thickness_m": 0.35,
+        "base_width_m": 1.95,
+        "base_thickness_m": 0.36,
+    }
+    SEMIGRAVITY = {
+        "wall_type": "semigravity",
+        "height_m": 4.0,
+        "stem_thickness_m": 0.35,
+        "top_width_m": 0.35,
+        "front_batter_ratio": 0.30,
+        "base_width_m": 2.60,
+        "base_thickness_m": 0.60,
+        "toe_projection_m": 0.50,
+        "toe_soil_depth_m": 1.50,
+    }
+
+    def test_gravity_uses_nominal_steel(self) -> None:
+        res = RW.analyse(self.GRAVITY)
+        out = RC.design_wall_rebar(self.GRAVITY, res)
+        self.assertEqual(out["wall_type"], "gravity")
+        self.assertIsNone(out["structural"])
+        mass = out["mass"]
+        self.assertFalse(mass["structural_rebar"])
+        # 牆面（露出側）D13@250 → 1,000/250 × A_D13
+        as_face = RC.REBAR_SIZES["D13"][1] * 1000.0 / 250.0
+        self.assertAlmostEqual(mass["As_face_mm2_per_m"], as_face, places=1)
+        self.assertAlmostEqual(mass["temperature_ratio"], as_face / 250000.0, places=5)
+        self.assertGreaterEqual(mass["temperature_ratio"], mass["temperature_min"])
+        self.assertEqual(len(mass["rows"]), 3)
+        self.assertNotIn("主筋", "".join(r["item"] for r in mass["rows"]))
+
+    def test_mass_wall_total_includes_lap_allowance(self) -> None:
+        res = RW.analyse(self.GRAVITY)
+        mass = RC.design_mass_wall_steel(self.GRAVITY, res)
+        self.assertAlmostEqual(
+            mass["total_kg_per_m"],
+            mass["subtotal_kg_per_m"] * (1.0 + mass["lap_allowance"]),
+            places=3,
+        )
+        # 3 m 重力式（T=0.30、BL=1.95）實測總量 43.86 kg/m；
+        # 舊版誤套懸臂公式為 66.8 kg/m（多算 52%）。
+        self.assertAlmostEqual(mass["total_kg_per_m"], 43.857, places=2)
+
+    def test_semigravity_uses_nominal_steel(self) -> None:
+        res = RW.analyse(self.SEMIGRAVITY)
+        out = RC.design_wall_rebar(self.SEMIGRAVITY, res)
+        self.assertEqual(out["wall_type"], "semigravity")
+        self.assertIsNone(out["structural"])
+        self.assertFalse(out["mass"]["structural_rebar"])
+        self.assertGreater(out["total_kg_per_m"], 0.0)
+
+    def test_cantilever_keeps_flexural_design(self) -> None:
+        res = RW.analyse(self.CANTILEVER)
+        out = RC.design_wall_rebar(self.CANTILEVER, res)
+        self.assertEqual(out["wall_type"], "cantilever")
+        self.assertIn("stem", out["structural"])
+        self.assertIn("base", out["structural"])
+        self.assertIn("main", out["structural"]["stem"])
+        self.assertAlmostEqual(out["total_kg_per_m"], 138.46, delta=1.0)
+
+    def test_unknown_wall_type_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            RC.design_wall_rebar(
+                {"height_m": 3.0, "stem_thickness_m": 0.3},
+                {"wall_type": "unknown_wall"},
+            )
+
+    def test_counterfort_steel_is_wired_and_positive(self) -> None:
+        q = {
+            "height_m": 8.0, "stem_thickness_m": 0.30, "base_width_m": 6.60,
+            "base_thickness_m": 0.60, "toe_length_m": 1.98,
+            "counterfort_spacing_m": 3.0, "counterfort_thickness_m": 0.40,
+            "counterfort_top_width_m": 0.30, "front_soil_depth_m": 1.0,
+        }
+        soil = {"gamma": 18.0, "phi_deg": 30.0, "allowable_bearing_kpa": 300.0,
+                "base_friction": 0.6, "foundation": "soil"}
+        res = CW.analyse(q, soil=soil, seismic={"kh": 0.0})
+        out = RC.design_wall_rebar(q, res)
+        self.assertEqual(out["wall_type"], "counterfort")
+        self.assertGreater(out["total_kg_per_m"], 0.0)
+        names = "".join(row["item"] for row in out["structural"]["rows"])
+        for token in ("牆板", "踵板", "趾板", "扶壁"):
+            self.assertIn(token, names)
+        self.assertAlmostEqual(
+            out["total_kg_per_m"],
+            out["structural"]["subtotal_kg_per_m"]
+            * (1.0 + out["structural"]["lap_allowance"]),
+            places=2,
+        )
+
+    def test_anchored_steel_is_wired_and_positive(self) -> None:
+        q = {
+            "height_m": 7.0, "wall_thickness_m": 0.40, "base_width_m": 1.20,
+            "base_thickness_m": 0.50, "front_soil_depth_m": 1.0,
+            "anchor_depths_m": [1.5, 3.5, 5.5], "horizontal_spacing_m": 2.50,
+            "inclination_deg": 20.0, "service": "permanent", "strand_type": "12.7",
+            "strands": 4, "free_length_m": 7.0, "bond_length_m": 6.0,
+            "drill_diameter_mm": 135.0, "bearing_plate_m": 0.30,
+            "lockoff_factor": 1.15, "pressure_distribution": "apparent",
+        }
+        soil = {"gamma": 19.0, "phi_deg": 30.0, "surcharge_kpa": 10.0,
+                "allowable_bearing_kpa": 300.0, "base_friction": 0.55,
+                "bond_strength_kpa": 400.0, "tendon_bond_mpa": 2.0}
+        res = AW.analyse(q, soil=soil, seismic={"kh": 0.0})
+        out = RC.design_wall_rebar(q, res)
+        self.assertEqual(out["wall_type"], "anchored")
+        self.assertGreater(out["total_kg_per_m"], 0.0)
+        names = "".join(row["item"] for row in out["structural"]["rows"])
+        self.assertIn("承壓區", names)
+        # 4 道牆面筋＋承壓區＋基腳上下層＋縱向分布筋
+        self.assertIn("基腳", names)
+        self.assertEqual(len(out["structural"]["rows"]), 8)
+
+    def test_mse_face_steel_uses_panel_minimum(self) -> None:
+        q = {
+            "height_m": 6.0, "embedment_m": 0.60, "reinforcement_type": "geogrid",
+            "reinforcement_length_m": 5.40, "vertical_spacing_m": 0.60,
+            "first_layer_m": 0.30, "long_term_strength_kN_per_m": 40.0,
+            "coverage_ratio": 1.0, "face_panel_thickness_m": 0.20,
+            "panel_width_m": 1.50, "face_panel_cover_mm": 50.0,
+        }
+        soil = {
+            "reinforced_gamma": 19.0, "reinforced_phi_deg": 34.0,
+            "retained_gamma": 18.0, "retained_phi_deg": 30.0,
+            "foundation_phi_deg": 30.0, "surcharge_kpa": 10.0,
+            "allowable_bearing_kpa": 300.0, "foundation": "soil",
+        }
+        res = MW.analyse(q, soil=soil, seismic={"kh": 0.0})
+        out = RC.design_wall_rebar(q, res)
+        self.assertEqual(out["wall_type"], "mse")
+        self.assertTrue(out["ok"])
+        self.assertEqual(len(out["structural"]["rows"]), 2)
+        self.assertEqual(out["structural"]["bar"], "D13")
+        self.assertGreater(out["total_kg_per_m"], 0.0)
+
+    def test_block_wall_has_no_rc_steel(self) -> None:
+        q = {"wall_type": "gabion", "course_count": 3, "course_height_m": 1.0,
+             "base_width_m": 2.5, "width_decrement_m": 0.5, "step_side": "front",
+             "embedment_m": 0.5}
+        res = BW.analyse(q)
+        out = RC.design_wall_rebar(q, res)
+        self.assertEqual(out["wall_type"], "gabion")
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["total_kg_per_m"], 0.0)
+        self.assertFalse(out["structural"]["applicable"])
+        self.assertEqual(out["structural"]["rows"], [])
+
+
 class EarthPressureTests(unittest.TestCase):
     def test_rankine_triangle(self) -> None:
         result = EP.active_earth_pressure(
@@ -450,6 +616,14 @@ class RetainingWallTests(unittest.TestCase):
             values["基礎承載（FS＝q_ult/q_max）"], 9.5138472, delta=0.01
         )
         self.assertAlmostEqual(result["x_R_m"], 1.0869593, delta=0.001)
+        # 報告與數量共用 res["soil"]["base_friction"]；半重力式的摩擦係數
+        # 是由 foundation_soil 推得，必須回寫到共用契約，不能只留在區域變數。
+        self.assertIn("base_friction", result["soil"])
+        self.assertAlmostEqual(
+            result["soil"]["base_friction"],
+            math.tan(math.radians((2.0 / 3.0) * 32.0)),
+            places=8,
+        )
 
     def test_legacy_semigravity_seismic_fs(self) -> None:
         result = RW._analyse_semigravity(self.q, self.soil, {"kh": 0.15})
@@ -683,8 +857,9 @@ class CounterfortWallTests(unittest.TestCase):
         cf = res["structure"]["counterfort"]
         # M＝S·Ka·γ·H³/6＝3×(1/3)×18×512/6
         self.assertAlmostEqual(cf["M_service_kNm"], 3.0 / 3.0 * 18.0 * 512.0 / 6.0, places=3)
-        theta = math.atan2(8.0, 3.7 - 0.3)
-        self.assertAlmostEqual(cf["d_mm"], (0.3 + 3.7) * math.sin(theta) * 1000.0 - 105.0, places=0)
+        # 扶壁為豎向懸臂 T 梁，d 是水平由牆板前面量到扶壁背面，
+        # 不可乘斜背傾角（舊式會少 12%，屬保守但定義錯誤）。
+        self.assertAlmostEqual(cf["d_mm"], (0.3 + 3.7) * 1000.0 - 105.0, places=0)
 
     def test_effective_height_limit_10m(self) -> None:
         sec = dict(self.SECTION, height_m=11.5, front_soil_depth_m=1.0)
@@ -734,6 +909,29 @@ class MSEWallTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "超過適用上限 8.0 m"):
             MW.analyse(dict(self.SEC, height_m=9.0, embedment_m=0.5), self.SOIL)
         MW.analyse(dict(self.SEC, height_m=9.0, embedment_m=1.0, reinforcement_length_m=6.5), self.SOIL)
+
+    def test_connector_and_bearing_use_governing_layer(self) -> None:
+        q = dict(self.SEC, panel_width_m=1.5,
+                 connector_capacity_kN=50.0,
+                 connector_bearing_area_mm2=20000.0,
+                 connector_fs=1.5)
+        res = MW.analyse(q, self.SOIL)
+        gov = max(res["layers"],
+                  key=lambda l: l["Tmax_kN_per_m"] + float(l.get("Tmd_kN_per_m") or 0.0))
+        demand = (gov["Tmax_kN_per_m"] + float(gov.get("Tmd_kN_per_m") or 0.0)) * 1.5
+        conn = res["connection"]
+        self.assertIsNotNone(conn)
+        self.assertAlmostEqual(conn["demand_kN"], demand, places=3)
+        self.assertAlmostEqual(conn["FS"], 50.0 / demand, places=3)
+        self.assertAlmostEqual(conn["bearing_stress_mpa"],
+                               demand * 1000.0 / 20000.0, places=3)
+        self.assertTrue(any("面版－加勁材連接" in c["item"] for c in res["checks"]))
+        self.assertTrue(any("局部承壓" in c["item"] for c in res["checks"]))
+
+    def test_connector_absent_stays_explicitly_unchecked(self) -> None:
+        res = MW.analyse(self.SEC, self.SOIL)
+        self.assertIsNone(res["connection"])
+        self.assertIn("面版連接強度、局部承壓", "".join(res["warnings"]))
 
 
 class AnchoredWallTests(unittest.TestCase):
@@ -2121,6 +2319,63 @@ class DrainageNetworkTests(unittest.TestCase):
         )
         self.assertFalse(result["links"][0]["ok"])
         self.assertFalse(result["pass"])
+
+
+class WallCasePipelineTests(unittest.TestCase):
+    """案件端到端：數量、預算、報告必須共用同一份牆型分流配筋量。"""
+
+    def _case(self, values):
+        return {
+            "schema": "civil-case/1",
+            "project": {"name": "測試案", "category": "擋土牆"},
+            "quantities": {"model": "wall", "values": values},
+        }
+
+    def test_semigravity_quantity_uses_nominal_steel(self) -> None:
+        case = self._case({
+            "wall_type": "semigravity",
+            "length_m": 20.0,
+            "height_m": 4.0,
+            "stem_thickness_m": 0.35,
+            "top_width_m": 0.35,
+            "front_batter_ratio": 0.30,
+            "back_batter_ratio": 0.0,
+            "base_width_m": 2.60,
+            "base_thickness_m": 0.60,
+            "toe_projection_m": 0.50,
+            "toe_soil_depth_m": 1.50,
+            "weep_diameter_m": 0.05,
+            "backfill_thickness_m": 0.30,
+            "excavation_work_m": 0.30,
+            "excavation_depth_m": 0.10,
+        })
+        model, q, issues = CASE.quantity_context(case)
+        self.assertEqual(model, "wall")
+        self.assertFalse([i for i in issues if i["level"] == "error"])
+        self.assertAlmostEqual(q["rebar_kg_per_m_design"], 58.48, delta=0.05)
+        self.assertAlmostEqual(q["rebar_kg_design"], 1169.5, delta=1.0)
+
+        sections = CASE._design_sections("wall", q, case)
+        notes = "".join(sections["comparison"]["notes"])
+        self.assertIn("半重力式", notes)
+        self.assertNotIn("懸臂式（薄牆", notes)
+        self.assertIn("已含 12% 搭接損耗", "".join(
+            sections["reinforcement"]["notes"]))
+
+    def test_unknown_wall_type_does_not_fall_back_to_cantilever(self) -> None:
+        case = self._case({
+            "wall_type": "buttress_unknown",
+            "length_m": 20.0,
+            "height_m": 8.0,
+            "stem_thickness_m": 0.30,
+            "base_width_m": 6.60,
+            "base_thickness_m": 0.60,
+        })
+        _model, _q, issues = CASE.quantity_context(case)
+        errors = [i["msg"] for i in issues if i["level"] == "error"]
+        self.assertTrue(errors)
+        self.assertIn("尚未支援", "".join(errors))
+        self.assertNotIn("rebar_kg_design", _q)
 
 
 if __name__ == "__main__":

@@ -39,6 +39,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 import earth_pressure as EP  # noqa: E402
+import rc_design as RC  # noqa: E402
 from retaining_wall import LIMITS  # noqa: E402
 
 
@@ -549,7 +550,7 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
                         "牆體以面層＋中間混凝土的等值單位重計，材料容許應力（§120 四）未檢核。")
 
     area = sum(_simpson(lambda y, s=s: _at(s, y)[1] - _at(s, y)[0], s["y0"], s["y1"]) for s in segs)
-    return {
+    out = {
         "wall_type": wall_type,
         "wall_label": spec["label"],
         "geometry": {
@@ -571,6 +572,9 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
         "warnings": warnings,
         "pass": all(c["ok"] for c in checks),
     }
+    out["reinforcement"] = RC.design_block_wall_steel(q, out)
+    out["rebar_kg_per_m"] = 0.0
+    return out
 
 
 def format_report(res: Mapping[str, Any]) -> str:
@@ -583,6 +587,7 @@ def format_report(res: Mapping[str, Any]) -> str:
         "材料：單位重 %.1f kN/m³、層間 μ=%.2f、基底 μ=%.2f；kh=%.2f"
         % (res["materials"]["unit_weight_kn_m3"], res["materials"]["interface_friction"],
            res["materials"]["base_friction"], res["seismic"]["kh"]),
+        "RC 鋼筋：不適用（疊砌／砌石牆，鋼筋量 0 kg/m）",
         "",
     ]
     for it in res["interfaces"]:

@@ -1,0 +1,96 @@
+{
+ "schema": "civil-case/1",
+ "_note": "擋土牆類別示範案（扶壁式）：8 m 牆板高、有效高 7 m，底板 6.60×0.60 m、扶壁中心距 3.00 m。斷面、穩定、配筋、數量、預算與報告共用同一份 case.json。",
+ "project": {
+  "name": "擋土牆8m扶壁式",
+  "full_name": "擋土牆新建工程（8 m 扶壁式 RC 擋土牆，L = 20 m）",
+  "category": "擋土牆",
+  "agency": "（主辦機關待填）",
+  "designer": "本工作區 AI 設計產線（tools/design；扶壁式）",
+  "date": "2026-11-04",
+  "boq_date": "115年1月",
+  "version": "v2026.11.04-1",
+  "location": {
+   "county": "（待填）",
+   "town": "（待填）",
+   "village": "",
+   "section": "",
+   "desc": "（案址待填；本檔為牆型驗證用示範）"
+  },
+  "crs": {
+   "name": "TWD97 TM2 二度分帶",
+   "epsg": "EPSG:3826",
+   "unit": "公尺"
+  },
+  "coords": [],
+  "report_title": "設計報告書",
+  "report_subtitle": "8 m 扶壁式 RC 擋土牆新建"
+ },
+ "quantities": {
+  "model": "wall",
+  "values": {
+   "wall_type": "counterfort",
+   "length_m": 20.0,
+   "height_m": 8.0,
+   "stem_thickness_m": 0.30,
+   "base_width_m": 6.60,
+   "base_thickness_m": 0.60,
+   "toe_length_m": 1.98,
+   "counterfort_spacing_m": 3.00,
+   "counterfort_thickness_m": 0.40,
+   "counterfort_top_width_m": 0.30,
+   "front_soil_depth_m": 1.00,
+   "include_passive": true,
+   "passive_ratio": 1.0,
+   "weep_diameter_m": 0.05,
+   "backfill_thickness_m": 0.30,
+   "excavation_work_m": 0.30,
+   "excavation_depth_m": 0.10
+  },
+  "notes": [
+   "斷面與配筋由 tools/design/wall_system.py 分流至 counterfort_wall.py；牆板、踵板、趾板、扶壁、箍筋與繫筋均納入配筋量。",
+   "土工參數為假設值（γ=18 kN/m³、φ=30°、c=0、容許承載力 300 kPa），正式設計前須以鑽探結果重算。",
+   "鋼筋量含 12% 搭接、錨定與損耗；模板為正面、兩端與扶壁兩側模板。"
+  ]
+ },
+ "boq": {
+  "rates": {},
+  "items": [
+   {"no": "01", "name": "施工測量及放樣", "unit": "式", "qty": 1, "price": 4000.0, "note": "經驗值"},
+   {"no": "02", "name": "擋土牆基礎開挖（含兩側工作面）", "unit": "m3", "qty_from": "excavation_m3", "price": 70.0, "note": "契約「機具挖方(一般)」"},
+   {"no": "03", "name": "結構用混凝土 fc'=210 kgf/cm2（含澆置）", "unit": "m3", "qty_from": "concrete_volume_m3", "price": 3190.0, "note": "預拌混凝土含澆置搬運"},
+   {"no": "04", "name": "鋼筋及加工組立 SD280／SD420", "unit": "kg", "qty_from": "rebar_kg_design", "price": 35.0, "note": "採扶壁式配筋設計值，含 12% 搭接與損耗"},
+   {"no": "05", "name": "模板（一般土木結構模板）", "unit": "m2", "qty_from": "formwork_m2", "price": 1230.0, "note": "含正面、兩端與扶壁兩側"},
+   {"no": "06", "name": "背填級配碎石（含夯實）", "unit": "m3", "qty_from": "backfill_gravel_m3", "price": 770.0, "note": "透水性級配碎石"},
+   {"no": "07", "name": "排水孔 Ø5 cm（含洩水管及反濾層）", "unit": "孔", "qty_from": "weep_hole_count", "price": 275.0, "note": "第121條配置"},
+   {"no": "08", "name": "伸縮縫（填縫料及止水帶）", "unit": "處", "qty_from": "expansion_joint_count", "price": 1140.0, "note": "第121條配置"},
+   {"no": "09", "name": "機具進出場費", "unit": "式", "qty": 1, "price": 12000.0, "note": "經驗值"}
+  ]
+ },
+ "report": {
+  "summary": {
+   "paragraphs": [
+    "本工程為新建 8 m 扶壁式 RC 擋土牆，牆長 20 m。牆板高 8.0 m、前趾覆土 1.0 m，有效高 7.0 m；底板寬 6.60 m、厚 0.60 m，扶壁中心距 3.00 m、厚 0.40 m。",
+    "牆板以扶壁為支承之連續版設計，踵板採連續版、趾板採懸臂板、扶壁採 T 梁，並配置牆板與踵板繫筋。",
+    "配筋量、混凝土量、模板量、開挖與背填均由同一份 case.json 派生，預算書與報告不再各自輸入數量。"
+   ],
+   "conclusions": [
+    "扶壁式適用於較高牆體；本示範有效高 7.0 m，未超過水土保持技術規範第118條 10 m 原則上限。",
+    "牆趾被動土壓力僅計入抗滑，覆土不得移除；地震工況滑動 FS 與傾倒 FS 均須通過。",
+    "正式設計前須以地質鑽探參數重算，並由合格技師覆核扶壁主筋、箍筋與繫筋細部。"
+   ]
+  },
+  "basis": {
+   "notes": [
+    "設計計算由 tools/design/wall_system.py 分流至 counterfort_wall.py；數量、預算與報告共用同一結果。",
+    "配筋依混凝土結構設計規範 100.06.09 版常用式；112.08.10 版條號對照待補。"
+   ],
+   "regulation_ids": ["SWH-118", "SWH-119", "SWH-120", "SWH-121"]
+  }
+ },
+ "section": {
+  "scale": "auto",
+  "out": "out/擋土牆8m扶壁式/S-01_擋土牆標準斷面圖.dxf",
+  "rebar_out": "out/擋土牆8m扶壁式/S-02_擋土牆配筋圖.dxf"
+ }
+}

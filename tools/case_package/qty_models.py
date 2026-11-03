@@ -25,9 +25,13 @@
 import ast
 import math
 
+# 圖／數對帳用的實體斷面面積鍵名。集中定義，避免 qty_models 與
+# dxf_takeoff 各寫一份字串而不一致。
+DRAWN_SECTION_AREA_KEY = "drawn_section_area_m2"
+
 _ALLOWED_FUNCS = {
     "ceil": math.ceil, "floor": math.floor, "max": max, "min": min,
-    "abs": abs, "round": round, "sqrt": math.sqrt,
+    "abs": abs, "round": round, "sqrt": math.sqrt, "len": len,
     "pi": math.pi,
     # 邊坡用：斜坡長 = H/sinβ、水平投影 = H/tanβ
     "sin": math.sin, "cos": math.cos, "tan": math.tan,
@@ -154,11 +158,28 @@ MODELS = {
 
     # ------------------------------------------------------------- 擋土牆
     "wall": {
-        "label": "擋土牆（重力式／半重力式／懸臂式，每米斷面）",
-        "required": ["length_m", "height_m", "stem_thickness_m",
-                     "base_width_m", "base_thickness_m"],
-        "_wall_type_note": "wall_type：gravity＝重力式；semigravity＝半重力式；cantilever＝懸臂式。"
-                           "斷面積依型別自動切換，見 section_area_m2 的分支。",
+        "label": "擋土牆（重力／半重力／懸臂／扶壁／錨定／加勁，每米斷面）",
+        "required": ["length_m", "height_m"],
+        "required_by_type": {
+            "gravity": ["length_m", "height_m", "stem_thickness_m",
+                        "base_width_m"],
+            "semigravity": ["length_m", "height_m", "top_width_m",
+                            "base_width_m", "base_thickness_m"],
+            "cantilever": ["length_m", "height_m", "stem_thickness_m",
+                           "base_width_m", "base_thickness_m"],
+            "counterfort": ["length_m", "height_m", "stem_thickness_m",
+                            "base_width_m", "base_thickness_m", "toe_length_m",
+                            "counterfort_spacing_m", "counterfort_thickness_m",
+                            "counterfort_top_width_m"],
+            "anchored": ["length_m", "height_m", "wall_thickness_m",
+                         "base_width_m", "base_thickness_m",
+                         "anchor_depths_m", "horizontal_spacing_m"],
+            "mse": ["length_m", "height_m", "face_panel_thickness_m",
+                    "reinforcement_length_m", "vertical_spacing_m",
+                    "long_term_strength_kN_per_m"],
+        },
+        "_wall_type_note": "wall_type：gravity／semigravity／cantilever／counterfort／"
+                           "anchored／mse。斷面積與配筋依型別自動切換。",
         "derive": [
             # 斷面積（m²/m）
             #  gravity    ：梯形斷面 = (頂寬 + 底寬)/2 × 牆高        （T=頂寬、base_width=底寬）
@@ -171,28 +192,62 @@ MODELS = {
                 " + 0.5 * (front_batter_ratio + back_batter_ratio)"
                 " * (height_m - base_thickness_m) ** 2"
                 " if wall_type == 'semigravity' else "
-                "stem_thickness_m * height_m + base_width_m * base_thickness_m)",
+                "stem_thickness_m * height_m + base_width_m * base_thickness_m"
+                " if wall_type == 'cantilever' else ("
+                "base_width_m * base_thickness_m + stem_thickness_m * height_m"
+                " + 0.5 * ((base_width_m - toe_length_m - stem_thickness_m)"
+                " + counterfort_top_width_m) * height_m"
+                " * counterfort_thickness_m / counterfort_spacing_m)"
+                " if wall_type == 'counterfort' else ("
+                "wall_thickness_m * (height_m - base_thickness_m)"
+                " + base_width_m * base_thickness_m)"
+                " if wall_type == 'anchored' else ("
+                "face_panel_thickness_m * height_m"
+                " if facing_type != 'segmented_block' else 0.0))",
              "verify_tol_pct": 0,
              "note": "gravity＝(T+B)/2×H；semigravity＝底板 B×d＋牆身 T×(H-d)"
-                     "＋前後坡三角形；cantilever＝T×H＋B×BT"},
+                     "＋前後坡三角形；cantilever＝T×H＋B×BT；"
+                     "counterfort＝底板＋牆板＋扶壁分攤；anchored＝牆面＋基腳；"
+                     "mse＝RC 面版"},
+            # 圖／數對帳用：S-01/S-02 畫的是「兩扶壁間」的實體斷面，
+            # 不含扶壁分攤（扶壁以虛線表示）。混凝土體積仍用
+            # section_area_m2（含扶壁），兩者差額在備註說明。
+            {"key": DRAWN_SECTION_AREA_KEY, "expr":
+                "section_area_m2 - 0.5 * ((base_width_m - toe_length_m - stem_thickness_m)"
+                " + counterfort_top_width_m) * height_m * counterfort_thickness_m"
+                " / counterfort_spacing_m"
+                " if wall_type == 'counterfort' else section_area_m2",
+             "verify_tol_pct": 0,
+             "note": "扶壁式取兩扶壁間標準斷面；其餘牆型同 section_area_m2"},
 
             # 混凝土體積（扣排水孔）
             {"key": "concrete_volume_m3_per_m", "expr": "section_area_m2",
              "verify_tol_pct": 0, "note": "未扣排水孔；扣孔後另計"},
             {"key": "face_area_m2", "expr": "height_m * length_m",
              "verify_tol_pct": 0, "note": "牆面面積（露出面）"},
+            {"key": "wall_thickness_eff_m", "expr":
+                "stem_thickness_m if (wall_type == 'gravity' or wall_type == 'semigravity'"
+                " or wall_type == 'cantilever' or wall_type == 'counterfort')"
+                " else (wall_thickness_m if wall_type == 'anchored' else face_panel_thickness_m)",
+             "verify_tol_pct": 0, "note": "排水孔深度用的牆體厚度"},
+            {"key": "base_width_eff_m", "expr":
+                "reinforcement_length_m if wall_type == 'mse' else base_width_m",
+             "verify_tol_pct": 0, "note": "MSE 以加勁區長度作為計畫寬度"},
+            {"key": "base_thickness_eff_m", "expr":
+                "0.0 if wall_type == 'mse' else base_thickness_m",
+             "verify_tol_pct": 0},
             {"key": "weep_hole_count", "expr": "ceil(face_area_m2 / 2)",
              "verify_tol_pct": 0,
              "note": "水土保持技術規範第121條：每 2 m² 牆面至少 1 孔"},
             {"key": "weep_area_m3", "expr":
-                "weep_hole_count * pi * (weep_diameter_m / 2) ** 2 * stem_thickness_m",
+                "weep_hole_count * pi * (weep_diameter_m / 2) ** 2 * wall_thickness_eff_m",
              "verify_tol_pct": 0, "note": "排水孔扣除體積（孔深＝牆厚）"},
             {"key": "concrete_volume_m3", "expr":
                 "concrete_volume_m3_per_m * length_m - weep_area_m3",
              "verify_tol_pct": 0, "note": "淨混凝土體積"},
             {"key": "concrete_volume_m3_per_m_net", "expr":
                 "concrete_volume_m3_per_m"
-                " - (weep_hole_count / length_m) * pi * (weep_diameter_m / 2) ** 2 * stem_thickness_m",
+                " - (weep_hole_count / length_m) * pi * (weep_diameter_m / 2) ** 2 * wall_thickness_eff_m",
              "verify_tol_pct": 0,
              "note": "淨每米體積（已扣排水孔）—— 可直接與 3D 模型量測值對帳"},
 
@@ -200,19 +255,56 @@ MODELS = {
             {"key": "expansion_joint_count", "expr": "max(1, floor(length_m / 25))",
              "verify_tol_pct": 0,
              "note": "第121條：長度每 20~40 m 一處，取較嚴 25 m"},
+            {"key": "counterfort_count", "expr":
+                "ceil(length_m / counterfort_spacing_m) + 1"
+                " if wall_type == 'counterfort' else 0",
+             "verify_tol_pct": 0, "note": "扶壁道數（含兩端）"},
+            {"key": "anchor_count", "expr":
+                "(ceil(length_m / horizontal_spacing_m) + 1) * len(anchor_depths_m)"
+                " if wall_type == 'anchored' else 0",
+             "verify_tol_pct": 0, "note": "地錨支數＝每排支數×排數"},
+            {"key": "anchor_drilling_m", "expr":
+                "anchor_count * (free_length_m + bond_length_m)"
+                " if wall_type == 'anchored' else 0",
+             "verify_tol_pct": 0, "note": "地錨鑽孔總長（自由段＋錨碇段）"},
+            {"key": "mse_layer_count", "expr":
+                "floor((height_m - 0.001 - first_layer_m) / vertical_spacing_m) + 1"
+                " if wall_type == 'mse' else 0",
+             "verify_tol_pct": 0, "note": "加勁材層數"},
+            {"key": "mse_reinforcement_area_m2", "expr":
+                "mse_layer_count * reinforcement_length_m * length_m"
+                " if wall_type == 'mse' else 0",
+             "verify_tol_pct": 0, "note": "加勁材面積（舖設量）"},
 
             # 模板／開挖／背填
             {"key": "formwork_m2", "expr":
-                "(height_m * length_m + 2 * section_area_m2)",
+                "(0.0 if wall_type == 'mse' and facing_type == 'segmented_block' else ("
+                "height_m * length_m if wall_type == 'mse' else "
+                "height_m * length_m + 2 * section_area_m2 + "
+                "2 * 0.5 * ((base_width_m - toe_length_m - stem_thickness_m)"
+                " + counterfort_top_width_m) * height_m"
+                " / counterfort_spacing_m * length_m))",
              "verify_tol_pct": 0,
-             "note": "正面（貼土背不計）＋ 兩端斷面；重力式與懸臂式同式（保守）"},
+             "note": "正面（貼土背不計）＋兩端斷面；扶壁另加兩側扶壁模板；"
+                     "MSE 預鑄面版不計場鑄模板"},
+            {"key": "template_per_meter", "expr": "formwork_m2 / length_m",
+             "verify_tol_pct": 0, "note": "模板每延米"},
             {"key": "excavation_m3", "expr":
-                "(base_width_m + 2 * excavation_work_m) * (base_thickness_m + excavation_depth_m) * length_m",
-             "verify_tol_pct": 0, "note": "基礎開挖（含兩側工作面 0.3 m、超挖 0.1 m）"},
+                "(reinforcement_length_m + 2 * excavation_work_m)"
+                " * (height_m + excavation_depth_m) * length_m"
+                " if wall_type == 'mse' else "
+                "(base_width_m + 2 * excavation_work_m)"
+                " * (base_thickness_m + excavation_depth_m) * length_m",
+             "verify_tol_pct": 0,
+             "note": "基礎開挖（含兩側工作面 0.3 m、超挖 0.1 m）；"
+                     "MSE 以加勁區全寬與牆高估算"},
             {"key": "backfill_gravel_m3", "expr":
+                "length_m * height_m * reinforcement_length_m"
+                " if wall_type == 'mse' else "
                 "length_m * height_m * backfill_thickness_m",
              "verify_tol_pct": 0,
-             "note": "背填透水性材料（級配碎石）厚度 0.3 m"},
+             "note": "背填透水性材料（級配碎石）厚度 0.3 m；"
+                     "MSE 表列加勁區填方體積"},
 
             # 鋼筋（以單位體積含鋼量估算，須以配筋圖覆核）
             {"key": "rebar_kg", "expr": "rebar_ratio_kg_m3 * concrete_volume_m3",
@@ -220,7 +312,10 @@ MODELS = {
              "note": "重力式擋土牆通常僅構造筋；含鋼量取假設值，須以配筋圖覆核"},
         ],
         "defaults": {
-            "wall_type": "cantilever",        # gravity｜semigravity｜cantilever
+            "wall_type": "cantilever",
+            "stem_thickness_m": 0.0,
+            "base_width_m": 0.0,
+            "base_thickness_m": 0.0,
             "top_width_m": 0.30,              # 半重力式牆頂寬
             "front_batter_ratio": 0.30,       # 半重力式牆面坡度 1:S1
             "back_batter_ratio": 0.0,         # 半重力式牆背坡度 1:S2
@@ -231,30 +326,56 @@ MODELS = {
             "excavation_work_m": 0.30,
             "excavation_depth_m": 0.10,
             "rebar_ratio_kg_m3": 40.0,        # 假設值，須以配筋圖覆核
+            "toe_length_m": 1.00,
+            "counterfort_spacing_m": 3.00,
+            "counterfort_thickness_m": 0.40,
+            "counterfort_top_width_m": 0.30,
+            "front_soil_depth_m": 0.50,
+            "wall_thickness_m": 0.40,
+            "anchor_depths_m": [1.5, 3.5, 5.5],
+            "horizontal_spacing_m": 2.50,
+            "inclination_deg": 20.0,
+            "face_panel_thickness_m": 0.20,
+            "reinforcement_length_m": 4.20,
+            "vertical_spacing_m": 0.60,
+            "first_layer_m": 0.30,
+            "long_term_strength_kN_per_m": 40.0,
+            "coverage_ratio": 1.0,
+            "embedment_m": 0.60,
+            "facing_type": "precast_panel",
+            "free_length_m": 7.00,
+            "bond_length_m": 6.00,
         },
         "table": {
             "caption": "工程數量表（擋土牆，每米斷面 × 牆長）",
             "rows": [
                 {"label": "牆型", "key": "wall_type", "unit": "", "decimals": None,
-                 "basis": "gravity 重力式／semigravity 半重力式／cantilever 懸臂式"},
+                 "basis": "gravity／semigravity／cantilever／counterfort／anchored／mse"},
                 {"label": "牆長 L", "key": "length_m", "unit": "m", "decimals": 1,
                  "basis": "設計假設（配合伸縮縫分段）"},
                 {"label": "牆高 H（有效高）", "key": "height_m", "unit": "m", "decimals": 2,
                  "basis": "斷面設計值；第118條有效高"},
-                {"label": "牆身厚 T", "key": "stem_thickness_m", "unit": "m", "decimals": 2,
+                {"label": "牆身／面版厚 T", "key": "wall_thickness_eff_m", "unit": "m", "decimals": 2,
                  "basis": "斷面設計值；半重力式以 top_width_m 表示牆頂寬"},
-                {"label": "底板寬 BL", "key": "base_width_m", "unit": "m", "decimals": 2,
-                 "basis": "斷面設計值（趾板）"},
-                {"label": "底板厚 BT", "key": "base_thickness_m", "unit": "m", "decimals": 2,
+                {"label": "底板寬／加勁長 BL", "key": "base_width_eff_m", "unit": "m", "decimals": 2,
+                 "basis": "斷面設計值；MSE 為加勁材長度"},
+                {"label": "底板厚 BT", "key": "base_thickness_eff_m", "unit": "m", "decimals": 2,
                  "basis": "斷面設計值"},
                 {"label": "混凝土斷面積", "key": "section_area_m2", "unit": "m²/m", "decimals": 3,
                  "basis": "T×H + BL×BT"},
                 {"label": "混凝土淨體積", "key": "concrete_volume_m3", "unit": "m³", "decimals": 2,
                  "basis": "斷面積×L，扣排水孔"},
-                {"label": "鋼筋（估算）", "key": "rebar_kg", "unit": "kg", "decimals": 1,
-                 "basis": "含鋼量假設值，須以配筋圖覆核"},
+                {"label": "鋼筋（設計，含搭接損耗）", "key": "rebar_kg_design",
+                 "unit": "kg", "decimals": 1,
+                 "basis": "配筋設計 kg/m × 牆長；牆體含 12% 搭接、錨定與損耗"},
+                {"label": "鋼筋（每延米）", "key": "rebar_kg_per_m_design",
+                 "unit": "kg/m", "decimals": 2,
+                 "basis": "配筋設計值，已含 12% 搭接與損耗"},
                 {"label": "模板", "key": "formwork_m2", "unit": "m²", "decimals": 2,
                  "basis": "正面＋頂面＋兩端；牆背貼土不計"},
+                {"label": "模板（每延米）", "key": "template_per_meter",
+                 "unit": "m²/m", "decimals": 2,
+                 "basis": "模板總量 ÷ 牆長"},
                 {"label": "基礎開挖", "key": "excavation_m3", "unit": "m³", "decimals": 2,
                  "basis": "含兩側工作面 0.3 m、超挖 0.1 m"},
                 {"label": "背填級配碎石", "key": "backfill_gravel_m3", "unit": "m³", "decimals": 2,
@@ -263,14 +384,29 @@ MODELS = {
                  "basis": "第121條：每 2 m² 牆面 1 孔"},
                 {"label": "伸縮縫", "key": "expansion_joint_count", "unit": "處", "decimals": 0,
                  "basis": "第121條：每 20~40 m 一處（取 25 m）"},
+                {"label": "扶壁道數", "key": "counterfort_count", "unit": "道", "decimals": 0,
+                 "basis": "含兩端；中心距 × (n−1) + 端部", "show_if": {"wall_type": "counterfort"}},
+                {"label": "地錨支數", "key": "anchor_count", "unit": "支", "decimals": 0,
+                 "basis": "每排 (L/水平間距+1) 支 × 排數", "show_if": {"wall_type": "anchored"}},
+                {"label": "地錨鑽孔長", "key": "anchor_drilling_m", "unit": "m", "decimals": 1,
+                 "basis": "支數 ×（自由段＋錨碇段）", "show_if": {"wall_type": "anchored"}},
+                {"label": "加勁材層數", "key": "mse_layer_count", "unit": "層", "decimals": 0,
+                 "basis": "由牆高、第一層高程與層距推算", "show_if": {"wall_type": "mse"}},
+                {"label": "加勁材面積", "key": "mse_reinforcement_area_m2", "unit": "m²", "decimals": 1,
+                 "basis": "層數 × 加勁長 × 牆長", "show_if": {"wall_type": "mse"}},
             ],
-            "note": "混凝土體積已扣排水孔；鋼筋為估算值；本表未含損耗與預備數量。",
+            "note": "混凝土體積已扣排水孔；鋼筋為配筋設計值（重力式與半重力式為名目"
+                    "構造鋼筋，其餘 RC 牆型為構材撓曲配筋），已含 12% 搭接損耗；"
+                    "rebar_kg（含鋼量假設值）僅作交叉檢查，不進預算。",
         },
         "notes": [
             "擋土牆型：數量結構為「每米斷面 × 牆長」，並含排水孔、伸縮縫、模板、開挖、背填。",
             "排水孔與伸縮縫依水土保持技術規範第121條直接計算（不依賴土工參數）。",
             "模板假設牆背貼土不計模板；若牆背需雙面模板，formwork_m2 要改算式。",
-            "含鋼量為假設值 → 報告與預算書須標示「須以配筋圖覆核」。",
+            "MSE 的背填級配碎石欄位表列加勁區填方體積；RC 面版配筋只計面版，"
+            "不含面版連接器與加勁材材料費。",
+            "鋼筋量一律採 rebar_kg_design（rc_design.design_wall_rebar 依牆型分流）；"
+            "rebar_kg 的含鋼量假設值只保留作交叉檢查，不得再進預算。",
         ],
     },
 
@@ -366,17 +502,17 @@ MODELS = {
                  "basis": "外寬×覆土深×涵長"},
                 {"label": "伸縮縫", "key": "expansion_joint_count", "unit": "處", "decimals": 0,
                  "basis": "每 25 m 一處（假設）"},
-                {"label": "鋼筋（估算）", "key": "rebar_kg", "unit": "kg", "decimals": 1,
-                 "basis": "含鋼量假設值，須以構架配筋覆核"},
+                {"label": "鋼筋（設計，含搭接損耗）", "key": "rebar_kg_design",
+                 "unit": "kg", "decimals": 1,
+                 "basis": "逐面構架配筋；損耗率見 rebar_loss_rate"},
             ],
             "note": "本表不含翼牆、擋土牆、基礎地盤改良、保護工與損耗；箱涵結構檢核另見 tools\\design\\box_culvert.py。",
         },
         "notes": [
             "箱涵以每米斷面的二維平面剛架分析，孔數只改變構架拓樸。",
             "混凝土量採外框減孔洞的精確公式，不得用桿件中心線長度相加。",
-            "鋼筋含鋼量預設 90 kg/m³ 僅為數量初估；構架配筋完成後會另給"
-            " rebar_kg_design（含 6% 損耗）與 formwork_m2_design，"
-            "預算可改用 qty_from 指向設計值。",
+            "鋼筋含鋼量預設 90 kg/m³ 僅供交叉檢查；預算與報告均採"
+            " rebar_kg_design（含 6% 搭接損耗）與 formwork_m2_design。",
         ],
     },
 
@@ -452,11 +588,15 @@ def derive_all(model, values):
     """回傳 (已補齊的 values, issues)。issues: [{level, msg}]"""
     m = get(model)
     out = dict(m.get("defaults") or {})
-    out.update(values or {})
+    supplied = dict(values or {})
+    out.update(supplied)
     issues = []
 
-    for k in m["required"]:
-        if out.get(k) in (None, ""):
+    by_type = m.get("required_by_type") or {}
+    required = by_type.get(str(out.get("wall_type") or "").strip().lower(),
+                           m["required"])
+    for k in required:
+        if supplied.get(k) in (None, ""):
             issues.append({"level": "error",
                            "msg": f"quantities.{model} 缺少必要輸入 {k}"})
 

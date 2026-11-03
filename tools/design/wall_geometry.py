@@ -297,6 +297,145 @@ def _semigravity(q: Mapping[str, Any]) -> WallGeometry:
     )
 
 
+def _counterfort(q: Mapping[str, Any]) -> WallGeometry:
+    """Typical cross-section between counterforts.
+
+    The counterfort itself is a longitudinal stiffener and is shown as a
+    dashed outline in S-01/S-02.  It is deliberately excluded from the
+    closed concrete polygon so the drawing area remains equal to the
+    per-metre quantity (base + wall panel).
+    """
+
+    H = _positive("height_m", q.get("height_m"))
+    ts = _positive("stem_thickness_m", q.get("stem_thickness_m"))
+    BL = _positive("base_width_m", q.get("base_width_m"))
+    BT = _positive("base_thickness_m", q.get("base_thickness_m"))
+    Lt = _positive("toe_length_m", q.get("toe_length_m", 0.0), allow_zero=True)
+    S = _positive("counterfort_spacing_m", q.get("counterfort_spacing_m"))
+    tc = _positive("counterfort_thickness_m", q.get("counterfort_thickness_m"))
+    ctop = _positive("counterfort_top_width_m", q.get("counterfort_top_width_m", 0.0),
+                     allow_zero=True)
+    ds = _positive("front_soil_depth_m", q.get("front_soil_depth_m", 0.0),
+                   allow_zero=True)
+    if Lt + ts >= BL:
+        raise WallGeometryError("Counterfort wall needs a positive heel length.")
+    if tc >= S:
+        raise WallGeometryError("Counterfort thickness must be smaller than spacing.")
+    if ctop > BL - Lt - ts:
+        raise WallGeometryError("Counterfort top width exceeds heel length.")
+
+    base = ((0.0, -BT), (BL, -BT), (BL, 0.0), (0.0, 0.0))
+    stem = ((Lt, 0.0), (Lt + ts, 0.0), (Lt + ts, H), (Lt, H))
+    points = ((0.0, -BT), (BL, -BT), (BL, 0.0), (Lt + ts, 0.0),
+              (Lt + ts, H), (Lt, H), (Lt, 0.0), (0.0, 0.0))
+    return WallGeometry(
+        wall_type="counterfort",
+        points=points,
+        components=(
+            WallComponent("base_slab", "concrete", base),
+            WallComponent("stem", "concrete", stem),
+        ),
+        key_points={
+            "toe": (0.0, -BT),
+            "heel": (BL, -BT),
+            "stem_front_base": (Lt, 0.0),
+            "stem_back_base": (Lt + ts, 0.0),
+            "top_front": (Lt, H),
+            "top_back": (Lt + ts, H),
+        },
+        height_m=H + BT,
+        retained_height_m=H,
+        base_width_m=BL,
+        base_thickness_m=BT,
+        parameters={
+            "stem_thickness_m": ts,
+            "toe_length_m": Lt,
+            "heel_length_m": BL - Lt - ts,
+            "counterfort_spacing_m": S,
+            "counterfort_thickness_m": tc,
+            "counterfort_top_width_m": ctop,
+            "front_soil_depth_m": ds,
+        },
+    )
+
+
+def _anchored(q: Mapping[str, Any]) -> WallGeometry:
+    H = _positive("height_m", q.get("height_m"))
+    t = _positive("wall_thickness_m", q.get("wall_thickness_m",
+                                            q.get("stem_thickness_m")))
+    BL = _positive("base_width_m", q.get("base_width_m", t))
+    BT = _positive("base_thickness_m", q.get("base_thickness_m", 0.0),
+                   allow_zero=True)
+    if BT >= H:
+        raise WallGeometryError("Base thickness must be smaller than wall height.")
+    if BL < t:
+        raise WallGeometryError("Base width must not be smaller than wall thickness.")
+    hw = H - BT
+    base = ((0.0, -BT), (BL, -BT), (BL, 0.0), (0.0, 0.0))
+    wall = ((0.0, 0.0), (t, 0.0), (t, hw), (0.0, hw))
+    points = ((0.0, -BT), (BL, -BT), (BL, 0.0), (t, 0.0), (t, hw),
+              (0.0, hw), (0.0, 0.0))
+    return WallGeometry(
+        wall_type="anchored",
+        points=points,
+        components=(
+            WallComponent("base_slab", "concrete", base),
+            WallComponent("wall", "concrete", wall),
+        ),
+        key_points={
+            "toe": (0.0, -BT),
+            "heel": (BL, -BT),
+            "wall_front_base": (0.0, 0.0),
+            "wall_back_base": (t, 0.0),
+            "top_front": (0.0, hw),
+            "top_back": (t, hw),
+        },
+        height_m=H,
+        retained_height_m=H,
+        base_width_m=BL,
+        base_thickness_m=BT,
+        parameters={
+            "wall_thickness_m": t,
+            "front_soil_depth_m": float(q.get("front_soil_depth_m") or 0.0),
+            "anchor_depths_m": q.get("anchor_depths_m") or [],
+            "horizontal_spacing_m": float(q.get("horizontal_spacing_m") or 0.0),
+            "inclination_deg": float(q.get("inclination_deg") or 0.0),
+        },
+    )
+
+
+def _mse(q: Mapping[str, Any]) -> WallGeometry:
+    H = _positive("height_m", q.get("height_m"))
+    t = _positive("face_panel_thickness_m", q.get("face_panel_thickness_m", 0.20))
+    L = _positive("reinforcement_length_m", q.get("reinforcement_length_m"))
+    emb = _positive("embedment_m", q.get("embedment_m", 0.0), allow_zero=True)
+    panel = ((0.0, 0.0), (t, 0.0), (t, H), (0.0, H))
+    return WallGeometry(
+        wall_type="mse",
+        points=panel,
+        components=(WallComponent("face_panel", "concrete", panel),),
+        key_points={
+            "toe": (0.0, 0.0),
+            "heel": (t, 0.0),
+            "top_front": (0.0, H),
+            "top_back": (t, H),
+            "reinforcement_end": (t + L, 0.0),
+        },
+        height_m=H,
+        retained_height_m=H,
+        base_width_m=L,
+        base_thickness_m=0.0,
+        parameters={
+            "face_panel_thickness_m": t,
+            "reinforcement_length_m": L,
+            "embedment_m": emb,
+            "vertical_spacing_m": float(q.get("vertical_spacing_m") or 0.6),
+            "first_layer_m": float(q.get("first_layer_m") or 0.3),
+            "facing_type": str(q.get("facing_type") or "precast_panel").lower(),
+        },
+    )
+
+
 def parse(values: Mapping[str, Any] | Any) -> WallGeometry:
     """Build a validated wall geometry from case or quantity values."""
 
@@ -308,8 +447,15 @@ def parse(values: Mapping[str, Any] | Any) -> WallGeometry:
         return _cantilever(q)
     if wall_type in {"semigravity", "semi_gravity", "半重力式"}:
         return _semigravity(q)
+    if wall_type in {"counterfort", "扶壁式"}:
+        return _counterfort(q)
+    if wall_type in {"anchored", "錨定式"}:
+        return _anchored(q)
+    if wall_type in {"mse", "加勁式"}:
+        return _mse(q)
     raise WallGeometryError(
-        f"Unsupported wall_type={wall_type!r}; expected gravity, cantilever or semigravity."
+        f"Unsupported wall_type={wall_type!r}; expected gravity, semigravity, "
+        "cantilever, counterfort, anchored or mse."
     )
 
 

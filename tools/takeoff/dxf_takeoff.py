@@ -128,6 +128,63 @@ def measure_rebar(dxf_path, max_radius=0.02):
     return out
 
 
+def measure_rebar_rows(dxf_path, max_radius=0.02):
+    """同一批鋼筋圓點改以 **水平列（y 分群）** 量間距。
+
+    底板／溝底筋是沿 x 等距排列的，用垂直欄分群會全部變成單點（n=1），
+    量不到間距。配筋圖對帳必須同時看「豎向排」與「水平排」兩種。
+    """
+    import ezdxf as _ez
+    doc = _ez.readfile(dxf_path)
+    cs = [e for e in doc.modelspace().query("CIRCLE")
+          if e.dxf.layer == REBAR_LAYER and e.dxf.radius <= max_radius]
+    rows = {}
+    for e in cs:
+        c = e.dxf.center
+        rows.setdefault(round(c.y / 0.010), []).append((c.x, c.y))
+    out = []
+    for k in sorted(rows):
+        pts = sorted(rows[k], key=lambda p: p[0])
+        n = len(pts)
+        span = pts[-1][0] - pts[0][0]
+        sp = span / (n - 1) if n > 1 else None
+        out.append({"y_m": round(sum(p[1] for p in pts) / n, 3), "n": n,
+                    "x_lo": round(pts[0][0], 3), "x_hi": round(pts[-1][0], 3),
+                    "span_m": round(span, 3),
+                    "spacing_m": round(sp, 3) if sp else None,
+                    "per_m": round(1.0 / sp, 1) if sp else None})
+    return out
+
+
+def measure_rebar_chain(dxf_path, max_radius=0.02):
+    """量**斜面**上的鋼筋間距（重力式牆面有坡度，垂直欄／水平列都分不到組）。
+
+    作法：只取「同一高度只有一根」的點（斜面豎向筋），依 y 排序後算相鄰點距離。
+    底板筋在同一 y 有一整排，會被這個條件排除，不會污染結果。
+    回傳 ``{"n", "spacing_m", "per_m"}`` 或 ``None``。
+    """
+    import ezdxf as _ez
+    doc = _ez.readfile(dxf_path)
+    cs = [e for e in doc.modelspace().query("CIRCLE")
+          if e.dxf.layer == REBAR_LAYER and e.dxf.radius <= max_radius]
+    by_y = {}
+    for e in cs:
+        c = e.dxf.center
+        by_y.setdefault(round(c.y / 0.005), []).append((c.x, c.y))
+    pts = sorted((v[0] for v in by_y.values() if len(v) == 1),
+                 key=lambda p: p[1])
+    if len(pts) < 3:
+        return None
+    ds = [((pts[i + 1][0] - pts[i][0]) ** 2
+           + (pts[i + 1][1] - pts[i][1]) ** 2) ** 0.5
+          for i in range(len(pts) - 1)]
+    ds = sorted(d for d in ds if 0.05 <= d <= 1.0)
+    if len(ds) < 2:
+        return None
+    sp = ds[len(ds) // 2]
+    return {"n": len(pts), "spacing_m": round(sp, 3), "per_m": round(1.0 / sp, 1)}
+
+
 def check_rebar(dxf_path, case_path):
     """把配筋圖量到的間距與案件（= 配筋表）的設計間距對帳。"""
     import sys
@@ -137,6 +194,7 @@ def check_rebar(dxf_path, case_path):
     case = CC.load(case_path)
     model, q, _ = CC.quantity_context(case)
     cols = measure_rebar(dxf_path)
+    rows_ = measure_rebar_rows(dxf_path)
     # 設計間距：直接從配筋設計算（case 的 section 段只有比例與檔名，沒有間距）
     want = set()
     sec = case.get("section") or {}
@@ -150,14 +208,10 @@ def check_rebar(dxf_path, case_path):
         try:
             import rc_design as RC
             if model == "wall":
-                import retaining_wall as RW
-                _wr = RW.analyse(q, soil=case.get("soil") or {})
-                if _wr["wall_type"] != "gravity":
-                    _st = RC.design_cantilever_stem(q, _wr)
-                    _bs = RC.design_base_slab(q, _wr)
-                    want.add(int(_st["main"]["spacing_mm"]))
-                    if _bs:
-                        want.add(int(_bs["members"][0]["main"]["spacing_mm"]))
+                import wall_system as WS
+                _wr = WS.analyse(q, case)
+                _wd = WS.rebar_design(q, _wr)
+                want.update(WS.spacing_candidates(q, _wr, _wd))
             elif model == "channel":
                 import channel_hydraulics as CH
                 _hy = case.get("hydraulics") or {}
@@ -168,8 +222,20 @@ def check_rebar(dxf_path, case_path):
                 want.add(int(RC.design_channel_wall(q, _hr)["main"]["spacing_mm"]))
         except Exception:
             pass
-    got = sorted({int(round(c["spacing_m"] * 1000)) for c in cols
-                  if c["spacing_m"] and 0.05 <= c["spacing_m"] <= 1.0})
+    # 水平列若只有 2 點（重力式牆面有坡度，同一高度的前後兩根筋距離會逐層變化），
+    # 那不是「間距」而是兩面層的淨距，必須排除，否則會產生大量假間距。
+    got = sorted({int(round(m["spacing_m"] * 1000))
+                  for m in cols
+                  if m["spacing_m"] and 0.05 <= m["spacing_m"] <= 1.0}
+                 | {int(round(m["spacing_m"] * 1000))
+                    for m in rows_
+                    if m["spacing_m"] and m["n"] >= 3
+                    and 0.05 <= m["spacing_m"] <= 1.0})
+    # 斜面豎向筋（重力式牆面）在垂直欄／水平列都成不了組 → 補一條「沿面層」量測
+    if want and not all(any(abs(g - w) <= 10 for g in got) for w in want):
+        chain = measure_rebar_chain(dxf_path)
+        if chain:
+            got = sorted(set(got) | {int(round(chain["spacing_m"] * 1000))})
     return {"cols": cols, "design_mm": sorted(want), "found_mm": got,
             "ok": None if not want else all(any(abs(g - w) <= 10 for g in got) for w in want)}
 
@@ -226,18 +292,24 @@ def check_case(case_path, dxf_path, tol_pct=0.5):
     HERE = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, os.path.join(os.path.dirname(HERE), "case_package"))
     import case_core as CC
+    import qty_models as QM
 
     case = CC.load(case_path)
     model, q, _ = CC.quantity_context(case)
     meas = measure(dxf_path)
     net, gross, void = net_area(meas)
 
-    expect = float(q.get("section_area_m2") or 0)
+    # 扶壁式的 S-01/S-02 是「兩扶壁間」的實體斷面，扶壁以虛線表示；
+    # 混凝土體積仍含扶壁分攤。對帳必須用 section_area_typical_m2，
+    # 否則會把扶壁分攤算成圖面漏畫（8 m 案實測差 27.9%）。
+    _key = getattr(QM, "DRAWN_SECTION_AREA_KEY", "")
+    expect = float((q.get(_key) if _key else None) or q.get("section_area_m2") or 0)
     diff_pct = (abs(net - expect) / expect * 100.0) if expect else None
     rows = [
         {"item": "圖面混凝土外框面積", "drawn": gross, "model": None, "unit": "m²"},
         {"item": "圖面內腔面積（應扣）", "drawn": void, "model": None, "unit": "m²"},
-        {"item": "圖面混凝土淨面積", "drawn": net, "model": round(expect, 4), "unit": "m²"},
+        {"item": "圖面混凝土淨面積（實體斷面）", "drawn": net,
+         "model": round(expect, 4), "unit": "m²"},
     ]
     ok = diff_pct is not None and diff_pct <= tol_pct
     return {"case": os.path.basename(os.path.dirname(os.path.abspath(case_path))),
@@ -277,12 +349,20 @@ if __name__ == "__main__":
     a = ap.parse_args()
     if a.rebar:
         cols = measure_rebar(a.dxf)
+        rows_ = measure_rebar_rows(a.dxf)
         print("  鋼筋圓點分群（已排除筋號圓標 r>0.02）：")
         for c in cols:
             print("    x≈%5.3f  n=%2d  y %.3f~%.3f（跨 %.3f）"
                   % (c["x_m"], c["n"], c["y_lo"], c["y_hi"], c["span_m"])
                   + ("  間距 %.3f m → %4.1f 支/米" % (c["spacing_m"], c["per_m"])
                      if c["spacing_m"] else "  （單點）"))
+        print("  水平列（底板／溝底筋）：")
+        for r in rows_:
+            if not r["spacing_m"] or r["n"] < 3:
+                continue
+            print("    y≈%5.3f  n=%2d  x %.3f~%.3f  間距 %.3f m → %4.1f 支/米"
+                  % (r["y_m"], r["n"], r["x_lo"], r["x_hi"],
+                     r["spacing_m"], r["per_m"]))
         if a.case:
             r = check_rebar(a.dxf, a.case)
             print("\n  配筋表設計間距 %s mm；圖面量到 %s mm → %s"

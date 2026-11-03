@@ -16,8 +16,10 @@
       破壞面：伸張性用 Rankine 線（45°＋φ/2 由趾部起），非伸張性用雙線性（上半 0.3H、下半 0.6(H−z)）。
       拉斷 FS＝Tal·Rc／Tmax ≥ 1.5；拉出 Pr＝F*·α·σv'·Le·C·Rc，FS＝Pr／Tmax ≥ 1.5，且 Le ≥ 0.9 m。
       地震：內部慣性力 Pi＝kh·（主動區重量），依各層 Le 比例分配；拉斷 FS ≥ 1.125、拉出 FS ≥ 1.1（F*×0.8）。
+      面版連接：需求＝控制層 Tmax（含地震分攤）×面版寬；容量與承壓面積由輸入提供
+      （connector_capacity_kN、connector_bearing_area_mm2），未提供時明示未檢核。
 
-限制：面版連接強度、面版本身、複合（穿越加勁區）滑動、整體圓弧滑動、排水與沉陷未檢核。
+限制：面版本身細部、複合（穿越加勁區）滑動、整體圓弧滑動、排水與沉陷未檢核。
 """
 
 from __future__ import annotations
@@ -34,6 +36,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 import earth_pressure as EP  # noqa: E402
+import rc_design as RC  # noqa: E402
 from retaining_wall import LIMITS  # noqa: E402
 
 
@@ -283,15 +286,63 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
             checks.append({"item": "%s拉出（地震）" % tag, "value": l["FS_pullout_eq"], "limit": FS_PULLOUT_EQ,
                            "ok": l["FS_pullout_eq"] >= FS_PULLOUT_EQ, "unit": "FS"})
 
+    # ---------------- 面版－加勁材連接與局部承壓 ----------------
+    # 連接需求＝控制層之 Tmax（必要時加地震慣性分攤）× 面版單元寬度。
+    # 連接器容量與承壓面積須由產品型錄或試驗提供；未提供時不臆造。
+    connection = None
+    panel_width = float(q.get("panel_width_m") or 1.5)
+    Tcap_raw = q.get("connector_capacity_kN")
+    Ab_raw = q.get("connector_bearing_area_mm2")
+    if Tcap_raw not in (None, "") or Ab_raw not in (None, ""):
+        gov = max(layers, key=lambda l: l["Tmax_kN_per_m"] + float(l.get("Tmd_kN_per_m") or 0.0))
+        demand = (gov["Tmax_kN_per_m"] + float(gov.get("Tmd_kN_per_m") or 0.0)) * panel_width
+        connection = {
+            "panel_width_m": round(panel_width, 3),
+            "governing_layer": int(gov["layer"]),
+            "governing_y_m": gov["y_m"],
+            "demand_kN": round(demand, 3),
+        }
+        if Tcap_raw not in (None, ""):
+            Tcap = float(Tcap_raw)
+            fs_conn = float(q.get("connector_fs") or 1.5)
+            if Tcap <= 0 or fs_conn <= 0:
+                raise MSEWallError("connector_capacity_kN 與 connector_fs 必須大於 0")
+            checks.append({
+                "item": "面版－加勁材連接（第 %d 層，面版寬 %.2f m）" % (gov["layer"], panel_width),
+                "value": Tcap / demand if demand > 0 else float("inf"),
+                "limit": fs_conn, "ok": Tcap >= fs_conn * demand, "unit": "FS",
+            })
+            connection.update({"capacity_kN": Tcap, "fs_required": fs_conn,
+                               "FS": round(Tcap / demand, 4) if demand > 0 else None,
+                               "ok": Tcap >= fs_conn * demand})
+        if Ab_raw not in (None, ""):
+            Ab = float(Ab_raw)
+            if Ab <= 0:
+                raise MSEWallError("connector_bearing_area_mm2 必須大於 0")
+            fc = float(RC.CONCRETE["fc_mpa"])
+            sigma = demand * 1000.0 / Ab          # N/mm² = MPa
+            limit = 0.30 * fc
+            checks.append({
+                "item": "面版連接處局部承壓（第 %d 層）" % gov["layer"],
+                "value": sigma, "limit": limit, "ok": sigma <= limit,
+                "unit": "MPa", "relation": "le",
+            })
+            connection.update({"bearing_area_mm2": Ab, "bearing_stress_mpa": round(sigma, 4),
+                               "bearing_limit_mpa": round(limit, 3),
+                               "bearing_ok": sigma <= limit})
+
     warnings = [
         "Tal 應為長期設計強度（已扣潛變、施工損傷、耐久性折減）；F*、α 為 FHWA 保守預設值，有拉出試驗應取代。",
-        "面版連接強度、面版、複合滑動與整體圓弧滑動未檢核；整體穩定請另用 slope_stability.py。",
+        ("面版－加勁材連接與局部承壓已依輸入容量檢核；面版細部、複合滑動與整體圓弧滑動未檢核"
+         "（整體穩定請另用 slope_stability.py）。" if connection else
+         "面版連接強度、局部承壓、面版細部、複合滑動與整體圓弧滑動未檢核；"
+         "整體穩定請另用 slope_stability.py。"),
         "加勁區與牆後須設排水，未計靜水壓。",
     ]
     if rise > 0:
         warnings.append("斜填土時內部 σv 未計牆頂斜坡土重（偏不保守），坡度大時請以等值上載輸入。")
     warnings += EP.passive_warnings(passive, kh > 0)
-    return {
+    out = {
         "wall_type": "mse",
         "wall_label": SPEC["label"],
         "reinforcement": {"type": rkey, "label": rtype["label"], "Tal_kN_per_m": Tal, "coverage_ratio": Rc,
@@ -306,10 +357,14 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
         "external": {"static": ext_s, "seismic": ext_e},
         "passive": passive,
         "layers": layers,
+        "connection": connection,
         "checks": checks,
         "warnings": warnings,
         "pass": all(c["ok"] for c in checks),
     }
+    out["face_reinforcement"] = RC.design_mse_face_steel(q, out)
+    out["rebar_kg_per_m"] = out["face_reinforcement"]["total_kg_per_m"]
+    return out
 
 
 def format_report(res: Mapping[str, Any]) -> str:
@@ -320,6 +375,8 @@ def format_report(res: Mapping[str, Any]) -> str:
            r["count"], r["length_m"], r["Tal_kN_per_m"], r["coverage_ratio"]),
         "保留土 Ka=%.3f、加勁土 Ka=%.3f、基底 μ=%.3f；kh=%.2f"
         % (res["Ka_retained"], res["Ka_reinforced"], res["soil"]["base_friction"], res["seismic"]["kh"]),
+        "面版配筋量：%.2f kg/m（含 %.0f%% 搭接、錨定與損耗）"
+        % (res["rebar_kg_per_m"], res["face_reinforcement"]["lap_allowance"] * 100.0),
         "",
     ]
     for case, ext in (("常時", res["external"]["static"]), ("地震", res["external"]["seismic"])):

@@ -554,6 +554,365 @@ def wall_min_steel(b_mm, t_mm):
     }
 
 
+# 重力式／半重力式的名目構造鋼筋（非強度控制）
+MASS_WALL_FACE_BAR = "D13"
+MASS_WALL_FACE_SPACING_MM = 250.0
+MASS_WALL_BASE_BAR = "D16"
+MASS_WALL_BASE_SPACING_MM = 200.0
+MASS_WALL_TEMPERATURE_RATIO = 0.002
+
+
+def design_mass_wall_steel(q, wall_res=None, cc=None):
+    """重力式／半重力式擋土牆的名目構造鋼筋（不是撓曲配筋）。
+
+    為什麼不套懸臂公式
+    ------------------
+    重力式靠自重穩定，牆身屬大體積混凝土；半重力式的牆身厚度由頂寬與
+    牆面坡度決定（可達 1 m 以上），撓曲需求極小。兩者若套用懸臂式的
+    莖板／底板配筋，會產生不存在的鋼筋量（實測重力式 3 m 被算出
+    66.8 kg/m）。工作簿 `擋土牆安定分析.mod.xls` 的重力式工作表也只在
+    止滑榫（b>0）才設計受力鋼筋。
+
+    本函式只提供**溫度收縮與構造鋼筋**：
+      牆面（露出側）D13@250（垂直向＋水平向，單面雙向）
+      底部縱向 D16@200（沿牆長、分佈於底寬）
+    並以 250 mm 有效表層換算溫度鋼筋比，確認為 0.002 以上。
+
+    ⚠ 計量單位：`As` 是「每公尺排筋方向的鋼筋面積」（mm²/m）。
+      垂直筋的長度 = 牆高 H；水平筋的長度 = 牆高 H（沿高度共有 H/間距 層，
+      每層 1 m）；底部縱筋的長度 = 底寬 BL。三者不可一律乘 1.0 m ——
+      先前版本把水平筋與底部筋都乘 1.0，分別少算 H 倍與 BL 倍。
+    """
+    c = dict(CONCRETE, **(cc or {}))
+    H = float(q["height_m"])
+    BL = float(q["base_width_m"])
+    face_bar = str(q.get("mass_wall_face_bar") or MASS_WALL_FACE_BAR)
+    face_sp = float(q.get("mass_wall_face_spacing_mm") or MASS_WALL_FACE_SPACING_MM)
+    base_bar = str(q.get("mass_wall_base_bar") or MASS_WALL_BASE_BAR)
+    base_sp = float(q.get("mass_wall_base_spacing_mm") or MASS_WALL_BASE_SPACING_MM)
+    surface_mm = float(q.get("mass_wall_surface_mm") or 250.0)
+    if face_bar not in REBAR_SIZES or base_bar not in REBAR_SIZES:
+        raise ValueError("mass_wall_face_bar／base_bar 必須是 %s" %
+                         "、".join(sorted(REBAR_SIZES)))
+    if face_sp <= 0 or base_sp <= 0:
+        raise ValueError("構造鋼筋間距必須大於 0")
+
+    As_face = _bar_area(face_bar) * 1000.0 / face_sp
+    As_base = _bar_area(base_bar) * 1000.0 / base_sp
+    rho = As_face / (1000.0 * surface_mm)
+
+    rows = [
+        ("牆面（露出側）垂直構造筋", As_face, H),
+        ("牆面（露出側）水平構造筋", As_face, H),
+        ("底部縱向構造筋", As_base, BL),
+    ]
+    detail = [{"item": n, "As_mm2": round(a, 1), "len_m": round(l, 3),
+               "kg_per_m": round(_kg(a, l), 3)} for n, a, l in rows]
+    sub = sum(_kg(a, l) for n, a, l in rows)
+    total = sub * (1.0 + LAP_ALLOWANCE)
+    return {
+        "structural_rebar": False,
+        "face_bar": face_bar, "face_spacing_mm": face_sp,
+        "base_bar": base_bar, "base_spacing_mm": base_sp,
+        "As_face_mm2_per_m": round(As_face, 1),
+        "As_base_mm2_per_m": round(As_base, 1),
+        "temperature_ratio": round(rho, 5),
+        "temperature_min": MASS_WALL_TEMPERATURE_RATIO,
+        "surface_mm": surface_mm,
+        "rows": detail,
+        "subtotal_kg_per_m": round(sub, 3),
+        "total_kg_per_m": round(total, 3),
+        "lap_allowance": LAP_ALLOWANCE,
+        "ok": rho >= MASS_WALL_TEMPERATURE_RATIO,
+        "note": ("重力式／半重力式不設撓曲主筋；本表為牆面（露出側）單面雙向"
+                 "溫度收縮與構造鋼筋＋底部縱筋，止滑榫另依實際設置情形設計。"),
+    }
+
+
+def _rebar_mass(rows, *, note, applicable=True, basis=""):
+    """把 (位置, 等效 As mm²/m, 長度 m) 彙總成每公尺牆長的鋼筋量。"""
+    detail = []
+    for name, area, length in rows:
+        area = max(0.0, float(area or 0.0))
+        length = max(0.0, float(length or 0.0))
+        detail.append({
+            "item": name,
+            "As_mm2": round(area, 1),
+            "len_m": round(length, 3),
+            "kg_per_m": round(_kg(area, length), 3),
+        })
+    subtotal = sum(r["kg_per_m"] for r in detail)
+    total = subtotal * (1.0 + LAP_ALLOWANCE) if applicable else 0.0
+    return {
+        "applicable": bool(applicable),
+        "rows": detail,
+        "subtotal_kg_per_m": round(subtotal, 3),
+        "total_kg_per_m": round(total, 3),
+        "lap_allowance": LAP_ALLOWANCE,
+        "ok": True,
+        "basis": basis,
+        "note": note,
+    }
+
+
+def _max_member_steel(members, *tokens):
+    values = []
+    for member in members or []:
+        name = str(member.get("member") or "")
+        if all(token in name for token in tokens):
+            values.append(float((member.get("flexure") or {}).get("As_prov_mm2") or 0.0))
+    return max(values) if values else 0.0
+
+
+def design_counterfort_wall_steel(q, wall_res, cc=None):
+    """扶壁式擋土牆每公尺牆長的鋼筋量（牆板、底板、扶壁、繫筋）。"""
+    g = wall_res["geometry"]
+    st = wall_res.get("structure") or {}
+    slabs = st.get("slabs") or []
+    H = float(g["H"])
+    ts = float(g["ts"])
+    tb = float(g["tb"])
+    heel = float(g["heel"])
+    toe = float(g["Lt"])
+    tc = float(g["tc"])
+    ctop = float(g["ctop"])
+    S = float(g["S"])
+    c = dict(CONCRETE, **(cc or {}))
+    cover = float(c["cover_mm"])
+
+    rows = [
+        ("牆板背面鉛直筋", _max_member_steel(slabs, "牆板", "鉛直負彎矩"), H),
+        ("牆板前面鉛直筋", _max_member_steel(slabs, "牆板", "鉛直正彎矩"), H),
+        ("牆板背面水平筋", _max_member_steel(slabs, "牆板", "水平負彎矩"), H),
+        ("牆板前面水平筋", _max_member_steel(slabs, "牆板", "水平正彎矩"), H),
+        ("踵板上層筋", _max_member_steel(slabs, "踵板負彎矩"), heel),
+        ("踵板下層筋", _max_member_steel(slabs, "踵板正彎矩"), heel),
+        ("趾板下層筋", _max_member_steel(slabs, "趾板"), toe),
+    ]
+
+    cf = st.get("counterfort") or {}
+    main = cf.get("main") or {}
+    if main.get("bar") and main.get("count"):
+        bar = str(main["bar"])
+        count = int(main["count"])
+        diagonal = math.hypot(H, heel - ctop)
+        rows.append(("扶壁主拉力筋（%d-%s／支）" % (count, bar),
+                     count * _bar_area(bar) / S, diagonal))
+
+    stirrup = cf.get("stirrup") or {}
+    if stirrup.get("bar") and stirrup.get("spacing_mm"):
+        bar = str(stirrup["bar"])
+        spacing = float(stirrup["spacing_mm"]) / 1000.0
+        diagonal = math.hypot(H, heel - ctop)
+        n_ties = math.ceil(diagonal / max(spacing, 1e-9)) + 1
+        width = max(tc - 2.0 * cover / 1000.0, 0.10)
+        depth = max(float(cf.get("d_mm") or 0.0) / 1000.0 - 2.0 * cover / 1000.0, 0.10)
+        tie_length = 2.0 * (width + depth) + 0.30
+        rows.append(("扶壁水平箍筋（%s 兩肢 @%d）" % (bar, int(stirrup["spacing_mm"])),
+                     n_ties * _bar_area(bar) / S, tie_length))
+
+    tie_lengths = {
+        "牆板": ts + 0.60,
+        "踵板": tb + 0.60,
+    }
+    for tie in st.get("ties") or []:
+        name = str(tie.get("member") or "")
+        length = tie_lengths.get("牆板" if "牆板" in name else "踵板", 1.0)
+        rows.append(("%s（%s 兩肢 @%d）" % (name, tie.get("bar"), int(tie.get("spacing_mm") or 0)),
+                     float(tie.get("As_prov_mm2_per_m") or 0.0), length))
+
+    out = _rebar_mass(
+        rows,
+        note=("依扶壁式引擎之牆板三帶彎矩、踵板連續版、趾板懸臂、扶壁 T 梁與繫筋設計彙總；"
+              "箍筋與繫筋長度採矩形圍束與 0.6 m 錨定長度之保守估列，施工詳圖仍須依實際彎鉤調整。"),
+        basis="混凝土結構設計規範 §3.4.4、§3.6.1、§4.4.1.1（100.06.09 版）",
+    )
+    out["ok"] = bool(wall_res.get("pass")) and all(
+        bool((m.get("flexure") or {}).get("ok")) for m in slabs
+    )
+    return out
+
+
+def design_anchored_wall_steel(q, wall_res, cc=None):
+    """錨定式擋土牆每公尺牆長的牆面、基腳鋼筋與地錨承壓區補強。"""
+    members = (wall_res.get("wall") or {}).get("members") or []
+    g = wall_res["geometry"]
+    H = float(g["H"])
+    B = float(g["B"])
+    tb = float(g["tb"])
+    sh = float(g["sh"])
+    n_anchor_rows = len(wall_res.get("anchors") or [])
+    c = dict(CONCRETE, **(cc or {}))
+    rows = [
+        ("牆面鉛直筋（背面，地錨處）",
+         _max_member_steel(members, "牆面鉛直筋", "背面"), H),
+        ("牆面鉛直筋（正面，跨中）",
+         _max_member_steel(members, "牆面鉛直筋", "正面"), H),
+        ("牆面水平筋（背面，地錨處）",
+         _max_member_steel(members, "牆面水平筋", "背面"), H),
+        ("牆面水平筋（正面，跨中）",
+         _max_member_steel(members, "牆面水平筋", "正面"), H),
+    ]
+    mesh_side_m = 1.00
+    mesh_spacing_m = 0.20
+    n_bars = int(math.ceil(mesh_side_m / mesh_spacing_m)) + 1
+    mesh_as = _bar_area("D13") * 2.0 * n_bars / max(sh, 1e-9)
+    rows.append(("地錨承壓區補強網（正面 D13@200 雙向，1.0×1.0 m）",
+                 mesh_as, float(n_anchor_rows)))
+
+    # 基腳是牆面的支承，不能只畫在圖上卻不計鋼筋。依最小鋼筋量配置
+    # 上下兩層橫向筋（長度＝基腳寬）與縱向分布筋（沿牆長 1 m）。
+    as_min = 0.0018 * 1000.0 * tb * 1000.0
+    base_bar, base_sp, base_as = _pick_bars(
+        as_min, c["cover_mm"], tb * 1000.0, prefer=("D16", "D13")
+    )
+    rows += [
+        ("基腳底層橫向筋", base_as, B),
+        ("基腳頂層橫向筋", base_as, B),
+        ("基腳縱向分布筋（上下層）", 2.0 * base_as * B, 1.0),
+    ]
+
+    out = _rebar_mass(
+        rows,
+        note=("牆面四向筋取自連續梁撓曲設計；基腳以最小鋼筋配置上下層橫向筋與"
+              "縱向分布筋；地錨承壓區以每排 1.0×1.0 m、D13@200 單面雙向補強網估列，"
+              "未含錨頭鋼鈑、螺旋筋與施工架。"),
+        basis="公路邊坡工程設計規範第六章、混凝土結構設計規範（100.06.09 版）",
+    )
+    out["base_rebar"] = {
+        "bar": base_bar,
+        "spacing_mm": int(base_sp),
+        "As_prov_mm2_per_m": round(base_as, 1),
+        "basis": "基腳最小鋼筋 0.0018bh；上下層橫向筋＋縱向分布筋",
+    }
+    out["ok"] = bool(wall_res.get("pass")) and all(
+        bool((m.get("flexure") or {}).get("ok")) for m in members
+    )
+    return out
+
+
+def design_mse_face_steel(q, wall_res, cc=None):
+    """加勁式擋土牆 RC 面版初步配筋（每公尺牆長）。"""
+    facing = str(q.get("facing_type") or q.get("face_panel_type") or "precast_panel").lower()
+    if facing in ("segmental_block", "block", "none", "不配筋"):
+        return _rebar_mass(
+            [],
+            applicable=False,
+            note="所選面版為塊狀面版或不配置 RC 鋼筋；面版連接強度仍須另行檢核。",
+            basis="水土保持技術規範 §118 六(三)",
+        )
+
+    g = wall_res["geometry"]
+    H = float(g["height_m"])
+    thickness = float(q.get("face_panel_thickness_m") or 0.20)
+    panel_width = float(q.get("panel_width_m") or 1.50)
+    layer_spacing = float(q.get("vertical_spacing_m") or 0.60)
+    span = max(panel_width, layer_spacing)
+    gamma_r = float((wall_res.get("soil") or {}).get("reinforced_gamma") or 19.0)
+    qs = float((wall_res.get("soil") or {}).get("surcharge_kpa") or 0.0)
+    ka = float(wall_res.get("Ka_retained") or 0.333)
+    p = ka * (gamma_r * H + qs)
+    Mu = 1.7 * p * span ** 2 / 8.0
+
+    panel_cc = dict(CONCRETE, **(cc or {}))
+    panel_cc["cover_mm"] = float(q.get("face_panel_cover_mm") or 50.0)
+    flex = flexure_design(
+        Mu,
+        b_mm=1000.0,
+        h_mm=thickness * 1000.0,
+        cc=panel_cc,
+        bar_prefer=("D13", "D16"),
+    )
+    as_min = 0.0018 * 1000.0 * thickness * 1000.0
+    bar, spacing, as_prov = _pick_bars(
+        max(float(flex.get("As_prov_mm2") or 0.0), as_min),
+        panel_cc["cover_mm"],
+        thickness * 1000.0,
+        prefer=("D13", "D16"),
+    )
+    rows = [
+        ("面版水平筋（單層）", as_prov, H),
+        ("面版豎向筋（單層）", as_prov, H),
+    ]
+    out = _rebar_mass(
+        rows,
+        note=("面版採 %.0f mm 厚 RC 預鑄／場鑄面版，以 %.2f m 跨度、底部土壓 %.2f kPa "
+              "作單向版初步設計；面版－加勁材連接、吊裝與溫度收縮細節仍須另計。"
+              % (thickness * 1000.0, span, p)),
+        basis="水土保持技術規範 §118 六(三)、混凝土結構設計規範（100.06.09 版）",
+    )
+    out.update({
+        "facing_type": facing,
+        "face_panel_thickness_mm": round(thickness * 1000.0, 1),
+        "panel_width_m": round(panel_width, 3),
+        "design_pressure_kpa": round(p, 3),
+        "Mu_kNm_per_m": round(Mu, 3),
+        "bar": bar,
+        "spacing_mm": int(spacing),
+        "As_prov_mm2_per_m": round(as_prov, 1),
+        "flexure_ok": bool(flex.get("ok")),
+    })
+    out["ok"] = bool(wall_res.get("pass")) and bool(flex.get("ok")) and thickness >= 0.14
+    return out
+
+
+BLOCK_WALL_TYPES = ("gabion", "crib", "masonry_wet", "masonry_dry", "sandwich")
+
+
+def design_block_wall_steel(q, wall_res=None, cc=None):
+    """疊砌／砌石牆不配置 RC 鋼筋，鋼筋量明確為零。"""
+    wt = str((wall_res or {}).get("wall_type") or q.get("wall_type") or "").lower()
+    return _rebar_mass(
+        [],
+        applicable=False,
+        note=("%s 為疊砌式或加勁式非 RC 牆體，不配置 RC 鋼筋；"
+              "蛇籠網線、格籠構件或面版連接件之材料規格另依標準圖檢核。" % wt),
+        basis="水土保持技術規範 §118 六～八",
+    )
+
+
+def design_wall_rebar(q, wall_res, cc=None):
+    """依牆型分流的配筋設計唯一入口。
+
+    回傳 ``total_kg_per_m`` 供數量、預算、報告共用，避免各處自行判斷
+    wall_type 而出現「報告說無須配筋、預算卻算懸臂鋼筋」的矛盾。
+    """
+    wt = str((wall_res or {}).get("wall_type") or q.get("wall_type") or "").lower()
+    if wt in ("gravity", "semigravity"):
+        mass = design_mass_wall_steel(q, wall_res, cc)
+        return {"wall_type": wt, "structural": None, "mass": mass,
+                "total_kg_per_m": mass["total_kg_per_m"], "ok": mass["ok"]}
+    if wt == "cantilever":
+        stem = design_cantilever_stem(q, wall_res, cc)
+        base = design_base_slab(q, wall_res, cc)
+        kg = rebar_kg_per_m(q, stem, base)
+        ok = bool(stem.get("ok"))
+        if base:
+            ok = ok and all(m.get("ok") for m in base.get("members") or [])
+        return {"wall_type": wt, "structural": {"stem": stem, "base": base},
+                "mass": None, "kg": kg, "total_kg_per_m": kg["total_kg_per_m"],
+                "ok": ok}
+    if wt == "counterfort":
+        steel = design_counterfort_wall_steel(q, wall_res, cc)
+        return {"wall_type": wt, "structural": steel, "mass": None,
+                "total_kg_per_m": steel["total_kg_per_m"], "ok": steel["ok"]}
+    if wt == "anchored":
+        steel = design_anchored_wall_steel(q, wall_res, cc)
+        return {"wall_type": wt, "structural": steel, "mass": None,
+                "total_kg_per_m": steel["total_kg_per_m"], "ok": steel["ok"]}
+    if wt == "mse":
+        steel = design_mse_face_steel(q, wall_res, cc)
+        return {"wall_type": wt, "structural": steel, "mass": None,
+                "total_kg_per_m": steel["total_kg_per_m"], "ok": steel["ok"]}
+    if wt in BLOCK_WALL_TYPES:
+        steel = design_block_wall_steel(q, wall_res, cc)
+        return {"wall_type": wt, "structural": steel, "mass": None,
+                "total_kg_per_m": 0.0, "ok": True}
+    raise ValueError(
+        "擋土牆配筋尚未支援 wall_type=%r（支援 gravity／semigravity／cantilever／"
+        "counterfort／anchored／mse／gabion／crib／masonry_wet／masonry_dry／sandwich）" % wt)
+
+
 def design_cantilever_stem(q, wall_res, cc=None):
     """懸臂式擋土牆莖板配筋（牆底為控制斷面）。
 
@@ -792,11 +1151,25 @@ if __name__ == "__main__" and "--selftest" not in sys.argv:
     model, q, _ = CC.quantity_context(case)
     if model == "wall":
         wr = RW.analyse(q, soil=case.get("soil") or {}, seismic={"kh": 0.0})
-        if wr["wall_type"] == "gravity":
-            print("重力式擋土牆：屬質量混凝土，無須結構配筋（僅構造筋）。")
-            print("  → 報告第 8 章應說明：重力式靠自重穩定，配筋僅為溫度／收縮與構造需求。")
-            raise SystemExit(0)
-        d = design_cantilever_stem(q, wr)
+        wd = design_wall_rebar(q, wr)
+        print("牆型：%s；配筋量 %.2f kg/m（含 %.0f%% 搭接、錨定與損耗）"
+              % (wd["wall_type"], wd["total_kg_per_m"],
+                 LAP_ALLOWANCE * 100.0))
+        steel = wd.get("structural") or wd.get("mass") or {}
+        for row in steel.get("rows") or []:
+            is_face = "牆面" in row["item"]
+            bar = steel.get("face_bar") if is_face else steel.get("base_bar")
+            spacing = steel.get("face_spacing_mm") if is_face else steel.get("base_spacing_mm")
+            if not bar:
+                bar, spacing = steel.get("bar", ""), steel.get("spacing_mm", "")
+            print("  %-36s %s@%-4s As=%8.1f mm²/m  %8.3f kg/m"
+                  % (row["item"], bar, spacing,
+                     row["As_mm2"], row["kg_per_m"]))
+        print()
+        print(json.dumps({"wall_type": wd["wall_type"],
+                          "total_kg_per_m": wd["total_kg_per_m"],
+                          "ok": wd["ok"]}, ensure_ascii=False))
+        raise SystemExit(0 if wd["ok"] else 1)
     elif model == "channel":
         hy = case.get("hydraulics") or {}
         hr = CH.analyse(float(hy.get("design_flow_m3s") or 0.5),

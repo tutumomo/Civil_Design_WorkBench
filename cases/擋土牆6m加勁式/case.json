@@ -1,0 +1,104 @@
+{
+ "schema": "civil-case/1",
+ "_note": "擋土牆類別示範案（加勁式）：6 m 牆高、埋入 0.60 m、有效高 5.40 m；土工格網 10 層、長 5.40 m。RC 面版配筋與加勁材數量分開計價。",
+ "project": {
+  "name": "擋土牆6m加勁式",
+  "full_name": "擋土牆新建工程（6 m 加勁式擋土牆，L = 20 m）",
+  "category": "擋土牆",
+  "agency": "（主辦機關待填）",
+  "designer": "本工作區 AI 設計產線（tools/design；加勁式）",
+  "date": "2026-11-04",
+  "boq_date": "115年1月",
+  "version": "v2026.11.04-1",
+  "location": {
+   "county": "（待填）",
+   "town": "（待填）",
+   "village": "",
+   "section": "",
+   "desc": "（案址待填；本檔為牆型驗證用示範）"
+  },
+  "crs": {
+   "name": "TWD97 TM2 二度分帶",
+   "epsg": "EPSG:3826",
+   "unit": "公尺"
+  },
+  "coords": [],
+  "report_title": "設計報告書",
+  "report_subtitle": "6 m 加勁式擋土牆新建"
+ },
+ "quantities": {
+  "model": "wall",
+  "values": {
+   "wall_type": "mse",
+   "length_m": 20.0,
+   "height_m": 6.0,
+   "embedment_m": 0.60,
+   "reinforcement_type": "geogrid",
+   "reinforcement_length_m": 5.40,
+   "vertical_spacing_m": 0.60,
+   "first_layer_m": 0.30,
+   "long_term_strength_kN_per_m": 40.0,
+   "coverage_ratio": 1.0,
+   "facing_type": "precast_panel",
+   "face_panel_thickness_m": 0.20,
+   "panel_width_m": 1.50,
+   "face_panel_cover_mm": 50.0,
+   "connector_capacity_kN": 100.0,
+   "connector_bearing_area_mm2": 20000.0,
+   "connector_fs": 1.5,
+   "include_passive": false,
+   "passive_ratio": 1.0,
+   "weep_diameter_m": 0.05,
+   "backfill_thickness_m": 0.30,
+   "excavation_work_m": 0.30,
+   "excavation_depth_m": 0.10
+  },
+  "notes": [
+   "外部穩定與逐層拉斷／拉出由 tools/design/mse_wall.py 計算；RC 面版配筋由 rc_design.design_mse_face_steel() 計算。",
+   "鋼筋量僅計 RC 面版；加勁材以層數×長度×牆長派生舖設面積，兩者分別進入預算。",
+   "加勁材長期設計強度、面版連接器容量與局部承壓面積均為示範值，正式設計須以產品型錄或試驗替換。"
+  ]
+ },
+ "boq": {
+  "rates": {},
+  "items": [
+   {"no": "01", "name": "施工測量及放樣", "unit": "式", "qty": 1, "price": 4000.0, "note": "經驗值"},
+   {"no": "02", "name": "擋土牆基礎開挖（含工作面）", "unit": "m3", "qty_from": "excavation_m3", "price": 70.0, "note": "契約「機具挖方(一般)」"},
+   {"no": "03", "name": "RC 面版混凝土 fc'=210 kgf/cm2（含澆置）", "unit": "m3", "qty_from": "concrete_volume_m3", "price": 3190.0, "note": "僅 RC 面版"},
+   {"no": "04", "name": "鋼筋及加工組立 SD280／SD420", "unit": "kg", "qty_from": "rebar_kg_design", "price": 35.0, "note": "採 RC 面版配筋設計值，含 12% 搭接與損耗"},
+   {"no": "05", "name": "RC 面版模板", "unit": "m2", "qty_from": "formwork_m2", "price": 1230.0, "note": "面版正面模板"},
+   {"no": "06", "name": "加勁區級配填方（含夯實）", "unit": "m3", "qty_from": "backfill_gravel_m3", "price": 770.0, "note": "加勁區填方"},
+   {"no": "07", "name": "土工格網加勁材（含舖設）", "unit": "m2", "qty_from": "mse_reinforcement_area_m2", "price": 320.0, "note": "10 層×5.40 m×20 m；單價為假設值"},
+   {"no": "08", "name": "面版連接器及局部承壓配件", "unit": "組", "qty_from": "mse_layer_count", "price": 1800.0, "note": "每層一組／每公尺牆長之示範單價"},
+   {"no": "09", "name": "排水孔 Ø5 cm（含洩水管及反濾層）", "unit": "孔", "qty_from": "weep_hole_count", "price": 275.0, "note": "第121條配置"},
+   {"no": "10", "name": "伸縮縫（填縫料及止水帶）", "unit": "處", "qty_from": "expansion_joint_count", "price": 1140.0, "note": "第121條配置"},
+   {"no": "11", "name": "機具進出場費", "unit": "式", "qty": 1, "price": 12000.0, "note": "經驗值"}
+  ]
+ },
+ "report": {
+  "summary": {
+   "paragraphs": [
+    "本工程為新建 6 m 加勁式擋土牆，牆長 20 m。牆高 6.0 m、埋入 0.60 m，有效高 5.40 m；RC 面版厚 0.20 m，土工格網 10 層、每層長 5.40 m、層距 0.60 m。",
+    "外部滑動、傾倒、偏心與承載，以及加勁材逐層拉斷、拉出與錨定長度均依 FHWA 簡化法檢核。",
+    "RC 面版以面版寬度與層距較大者作單向版初步設計，配置 D13 雙向筋；鋼筋量與加勁材舖設面積分開計算。"
+   ],
+   "conclusions": [
+    "加勁長度 5.40 m ≥ 0.7H = 4.20 m，且 ≥ 2.4 m；內部與外部穩定均通過示範檢核。",
+    "整體圓弧滑動、複合滑動、面版吊裝與連接細部仍須另案檢核。",
+    "加勁材數量由層數、長度與牆長派生，預算書不另填數量。"
+   ]
+  },
+  "basis": {
+   "notes": [
+    "設計計算由 tools/design/wall_system.py 分流至 mse_wall.py；數量模型使用相同牆型與幾何。",
+    "加勁式依水土保持技術規範第118條六(三)與 FHWA-NHI-10-024。"
+   ],
+   "regulation_ids": ["SWH-118", "SWH-119", "SWH-120", "SWH-121"]
+  }
+ },
+ "section": {
+  "scale": "auto",
+  "out": "out/擋土牆6m加勁式/S-01_擋土牆標準斷面圖.dxf",
+  "rebar_out": "out/擋土牆6m加勁式/S-02_擋土牆配筋圖.dxf"
+ }
+}

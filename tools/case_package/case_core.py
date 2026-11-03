@@ -44,6 +44,7 @@ import argparse
 import copy
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -66,8 +67,9 @@ try:
     import channel_hydraulics as CH                  # 排水溝水力計算
     import rc_design as RC                           # RC 構材配筋設計
     import box_culvert as BC                         # 單／雙／三孔箱涵
+    import wall_system as WS                         # 擋土牆七型分流入口
 except Exception:                                    # design 模組缺失時不阻擋
-    HY = RW = CH = RC = SS = BC = None
+    HY = RW = CH = RC = SS = BC = WS = None
 
 SCHEMA = "civil-case/1"
 
@@ -92,6 +94,72 @@ def _roc_date(iso_date):
         return f"{int(y) - 1911}年{int(m)}月"
     except Exception:
         return str(iso_date)
+
+
+def _pick_value(*values, default=None):
+    for value in values:
+        if value not in (None, ""):
+            return value
+    return default
+
+
+def _box_culvert_kwargs(case, values):
+    """箱涵分析參數的唯一來源；數量、預算、報告與設計閘門共用。"""
+    hy = case.get("hydraulics") or {}
+    cv = case.get("culvert") or {}
+    return {
+        "design_flow_m3s": float(hy.get("design_flow_m3s") or 0.0),
+        "slope": float(hy.get("slope") or 0.005),
+        "manning_n": float(hy.get("manning_n") or 0.014),
+        "freeboard_min_m": float(hy.get("freeboard_min_m") or 0.20),
+        "soil_unit_weight_kn_m3": float(
+            cv.get("soil_unit_weight_kn_m3") or 18.0),
+        "soil_phi_deg": float(cv.get("soil_phi_deg") or 30.0),
+        "surcharge_kpa": float(cv.get("surcharge_kpa") or 0.0),
+        "traffic_type": _pick_value(
+            cv.get("traffic_type"), values.get("traffic_type"), default="h20"),
+        "traffic_load_kpa": float(
+            _pick_value(cv.get("traffic_load_kpa"),
+                        values.get("traffic_load_kpa"), default=0.0)),
+        "traffic_lanes": int(
+            _pick_value(cv.get("traffic_lanes"),
+                        values.get("traffic_lanes"), default=4)),
+        "traffic_impact_factor": (
+            None if _pick_value(cv.get("traffic_impact_factor"),
+                                values.get("traffic_impact_factor")) is None
+            else float(_pick_value(cv.get("traffic_impact_factor"),
+                                   values.get("traffic_impact_factor")))),
+        "groundwater_depth_m": (
+            None if _pick_value(cv.get("groundwater_depth_m"),
+                                values.get("groundwater_depth_m")) is None
+            else float(_pick_value(cv.get("groundwater_depth_m"),
+                                   values.get("groundwater_depth_m")))),
+        "internal_water_depth_m": float(
+            cv.get("internal_water_depth_m") or 0.0),
+        "load_factor": float(cv.get("load_factor") or 1.7),
+        "seismic_kh": float((case.get("seismic") or {}).get("kh", 0.0) or 0.0),
+        "allowable_bearing_kpa": (
+            None if _pick_value(cv.get("allowable_bearing_kpa"),
+                                values.get("allowable_bearing_kpa")) is None
+            else float(_pick_value(cv.get("allowable_bearing_kpa"),
+                                   values.get("allowable_bearing_kpa")))),
+        "cover_mm": float(
+            _pick_value(cv.get("cover_mm"), values.get("cover_mm"), default=50.0)),
+        "crack_limit_mm": float(
+            _pick_value(cv.get("crack_limit_mm"),
+                        values.get("crack_limit_mm"), default=0.30)),
+        "bar_preference": str(
+            _pick_value(cv.get("bar_preference"),
+                        values.get("bar_preference"), default="auto")),
+        "distribution_bar": str(
+            _pick_value(cv.get("distribution_bar"),
+                        values.get("distribution_bar"), default="D13")),
+        "rebar_loss_rate": float(
+            _pick_value(cv.get("rebar_loss_rate"),
+                        values.get("rebar_loss_rate"),
+                        default=BC.REBAR_LOSS_RATE
+                        if BC is not None else 0.06)),
+    }
 
 
 def quantity_context(case):
@@ -136,12 +204,19 @@ def quantity_context(case):
         import rc_design as _RC
         _L = float(values.get("length_m") or 0)
         if model == "wall" and _L > 0:
-            import retaining_wall as _RW
-            _wr = _RW.analyse(values, soil=case.get("soil") or {})
-            _kg = _RC.rebar_kg_per_m(values, _RC.design_cantilever_stem(values, _wr),
-                                     _RC.design_base_slab(values, _wr))
-            values["rebar_kg_per_m_design"] = round(_kg["total_kg_per_m"], 2)
-            values["rebar_kg_design"] = round(_kg["total_kg_per_m"] * _L, 1)
+            if WS is None:
+                raise RuntimeError("wall_system 未載入")
+            _wr = WS.analyse(values, case)
+            # 牆型分流的唯一入口：重力式／半重力式走名目構造鋼筋，
+            # 懸臂式才做莖板＋底板的撓曲配筋。不可再對所有 wall 套同一公式。
+            _wd = WS.rebar_design(values, _wr)
+            values["rebar_kg_per_m_design"] = round(_wd["total_kg_per_m"], 2)
+            values["rebar_kg_design"] = round(_wd["total_kg_per_m"] * _L, 1)
+            values["wall_rebar"] = {
+                "wall_type": _wd["wall_type"],
+                "total_kg_per_m": round(_wd["total_kg_per_m"], 3),
+                "ok": bool(_wd.get("ok")),
+            }
         elif model == "channel" and _L > 0:
             import channel_hydraulics as _CH
             _hy = case.get("hydraulics") or {}
@@ -155,34 +230,7 @@ def quantity_context(case):
             values["rebar_kg_per_m_design"] = round(_kgc["total_kg_per_m"], 2)
             values["rebar_kg_design"] = round(_kgc["total_kg_per_m"] * _L, 1)
         elif model == "box_culvert" and BC is not None and _L > 0:
-            _hy = case.get("hydraulics") or {}
-            _cv = case.get("culvert") or {}
-            _br = BC.analyse(
-                values,
-                design_flow_m3s=float(_hy.get("design_flow_m3s") or 0.0),
-                slope=float(_hy.get("slope") or 0.005),
-                manning_n=float(_hy.get("manning_n") or 0.014),
-                freeboard_min_m=float(_hy.get("freeboard_min_m") or 0.20),
-                soil_unit_weight_kn_m3=float(_cv.get("soil_unit_weight_kn_m3") or 18.0),
-                soil_phi_deg=float(_cv.get("soil_phi_deg") or 30.0),
-                surcharge_kpa=float(_cv.get("surcharge_kpa") or 0.0),
-                traffic_type=_cv.get("traffic_type"),
-                traffic_load_kpa=float(_cv.get("traffic_load_kpa") or 0.0),
-                traffic_lanes=int(_cv.get("traffic_lanes") or 4),
-                traffic_impact_factor=_cv.get("traffic_impact_factor"),
-                groundwater_depth_m=(
-                    None if _cv.get("groundwater_depth_m") in (None, "")
-                    else float(_cv["groundwater_depth_m"])
-                ),
-                internal_water_depth_m=float(_cv.get("internal_water_depth_m") or 0.0),
-                load_factor=float(_cv.get("load_factor") or 1.7),
-                seismic_kh=float((case.get("seismic") or {}).get("kh", 0.0) or 0.0),
-                allowable_bearing_kpa=(
-                    None if _cv.get("allowable_bearing_kpa") in (None, "")
-                    else float(_cv["allowable_bearing_kpa"])
-                ),
-                rebar_loss_rate=float(_cv.get("rebar_loss_rate") or BC.REBAR_LOSS_RATE),
-            )
+            _br = BC.analyse(values, **_box_culvert_kwargs(case, values))
             _bq = _br["quantities"]
             values["rebar_kg_per_m_design"] = _bq["rebar_kg_per_m"]
             values["rebar_kg_design"] = _bq["rebar_kg_total"]
@@ -190,8 +238,16 @@ def quantity_context(case):
             values["formwork_m2_per_m_design"] = _bq["formwork_m2_per_m"]
             values["formwork_m2_design"] = _bq["formwork_m2"]
     except Exception as _ex:
-        issues.append({"level": "warn",
-                       "msg": "鋼筋設計量未算出（rebar_kg_design 不提供）：%s" % _ex})
+        if model == "wall":
+            issues.append({
+                "level": "error",
+                "msg": ("擋土牆配筋／數量未算出：%s。請確認 wall_type 與必要輸入"
+                        "（gravity／semigravity／cantilever／counterfort／anchored／mse）。"
+                        % _ex),
+            })
+        else:
+            issues.append({"level": "warn",
+                           "msg": "鋼筋設計量未算出（rebar_kg_design 不提供）：%s" % _ex})
     return model, values, issues
 
 
@@ -220,14 +276,10 @@ def consistency(case):
             _ratio = float(values.get("rebar_ratio_kg_m3") or 0)
             _kg = float(values.get("rebar_kg") or 0)
             _design_kg = None
-            if model == "wall" and RW is not None:
-                _wr = RW.analyse(values, soil=case.get("soil") or {},
-                                 seismic={"kh": float((case.get("seismic") or {}).get("kh", 0) or 0)})
-                if _wr["wall_type"] != "gravity":
-                    _stem = RC.design_cantilever_stem(values, _wr)
-                    _base = RC.design_base_slab(values, _wr)
-                    _r = RC.rebar_kg_per_m(values, _stem, _base)
-                    _design_kg = _r["total_kg_per_m"] * float(values.get("length_m") or 0)
+            if model == "wall" and WS is not None:
+                _wr = WS.analyse(values, case)
+                _wd = WS.rebar_design(values, _wr)
+                _design_kg = _wd["total_kg_per_m"] * float(values.get("length_m") or 0)
             if model == "channel" and CH is not None and _design_kg is None:
                 _hy = case.get("hydraulics") or {}
                 _hr = CH.analyse(float(_hy.get("design_flow_m3s") or 0.5),
@@ -243,9 +295,10 @@ def consistency(case):
             if _design_kg and _kg > 0:
                 _diff = (_design_kg - _kg) / _kg * 100.0
                 if abs(_diff) > 25.0:
-                    warn("鋼筋量：數量表以假設含鋼量 %.1f kg/m³ 得 %.0f kg，"
-                         "但配筋設計推算為 %.0f kg（%+.0f%%）。"
-                         "假設值與設計值差超過 25%%，正式預算前應以設計值或詢價確認。"
+                    warn("鋼筋量：case 內的含鋼量假設值 %.1f kg/m³ 推得 %.0f kg，"
+                         "與配筋設計值 %.0f kg 差 %+.0f%%。"
+                         "預算與報告已採設計值（rebar_kg_design）；"
+                         "建議更新或移除 rebar_ratio_kg_m3，避免日後誤用。"
                          % (_ratio, _kg, _design_kg, _diff))
         except Exception as _ex:
             warn("鋼筋量交叉檢查未完成：%s" % _ex)
@@ -256,9 +309,8 @@ def consistency(case):
     # 這裡把它變成 error（不是 warn）—— 不通過就不能交件。
     try:
         _fails = []
-        if model == "wall" and RW is not None:
-            _wr = RW.analyse(values, soil=case.get("soil") or {},
-                             seismic={"kh": float((case.get("seismic") or {}).get("kh", 0) or 0)})
+        if model == "wall" and WS is not None:
+            _wr = WS.analyse(values, case)
             if not _wr.get("pass"):
                 for c in _wr.get("checks") or []:
                     if not c.get("ok"):
@@ -279,30 +331,7 @@ def consistency(case):
                 if not c.get("ok"):
                     _fails.append("排水溝 %s（計算值 %s）" % (c["item"], c.get("value")))
         elif model == "box_culvert" and BC is not None:
-            _hy3 = case.get("hydraulics") or {}
-            _cv = case.get("culvert") or {}
-            _br = BC.analyse(
-                values,
-                design_flow_m3s=float(_hy3.get("design_flow_m3s") or 0.0),
-                slope=float(_hy3.get("slope") or 0.005),
-                manning_n=float(_hy3.get("manning_n") or 0.014),
-                freeboard_min_m=float(_hy3.get("freeboard_min_m") or 0.20),
-                soil_unit_weight_kn_m3=float(_cv.get("soil_unit_weight_kn_m3") or 18.0),
-                soil_phi_deg=float(_cv.get("soil_phi_deg") or 30.0),
-                surcharge_kpa=float(_cv.get("surcharge_kpa") or 0.0),
-                traffic_load_kpa=float(_cv.get("traffic_load_kpa") or 0.0),
-                groundwater_depth_m=(
-                    None if _cv.get("groundwater_depth_m") in (None, "")
-                    else float(_cv["groundwater_depth_m"])
-                ),
-                internal_water_depth_m=float(_cv.get("internal_water_depth_m") or 0.0),
-                load_factor=float(_cv.get("load_factor") or 1.7),
-                seismic_kh=float((case.get("seismic") or {}).get("kh", 0.0) or 0.0),
-                allowable_bearing_kpa=(
-                    None if _cv.get("allowable_bearing_kpa") in (None, "")
-                    else float(_cv["allowable_bearing_kpa"])
-                ),
-            )
+            _br = BC.analyse(values, **_box_culvert_kwargs(case, values))
             for c in _br.get("checks") or []:
                 if not c.get("ok"):
                     _fails.append("箱涵 %s（計算值 %s）" % (c["item"], c.get("value")))
@@ -475,6 +504,360 @@ def _verdict(ok):
     return "符合" if ok else "不符合"
 
 
+def _wall_limit_text(c):
+    lim = c.get("limit")
+    if isinstance(lim, (tuple, list)):
+        return "%.3f ～ %.3f" % (lim[0], lim[1])
+    if isinstance(lim, str):
+        return lim
+    if lim is None:
+        return "—"
+    op = "≤" if c.get("relation") == "le" else ("≥" if c.get("relation") == "ge" else "")
+    return ("%s %.3f" % (op, lim)).strip()
+
+
+def _wall_check_rows(res):
+    rows = []
+    for c in res.get("checks") or []:
+        val = c.get("value")
+        rows.append({
+            "item": c.get("item", ""),
+            "requirement": _wall_limit_text(c),
+            "value": "—" if val is None else ("%.3f" % val if isinstance(val, (int, float))
+                                              else str(val)),
+            "verdict": _verdict(c.get("ok")),
+        })
+    return rows
+
+
+def _rebar_summary_table(design, q, title):
+    rows = []
+    for row in (design or {}).get("rows") or []:
+        rows.append([row.get("item", ""), "%.1f" % float(row.get("As_mm2") or 0),
+                     "%.2f" % float(row.get("len_m") or 0),
+                     "%.3f" % float(row.get("kg_per_m") or 0)])
+    L = float((q or {}).get("length_m") or 0)
+    total = float((design or {}).get("total_kg_per_m") or 0)
+    return _tbl(
+        title,
+        [("位置", 5.2, "left"), ("等效 As（mm²/m）", 2.8, "center"),
+         ("長度（m）", 2.0, "center"), ("kg/m", 1.8, "center")],
+        rows,
+        note=("淨重 %.2f kg/m，含 %.0f%% 搭接／錨定／損耗後 %.2f kg/m；"
+              "牆長 %.1f m → %.1f kg。"
+              % (float((design or {}).get("subtotal_kg_per_m") or 0),
+                 float((design or {}).get("lap_allowance") or 0) * 100.0,
+                 total, L, total * L)),
+    )
+
+
+def _advanced_wall_sections(res, q, case):
+    """Report sections for counterfort / anchored / MSE walls."""
+
+    wt = str(res.get("wall_type"))
+    out = {}
+    g = res.get("geometry") or {}
+    design = res.get("reinforcement") or {}
+    label = res.get("wall_label") or wt
+    checks = _wall_check_rows(res)
+    L = float(q.get("length_m") or 0)
+    total = float(design.get("total_kg_per_m") or 0)
+    form = float(q.get("formwork_m2") or 0)
+
+    if wt == "counterfort":
+        st = res.get("stability") or {}
+        static = st.get("static") or {}
+        out["loads"] = {
+            "items": [_tbl(
+                "載重與土壓力計算表（每公尺牆長）",
+                [("項目", 3.6, "left"), ("計算式／位置", 4.4, "left"),
+                 ("大小", 2.4, "center"), ("說明", 3.4, "left")],
+                [["牆板高 H", "底板頂以上", "%.2f m" % g.get("H", 0), "有效高 %.2f m" % g.get("eff", 0)],
+                 ["主動土壓力 Pa", "Rankine／Coulomb", "%.2f kN/m" % static.get("Pa_kN_per_m", 0),
+                  "作用於牆背"],
+                 ["上載 q", "均佈", "%.2f kPa" % (res.get("soil") or {}).get("surcharge_kpa", 0),
+                  "已計入土壓力"],
+                 ["牆體自重", "混凝土 24 kN/m³", "%.2f kN/m" % (res.get("concrete_m3_per_m", 0) * 24.0),
+                  "含底板、牆板與扶壁分攤"],
+                 ["地震力", "kh=%.2f" % (res.get("seismic") or {}).get("kh", 0),
+                  "%.2f kN/m" % static.get("F_inertia_kN_per_m", 0), "擬靜態法"]],
+                note="扶壁式以牆板／踵板連續版、趾板懸臂、扶壁 T 梁設計。",
+            )],
+            "notes": [
+                "扶壁中心距 %.2f m、厚 %.2f m、頂寬 %.2f m；底板 %.2f×%.2f m。"
+                % (g.get("S", 0), g.get("tc", 0), g.get("ctop", 0),
+                   g.get("B", 0), g.get("tb", 0)),
+            ],
+        }
+        member_rows = []
+        for m in (res.get("structure") or {}).get("slabs") or []:
+            fl = m.get("flexure") or {}
+            member_rows.append([
+                m.get("member", ""), "%.2f" % float(m.get("Mu_kNm_per_m") or 0),
+                "%s@%s" % (fl.get("bar", "—"), fl.get("spacing_mm", "—")),
+                "%.2f" % float(fl.get("phiMn_kNm") or 0), _verdict(fl.get("ok")),
+            ])
+        cf = (res.get("structure") or {}).get("counterfort") or {}
+        if cf.get("main"):
+            m = cf["main"]
+            member_rows.append([
+                "扶壁主拉力筋", "%.2f" % float(cf.get("Mu_kNm") or 0),
+                "%d-%s（%s 層）" % (m.get("count", 0), m.get("bar", "—"), m.get("layers") or "—"),
+                "%.2f" % float(cf.get("phiMn_kNm") or 0), _verdict(cf.get("flexure_ok")),
+            ])
+        if cf.get("stirrup"):
+            member_rows.append([
+                "扶壁水平箍筋", "Vu=%.2f kN" % float(cf.get("Vu_kN") or 0),
+                "%s 兩肢 @%s" % (cf["stirrup"].get("bar"), cf["stirrup"].get("spacing_mm")),
+                "φVn=%.2f" % float(cf.get("phiVn_kN") or 0), _verdict(cf.get("shear_ok")),
+            ])
+        for tie in (res.get("structure") or {}).get("ties") or []:
+            member_rows.append([
+                tie.get("member", ""), "Tu=%.2f kN/m" % float(tie.get("Tu_kN_per_m") or 0),
+                "%s 兩肢 @%s" % (tie.get("bar"), tie.get("spacing_mm")),
+                "As=%.0f" % float(tie.get("As_prov_mm2_per_m") or 0), _verdict(tie.get("ok")),
+            ])
+        out["reinforcement"] = {
+            "items": [
+                _tbl("扶壁式構材配筋結果表",
+                     [("構材", 4.4, "left"), ("控制內力", 2.6, "center"),
+                      ("鋼筋", 3.4, "center"), ("強度", 2.6, "center"),
+                      ("判定", 1.4, "center")],
+                     member_rows,
+                     note="牆板與踵板採連續版係數、趾板採懸臂、扶壁採 T 梁；"
+                          "載重組合為 1.7H 與 0.75(1.7H＋1.87E)。"),
+                _rebar_summary_table(design, q, "扶壁式鋼筋量彙總表"),
+            ],
+            "notes": [
+                "牆板四向筋、踵板上下層、趾板下層、扶壁主筋／箍筋與繫筋均已納入。",
+                "鋼筋量 %.2f kg/m（含 12%% 搭接與損耗）× %.1f m = %.1f kg；"
+                "模板 %.2f m²（%.2f m²/m）。" % (total, L, total * L, form, form / max(L, 1e-9)),
+                "⚠ 扶壁式未做止滑榫榫部鋼筋；整體圓弧滑動與地下水須另案檢核。",
+            ],
+        }
+        out["comparison"] = {"notes": [
+            "%s：牆板 H=%.2f m、底板 B=%.2f m、前趾 %.2f m、踵板 %.2f m、"
+            "扶壁間距 %.2f m。" % (label, g.get("H", 0), g.get("B", 0), g.get("Lt", 0),
+                                     g.get("heel", 0), g.get("S", 0)),
+            "混凝土 %.3f m³/m、鋼筋 %.2f kg/m；混凝土與鋼筋量均以每米斷面乘牆長。"
+            % (res.get("concrete_m3_per_m", 0), total),
+        ]}
+
+    elif wt == "anchored":
+        pr = res.get("pressure") or {}
+        out["loads"] = {
+            "items": [_tbl(
+                "土壓與地錨反力計算表",
+                [("項目", 3.8, "left"), ("計算式", 5.0, "left"),
+                 ("大小", 2.4, "center"), ("說明", 3.2, "left")],
+                [["水平土壓係數 Ka", "Coulomb／Rankine", "%.4f" % pr.get("Ka_h", 0), "含牆背摩擦"],
+                 ["總土壓力", "視土壓包絡或三角形", "%.2f kN/m" % pr.get("P_earth_kN_per_m", 0),
+                  "p_max=%.2f kPa" % pr.get("p_max_kPa", 0)],
+                 ["上載土壓", "q·Ka", "%.2f kPa" % pr.get("p_surcharge_kPa", 0), "均佈上載"],
+                 ["地震增量", "M-O", "%.2f kN/m" % pr.get("dPae_kN_per_m", 0),
+                  "kh=%.2f" % (res.get("seismic") or {}).get("kh", 0)],
+                 ["地錨排數", "固定間距", "%d 排" % len(res.get("anchors") or []),
+                  "水平間距 %.2f m" % g.get("sh", 0)]],
+                note="牆面以連續梁分析，地錨處與基底為支承。",
+            )],
+            "notes": ["地錨俯角 %.1f°、%s。" % (g.get("alpha", 0), res.get("anchor_fs", {}).get("label", ""))],
+        }
+        anchor_rows = []
+        for a in res.get("anchors") or []:
+            anchor_rows.append([
+                "%d" % a.get("row", 0), "%.2f" % float(a.get("depth_m") or 0),
+                "%.1f" % float(a.get("T_design_kN") or 0),
+                "%d" % int(a.get("strands") or 0),
+                "%.1f / %.1f" % (float(a.get("free_length_m") or 0), float(a.get("bond_length_m") or 0)),
+                "%.1f" % float(a.get("lockoff_kN") or 0),
+                _verdict(all(c.get("ok") for c in (res.get("checks") or [])
+                             if ("第 %d 排" % a.get("row", 0)) in str(c.get("item", "")))),
+            ])
+        member_rows = []
+        for m in (res.get("wall") or {}).get("members") or []:
+            fl = m.get("flexure") or {}
+            member_rows.append([
+                m.get("member", ""), "%.2f" % float(m.get("Mu_kNm_per_m") or 0),
+                "%s@%s" % (fl.get("bar", "—"), fl.get("spacing_mm", "—")),
+                "%.2f" % float(fl.get("phiMn_kNm") or 0), _verdict(fl.get("ok")),
+            ])
+        member_rows.append(["地錨承壓區補強網", "每排 1.0×1.0 m", "D13@200 雙向",
+                            "As=%.0f mm²/m" % (2.0 * 127.0 * 6.0 / max(g.get("sh", 1), 1e-9)),
+                            "構造"])
+        out["reinforcement"] = {
+            "items": [
+                _tbl("錨定式地錨設計結果表",
+                     [("排", 1.0, "center"), ("深度(m)", 1.5, "center"),
+                      ("T(kN)", 1.5, "center"), ("股數", 1.0, "center"),
+                      ("自由段/錨碇段(m)", 2.8, "center"), ("鎖定(kN)", 1.6, "center"),
+                      ("判定", 1.2, "center")],
+                     anchor_rows,
+                     note="抗張材、地層－漿體、抗張材－漿體與鎖定荷重均逐排檢核。"),
+                _tbl("錨定式牆面配筋結果表",
+                     [("構材", 4.6, "left"), ("控制內力", 2.6, "center"),
+                      ("鋼筋", 3.2, "center"), ("φMn(kN·m/m)", 2.4, "center"),
+                      ("判定", 1.4, "center")],
+                     member_rows,
+                     note="牆面為連續梁，正負彎矩分面配置；保護層 75 mm。"),
+                _rebar_summary_table(design, q, "錨定式鋼筋量彙總表"),
+            ],
+            "notes": [
+                "牆面四向筋與地錨承壓區 D13@200 補強網均已計入。",
+                "鋼筋量 %.2f kg/m（含 12%% 搭接與損耗）× %.1f m = %.1f kg；"
+                "模板 %.2f m²（%.2f m²/m）。" % (total, L, total * L, form, form / max(L, 1e-9)),
+                "⚠ 整體（深層）穩定不在本引擎內，須另跑 slope_stability.py；"
+                "握裹強度須以證明試驗確認。",
+            ],
+        }
+        out["comparison"] = {"notes": [
+            "%s：H=%.2f m、有效高 %.2f m、牆面厚 %.2f m、基腳 %.2f×%.2f m。"
+            % (label, g.get("H", 0), g.get("eff", 0), g.get("t", 0), g.get("B", 0), g.get("tb", 0)),
+            "混凝土 %.3f m³/m、鋼筋 %.2f kg/m；地錨 %d 排。"
+            % (res.get("concrete_m3_per_m", 0), total, len(res.get("anchors") or [])),
+        ]}
+
+    else:  # mse
+        ext = (res.get("external") or {}).get("static") or {}
+        out["loads"] = {
+            "items": [_tbl(
+                "加勁式外部載重計算表",
+                [("項目", 3.8, "left"), ("計算式", 4.8, "left"),
+                 ("大小", 2.4, "center"), ("說明", 3.4, "left")],
+                [["加勁區重量 V", "加勁土＋面版", "%.1f kN/m" % float(ext.get("V_kN_per_m") or 0),
+                  "γr=%.1f kN/m³" % (res.get("soil") or {}).get("reinforced_gamma", 0)],
+                 ["水平土壓力 Ph", "Rankine", "%.1f kN/m" % float(ext.get("Ph_kN_per_m") or 0),
+                  "Ka=%.3f" % res.get("Ka_retained", 0)],
+                 ["基底平均應力", "Meyerhof", "%.1f kPa" % float(ext.get("sigma_v_kPa") or 0),
+                  "容許承載力另計"],
+                 ["地震", "kh=%.2f" % (res.get("seismic") or {}).get("kh", 0),
+                  "—", "外部與內部穩定均含地震"]],
+                note="FHWA 簡化法；F*／α 為保守預設值。",
+            )],
+            "notes": [
+                "加勁材 %s、%d 層、長 %.2f m。"
+                % ((res.get("reinforcement") or {}).get("label", ""),
+                   int((res.get("reinforcement") or {}).get("count") or 0),
+                   float((res.get("reinforcement") or {}).get("length_m") or 0)),
+            ],
+        }
+        layer_rows = []
+        for l in res.get("layers") or []:
+            layer_rows.append([
+                "%d" % l.get("layer", 0), "%.2f" % float(l.get("y_m") or 0),
+                "%.2f" % float(l.get("Tmax_kN_per_m") or 0),
+                "%.2f" % float(l.get("Le_m") or 0),
+                "%.2f" % float(l.get("FS_rupture") or 0),
+                "%.2f" % float(l.get("FS_pullout") or 0),
+            ])
+        face = res.get("face_reinforcement") or {}
+        out["reinforcement"] = {
+            "items": [
+                _tbl("加勁式內部穩定逐層檢核表",
+                     [("層", 1.0, "center"), ("高程 y(m)", 2.2, "center"),
+                      ("Tmax(kN/m)", 2.6, "center"), ("Le(m)", 2.0, "center"),
+                      ("FS拉斷", 2.2, "center"), ("FS拉出", 2.2, "center")],
+                     layer_rows,
+                     note="加勁材拉斷與拉出均逐層檢核；地震另以 0.8 倍拉出阻抗折減。"),
+                _tbl("加勁式 RC 面版配筋表",
+                     [("項目", 4.6, "left"), ("數值", 3.0, "center"),
+                      ("採用", 4.2, "center"), ("判定", 1.8, "center")],
+                     [["設計土壓 p", "%.2f kPa" % float(face.get("design_pressure_kpa") or 0), "—", "—"],
+                      ["設計彎矩 Mu", "%.2f kN·m/m" % float(face.get("Mu_kNm_per_m") or 0), "—", "—"],
+                      ["面版鋼筋", "%.0f mm²/m" % float(face.get("As_prov_mm2_per_m") or 0),
+                       "%s@%s" % (face.get("bar", "—"), face.get("spacing_mm", "—")),
+                       _verdict(face.get("flexure_ok"))],
+                      ["面版厚度", "%.0f mm" % float(face.get("face_panel_thickness_mm") or 0),
+                       "≥ 140 mm", _verdict(float(face.get("face_panel_thickness_mm") or 0) >= 140)]],
+                     note="僅做單向版初步設計；吊裝、溫度收縮與連接細部另計。"),
+                _rebar_summary_table(design, q, "加勁式面版鋼筋量彙總表"),
+            ],
+            "notes": [
+                "RC 面版鋼筋量 %.2f kg/m（含 12%% 搭接與損耗）× %.1f m = %.1f kg；"
+                "面版模板 %.2f m²（%.2f m²/m）。" % (total, L, total * L, form, form / max(L, 1e-9)),
+                "塊狀面版不配置 RC 鋼筋；本表僅適用 RC 預鑄／場鑄面版。",
+                "⚠ 面版－加勁材連接與局部承壓僅於輸入產品容量時檢核；"
+                "整體圓弧滑動須另用 slope_stability.py。",
+            ],
+        }
+        out["comparison"] = {"notes": [
+            "%s：H=%.2f m、埋入 %.2f m、有效高 %.2f m、加勁長 %.2f m。"
+            % (label, g.get("height_m", 0), g.get("embedment_m", 0),
+               g.get("effective_height_m", 0), g.get("reinforcement_length_m", 0)),
+            "RC 面版 %.0f mm、鋼筋 %.2f kg/m；加勁材 %d 層。"
+            % (float((q.get("face_panel_thickness_m") or 0.2) * 1000.0), total,
+               len(res.get("layers") or [])),
+        ]}
+
+    out["stability"] = {
+        "checks": checks,
+        "notes": [
+            "檢核依水土保持技術規範 §118～§120 與各牆型專用規範；"
+            "牆型：%s。" % label,
+            "綜合判定：%s。" % ("全部符合" if res.get("pass") else "有未符合項，不得交件"),
+        ] + list(res.get("warnings") or []),
+    }
+    return out
+
+
+def _dxf_scale(path):
+    """Read the resolved 1:N scale from a drawing's title block / notes.
+
+    `section.scale` in case.json is usually ``"auto"`` because the real scale is
+    chosen after the model extents are known.  The report used to print
+    ``1:auto（自動）``; the scale is already written into the DXF, so read it
+    back instead of guessing.
+    """
+    if not path or not os.path.exists(path):
+        return None
+    try:
+        import ezdxf
+        doc = ezdxf.readfile(path)
+    except Exception:
+        return None
+    counts = {}
+    for layout in doc.layouts:
+        for ent in layout.query("TEXT"):
+            text = ent.dxf.text or ""
+            for m in re.finditer(r"1\s*:\s*(\d+)", text):
+                n = int(m.group(1))
+                if 1 <= n <= 5000:
+                    counts[n] = counts.get(n, 0) + 1
+    if not counts:
+        return None
+    return max(counts.items(), key=lambda kv: kv[1])[0]
+
+
+def _attach_section_figure(out, case):
+    fig = case.get("section") or {}
+    if not fig:
+        return
+    _sc = fig.get("scale", 20)
+    try:
+        _sc = int(_sc)
+    except (TypeError, ValueError):
+        _sc = (_dxf_scale(fig.get("out"))
+               or _dxf_scale(fig.get("rebar_out")) or 20)
+    _sc_txt = "1:%d" % _sc
+    figures = []
+    for key, title in (("out", "標準斷面圖（A3，%s）" % _sc_txt),
+                       ("rebar_out", "配筋圖（A3，%s）" % _sc_txt)):
+        dxf = fig.get(key) or ""
+        if not dxf:
+            continue
+        base = os.path.splitext(dxf)[0]
+        for cand in (base + "_pdf.png", base + ".png"):
+            if os.path.exists(cand):
+                figures.append({
+                    "path": cand, "title": title,
+                    "note": "由 tools/wall_section/make_wall_section.py 產製，"
+                            "已通過 check_delivery.py（E1~E18）。",
+                    "width_cm": 15.5,
+                })
+                break
+    if figures:
+        out.setdefault("drawings", {})["figures"] = figures
+
+
 def _design_sections(model, q, case):
     """由設計計算模組自動產生報告第 6／7／11 章的內容。
 
@@ -516,10 +899,18 @@ def _design_sections(model, q, case):
         }
 
     # ------------------------------------------------ 擋土牆
-    if model == "wall" and RW is not None:
-        res = RW.analyse(q, soil=soil, seismic={"kh": kh})
+    if model == "wall" and WS is not None:
+        res = WS.analyse(q, case)
         g = res["geometry"]
-        wt = "重力式（梯形斷面）" if res["wall_type"] == "gravity" else "懸臂式（薄牆＋底板）"
+        if res["wall_type"] not in ("gravity", "semigravity", "cantilever"):
+            out.update(_advanced_wall_sections(res, q, case))
+            _attach_section_figure(out, case)
+            return out
+        wt = {
+            "gravity": "重力式（梯形斷面）",
+            "semigravity": "半重力式（厚牆＋底板）",
+            "cantilever": "懸臂式（薄牆＋底板）",
+        }.get(res["wall_type"], res["wall_type"])
 
         out["loads"] = {
             "items": [_tbl(
@@ -587,24 +978,46 @@ def _design_sections(model, q, case):
         joint = int(float(q.get("expansion_joint_count", 0) or 0))
         # 第 8 章：構材配筋設計
         if RC is not None:
-            if res["wall_type"] == "gravity":
+            if res["wall_type"] in ("gravity", "semigravity"):
+                mass = RC.design_mass_wall_steel(q, res)
+                rows = []
+                for item in mass["rows"]:
+                    _is_face = "牆面" in item["item"]
+                    rows.append([
+                        item["item"],
+                        "%s@%d" % (mass["face_bar"] if _is_face else mass["base_bar"],
+                                   int(mass["face_spacing_mm"] if _is_face
+                                       else mass["base_spacing_mm"])),
+                        "%.0f" % item["As_mm2"],
+                        "%.2f" % item["kg_per_m"]])
+                _L = float(q.get("length_m") or 0)
                 out["reinforcement"] = {
                     "notes": [
-                        "本牆為**重力式**擋土牆，靠自重維持穩定，牆身所受應力在混凝土容許應力範圍內，"
-                        "**無須結構配筋**（符合水土保持技術規範第 120 條四之前提）。",
-                        "配筋僅為溫度收縮與構造需求：牆面與牆背各配置 D13@250 單層構造筋，"
-                        "底部配置 D16@200 縱向構造筋，保護層 75 mm。",
-                        "若後續改為懸臂式或半重力式，須依撓曲與剪力重新設計配筋。",
+                        "本牆為**%s**擋土牆，靠自重維持穩定，牆身不以撓曲配筋控制；"
+                        "配筋僅供溫度收縮與構造需求。" % (
+                            "重力式" if res["wall_type"] == "gravity" else "半重力式"),
+                        "構造鋼筋：牆面（露出側）%s@%d（垂直向＋水平向，單面雙向），底部縱向 %s@%d，"
+                        "保護層 %.0f mm。" % (
+                            mass["face_bar"], int(mass["face_spacing_mm"]),
+                            mass["base_bar"], int(mass["base_spacing_mm"]),
+                            float((RC.CONCRETE or {}).get("cover_mm", 75.0))),
+                        "溫度鋼筋比 ρ = %.5f（以 %.0f mm 有效表層計），下限 %.3f：%s。" % (
+                            mass["temperature_ratio"], mass["surface_mm"],
+                            mass["temperature_min"], "符合" if mass["ok"] else "不足"),
+                        "鋼筋量 %.2f kg/m（已含 %.0f%% 搭接損耗）× 牆長 %.1f m = %.1f kg。" % (
+                            mass["total_kg_per_m"],
+                            mass["lap_allowance"] * 100.0, _L,
+                            mass["total_kg_per_m"] * _L),
+                        "參考工作簿 `tools.excel\\擋土牆安定分析.mod.xls`：重力式／半重力式牆身不配撓曲鋼筋，"
+                        "僅在設止滑榫（b>0）時設計榫部鋼筋；本計算未設止滑榫。",
                     ],
                     "items": [_tbl(
-                        "構造鋼筋配置表",
-                        [("位置", 4.6, "left"), ("鋼筋", 3.0, "center"),
-                         ("保護層", 2.4, "center"), ("說明", 4.4, "left")],
-                        [["牆面（露出側）", "D13@250", "75 mm", "溫度收縮筋（單層）"],
-                         ["牆背（靠土側）", "D13@250", "75 mm", "溫度收縮筋（單層）"],
-                         ["底部縱向", "D16@200", "75 mm", "構造筋"],
-                         ["排水孔周邊", "—", "—", "孔口補強筋依現場調整"]],
-                        note="重力式不設受力主筋；配筋量由構造需求控制，非由強度計算控制。")],
+                        "構造鋼筋配置與鋼筋量表",
+                        [("位置", 5.2, "left"), ("鋼筋", 3.0, "center"),
+                         ("As（mm²/m）", 2.6, "center"), ("kg/m", 2.2, "center")],
+                        rows,
+                        note="重力式／半重力式不設受力主筋；配筋量由溫度收縮與構造需求控制，"
+                             "非由強度計算控制。")],
                 }
             else:
                 dd = RC.design_cantilever_stem(q, res)
@@ -739,37 +1152,25 @@ def _design_sections(model, q, case):
     if model == "box_culvert" and BC is not None:
         hy = case.get("hydraulics") or {}
         cv = case.get("culvert") or {}
-        res = BC.analyse(
-            q,
-            design_flow_m3s=float(hy.get("design_flow_m3s") or 0.0),
-            slope=float(hy.get("slope") or 0.005),
-            manning_n=float(hy.get("manning_n") or 0.014),
-            freeboard_min_m=float(hy.get("freeboard_min_m") or 0.20),
-            soil_unit_weight_kn_m3=float(cv.get("soil_unit_weight_kn_m3") or 18.0),
-            soil_phi_deg=float(cv.get("soil_phi_deg") or 30.0),
-            surcharge_kpa=float(cv.get("surcharge_kpa") or 0.0),
-            traffic_load_kpa=float(cv.get("traffic_load_kpa") or 0.0),
-            groundwater_depth_m=(
-                None if cv.get("groundwater_depth_m") in (None, "")
-                else float(cv["groundwater_depth_m"])
-            ),
-            internal_water_depth_m=float(cv.get("internal_water_depth_m") or 0.0),
-            load_factor=float(cv.get("load_factor") or 1.7),
-            seismic_kh=float((case.get("seismic") or {}).get("kh", 0.0) or 0.0),
-            allowable_bearing_kpa=(
-                None if cv.get("allowable_bearing_kpa") in (None, "")
-                else float(cv["allowable_bearing_kpa"])
-            ),
-        )
+        res = BC.analyse(q, **_box_culvert_kwargs(case, q))
         sec = res["section"]
         hyd = res["hydraulic"]
         qty = res["quantities"]
+        _tr = res["loads"].get("traffic") or {}
+        _tr_pressure = float(
+            _tr.get("patch_pressure_kpa") or _tr.get("uniform_pressure_kpa") or 0.0
+        )
         out["loads"] = {
             "items": [_tbl(
                 "箱涵載重與構架分析輸入表（每公尺涵長）",
                 [("項目", 4.8, "left"), ("計算式／來源", 6.0, "left"),
                  ("數值", 2.6, "center"), ("單位", 1.4, "center")],
                 [
+                    ["車輛活載", res["loads"].get("traffic_label", "—"),
+                     "%.3f" % _tr_pressure, "kN/m²"],
+                    ["車輛載重換算均佈", "總輪載／總寬（僅供對照）",
+                     "%.3f" % float(res["loads"].get("traffic_equivalent_kpa") or 0.0),
+                     "kN/m²"],
                     ["頂版總向下載重", "覆土γH＋超載＋車輛活載",
                      "%.3f" % res["loads"]["top_load_kn_m2"], "kN/m²"],
                     ["底板平均向上反力", "整體垂直力平衡",
@@ -795,6 +1196,9 @@ def _design_sections(model, q, case):
                 % (float(cv.get("soil_unit_weight_kn_m3") or 18.0),
                    float(cv.get("soil_phi_deg") or 30.0),
                    "採案件指定值" if cv else "採模組預設假設值，正式設計前須以鑽探替換"),
+                "車載只作用於頂版；局部輪壓不另加側向土壓。"
+                "車載與其他載重目前共用載重係數 %.2f，尚未拆分靜／活載因數。"
+                % float(cv.get("load_factor") or 1.7),
             ],
         }
 
@@ -830,37 +1234,65 @@ def _design_sections(model, q, case):
         }
 
         reinf_rows = []
-        for m in res["members"]:
-            f = m["flexure"]
-            s = m["shear"]
-            cr = m["crack"]
-            ax = m.get("axial_flexure") or {}
-            ax_capacity = ax.get("phiMn_available_kNm")
+        for e in res["reinforcement"]["elements"]:
+            f = e["flexure"]
+            cr = e["crack"]
             reinf_rows.append([
-                "%s（%s）" % (m["member"], m["role"]),
-                "t=%.2f m、M=%.2f kN·m/m" % (m["thickness_m"], m["M_service_kNm"]),
+                e["label"],
+                "%s：%.2f kN·m/m" % (e["moment_label"], e["Mu_kNm"]),
                 "%s@%s（%.0f mm²/m）" % (
                     f.get("bar", "—"), f.get("spacing_mm", "—"),
                     f.get("As_prov_mm2", 0.0)),
-                "φMn=%.2f；軸彎φMn=%s；φVc=%.2f；w=%s mm" % (
+                "φMn=%.2f；w=%.3f mm；控制=%s" % (
                     f.get("phiMn_kNm", 0.0),
-                    ("%.2f" % ax_capacity) if ax_capacity is not None else "—",
-                    s.get("phiVc_kN", 0.0),
-                    ("%.3f" % cr["w_mm"]) if cr.get("w_mm") is not None else "—"),
-                _verdict(m["ok"]),
+                    cr.get("w_mm") if cr.get("w_mm") is not None else 0.0,
+                    f.get("governed_by", "—")),
+                _verdict(e["ok"]),
             ])
+        dist_rows = []
+        for d in res["reinforcement"].get("distribution") or []:
+            dist_rows.append([
+                d["title"],
+                "%.4f·b·h（總量分兩面）" % float(d["ratio"]),
+                "%s@%s（每面 %.0f mm²/m）" % (
+                    d.get("bar", "—"), d.get("spacing_mm", "—"),
+                    float(d.get("As_prov_mm2") or 0.0)),
+                "需求 %.1f／實配 %.1f mm²/m" % (
+                    float(d.get("As_req_mm2") or 0.0),
+                    float(d.get("As_prov_mm2") or 0.0)),
+                _verdict(d["ok"]),
+            ])
+        _q = res["reinforcement"]["quantity"]
         out["reinforcement"] = {
-            "items": [_tbl(
-                "箱涵構架配筋初步結果表",
-                [("構材", 3.4, "left"), ("控制內力", 4.0, "left"),
-                 ("主筋", 3.4, "center"), ("強度／裂縫", 5.0, "left"),
-                 ("判定", 1.8, "center")],
-                reinf_rows,
-                note="保護層暫採 50 mm；本表為初步設計，未檢核角隅細節、錨定、搭接、剪力筋與施工階段。",
-            )],
+            "items": [
+                _tbl(
+                    "箱涵逐面配筋初步結果表",
+                    [("構材／面", 3.8, "left"), ("控制內力", 4.2, "left"),
+                     ("主筋", 3.6, "center"), ("強度／裂縫", 5.4, "left"),
+                     ("判定", 1.6, "center")],
+                    reinf_rows,
+                    note="保護層 %.0f mm；逐面設計，頂版／底版／外牆／中牆的內外側分開檢核。"
+                    % float(_box_culvert_kwargs(case, q)["cover_mm"]),
+                ),
+                _tbl(
+                    "箱涵縱向分佈筋表",
+                    [("位置", 4.2, "left"), ("鋼筋比", 4.2, "left"),
+                     ("配置", 4.6, "center"), ("As 需求／實配", 4.4, "left"),
+                     ("判定", 1.6, "center")],
+                    dist_rows,
+                    note="版採 0.0018·b·h、牆採 0.0020·b·h；此為總量分置內外兩面，不是每面各一份。",
+                ),
+            ],
             "notes": [
-                "撓曲、軸彎互制與剪力依《混凝土結構設計規範》相關條文計算；"
-                "表中同時列出撓曲 φMn 與構架軸力共同作用下的軸彎 φMn，主筋採單層對稱配置的初步結果。",
+                "撓曲、軸彎互制、剪力與裂縫依《混凝土結構設計規範》相關條文計算；"
+                "主筋依實際受拉面定向，不以兩個彎曲方向取較小值。",
+                "鋼筋量依理想化排筋計數：淨 %.2f kg/m，含 %.0f%% 搭接／錨定／損耗後 %.2f kg/m，"
+                "總量 %.1f kg（%.2f t）。"
+                % (float(_q.get("subtotal_kg_per_m") or 0.0),
+                   float(_q.get("loss_rate") or 0.0) * 100.0,
+                   float(_q.get("total_kg_per_m") or 0.0),
+                   float(_q.get("total_kg") or 0.0),
+                   float(_q.get("total_kg") or 0.0) / 1000.0),
                 "目前構架分析只計單一重力＋土水壓載重 case，未建立 D／L／E 分項包絡；"
                 "正式設計須用 tools\\design\\load_combinations.py 擴充多工況。",
                 "牆與厚版的最小鋼筋、裂縫控制及角隅補強仍須由技師依現行規範覆核。",
@@ -907,6 +1339,16 @@ def _design_sections(model, q, case):
                    sec["outer_width_m"], sec["outer_height_m"]),
                 "混凝土淨斷面積 %.3f m²/m、總量 %.2f m³；不含翼牆、保護工與路面。"
                 % (qty["concrete_area_m2_per_m"], qty["concrete_volume_m3"]),
+                "鋼筋設計量：淨 %.2f kg/m、含 %.0f%% 損耗 %.2f kg/m，總量 %.1f kg（%.2f t）。"
+                % (float(qty.get("rebar_kg_per_m_net") or 0.0),
+                   float(qty.get("rebar_loss_rate") or 0.0) * 100.0,
+                   float(qty.get("rebar_kg_per_m") or 0.0),
+                   float(qty.get("rebar_kg_total") or 0.0),
+                   float(qty.get("rebar_ton") or 0.0)),
+                "模板量：每延米 %.2f m²/m，總量 %.2f m²（含兩端端模 %.2f m²）。"
+                % (float(qty.get("formwork_m2_per_m") or 0.0),
+                   float(qty.get("formwork_m2") or 0.0),
+                   float(qty.get("formwork_end_faces_m2") or 0.0)),
             ],
         }
 
@@ -1041,26 +1483,7 @@ def _design_sections(model, q, case):
         }
 
     # 第 12 章：已產出的標準斷面圖（若檔案存在就嵌入，不存在則留給人工）
-    fig = case.get("section") or {}
-    if fig:
-        dxf = fig.get("out") or ""
-        base = os.path.splitext(dxf)[0]
-        # section.scale 可能是 "auto"（自動挑比例），不能直接 int()
-        _sc = fig.get("scale", 20)
-        try:
-            _sc_txt = "1:%d" % int(_sc)
-        except (TypeError, ValueError):
-            _sc_txt = "1:%s（自動）" % _sc
-        for cand, cap in ((base + "_pdf.png", "標準斷面圖（A3，%s）" % _sc_txt),
-                          (base + ".png", "標準斷面圖")):
-            if dxf and os.path.exists(cand):
-                out.setdefault("drawings", {})["figures"] = [{
-                    "path": cand, "title": cap,
-                    "note": "由 tools/wall_section/make_wall_section.py 產製，"
-                            "已通過 check_delivery.py（E1~E18）。",
-                    "width_cm": 15.5,
-                }]
-                break
+    _attach_section_figure(out, case)
 
     return out
 
@@ -1109,6 +1532,9 @@ def derive_report(case):
             ]
             rows, bind = [], []
             for r in tbl["rows"]:
+                show_if = r.get("show_if") or {}
+                if show_if and any(q.get(k) != v for k, v in show_if.items()):
+                    continue
                 if q.get(r["key"]) is None:
                     continue
                 rows.append([r["label"], q[r["key"]], r.get("unit", ""), r.get("basis", "")])

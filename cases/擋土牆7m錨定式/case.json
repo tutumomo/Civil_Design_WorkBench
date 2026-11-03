@@ -1,0 +1,102 @@
+{
+ "schema": "civil-case/1",
+ "_note": "擋土牆類別示範案（錨定式）：7 m 牆高、有效高 6 m、牆面厚 0.40 m、三排地錨。牆面四向筋、基腳鋼筋與地錨承壓區補強均納入配筋量。",
+ "project": {
+  "name": "擋土牆7m錨定式",
+  "full_name": "擋土牆新建工程（7 m 錨定式 RC 擋土牆，L = 20 m）",
+  "category": "擋土牆",
+  "agency": "（主辦機關待填）",
+  "designer": "本工作區 AI 設計產線（tools/design；錨定式）",
+  "date": "2026-11-04",
+  "boq_date": "115年1月",
+  "version": "v2026.11.04-1",
+  "location": {
+   "county": "（待填）",
+   "town": "（待填）",
+   "village": "",
+   "section": "",
+   "desc": "（案址待填；本檔為牆型驗證用示範）"
+  },
+  "crs": {
+   "name": "TWD97 TM2 二度分帶",
+   "epsg": "EPSG:3826",
+   "unit": "公尺"
+  },
+  "coords": [],
+  "report_title": "設計報告書",
+  "report_subtitle": "7 m 錨定式 RC 擋土牆新建"
+ },
+ "quantities": {
+  "model": "wall",
+  "values": {
+   "wall_type": "anchored",
+   "length_m": 20.0,
+   "height_m": 7.0,
+   "wall_thickness_m": 0.40,
+   "base_width_m": 1.20,
+   "base_thickness_m": 0.50,
+   "front_soil_depth_m": 1.00,
+   "anchor_depths_m": [1.5, 3.5, 5.5],
+   "horizontal_spacing_m": 2.50,
+   "inclination_deg": 20.0,
+   "service": "permanent",
+   "strand_type": "12.7",
+   "strands": 4,
+   "free_length_m": 7.0,
+   "bond_length_m": 6.0,
+   "drill_diameter_mm": 135.0,
+   "pressure_distribution": "apparent",
+   "weep_diameter_m": 0.05,
+   "backfill_thickness_m": 0.30,
+   "excavation_work_m": 0.30,
+   "excavation_depth_m": 0.10
+  },
+  "notes": [
+   "牆面四向筋由錨定式引擎的連續梁分析配置；基腳以最小鋼筋配置上下層橫向筋與縱向分布筋。",
+   "地錨為三排、水平間距 2.50 m、俯角 20°、4 股 12.7 mm 鋼絞線；自由段 7.0 m、錨碇段 6.0 m。",
+   "深層穩定與地層握裹強度不在本引擎內，須另跑邊坡穩定分析並以試驗確認。"
+  ]
+ },
+ "boq": {
+  "rates": {},
+  "items": [
+   {"no": "01", "name": "施工測量及放樣", "unit": "式", "qty": 1, "price": 4000.0, "note": "經驗值"},
+   {"no": "02", "name": "擋土牆基礎開挖（含兩側工作面）", "unit": "m3", "qty_from": "excavation_m3", "price": 70.0, "note": "契約「機具挖方(一般)」"},
+   {"no": "03", "name": "結構用混凝土 fc'=210 kgf/cm2（含澆置）", "unit": "m3", "qty_from": "concrete_volume_m3", "price": 3190.0, "note": "預拌混凝土含澆置搬運"},
+   {"no": "04", "name": "鋼筋及加工組立 SD280／SD420", "unit": "kg", "qty_from": "rebar_kg_design", "price": 35.0, "note": "採錨定式配筋設計值，含牆面、基腳與承壓網"},
+   {"no": "05", "name": "模板（一般土木結構模板）", "unit": "m2", "qty_from": "formwork_m2", "price": 1230.0, "note": "牆面與基腳模板"},
+   {"no": "06", "name": "背填級配碎石（含夯實）", "unit": "m3", "qty_from": "backfill_gravel_m3", "price": 770.0, "note": "透水性級配碎石"},
+   {"no": "07", "name": "地錨鑽孔及灌漿（含鋼絞線）", "unit": "m", "qty_from": "anchor_drilling_m", "price": 850.0, "note": "自由段＋錨碇段；單價為假設值"},
+   {"no": "08", "name": "地錨錨頭、承壓鈑及試驗", "unit": "支", "qty_from": "anchor_count", "price": 3500.0, "note": "含錨頭、承壓鈑與驗收試驗"},
+   {"no": "09", "name": "排水孔 Ø5 cm（含洩水管及反濾層）", "unit": "孔", "qty_from": "weep_hole_count", "price": 275.0, "note": "第121條配置"},
+   {"no": "10", "name": "伸縮縫（填縫料及止水帶）", "unit": "處", "qty_from": "expansion_joint_count", "price": 1140.0, "note": "第121條配置"},
+   {"no": "11", "name": "機具進出場費", "unit": "式", "qty": 1, "price": 12000.0, "note": "經驗值"}
+  ]
+ },
+ "report": {
+  "summary": {
+   "paragraphs": [
+    "本工程為新建 7 m 錨定式 RC 擋土牆，牆長 20 m。牆高 7.0 m、牆前覆土 1.0 m，有效高 6.0 m；牆面厚 0.40 m、基腳寬 1.20 m、厚 0.50 m。",
+    "牆面以三排地錨與基底為支承，採連續梁分析配置鉛直與水平四向筋；基腳配置上下層橫向筋及縱向分布筋。",
+    "地錨水平間距 2.50 m、俯角 20°，每支 4 股 12.7 mm 鋼絞線；自由段 7.0 m、錨碇段 6.0 m。"
+   ],
+   "conclusions": [
+    "牆面撓曲、剪力、地錨抗張材、錨碇段、自由段、鎖定荷重、承壓鈑與沖剪均逐項檢核。",
+    "深層滑動、地層握裹強度與錨碇段用地範圍仍須另案確認，不得以本計算取代。",
+    "地錨數量與鑽孔長度已由牆長、水平間距與排數派生，並直接進入預算書。"
+   ]
+  },
+  "basis": {
+   "notes": [
+    "設計計算由 tools/design/wall_system.py 分流至 anchored_wall.py；配筋、地錨與數量共用同一結果。",
+    "地錨依公路邊坡工程設計規範第六章；牆型依水土保持技術規範第118條八。"
+   ],
+   "regulation_ids": ["SWH-118", "SWH-119", "SWH-120", "SWH-121"]
+  }
+ },
+ "section": {
+  "scale": "auto",
+  "out": "out/擋土牆7m錨定式/S-01_擋土牆標準斷面圖.dxf",
+  "rebar_out": "out/擋土牆7m錨定式/S-02_擋土牆配筋圖.dxf"
+ }
+}

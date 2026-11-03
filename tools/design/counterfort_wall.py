@@ -279,8 +279,11 @@ def _counterfort_design(g, Ka_h, dKae_h, soil, cc, kh):
     M_e = V_e * 0.6 * H
     Mu = max(LOAD_STATIC * M_s, LOAD_SEISMIC_H * M_s + LOAD_SEISMIC_E * M_e)
     Vu = max(LOAD_STATIC * V_s, LOAD_SEISMIC_H * V_s + LOAD_SEISMIC_E * V_e)
+    # 扶壁為豎向懸臂 T 梁，彎矩繞水平軸（垂直牆長方向）作用；
+    # 基底斷面的有效深度是「水平」由牆板前面量到扶壁背面，
+    # 即 ts + heel，不可再乘斜背傾角（那只會得到垂直斜面的距離）。
     theta = math.atan2(H, heel - ctop)
-    d = (ts + heel) * math.sin(theta) * 1000.0 - cc["cover_mm"] - 30.0
+    d = (ts + heel) * 1000.0 - cc["cover_mm"] - 30.0
     b = tc * 1000.0
     out = {"theta_deg": round(math.degrees(theta), 2), "d_mm": round(d, 1), "b_mm": round(b, 1),
            "M_service_kNm": round(M_s, 3), "V_service_kN": round(V_s, 3),
@@ -320,6 +323,15 @@ def _counterfort_design(g, Ka_h, dKae_h, soil, cc, kh):
         shear_ok = Vs <= Vs_max and s >= 75.0 and phiVn >= Vu
         stirrup = {"bar": "D13", "legs": 2, "spacing_mm": s, "Vs_req_kN": round(Vs, 3),
                    "Vs_prov_kN": round(Vs_prov, 3), "Vs_max_kN": round(Vs_max, 3)}
+    elif Vu > 0.5 * phiVc:
+        # ACI 318 §11.4.6.1／9.6.3.1：Vu 超過 0.5φVc 即須配置最少剪力筋，
+        # 即使混凝土本身已足。Av/s ≥ 0.062√fc′·bw/fy（SI）。
+        Av = 2.0 * RC.REBAR_SIZES["D13"][1]
+        avs_min = 0.062 * math.sqrt(fc) * b / fy
+        s = math.floor(min(Av / avs_min, d / 2.0, 600.0) / 10.0) * 10.0
+        stirrup = {"bar": "D13", "legs": 2, "spacing_mm": s, "minimum": True,
+                   "Av_per_s_mm2_per_mm": round(Av / s, 3),
+                   "Av_per_s_min": round(avs_min, 3)}
     out.update({
         "As_req_mm2": round(As_req, 1), "As_min_mm2": round(As_min, 1), "main": bars,
         "phi": phi_f, "epsilon_t": round(et, 5), "phi_basis": basis, "phiMn_kNm": round(phiMn, 3),
@@ -467,7 +479,7 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
 
     concrete_m3_per_m = (g["B"] * g["tb"] + g["ts"] * g["H"]
                          + 0.5 * (g["heel"] + g["ctop"]) * g["H"] * g["tc"] / g["S"])
-    return {
+    out = {
         "wall_type": "counterfort",
         "wall_label": SPEC["label"],
         "geometry": {k: round(v, 4) for k, v in g.items()},
@@ -483,6 +495,9 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
         "warnings": warnings,
         "pass": all(c["ok"] for c in checks),
     }
+    out["reinforcement"] = RC.design_counterfort_wall_steel(q, out, cc=cc)
+    out["rebar_kg_per_m"] = out["reinforcement"]["total_kg_per_m"]
+    return out
 
 
 def format_report(res: Mapping[str, Any]) -> str:
@@ -494,6 +509,8 @@ def format_report(res: Mapping[str, Any]) -> str:
         % (g["S"], g["tc"], g["ctop"], res["concrete_m3_per_m"]),
         "材料：fc'=%.0f MPa、fy=%.0f MPa、保護層 %.0f mm；kh=%.2f"
         % (res["concrete"]["fc_mpa"], res["concrete"]["fy_mpa"], res["concrete"]["cover_mm"], res["seismic"]["kh"]),
+        "配筋量：%.2f kg/m（含 %.0f%% 搭接、錨定與損耗）"
+        % (res["rebar_kg_per_m"], res["reinforcement"]["lap_allowance"] * 100.0),
         "",
     ]
     for case in (res["stability"]["static"], res["stability"]["seismic"]):

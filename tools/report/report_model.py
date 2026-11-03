@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-# D:\公司案件.AI\tools\report\report_model.py → parents[2] == D:\公司案件.AI
+# <專案根目錄>\tools\report\report_model.py → parents[2] == <專案根目錄>
 WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TEMPLATE_DIR = WORKSPACE_ROOT / "templates" / "report"
 

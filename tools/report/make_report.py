@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """設計報告產線主程式：案件 JSON → .docx ＋ .pdf。
 
-用法（在 D:\\公司案件.AI 下執行；**執行前必設 PYTHONIOENCODING=utf-8**）：
+用法（在 <專案根目錄> 下執行；**執行前必設 PYTHONIOENCODING=utf-8**）：
 
     set PYTHONIOENCODING=utf-8
-    C:\\Python312\\python.exe tools\\report\\make_report.py ^
+    python tools\\report\\make_report.py ^
         --case tools\\report\\examples\\AC刨鋪5cm工程.json ^
         --out-dir _report_test
 
@@ -28,7 +28,7 @@ import sys
 import time
 from pathlib import Path
 import sys as _sys
-_sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+_sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from project_paths import artcraft_cli  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -253,8 +253,11 @@ def build(args) -> int:
         for w in warnings:
             log(f"  ⚠ {w}")
     log("")
-    log(f"  下一步：C:\\Python312\\python.exe tools\\report\\verify_report.py \"{docx_path}\""
-        + (f" --pdf \"{pdf_path}\"" if pdf_ok else ""))
+    _verify_cmd = (f"C:\\Python312\\python.exe tools\\report\\verify_report.py \"{docx_path}\""
+                   + (f" --pdf \"{pdf_path}\"" if pdf_ok else ""))
+    if builder.figure_no == 0:
+        _verify_cmd += " --allow-no-figures"
+    log(f"  下一步：{_verify_cmd}")
 
     if args.fail_on_placeholder and builder.placeholders:
         log("  ✗ 指定 --fail-on-placeholder，仍有待補項目 → 退出碼 1")

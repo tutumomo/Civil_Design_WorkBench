@@ -52,7 +52,7 @@ def add(code: str, name: str, ok: bool, detail: str, level: str = "error"):
 # ---------------------------------------------------------------------------
 # DOCX 結構檢查
 # ---------------------------------------------------------------------------
-def check_docx(path: Path) -> dict:
+def check_docx(path: Path, allow_no_figures: bool = False) -> dict:
     print(f"\n[A] DOCX 結構：{path.name}")
     info: dict = {"path": str(path)}
     try:
@@ -85,8 +85,11 @@ def check_docx(path: Path) -> dict:
 
     # R4 圖號連續
     fig_nos = [int(m.group(1)) for p in paras if (m := FIG_CAP_RE.match(p.text.strip()))]
-    ok = fig_nos == list(range(1, len(fig_nos) + 1)) and len(fig_nos) > 0
-    add("R4", "圖號連續無跳號", ok, f"圖號 {fig_nos}")
+    if not fig_nos and allow_no_figures:
+        add("R4", "圖號連續無跳號", True, "無圖（本案未產設計圖，允許）")
+    else:
+        ok = fig_nos == list(range(1, len(fig_nos) + 1)) and len(fig_nos) > 0
+        add("R4", "圖號連續無跳號", ok, f"圖號 {fig_nos}")
     info["figure_captions"] = fig_nos
 
     # R5/R6 頁首頁尾
@@ -136,7 +139,8 @@ def _ink_ratio(page, dpi: int = 72) -> float:
     return dark / total
 
 
-def check_pdf(path: Path, docx_info: dict, out_dir: Path, min_pages: int, render_pages: list[int]) -> dict:
+def check_pdf(path: Path, docx_info: dict, out_dir: Path, min_pages: int,
+              render_pages: list[int], allow_no_figures: bool = False) -> dict:
     print(f"\n[B] PDF 實體：{path.name}")
     info: dict = {"path": str(path)}
     try:
@@ -203,7 +207,12 @@ def check_pdf(path: Path, docx_info: dict, out_dir: Path, min_pages: int, render
         images += len(pdf[i].get_images(full=True))
     ok = drawings >= 100
     add("R14", "表格框線存在", ok, f"向量線段物件 {drawings} 個")
-    add("R15", "內嵌圖片存在", images >= 1, f"圖片物件 {images} 個", level="warn")
+    if images == 0 and allow_no_figures:
+        add("R15", "內嵌圖片存在", True, "無內嵌圖（本案未產設計圖，允許）",
+            level="warn")
+    else:
+        add("R15", "內嵌圖片存在", images >= 1, f"圖片物件 {images} 個",
+            level="warn")
     info["drawing_objects"] = drawings
     info["images"] = images
 
@@ -239,6 +248,8 @@ def parse_args(argv: list[str] | None = None):
     ap.add_argument("--pages", default=None, help="要轉 PNG 的頁碼，如 1,2,7（預設 1,2,3,末頁）")
     ap.add_argument("--json", default=None, help="驗證結果 JSON 輸出路徑")
     ap.add_argument("--strict", action="store_true", help="警告也視為失敗")
+    ap.add_argument("--allow-no-figures", action="store_true",
+                    help="本案未產設計圖時，R4／R15 以「無圖（允許）」通過")
     return ap.parse_args(argv)
 
 
@@ -257,10 +268,11 @@ def main(argv: list[str] | None = None) -> int:
     print(f"設計報告回讀驗證　{Path(args.docx).name}")
     print("=" * 72)
 
-    docx_info = check_docx(docx_path)
+    docx_info = check_docx(docx_path, args.allow_no_figures)
     pdf_info = {}
     if pdf_path.exists():
-        pdf_info = check_pdf(pdf_path, docx_info, out_dir, args.min_pages, render_pages)
+        pdf_info = check_pdf(pdf_path, docx_info, out_dir, args.min_pages,
+                             render_pages, args.allow_no_figures)
     else:
         add("R9", "PDF 可開啟", False, f"找不到 {pdf_path}")
 

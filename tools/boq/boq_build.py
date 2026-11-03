@@ -3,7 +3,7 @@
 用法
 ----
     set PYTHONIOENCODING=utf-8
-    C:\\Python312\\python.exe D:\\公司案件.AI\\tools\\boq\\boq_build.py ^
+    python <專案根目錄>\\tools\\boq\\boq_build.py ^
         <案件.json> --out-dir <輸出資料夾> [--no-pdf] [--dry-run]
 
 產出（`<工程名稱>_預算書.*`）
@@ -25,7 +25,7 @@ import argparse
 import sys as _sys
 from pathlib import Path
 import sys as _sys
-_sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parents[2]))
+_sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parents[1]))
 from project_paths import artcraft_cli  # noqa: E402
 import json
 import os

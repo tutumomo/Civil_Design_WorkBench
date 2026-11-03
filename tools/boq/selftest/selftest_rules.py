@@ -5,7 +5,7 @@ r"""預算書計算核心回歸測試：必須完全重現公司真實預算書�
 
 執行：
     set PYTHONIOENCODING=utf-8
-    C:\\Python312\\python.exe D:\\公司案件.AI\\tools\\boq\\selftest\\selftest_rules.py
+    python <專案根目錄>\tools\boq\selftest\selftest_rules.py
 
 退出碼 0 = 全部對上。
 """

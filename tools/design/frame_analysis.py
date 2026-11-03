@@ -18,7 +18,11 @@ or with linearly varying end intensities:
 
 ``loads={"wy_i": -8.0, "wy_j": -12.0}``
 
-The consistent nodal-load vector is integrated with four-point Gauss
+Partial uniform loads use ``wy_patch`` with normalized start/end positions:
+
+``loads={"wy_patch": -70.0, "wy_patch_start": 0.3, "wy_patch_end": 0.7}``
+
+The consistent nodal-load vector is integrated with three-point Gauss
 quadrature, so linearly varying global loads are handled without approximating
 them as an average uniform load.
 """
@@ -194,6 +198,10 @@ class MemberResult:
     moment_end_knm: tuple[float, float]
     max_abs_moment_knm: float
     max_moment_position_m: float
+    # Sampled internal bending-moment diagram ``(x_m, M_knm)`` from end ``i``.
+    # Positive/negative split is needed for face-by-face reinforcement design
+    # (top/bottom of a slab, inner/outer face of a wall).
+    moment_diagram_knm: list[tuple[float, float]] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -208,6 +216,7 @@ class MemberResult:
             "moment_end_knm": self.moment_end_knm,
             "max_abs_moment_knm": self.max_abs_moment_knm,
             "max_moment_position_m": self.max_moment_position_m,
+            "moment_diagram_knm": self.moment_diagram_knm,
         }
 
 
@@ -317,7 +326,15 @@ class FrameModel:
 
         wx0, wx1 = value("wx")
         wy0, wy1 = value("wy")
-        return wx0 + (wx1 - wx0) * xi, wy0 + (wy1 - wy0) * xi
+        wy = wy0 + (wy1 - wy0) * xi
+        if "wy_patch" in loads:
+            start = min(1.0, max(0.0, float(loads.get("wy_patch_start", 0.0))))
+            end = min(1.0, max(0.0, float(loads.get("wy_patch_end", 1.0))))
+            if start > end:
+                start, end = end, start
+            if start <= xi <= end:
+                wy += float(loads["wy_patch"])
+        return wx0 + (wx1 - wx0) * xi, wy
 
     def equivalent_member_load_local(self, member: FrameMember) -> list[float]:
         """Return the consistent nodal-load vector in member-local coordinates."""
@@ -334,22 +351,37 @@ class FrameModel:
             (0.5, 4.0 / 9.0),
             (0.5 + 0.5 * math.sqrt(3.0 / 5.0), 5.0 / 18.0),
         )
+        # A partial uniform load is discontinuous.  Split the integration at
+        # its two edges so the consistent nodal vector is integrated exactly.
+        breaks = [0.0, 1.0]
+        if "wy_patch" in member.loads:
+            start = min(1.0, max(0.0, float(member.loads.get("wy_patch_start", 0.0))))
+            end = min(1.0, max(0.0, float(member.loads.get("wy_patch_end", 1.0))))
+            if start > end:
+                start, end = end, start
+            breaks.extend((start, end))
+        breaks = sorted(set(breaks))
+
         load = [0.0] * 6
-        for xi, weight in points:
-            wx, wy = self._load_intensity(member, xi)
-            qx = c * wx + s * wy
-            qy = -s * wx + c * wy
-            n1 = 1.0 - 3.0 * xi**2 + 2.0 * xi**3
-            n2 = L * (xi - 2.0 * xi**2 + xi**3)
-            n3 = 3.0 * xi**2 - 2.0 * xi**3
-            n4 = L * (-xi**2 + xi**3)
-            scale = weight * L
-            load[0] += scale * qx * (1.0 - xi)
-            load[1] += scale * qy * n1
-            load[2] += scale * qy * n2
-            load[3] += scale * qx * xi
-            load[4] += scale * qy * n3
-            load[5] += scale * qy * n4
+        for left, right in zip(breaks, breaks[1:]):
+            if right - left <= 1e-12:
+                continue
+            for point, weight in points:
+                xi = left + (right - left) * point
+                wx, wy = self._load_intensity(member, xi)
+                qx = c * wx + s * wy
+                qy = -s * wx + c * wy
+                n1 = 1.0 - 3.0 * xi**2 + 2.0 * xi**3
+                n2 = L * (xi - 2.0 * xi**2 + xi**3)
+                n3 = 3.0 * xi**2 - 2.0 * xi**3
+                n4 = L * (-xi**2 + xi**3)
+                scale = weight * (right - left) * L
+                load[0] += scale * qx * (1.0 - xi)
+                load[1] += scale * qy * n1
+                load[2] += scale * qy * n2
+                load[3] += scale * qx * xi
+                load[4] += scale * qy * n3
+                load[5] += scale * qy * n4
         return load
 
     def _global_element(self, member: FrameMember) -> tuple[list[list[float]], list[float], list[float]]:
@@ -439,8 +471,18 @@ class FrameModel:
             # sagging maximum of a uniformly loaded beam as well as end moments.
             max_m = abs(q_local[2])
             max_x = 0.0
-            for step in range(101):
-                x = length * step / 100.0
+            diagram: list[tuple[float, float]] = []
+            sample_x = [length * step / 100.0 for step in range(101)]
+            if "wy_patch" in member.loads:
+                patch_start = min(
+                    1.0, max(0.0, float(member.loads.get("wy_patch_start", 0.0)))
+                )
+                patch_end = min(
+                    1.0, max(0.0, float(member.loads.get("wy_patch_end", 1.0)))
+                )
+                sample_x.extend((patch_start * length, patch_end * length))
+                sample_x = sorted(set(round(v, 9) for v in sample_x))
+            for x in sample_x:
                 # Internal actions at a section measured from end i.  The local
                 # end-force vector stores the actions exerted by the member on
                 # its nodes; the internal bending moment therefore starts at
@@ -449,25 +491,35 @@ class FrameModel:
                 moment = -q_local[2] + shear * x
                 # Add the distributed-load contribution using 12-point Simpson.
                 if member.loads:
-                    nseg = max(2, int(math.ceil(12 * x / length)) * 2)
-                    h = x / nseg
-                    shear_load = 0.0
-                    moment_load = 0.0
-                    for s in range(nseg + 1):
-                        xp = s * h
-                        xi = xp / length
-                        wx, wy = self._load_intensity(member, xi)
-                        # Transform global load to local transverse intensity.
-                        _, c, srot = self._member_geometry(member)
-                        qy = -srot * wx + c * wy
-                        w = 1.0 if s in (0, nseg) else (4.0 if s % 2 else 2.0)
-                        shear_load += w * qy
-                        moment_load += w * qy * (x - xp)
-                    shear += shear_load * h / 3.0
-                    moment += moment_load * h / 3.0
+                    cut_points = [0.0, x]
+                    if "wy_patch" in member.loads:
+                        for value in (patch_start * length, patch_end * length):
+                            if 0.0 < value < x:
+                                cut_points.append(value)
+                    cut_points = sorted(set(round(v, 9) for v in cut_points))
+                    _, c, srot = self._member_geometry(member)
+                    for xa, xb in zip(cut_points, cut_points[1:]):
+                        if xb - xa <= 1e-12:
+                            continue
+                        shear_load = 0.0
+                        moment_load = 0.0
+                        nseg = max(2, int(math.ceil(24 * (xb - xa) / length)) * 2)
+                        h = (xb - xa) / nseg
+                        for s in range(nseg + 1):
+                            xp = xa + s * h
+                            xi = xp / length
+                            wx, wy = self._load_intensity(member, xi)
+                            # Transform global load to local transverse intensity.
+                            qy = -srot * wx + c * wy
+                            w = 1.0 if s in (0, nseg) else (4.0 if s % 2 else 2.0)
+                            shear_load += w * qy
+                            moment_load += w * qy * (x - xp)
+                        shear += shear_load * h / 3.0
+                        moment += moment_load * h / 3.0
                 if abs(moment) > max_m:
                     max_m = abs(moment)
                     max_x = x
+                diagram.append((round(x, 6), round(moment, 6)))
 
             member_results[member.id] = MemberResult(
                 id=member.id,
@@ -481,6 +533,7 @@ class FrameModel:
                 moment_end_knm=(-q_local[2], q_local[5]),
                 max_abs_moment_knm=max_m,
                 max_moment_position_m=max_x,
+                moment_diagram_knm=diagram,
             )
 
         return FrameResult(

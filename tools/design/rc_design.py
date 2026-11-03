@@ -71,13 +71,20 @@ def _bar_area(name):
     return REBAR_SIZES[name][1]
 
 
-def _pick_bars(As_req_mm2_per_m, cover_mm=75.0, h_mm=None, prefer=("D16", "D19", "D22", "D25", "D13")):
+def _pick_bars(
+    As_req_mm2_per_m,
+    cover_mm=75.0,
+    h_mm=None,
+    prefer=("D16", "D19", "D22", "D25", "D13"),
+    max_spacing_mm=300.0,
+):
     """在每公尺寬度內選筋：回傳 (筋號, 間距 mm, 實際 As mm²/m)。"""
+    cap = max(50.0, min(300.0, float(max_spacing_mm)))
     for name in prefer:
         ab = _bar_area(name)
         # 每公尺根數 = 1000 / spacing；As = 1000/spacing × ab
         spacing = math.floor(1000.0 * ab / max(As_req_mm2_per_m, 1e-9) / 10.0) * 10
-        spacing = max(50, min(spacing, 300))          # 實務間距 5~30 cm
+        spacing = max(50, min(spacing, cap))          # 實務間距 5~30 cm
         As = 1000.0 / spacing * ab
         if As >= As_req_mm2_per_m * 0.999:
             return name, int(spacing), As
@@ -85,6 +92,39 @@ def _pick_bars(As_req_mm2_per_m, cover_mm=75.0, h_mm=None, prefer=("D16", "D19",
     ab = _bar_area(name)
     spacing = 50
     return name, spacing, 1000.0 / spacing * ab
+
+
+def select_bars(
+    As_req_mm2_per_m,
+    h_mm,
+    cover_mm=50.0,
+    *,
+    prefer=("D16", "D19", "D22", "D25", "D13"),
+    max_spacing_mm=300.0,
+):
+    """依所需 As 選筋，回傳筋號／間距／實配 As。
+
+    供非撓曲控制之配筋（縱向分佈筋、溫度鋼筋）使用；不會套用樑式
+    As,min，因此可指定比 `flexure_design()` 更低的分佈筋量。
+    """
+    req = max(0.0, float(As_req_mm2_per_m))
+    prefer = tuple(p for p in prefer if p in REBAR_SIZES) or (
+        "D16", "D19", "D22", "D25", "D13"
+    )
+    name, spacing, As = _pick_bars(
+        req,
+        float(cover_mm),
+        float(h_mm),
+        prefer=prefer,
+        max_spacing_mm=max_spacing_mm,
+    )
+    return {
+        "bar": name,
+        "spacing_mm": int(spacing),
+        "As_prov_mm2": round(As, 1),
+        "As_req_mm2": round(req, 1),
+        "ok": As >= req - 1e-6,
+    }
 
 
 def phi_by_strain(As_mm2, b_mm, d_mm, fc_mpa, fy_mpa, es_mpa=None):
@@ -142,6 +182,8 @@ def flexure_design(
     cc=None,
     *,
     As_required_min_mm2=None,
+    max_spacing_mm=None,
+    bar_prefer=None,
 ):
     """單筋矩形斷面撓曲設計（每公尺）。回傳 dict。"""
     c = dict(CONCRETE, **(cc or {}))
@@ -174,7 +216,23 @@ def flexure_design(
     As_design = max(As_req, As_min)
     if As_required_min_mm2 is not None:
         As_design = max(As_design, float(As_required_min_mm2))
-    name, spacing, As_prov = _pick_bars(As_design, c["cover_mm"], h_mm)
+    prefer = (
+        tuple(bar_prefer)
+        if bar_prefer
+        else ("D16", "D19", "D22", "D25", "D13")
+    )
+    prefer = tuple(p for p in prefer if p in REBAR_SIZES) or (
+        "D16", "D19", "D22", "D25", "D13"
+    )
+    name, spacing, As_prov = _pick_bars(
+        As_design,
+        c["cover_mm"],
+        h_mm,
+        prefer=prefer,
+        max_spacing_mm=(
+            300.0 if max_spacing_mm is None else float(max_spacing_mm)
+        ),
+    )
 
     a = As_prov * fy / (0.85 * fc * b_mm)
     Mn = As_prov * fy * (d - a / 2) / 1e6            # kN·m

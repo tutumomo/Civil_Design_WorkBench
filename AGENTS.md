@@ -158,6 +158,8 @@ egs\`）。
 
 - **When using any 規範公式或表格數值做設計計算（引用規範公式／表值）**，一律用 MCP `regs_formula`／`regs_table`（已驗證庫，帶單位、適用範圍、條文頁碼）；`regs_clause` 純文字開頭標「【可信度：低】」者不得直接取數。`design_run` 回傳的 `references` 要寫進報告的依據欄。**新增或補強規範公式／圖表**（現有規範補庫、新增規範、修訂版）必須照 [`docs/規範公式圖表入庫SOP.md`](docs/規範公式圖表入庫SOP.md)：先 `tools/regs/regs_vtool.py coverage` 盤點，預設用 `tools/regs/page_table.py <src> --page N` 讀**座標化文字層**逐格轉錄（不看圖；真要對圖才 `regs_vtool.py page` 產 PNG，**同一對話的圖片總數上限 200 張，撞線後連 `/compact` 都會 400，只能開新對話**，見 `docs/踩坑紀錄.md` §U），不確定就不收，`lint`＋`verified_selftest.py`＋`regq_selftest.py` 全過才算入庫；原書疑誤者標 `pending` 並登錄 `tools/regs/design_conformance.py` 的 KNOWN，每輪跑 `design_conformance.py` 做「引擎↔已驗證庫」雙向比對（SOP §5 三道閘門、§6 雙向比對原則）。
 
+- **When the user says「收工」、「關帳」or closeout**, read [`docs\專案收工SOP.md`](docs/專案收工SOP.md) and run all 16 steps. 版本採 CalVer `vYYYY.MM.DD-N`；「收工」一律授權 commit、tag 與 push `main`（使用者另說「先不推」才跳過）；只 stage 本次白名單，不得掃入其他 dirty 檔。
+
 ## 6. 交件強制品管門檻（Mandatory Delivery Gate）
 凡交付 A3 圖面，必須備齊 `<案名>_現況平面圖_A3.dwg`、`.dxf`、`.pdf`、`.png`、`紀錄.log`，且**交件前必跑下列指令並取得退出碼 `0`（E1~E18 零錯誤，含 E15 字高／E16 標準比例／E17 顏色線粗／E18 出圖型式，含 E9 標題欄 `y=29.03`／技師圖記區 `x363.5~410.3, y29~80.9` 零跨越、E10 紙空間文字 bbox 零重疊）**，未通過不得宣稱完稿：
 

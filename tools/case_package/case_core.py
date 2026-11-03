@@ -154,6 +154,41 @@ def quantity_context(case):
                 values, _RC.design_channel_wall(values, _hr))
             values["rebar_kg_per_m_design"] = round(_kgc["total_kg_per_m"], 2)
             values["rebar_kg_design"] = round(_kgc["total_kg_per_m"] * _L, 1)
+        elif model == "box_culvert" and BC is not None and _L > 0:
+            _hy = case.get("hydraulics") or {}
+            _cv = case.get("culvert") or {}
+            _br = BC.analyse(
+                values,
+                design_flow_m3s=float(_hy.get("design_flow_m3s") or 0.0),
+                slope=float(_hy.get("slope") or 0.005),
+                manning_n=float(_hy.get("manning_n") or 0.014),
+                freeboard_min_m=float(_hy.get("freeboard_min_m") or 0.20),
+                soil_unit_weight_kn_m3=float(_cv.get("soil_unit_weight_kn_m3") or 18.0),
+                soil_phi_deg=float(_cv.get("soil_phi_deg") or 30.0),
+                surcharge_kpa=float(_cv.get("surcharge_kpa") or 0.0),
+                traffic_type=_cv.get("traffic_type"),
+                traffic_load_kpa=float(_cv.get("traffic_load_kpa") or 0.0),
+                traffic_lanes=int(_cv.get("traffic_lanes") or 4),
+                traffic_impact_factor=_cv.get("traffic_impact_factor"),
+                groundwater_depth_m=(
+                    None if _cv.get("groundwater_depth_m") in (None, "")
+                    else float(_cv["groundwater_depth_m"])
+                ),
+                internal_water_depth_m=float(_cv.get("internal_water_depth_m") or 0.0),
+                load_factor=float(_cv.get("load_factor") or 1.7),
+                seismic_kh=float((case.get("seismic") or {}).get("kh", 0.0) or 0.0),
+                allowable_bearing_kpa=(
+                    None if _cv.get("allowable_bearing_kpa") in (None, "")
+                    else float(_cv["allowable_bearing_kpa"])
+                ),
+                rebar_loss_rate=float(_cv.get("rebar_loss_rate") or BC.REBAR_LOSS_RATE),
+            )
+            _bq = _br["quantities"]
+            values["rebar_kg_per_m_design"] = _bq["rebar_kg_per_m"]
+            values["rebar_kg_design"] = _bq["rebar_kg_total"]
+            values["rebar_loss_rate"] = _bq["rebar_loss_rate"]
+            values["formwork_m2_per_m_design"] = _bq["formwork_m2_per_m"]
+            values["formwork_m2_design"] = _bq["formwork_m2"]
     except Exception as _ex:
         issues.append({"level": "warn",
                        "msg": "鋼筋設計量未算出（rebar_kg_design 不提供）：%s" % _ex})
@@ -180,7 +215,7 @@ def consistency(case):
     # ---- 鋼筋量：配筋設計推算 vs 數量表假設值 ----
     # 數量表的 rebar_kg 一向是「含鋼量假設值 × 混凝土體積」（40 kg/m³）。
     # 現在配筋設計已經算得出實際值，兩者若差太多就該提出來 —— 只 warn，不改預算。
-    if model in ("wall", "channel") and RC is not None:
+    if model in ("wall", "channel", "box_culvert") and RC is not None:
         try:
             _ratio = float(values.get("rebar_ratio_kg_m3") or 0)
             _kg = float(values.get("rebar_kg") or 0)
@@ -203,6 +238,8 @@ def consistency(case):
                 _cw = RC.design_channel_wall(values, _hr)
                 _rc = RC.rebar_kg_per_m_channel(values, _cw)
                 _design_kg = _rc["total_kg_per_m"] * float(values.get("length_m") or 0)
+            if model == "box_culvert" and _design_kg is None:
+                _design_kg = float(values.get("rebar_kg_design") or 0.0) or None
             if _design_kg and _kg > 0:
                 _diff = (_design_kg - _kg) / _kg * 100.0
                 if abs(_diff) > 25.0:

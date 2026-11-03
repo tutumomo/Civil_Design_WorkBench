@@ -318,8 +318,28 @@ npx wrangler deploy
 | `regression.py` 顯示基準不符 | 真的改變了設計數值 | 確認預期後才 `--update` |
 | 上架檢核 G6 FAIL | example 有新字串欄位沒給 select | 補 `field_rules`，或列入 `FREE_TEXT_FIELDS` |
 | 上架檢核 G7 FAIL | `regs_web.html` 的 `TOOL_TO_CALCS` 未掛載該引擎 | 在 `TOOL_TO_CALCS` 補上 `"tools\\design\\<engine>.py": [{ id, title, desc }]` |
-| 上架檢核 G4 WARN | 檢核列缺 `unit`／`limit` | 補欄位；純資訊列標 `advisory` |
+| 上架檢核 G4 WARN | 檢核列缺 `unit`／`limit` | 先問「這真的是通過／不通過嗎？」不是就移到 `summary`／`result`；真要在 `checks` 內，至少標 `severity:"advisory"` 且補 `unit` |
+| 回歸基準不符 | 真的改變了設計數值（例：鋼筋損耗 12%→6%、模板補上頂版底面） | 先列差異與原因，確認是本次刻意變更才 `regression.py --update`；回報要寫前後值 |
+| Excel 公式與程式不一致 | 只看工作表文字標籤，沒看儲存格實際數值 | 用 `xlrd` 逐格 dump 公式列與數值列；**以數值為準**（工作簿曾把 `1.2` 寫成 `1+0.3`） |
+| 同一數量有兩套算法 | 引擎與 `qty_models` 各寫一份 | 數量只能有一個定義：改引擎時同步 `qty_models`／`case.json`，並用回歸鎖住 |
+| 資訊性數字被當成檢核 | 例如「車載重換算均佈」沒有 limit | 不要放 `checks`；由 `summary`、`result` 或報告本文呈現 |
 | Cloudflare 線上版沒看到更新或報 `9109` | 誤加 `--temporary` 吃到過期臨時憑證或產生新網址 | 移除 `--temporary`，設定 `$env:CLOUDFLARE_ACCOUNT_ID='e2c04af8447f8efcbf6ca597d6d3ad36'` 跑 `npx wrangler deploy` |
+
+---
+
+## 10. 工項專用 SOP 索引
+
+上架 SOP 只管「怎麼把計算器接進工作台」；工項本身的模型、公式、限制與
+驗證，寫在對應的計算 SOP：
+
+| 工項 | SOP | 內容 |
+|---|---|---|
+| 鋼構柱＋柱腳＋基礎螺栓 | [`鋼構柱與基礎螺栓計算SOP.md`](鋼構柱與基礎螺栓計算SOP.md) | 鋼構規範、基板、錨栓、墩座 |
+| 單孔／雙孔／三孔箱涵 | [`箱涵計算SOP.md`](箱涵計算SOP.md) | 車載五型、逐面配筋、每延米鋼筋／模板、Excel 對照 |
+| 全體設計計算產線 | [`設計計算產線.md`](設計計算產線.md) | 各引擎公式、對帳、限制 |
+
+> 新增工項時，**兩份都要有**：上架 SOP 的 G0～G8，以及該工項的計算 SOP。
+> 只有程式、沒有計算 SOP，下一個人會不知道公式從哪來、哪些情況不能套。
 
 ---
 

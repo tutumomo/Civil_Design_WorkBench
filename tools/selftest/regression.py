@@ -146,7 +146,10 @@ def collect(case_dir):
                     cfg.get("soil_unit_weight_kn_m3") or 18.0),
                 soil_phi_deg=float(cfg.get("soil_phi_deg") or 30.0),
                 surcharge_kpa=float(cfg.get("surcharge_kpa") or 0.0),
-                traffic_load_kpa=float(cfg.get("traffic_load_kpa") or 10.0),
+                traffic_type=cfg.get("traffic_type")
+                or ("custom" if cfg.get("traffic_load_kpa") is not None else "h20"),
+                traffic_load_kpa=float(cfg.get("traffic_load_kpa") or 0.0),
+                traffic_lanes=int(cfg.get("traffic_lanes") or 4),
                 groundwater_depth_m=cfg.get("groundwater_depth_m"),
                 internal_water_depth_m=float(
                     cfg.get("internal_water_depth_m") or 0.0),
@@ -163,6 +166,11 @@ def collect(case_dir):
             rec["numbers"]["正常水深_m"] = round(
                 float(r["hydraulic"]["normal_depth_m"]), 4)
             rec["numbers"]["鋼筋量_kg"] = round(float(q.get("rebar_kg") or 0.0), 1)
+            # 引擎實算的配筋量（與案件假設的 rebar_kg 分開追蹤）
+            rec["numbers"]["配筋設計鋼筋量_kg_per_m"] = round(
+                float(r["quantities"]["rebar_kg_per_m"]), 2)
+            rec["numbers"]["配筋設計鋼筋總量_kg"] = round(
+                float(r["quantities"]["rebar_kg_total"]), 0)
             rec["numbers"]["模板_m2"] = round(float(q.get("formwork_m2") or 0.0), 2)
         elif model == "slope":
             import slope_stability as SS

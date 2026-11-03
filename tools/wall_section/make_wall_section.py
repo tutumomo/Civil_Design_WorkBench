@@ -37,10 +37,12 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 sys.path.insert(0, os.path.join(ROOT, "tools", "a3_sheet"))
 sys.path.insert(0, os.path.join(ROOT, "tools", "case_package"))
+sys.path.insert(0, os.path.join(ROOT, "tools", "design"))
 
 import drawing_rules as DR                    # noqa: E402
 from drawing_rules import model_h             # noqa: E402
 import case_core as CC                       # noqa: E402
+import wall_geometry as _WG                   # noqa: E402
 
 TEMPLATE = os.path.join(ROOT, "tools", "a3_sheet", "A3圖框_template.dxf")
 LAYOUT_NAME = "斷面圖"
@@ -347,8 +349,268 @@ def draw_slope_section(doc, q, scale, dimstyle):
                 slip=slip, title_note="邊坡標準斷面圖", drawing_no="E-01")
 
 
+def _draw_advanced_wall_section(doc, q, scale, dimstyle, rebar=None):
+    """Typical section for counterfort / anchored / MSE walls.
+
+    Counterfort is shown as a dashed longitudinal stiffener, not as a
+    closed concrete polygon: S-01/S-02 are typical sections between
+    counterforts, and their closed area must equal ``section_area_m2``.
+    """
+
+    msp = doc.modelspace()
+    wt = str(q.get("wall_type", "")).strip().lower()
+    WD = float(q.get("weep_diameter_m", 0.05))
+    NZ = int(q.get("weep_rows", 3) or 3)
+    BACK = float(q.get("backfill_thickness_m", 0.3))
+    FILT = 0.10
+    hs = model_h(3.0, scale)
+    hb = model_h(3.0, scale)
+    _dash = "DASHED" if "DASHED" in doc.linetypes else "CONTINUOUS"
+    g = _WG.parse(dict(q, wall_type=wt))
+    pts = list(g.points)
+    msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": L_CONC})
+    hatch_scale = (1.5 * scale / 1000.0) / 3.175
+    h = msp.add_hatch(color=256, dxfattribs={"layer": L_HATCH})
+    h.set_pattern_fill("ANSI31", color=256, scale=max(hatch_scale, 1e-4))
+    h.paths.add_polyline_path(pts, is_closed=True)
+
+    def put(x, y, s, layer=L_NOTE):
+        t = msp.add_text(s, height=hb, dxfattribs={"layer": layer, "style": "TOMO"})
+        t.set_placement((x, y))
+
+    def dim(p1, p2, base, angle=None):
+        if angle is None:
+            angle = 90 if abs(p1[0] - p2[0]) < abs(p1[1] - p2[1]) else 0
+        d = msp.add_linear_dim(base=base, p1=p1, p2=p2, angle=angle,
+                               dimstyle=dimstyle, dxfattribs={"layer": L_DIM})
+        d.render()
+
+    def face_x(bot, top, y):
+        if abs(top[1] - bot[1]) < 1e-9:
+            return top[0]
+        return bot[0] + (top[0] - bot[0]) * (y - bot[1]) / (top[1] - bot[1])
+
+    def dots_v(x, y0, y1, spacing, bar="D16"):
+        dia = {"D10": 0.010, "D13": 0.013, "D16": 0.016, "D19": 0.019,
+               "D22": 0.022, "D25": 0.025, "D29": 0.029, "D32": 0.032}.get(bar, 0.016)
+        yy = y0 + 0.10
+        while yy <= y1 - 0.08:
+            msp.add_circle((x, yy), dia / 2.0, dxfattribs={"layer": L_REBAR})
+            yy += spacing / 1000.0
+
+    def dots_h(y, x0, x1, spacing, bar="D16"):
+        dia = {"D10": 0.010, "D13": 0.013, "D16": 0.016, "D19": 0.019,
+               "D22": 0.022, "D25": 0.025, "D29": 0.029, "D32": 0.032}.get(bar, 0.016)
+        xx = x0 + 0.08
+        while xx <= x1 - 0.08:
+            msp.add_circle((xx, y), dia / 2.0, dxfattribs={"layer": L_REBAR})
+            xx += spacing / 1000.0
+
+    kp = g.key_points
+    if wt == "counterfort":
+        H = float(q["height_m"])
+        ts = float(q["stem_thickness_m"])
+        BL = float(q["base_width_m"])
+        BT = float(q["base_thickness_m"])
+        Lt = float(q["toe_length_m"])
+        S = float(q["counterfort_spacing_m"])
+        tc = float(q["counterfort_thickness_m"])
+        ctop = float(q["counterfort_top_width_m"])
+        ds = float(q.get("front_soil_depth_m") or 0)
+        back_lo = Lt + ts
+        backfill = [(back_lo, -BT), (back_lo + BACK, -BT),
+                    (back_lo + BACK, H), (back_lo, H)]
+        msp.add_lwpolyline(backfill, close=True, dxfattribs={"layer": L_BACK})
+        h2 = msp.add_hatch(color=256, dxfattribs={"layer": L_BACK})
+        h2.set_pattern_fill("ANSI37", color=256, scale=max(hatch_scale, 1e-4))
+        h2.paths.add_polyline_path(backfill, is_closed=True)
+        filt = [(back_lo + BACK, -BT), (back_lo + BACK + FILT, -BT),
+                (back_lo + BACK + FILT, H), (back_lo + BACK, H)]
+        msp.add_lwpolyline(filt, close=True, dxfattribs={"layer": L_BACK})
+        # Counterfort outline (longitudinal stiffener), dashed and not a
+        # closed concrete polygon so take-off area stays per-metre typical.
+        cf_pts = [(back_lo, 0.0), (BL, 0.0), (back_lo + ctop, H), (back_lo, H),
+                  (back_lo, 0.0)]
+        msp.add_lwpolyline(cf_pts, close=False,
+                           dxfattribs={"layer": L_NOTE, "linetype": _dash})
+        put((back_lo + min(ctop * 0.5, (BL - back_lo) * 0.25)), H * 0.55,
+            "扶壁（斷面外）")
+        # front toe soil
+        if ds > 0 and Lt > 0:
+            toe = [(0.0, 0.0), (Lt, 0.0), (Lt, ds), (0.0, ds)]
+            msp.add_lwpolyline(toe, close=True, dxfattribs={"layer": L_BACK})
+            hc = msp.add_hatch(color=256, dxfattribs={"layer": L_BACK})
+            hc.set_pattern_fill("ANSI37", color=256, scale=max(hatch_scale, 1e-4))
+            hc.paths.add_polyline_path(toe, is_closed=True)
+        ys = [H / (NZ + 1) * (k + 1) for k in range(NZ)]
+        for y in ys:
+            x = face_x((Lt, 0.0), (Lt, H), y)
+            msp.add_circle((x, y), WD / 2, dxfattribs={"layer": L_WEEP})
+            msp.add_line((x, y), (x - 0.12, y), dxfattribs={"layer": L_WEEP})
+        dim((Lt, 0.0), (Lt, H), (Lt - 0.45, 0.0))
+        dim((0.0, -BT), (BL, -BT), (0.0, -BT - 0.35))
+        dim((Lt, H), (Lt + ts, H), (Lt, H + 0.35))
+        dim((BL + 0.06, -BT), (BL + 0.06, 0.0), (BL + 0.50, -BT))
+        dim((back_lo, 0.0), (BL, 0.0), (back_lo, -BT - 0.70))
+        sp_stem = int((rebar or {}).get("stem_spacing_mm", 260))
+        sp_base = int((rebar or {}).get("base_spacing_mm", 110))
+        dots_v(Lt + 0.075, 0.0, H, sp_stem, (rebar or {}).get("stem_bar", "D16"))
+        dots_v(back_lo - 0.075, 0.0, H, sp_stem, (rebar or {}).get("stem_bar", "D16"))
+        dots_h(-BT + 0.075, 0.0, BL, sp_base, (rebar or {}).get("base_bar", "D16"))
+        dots_h(-0.075, 0.0, BL, sp_base, (rebar or {}).get("base_bar", "D16"))
+        # 6 必須落在扶壁虛線內，7 才是基礎開挖線；先前 6 誤指開挖線，
+        # 與右欄「部位圖例」對不上。
+        cf_tag = (back_lo + (BL - back_lo) * 0.45, H * 0.28)
+        for n, (x, y) in enumerate(((Lt + ts * 0.5, H * 0.55),
+                                    (BL * 0.55, -BT * 0.5),
+                                    (back_lo + BACK / 2, H * 0.55),
+                                    (back_lo + BACK + FILT / 2, H * 0.30),
+                                    (-0.17, ys[-1] if ys else H * 0.9),
+                                    cf_tag,
+                                    (-0.30, -BT - 0.10)), 1):
+            msp.add_circle((x, y), 0.055, dxfattribs={"layer": L_NOTE})
+            t = msp.add_text(str(n), height=hb, dxfattribs={"layer": L_NOTE, "style": "TOMO"})
+            t.set_placement((x, y), align=TextEntityAlignment.MIDDLE_CENTER)
+        return dict(H=H, T=ts, BL=BL, BT=BT, WD=WD, NZ=NZ, BACK=BACK, FILT=FILT,
+                    TOE=ds, wall_type=wt, weep_ys=ys, top_y=H,
+                    title_note="擋土牆標準斷面圖", drawing_no="S-01",
+                    counterfort_spacing_m=S, counterfort_thickness_m=tc,
+                    toe_length_m=Lt, front_soil_depth_m=ds)
+
+    if wt == "anchored":
+        H = float(q["height_m"])
+        t = float(q["wall_thickness_m"])
+        BL = float(q["base_width_m"])
+        BT = float(q["base_thickness_m"])
+        hw = H - BT
+        ds = float(q.get("front_soil_depth_m") or 0)
+        backfill = [(t, -BT), (t + BACK, -BT), (t + BACK, H), (t, H)]
+        msp.add_lwpolyline(backfill, close=True, dxfattribs={"layer": L_BACK})
+        h2 = msp.add_hatch(color=256, dxfattribs={"layer": L_BACK})
+        h2.set_pattern_fill("ANSI37", color=256, scale=max(hatch_scale, 1e-4))
+        h2.paths.add_polyline_path(backfill, is_closed=True)
+        # 反濾層要真的畫出來；否則圖例「4 反濾層」的圓標會懸在空白處。
+        filt = [(t + BACK, -BT), (t + BACK + FILT, -BT),
+                (t + BACK + FILT, H), (t + BACK, H)]
+        msp.add_lwpolyline(filt, close=True, dxfattribs={"layer": L_BACK})
+        if ds > 0:
+            toe = [(-0.5, 0.0), (0.0, 0.0), (0.0, ds), (-0.5, ds)]
+            msp.add_lwpolyline(toe, close=True, dxfattribs={"layer": L_BACK})
+        ys = [H / (NZ + 1) * (k + 1) for k in range(NZ)]
+        for y in ys:
+            msp.add_circle((0.0, y), WD / 2, dxfattribs={"layer": L_WEEP})
+            msp.add_line((0.0, y), (-0.12, y), dxfattribs={"layer": L_WEEP})
+        alpha = math.radians(float(q.get("inclination_deg") or 20))
+        for row, z in enumerate(q.get("anchor_depths_m") or [], 1):
+            z = float(z)
+            Lf = float(q.get("free_length_m") or 6.0)
+            Lb = float(q.get("bond_length_m") or 6.0)
+            y0 = H - z
+            p0 = (t, y0)
+            # S-01/S-02 是牆身標準斷面，不是地錨詳圖。只畫前 2 m 並以
+            # 折斷線收尾，避免 13 m 地錨把斷面比例逼到 1:200 而失去可讀性。
+            Lpreview = min(Lf, 2.0)
+            p1 = (t + Lpreview * math.cos(alpha), y0 - Lpreview * math.sin(alpha))
+            msp.add_line(p0, p1, dxfattribs={"layer": L_NOTE, "linetype": _dash})
+            brk = 0.12
+            msp.add_line((p1[0] - brk * math.sin(alpha), p1[1] - brk * math.cos(alpha)),
+                         (p1[0] + brk * math.sin(alpha), p1[1] + brk * math.cos(alpha)),
+                         dxfattribs={"layer": L_NOTE})
+            msp.add_line((t - 0.18, y0 + 0.15), (t - 0.18, y0 - 0.15),
+                         dxfattribs={"layer": L_REBAR})
+            put(t + 0.15, y0 + 0.12,
+                "地錨 %d（L=%.1f m）" % (row, Lf + Lb))
+        dim((0.0, 0.0), (0.0, H), (-0.55, 0.0))
+        dim((0.0, -BT), (BL, -BT), (0.0, -BT - 0.35))
+        dim((0.0, hw), (t, hw), (0.0, hw + 0.35))
+        dim((BL + 0.06, -BT), (BL + 0.06, 0.0), (BL + 0.50, -BT))
+        sp_wall = int((rebar or {}).get("stem_spacing_mm", 180))
+        sp_base = int((rebar or {}).get("base_spacing_mm", 200))
+        base_bar = (rebar or {}).get("base_bar", "D16")
+        dots_v(0.075, 0.0, hw, sp_wall, (rebar or {}).get("stem_bar", "D16"))
+        dots_v(t - 0.075, 0.0, hw, sp_wall, (rebar or {}).get("stem_bar", "D16"))
+        dots_h(-BT + 0.075, 0.0, BL, sp_base, base_bar)
+        dots_h(-0.075, 0.0, BL, sp_base, base_bar)
+        # 6 放在第一排地錨前段，7 才是基礎開挖線。
+        _depths = [float(v) for v in (q.get("anchor_depths_m") or [])]
+        _z = min(_depths) if _depths else H * 0.15
+        _y0 = H - _z
+        anchor_tag = (t + 0.95 * math.cos(alpha), _y0 - 0.95 * math.sin(alpha))
+        for n, (x, y) in enumerate(((t * 0.5, hw * 0.55),
+                                    (BL * 0.55, -BT * 0.5),
+                                    (t + BACK / 2, H * 0.55),
+                                    (t + BACK + FILT / 2, H * 0.30),
+                                    (-0.17, ys[-1] if ys else H * 0.9),
+                                    anchor_tag,
+                                    (-0.30, -BT - 0.10)), 1):
+            msp.add_circle((x, y), 0.055, dxfattribs={"layer": L_NOTE})
+            tt = msp.add_text(str(n), height=hb, dxfattribs={"layer": L_NOTE, "style": "TOMO"})
+            tt.set_placement((x, y), align=TextEntityAlignment.MIDDLE_CENTER)
+        return dict(H=H, T=t, BL=BL, BT=BT, WD=WD, NZ=NZ, BACK=BACK, FILT=FILT,
+                    TOE=ds, wall_type=wt, weep_ys=ys, top_y=H,
+                    title_note="擋土牆標準斷面圖", drawing_no="S-01",
+                    anchor_rows=len(q.get("anchor_depths_m") or []),
+                    horizontal_spacing_m=float(q.get("horizontal_spacing_m") or 0),
+                    inclination_deg=float(q.get("inclination_deg") or 0))
+
+    # MSE
+    H = float(q["height_m"])
+    t = float(q.get("face_panel_thickness_m") or 0.20)
+    L = float(q["reinforcement_length_m"])
+    emb = float(q.get("embedment_m") or 0.0)
+    block = str(q.get("facing_type") or "").lower() == "segmented_block"
+    soil = [(t, 0.0), (t + L, 0.0), (t + L, H), (t, H)]
+    msp.add_lwpolyline(soil, close=True, dxfattribs={"layer": L_BACK})
+    hs2 = msp.add_hatch(color=256, dxfattribs={"layer": L_BACK})
+    hs2.set_pattern_fill("ANSI37", color=256, scale=max(hatch_scale, 1e-4))
+    hs2.paths.add_polyline_path(soil, is_closed=True)
+    ys = []
+    y = float(q.get("first_layer_m") or 0.3)
+    spacing = float(q.get("vertical_spacing_m") or 0.6)
+    while y <= H + 1e-9:
+        ys.append(y)
+        msp.add_line((t, y), (t + L, y), dxfattribs={"layer": L_REBAR, "linetype": _dash})
+        y += spacing
+    msp.add_line((-0.8, 0.0), (0.0, 0.0), dxfattribs={"layer": L_NOTE})
+    if emb > 0:
+        msp.add_line((0.0, -emb), (0.0, 0.0), dxfattribs={"layer": L_NOTE, "linetype": _dash})
+        msp.add_line((0.0, -emb), (t + L, -emb), dxfattribs={"layer": L_NOTE, "linetype": _dash})
+    for yy in (H / (NZ + 1) * (k + 1) for k in range(NZ)):
+        msp.add_circle((0.0, yy), WD / 2, dxfattribs={"layer": L_WEEP})
+    if not block:
+        sp = int((rebar or {}).get("stem_spacing_mm", 260))
+        dots_v(0.065, 0.0, H, sp, (rebar or {}).get("stem_bar", "D13"))
+        dots_v(t - 0.065, 0.0, H, sp, (rebar or {}).get("stem_bar", "D13"))
+    dim((0.0, 0.0), (0.0, H), (-0.55, 0.0))
+    dim((0.0, H), (t, H), (0.0, H + 0.35))
+    dim((t, 0.0), (t + L, 0.0), (t, -0.45))
+    if emb > 0:
+        dim((0.0, -emb), (0.0, 0.0), (-0.75, -emb))
+    # 4 必須落在基礎埋入段（地面線以下的面版），先前誤放在加勁區中段，
+    # 與右欄「4 基礎埋入段」對不上；6 則移到開挖線左端外側。
+    _emb_tag_y = -emb * 0.5 if emb > 0.05 else -0.12
+    _exc_tag = (-0.30, (-emb if emb > 0.0 else 0.0) - 0.10)
+    for n, (x, yy) in enumerate(((t * 0.5, H * 0.55),
+                                  (t + L * 0.45, H * 0.55),
+                                  (t + L * 0.18, H * 0.25),
+                                  (t + 0.30, _emb_tag_y),
+                                  (-0.17, H * 0.85),
+                                  _exc_tag), 1):
+        msp.add_circle((x, yy), 0.055, dxfattribs={"layer": L_NOTE})
+        tt = msp.add_text(str(n), height=hb, dxfattribs={"layer": L_NOTE, "style": "TOMO"})
+        tt.set_placement((x, yy), align=TextEntityAlignment.MIDDLE_CENTER)
+    return dict(H=H, T=t, BL=L, BT=0.0, WD=WD, NZ=NZ, BACK=0.0, FILT=0.0,
+                TOE=0.0, wall_type=wt, weep_ys=[H / (NZ + 1) * (k + 1) for k in range(NZ)],
+                top_y=H, title_note="擋土牆標準斷面圖", drawing_no="S-01",
+                reinforcement_length_m=L, embedment_m=emb,
+                vertical_spacing_m=float(q.get("vertical_spacing_m") or 0.6))
+
+
 def draw_section(doc, q, scale, dimstyle, rebar=None):
     msp = doc.modelspace()
+    wall_type = str(q.get("wall_type", "cantilever")).strip().lower()
+    if wall_type in ("counterfort", "anchored", "mse"):
+        return _draw_advanced_wall_section(doc, q, scale, dimstyle, rebar=rebar)
     H = float(q["height_m"]); T = float(q["stem_thickness_m"])
     BL = float(q["base_width_m"]); BT = float(q["base_thickness_m"])
     WD = float(q.get("weep_diameter_m", 0.05))
@@ -359,15 +621,32 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
     # 否則圖面是「素地」、計算卻用了被動土壓，兩者對不起來。
     TOE = float(q.get("toe_soil_depth_m", 0.0) or 0.0)
 
-    # ---- 混凝土斷面：重力式＝梯形；懸臂式＝薄牆身 + 底板 ----
-    wall_type = str(q.get("wall_type", "cantilever"))
+    # ---- 混凝土斷面：一律取自 wall_geometry（圖面與穩定分析共用同一份幾何）----
+    # 重力式＝梯形、懸臂式＝薄牆＋底板、半重力式＝底板＋牆身＋前後坡。
+    # 先前這裡自行拼點，半重力式會被畫成懸臂式；改成單一來源後不會再走鐘。
+    # 重力式不計牆趾被動土壓（retaining_wall 的 default_include 為 False），
+    # 圖上就不該畫出 1.5 m 覆土，否則圖面與穩定分析的假設互相矛盾。
     if wall_type == "gravity":
-        # 梯形：**背面（靠土側）鉛直在 x=BL、正面（露出側）放坡**
-        # 必須與 tools\design\retaining_wall.py 的幾何一致，否則圖上畫的斷面
-        # 和算穩定用的斷面是兩個東西（質量分布不同，驗算結果不能互相比對）。
-        pts = [(0.0, 0.0), (BL, 0.0), (BL, H), (BL - T, H)]
+        TOE = 0.0
+    _wg = _WG.parse(dict(q, wall_type=wall_type))
+    kp = _wg.key_points
+    pts = list(_wg.points)
+    top_y = float(_wg.retained_height_m)          # 牆頂（背填頂）高程
+    base_y = min(p[1] for p in pts)               # 基礎底（重力式＝0）
+    if wall_type == "gravity":
+        front_bot, back_bot = (0.0, 0.0), (BL, 0.0)
     else:
-        pts = [(0.0, -BT), (BL, -BT), (BL, 0.0), (T, 0.0), (T, H), (0.0, H)]
+        front_bot, back_bot = kp["stem_front_base"], kp["stem_back_base"]
+    front_top, back_top = kp["top_front"], kp["top_back"]
+    top_width = abs(back_top[0] - front_top[0])
+
+    def _x_at(p_bot, p_top, y):
+        """面層在高度 y 的 x（牆面有坡度時線性內插）。"""
+        dy = p_top[1] - p_bot[1]
+        if abs(dy) < 1e-9:
+            return p_top[0]
+        return p_bot[0] + (p_top[0] - p_bot[0]) * (y - p_bot[1]) / dy
+
     msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": L_CONC})
     # 剖面線間距：紙面約 1.5 mm。模型 1 unit = 1 m、ANSI31 圖案基準間距 3.175 unit
     # 先前寫 scale/20（1:20 → 1.0 unit ≈ 3.2 m 間距）→ 3 m 高的牆只畫得出 1 條線。
@@ -377,30 +656,26 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
     h.paths.add_polyline_path(pts, is_closed=True)
 
     # ---- 背填（透水性材料）+ 反濾層 ----
-    # 懸臂式：牆背鉛直在 x=T → 背填 T ~ T+BACK（鉛直帶狀）
-    # 重力式：斷面 [(0,0),(BL,0),(T,H),(0,H)] → 正面在 x=0 鉛直、背面是 (BL,0)→(T,H) 斜面
-    #          背填須「沿斜面往後」；若從 x=0 起算會填進牆體裡（先前就是這個錯）
-    if wall_type == "gravity":
-        b_lo, b_hi = BL, BL          # 背面鉛直 → 背填為鉛直帶狀
-    else:
-        b_lo, b_hi = T, T
-    back_pts = [(b_lo, 0.0), (b_lo + BACK, 0.0), (b_hi + BACK, H), (b_hi, H)]
+    # 一律由牆背實際位置起算；重力式的牆背鉛直在 x=BL、半重力式則可能有背坡。
+    b_lo, b_hi = back_bot[0], back_top[0]
+    back_pts = [(b_lo, 0.0), (b_lo + BACK, 0.0),
+                (b_hi + BACK, top_y), (b_hi, top_y)]
     msp.add_lwpolyline(back_pts, close=True, dxfattribs={"layer": L_BACK})
     h2 = msp.add_hatch(color=256, dxfattribs={"layer": L_BACK})
     h2.set_pattern_fill("ANSI37", color=256, scale=max(hatch_scale, 1e-4))
     h2.paths.add_polyline_path(back_pts, is_closed=True)
     filt = [(b_lo + BACK, 0.0), (b_lo + BACK + FILT, 0.0),
-            (b_hi + BACK + FILT, H), (b_hi + BACK, H)]
+            (b_hi + BACK + FILT, top_y), (b_hi + BACK, top_y)]
     msp.add_lwpolyline(filt, close=True, dxfattribs={"layer": L_BACK})
     # 背填／反濾層分界線（兩者都是 L_BACK 圖層，沒有這條線看不出分界）
-    msp.add_line((b_lo + BACK, 0.0), (b_hi + BACK, H),
+    msp.add_line((b_lo + BACK, 0.0), (b_hi + BACK, top_y),
                  dxfattribs={"layer": L_BACK})
 
     # ---- 原地面線（前後地面）----
     # 有牆趾覆土時，前方地面抬到 y=TOE（覆土面），牆面在該高度的 x 由正面坡度反算。
     gx = 0.6
-    if TOE > 1e-9 and wall_type == "gravity":
-        xf = (BL - T) * TOE / H if H > 1e-9 else 0.0
+    if TOE > 1e-9 and wall_type in ("gravity", "semigravity"):
+        xf = _x_at(front_bot, front_top, min(TOE, top_y))
         msp.add_line((-gx, TOE), (xf, TOE), dxfattribs={"layer": L_NOTE})
         cover = [(-gx, 0.0), (xf, 0.0), (xf, TOE), (-gx, TOE)]
         msp.add_lwpolyline(cover, close=True, dxfattribs={"layer": L_BACK})
@@ -409,31 +684,36 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
         hc.paths.add_polyline_path(cover, is_closed=True)
     else:
         msp.add_line((-gx, 0.0), (0.0, 0.0), dxfattribs={"layer": L_NOTE})
-    msp.add_line((b_hi + BACK + FILT, H), (b_hi + BACK + FILT + 0.5, H),
+    msp.add_line((b_hi + BACK + FILT, top_y), (b_hi + BACK + FILT + 0.5, top_y),
                  dxfattribs={"layer": L_NOTE})
 
     # ---- 開挖線（虛線）----
     ex0 = -0.45
-    ex1 = (BL if wall_type == "gravity" else T) + BACK + FILT + 0.2
-    base_y = 0.0 if wall_type == "gravity" else -BT
+    ex1 = max(p[0] for p in pts) + BACK + FILT + 0.2
     msp.add_line((ex0, 0.15), (ex0, base_y - 0.15), dxfattribs={"layer": L_EXC})
     msp.add_line((ex0, base_y - 0.15), (ex1, base_y - 0.15), dxfattribs={"layer": L_EXC})
     msp.add_line((ex1, base_y - 0.15), (ex1, 0.15), dxfattribs={"layer": L_EXC})
 
     # ---- 排水孔（Ø5cm，等距）----
-    ys = [H / (NZ + 1) * (k + 1) for k in range(NZ)]
+    ys = [top_y / (NZ + 1) * (k + 1) for k in range(NZ)]
     for y in ys:
-        msp.add_circle((0.0, y), WD / 2, dxfattribs={"layer": L_WEEP})
-        msp.add_line((0.0, y), (-0.12, y), dxfattribs={"layer": L_WEEP})   # 洩水管出水口
+        x_face = _x_at(front_bot, front_top, y)
+        msp.add_circle((x_face, y), WD / 2, dxfattribs={"layer": L_WEEP})
+        msp.add_line((x_face, y), (x_face - 0.12, y),
+                     dxfattribs={"layer": L_WEEP})   # 洩水管出水口
 
     # ---- 背填頂面（回填面）----
-    msp.add_line((b_hi + BACK + FILT, H), (b_lo + BACK + FILT, 0.0),
+    msp.add_line((b_hi + BACK + FILT, top_y), (b_lo + BACK + FILT, 0.0),
                  dxfattribs={"layer": L_BACK})
 
     # ---- 鋼筋 ----
     # 有配筋設計結果（S-02 配筋圖）→ 依設計的筋號與間距配置；否則用示意值（S-01 標準斷面圖）。
     cover = 0.075
-    _RB = {"stem": ("D16", 200), "base": ("D16", 210)}     # 示意預設
+    # 示意預設也要跟牆型一致：重力式／半重力式是名目構造筋 D13@250＋D16@200。
+    if wall_type in ("gravity", "semigravity"):
+        _RB = {"stem": ("D13", 250), "base": ("D16", 200)}
+    else:
+        _RB = {"stem": ("D16", 200), "base": ("D16", 210)}
     if rebar:
         _RB["stem"] = (rebar.get("stem_bar", "D16"), int(rebar.get("stem_spacing_mm", 200)))
         _RB["base"] = (rebar.get("base_bar", "D16"), int(rebar.get("base_spacing_mm", 210)))
@@ -443,30 +723,52 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
     dbase = _dia.get(_RB["base"][0], 0.016)
     sp_stem = _RB["stem"][1] / 1000.0
     sp_base = _RB["base"][1] / 1000.0
-    xs_main = [cover, T - cover]
-    y = cover + 0.05
-    while y <= H - cover:
-        for x in xs_main:
-            msp.add_circle((x, y), d16 / 2, dxfattribs={"layer": L_REBAR})
-        y += sp_stem
-    if wall_type != "gravity":
-        yb = [-BT + cover, -cover]
-        x = cover
-        while x <= BL - cover:
-            for yy in yb:
+    # 豎向筋：沿實際面層配置（重力式的牆面是有坡度的，不能固定在 x=T）。
+    # 間距 250 mm 是「沿著面層量」，斜面在鉛直方向的投影會小於 250
+    # （先前的寫法用 y += 250，斜面實際間距變成 285 mm）。
+    # 重力式／半重力式只配露出側單面（與 design_mass_wall_steel 一致）；
+    # 懸臂式才是牆面＋牆背雙面。
+    _mass_wall = wall_type in ("gravity", "semigravity")
+
+    def _face_levels(p_bot, p_top, spacing):
+        dx_, dy_ = p_top[0] - p_bot[0], p_top[1] - p_bot[1]
+        L = math.hypot(dx_, dy_)
+        if L < 1e-9:
+            return []
+        out_, s_ = [], cover + 0.05
+        while s_ <= L - cover:
+            out_.append(p_bot[1] + dy_ * (s_ / L))
+            s_ += spacing
+        return out_
+
+    for y in _face_levels(front_bot, front_top, sp_stem):
+        msp.add_circle((_x_at(front_bot, front_top, y) + cover, y),
+                       d16 / 2, dxfattribs={"layer": L_REBAR})
+    if not _mass_wall:
+        for y in _face_levels(back_bot, back_top, sp_stem):
+            msp.add_circle((_x_at(back_bot, back_top, y) - cover, y),
+                           d16 / 2, dxfattribs={"layer": L_REBAR})
+    if base_y < -1e-9:
+        # 懸臂式／半重力式：底板上下兩層縱向筋
+        for yy in (base_y + cover, -cover):
+            x = cover
+            while x <= BL - cover:
                 msp.add_circle((x, yy), dbase / 2, dxfattribs={"layer": L_REBAR})
-            x += sp_base
+                x += sp_base
     else:
         # 重力式：底部縱向構造筋一層
         x = cover
         while x <= BL - cover:
             msp.add_circle((x, cover), dbase / 2, dxfattribs={"layer": L_REBAR})
             x += sp_base
-    # 分布筋（水平線表示）
-    for yy in (cover, H - cover):
-        msp.add_line((cover, yy), (T - cover, yy),
-                     dxfattribs={"layer": L_REBAR})
-    msp.add_line((-0.05, -BT + cover), (-0.05, -cover), dxfattribs={"layer": L_REBAR})
+    # 水平分布筋（沿牆長方向）在此斷面是「圓點」、不是長線；
+    # 重力式／半重力式的 D13@250 雙向鋼筋網在斷面上就是同一排 dots，不再另畫線。
+    # 懸臂式牆身的分布筋只在受壓面，畫一條線標示其位置。
+    if not _mass_wall:
+        for yy in (cover, top_y - cover):
+            msp.add_line((_x_at(front_bot, front_top, yy) + cover, yy),
+                         (_x_at(back_bot, back_top, yy) - cover, yy),
+                         dxfattribs={"layer": L_REBAR})
 
     # ---- 尺寸標註 ----
     def dim(p1, p2, base, angle=None):
@@ -479,9 +781,12 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
                                dxfattribs={"layer": L_DIM})
         d.render()
 
-    dim((0, 0), (0, H), (-0.45, 0))                 # 牆高 H
+    dim((0, 0), (0, top_y), (-0.45, 0))             # 牆身（露出）高
     if wall_type == "gravity":
         dim((BL - T, H), (BL, H), (BL - T, H + 0.35))   # 頂寬 T（背面在 BL）
+    elif wall_type == "semigravity":
+        dim((0, base_y), (0, top_y), (-0.90, 0))        # 總高 H（含底板）
+        dim(front_top, back_top, (front_top[0], top_y + 0.35))   # 頂寬
     else:
         dim((0, H), (T, H), (0, H + 0.35))              # 牆身厚 T
     if wall_type == "gravity":
@@ -490,7 +795,9 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
         dim((0, -BT), (BL, -BT), (0, -BT - 0.30))   # 底板寬 BL
         dim((BL + 0.05, -BT), (BL + 0.05, 0.0), (BL + 0.45, -BT))   # 底板厚 BT
     if len(ys) >= 2:
-        dim((0, ys[0]), (0, ys[1]), (-0.45, 0))     # 排水孔間距
+        # 排水孔間距往左再退一階，避免與牆高／總高尺寸線疊在同一條 x
+        _wx = -1.20 if wall_type == "semigravity" else -0.85
+        dim((0, ys[0]), (0, ys[1]), (_wx, 0))       # 排水孔間距
 
     # ---- 部位標註：編號圓標（數字在圖上、名稱在右側圖例）→ 不會有字壓在斷面上 ----
     hb = model_h(3.0, scale)
@@ -504,12 +811,13 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
             (6, (-0.30, -0.05)),                      # 開挖線
         ]
     else:
+        _xm = (front_bot[0] + back_bot[0]) / 2.0
         tags = [
-            (1, (T / 2, H * 0.72)),                   # 牆身
+            (1, (_xm, top_y * 0.55)),                 # 牆身
             (2, (BL / 2, -BT / 2)),                   # 底板
-            (3, (b_hi + BACK / 2, H * 0.55)),         # 背填
-            (4, (b_hi + BACK + FILT / 2, H * 0.30)),  # 反濾層
-            (5, (-0.17, ys[-1] if ys else H * 0.9)),  # 洩水管
+            (3, (b_hi + BACK / 2, top_y * 0.55)),     # 背填
+            (4, (b_hi + BACK + FILT / 2, top_y * 0.30)),  # 反濾層
+            (5, (-0.17, ys[-1] if ys else top_y * 0.9)),  # 洩水管
             (6, (-0.30, -BT - 0.05)),                 # 開挖線
         ]
     for n, (x, y) in tags:
@@ -518,20 +826,261 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
         t.set_placement((x, y), align=TextEntityAlignment.MIDDLE_CENTER)
 
     # ---- 鋼筋標註：引線 + 圓標（名稱見右側鋼筋圖例）----
-    bars = [
-        ("A", (T + 0.30, H * 0.80), (T + 0.02, H * 0.80)),     # 主筋
-        ("B", (T + 0.30, H * 0.50), (T + 0.02, H * 0.50)),     # 分布筋
-        ("C", (BL * 0.72, -BT - 0.28), (BL * 0.72, -BT + 0.02)),  # 底板筋
-    ]
+    _ya, _yb2 = top_y * 0.80, top_y * 0.50
+    if _mass_wall:
+        # 單面配筋：A、B 都指向露出側（A 豎向、B 水平），引線往左拉出牆體
+        _xa = _x_at(front_bot, front_top, _ya)
+        _xb2 = _x_at(front_bot, front_top, _yb2)
+        bars = [
+            ("A", (_xa - 0.30, _ya), (_xa - 0.02, _ya)),
+            ("B", (_xb2 - 0.30, _yb2), (_xb2 - 0.02, _yb2)),
+            ("C", (BL * 0.72, base_y - 0.28), (BL * 0.72, base_y + 0.02)),
+        ]
+    else:
+        _xa = _x_at(back_bot, back_top, _ya)
+        _xb2 = _x_at(front_bot, front_top, _yb2)
+        bars = [
+            ("A", (_xa + 0.30, _ya), (_xa + 0.02, _ya)),       # 牆背筋
+            ("B", (_xb2 - 0.30, _yb2), (_xb2 - 0.02, _yb2)),   # 牆面筋
+            ("C", (BL * 0.72, base_y - 0.28), (BL * 0.72, base_y + 0.02)),
+        ]
     for n, (tx, ty), (lx, ly) in bars:
         msp.add_circle((tx, ty), 0.055, dxfattribs={"layer": L_REBAR})
         t = msp.add_text(n, height=hb, dxfattribs={"layer": L_REBAR, "style": "TOMO"})
         t.set_placement((tx, ty), align=TextEntityAlignment.MIDDLE_CENTER)
         msp.add_line((tx - 0.06, ty), (lx, ly), dxfattribs={"layer": L_REBAR})
 
-    return dict(H=H, T=T, BL=BL, BT=BT, WD=WD, NZ=NZ, BACK=BACK, FILT=FILT,
-                TOE=TOE, wall_type=wall_type, weep_ys=ys,
+    return dict(H=H, T=top_width, BL=BL, BT=BT, WD=WD, NZ=NZ, BACK=BACK, FILT=FILT,
+                TOE=TOE, wall_type=wall_type, weep_ys=ys, top_y=top_y,
                 title_note="擋土牆標準斷面圖", drawing_no="S-01")
+
+
+# --------------------------------------------------------------------------- #
+# 配筋表：把配筋設計結果轉成 S-02 右欄可直接列印的列
+# --------------------------------------------------------------------------- #
+def _member_flex(member):
+    return (member or {}).get("flexure") or {}
+
+
+def _member_by(slabs, *tokens):
+    for member in slabs or []:
+        name = str(member.get("member") or "")
+        if all(token in name for token in tokens):
+            return member
+    return None
+
+
+def _schedule_row(no, pos, bar, spacing=None, per_m=None, *, spacing_text=None,
+                  checked=True):
+    return {"no": no, "pos": pos, "bar": bar, "spacing": spacing,
+            "per_m": per_m, "spacing_text": spacing_text, "checked": checked}
+
+
+def _build_rebar_schedule(wt, design, q, result):
+    """Return printable S-02 rows from the type-dispatched rebar design."""
+
+    rows = []
+    if wt in ("gravity", "semigravity"):
+        mass = design.get("mass") or {}
+        for i, item in enumerate(mass.get("rows") or []):
+            is_face = "牆面" in str(item.get("item") or "")
+            bar = mass["face_bar"] if is_face else mass["base_bar"]
+            spacing = mass["face_spacing_mm"] if is_face else mass["base_spacing_mm"]
+            rows.append(_schedule_row(
+                "ABC"[i],
+                "牆面豎筋" if i == 0 else "牆面橫筋" if i == 1 else "底部縱筋",
+                bar, int(round(spacing)), 1000.0 / max(float(spacing), 1.0),
+            ))
+        return rows
+
+    if wt == "cantilever":
+        stem = (design.get("structural") or {}).get("stem") or {}
+        main = stem.get("main") or {}
+        rows.append(_schedule_row(
+            "A", "牆身主筋(背側)", main.get("bar", "D16"),
+            int(round(main.get("spacing_mm") or 200)),
+            1000.0 / max(float(main.get("spacing_mm") or 200), 1.0),
+        ))
+        rows.append(_schedule_row(
+            "B", "牆身分布筋(面側)", stem.get("dist_bar", "D13"),
+            int(round(stem.get("dist_spacing_mm") or 250)),
+            1000.0 / max(float(stem.get("dist_spacing_mm") or 250), 1.0),
+        ))
+        for i, member in enumerate(((design.get("structural") or {}).get("base") or {}).get("members") or []):
+            fl = _member_flex(member)
+            rows.append(_schedule_row(
+                "C" if i == 0 else "D",
+                "踵板上層筋" if i == 0 else "趾板上層筋",
+                fl.get("bar", "D16"), int(round(fl.get("spacing_mm") or 210)),
+                1000.0 / max(float(fl.get("spacing_mm") or 210), 1.0),
+            ))
+        return rows
+
+    if wt == "counterfort":
+        slabs = (result.get("structure") or {}).get("slabs") or []
+        specs = [
+            ("A", "牆板背豎筋", ("牆板", "鉛直負彎矩")),
+            ("B", "牆板面豎筋", ("牆板", "鉛直正彎矩")),
+            ("C", "牆板水平筋", ("牆板", "水平負彎矩")),
+            ("D", "踵板上下層", ("踵板負彎矩",)),
+            ("E", "趾板下層筋", ("趾板",)),
+        ]
+        for no, pos, tokens in specs:
+            member = _member_by(slabs, *tokens)
+            fl = _member_flex(member)
+            if fl.get("bar") and fl.get("spacing_mm"):
+                rows.append(_schedule_row(
+                    no, pos, fl["bar"], int(round(fl["spacing_mm"])),
+                    1000.0 / max(float(fl["spacing_mm"]), 1.0),
+                ))
+        cf = (result.get("structure") or {}).get("counterfort") or {}
+        main = cf.get("main") or {}
+        g = result.get("geometry") or {}
+        if main.get("bar") and main.get("count"):
+            rows.append(_schedule_row(
+                "F", "扶壁拉力筋", main["bar"], None,
+                float(main["count"]) / max(float(g.get("S") or 1.0), 1e-9),
+                spacing_text="%d支/道" % int(main["count"]), checked=False,
+            ))
+        stirrup = cf.get("stirrup") or {}
+        if stirrup.get("bar") and stirrup.get("spacing_mm"):
+            rows.append(_schedule_row(
+                "G", "扶壁水平箍筋", stirrup["bar"],
+                int(round(stirrup["spacing_mm"])), None,
+                spacing_text="%d（兩肢）" % int(round(stirrup["spacing_mm"])),
+                checked=False,
+            ))
+        ties = (result.get("structure") or {}).get("ties") or []
+        if ties:
+            tie = ties[0]
+            rows.append(_schedule_row(
+                "H", "扶壁繫筋", tie.get("bar", "D13"),
+                int(round(tie.get("spacing_mm") or 300)),
+                None, spacing_text="%d（兩肢）" % int(round(tie.get("spacing_mm") or 300)),
+                checked=False,
+            ))
+        return rows
+
+    if wt == "anchored":
+        members = (result.get("wall") or {}).get("members") or []
+        specs = [
+            ("A", "牆面背豎筋", ("鉛直筋", "背面")),
+            ("B", "牆面面豎筋", ("鉛直筋", "正面")),
+            ("C", "牆面背橫筋", ("水平筋", "背面")),
+            ("D", "牆面面橫筋", ("水平筋", "正面")),
+        ]
+        for no, pos, tokens in specs:
+            member = _member_by(members, *tokens)
+            fl = _member_flex(member)
+            if fl.get("bar") and fl.get("spacing_mm"):
+                rows.append(_schedule_row(
+                    no, pos, fl["bar"], int(round(fl["spacing_mm"])),
+                    1000.0 / max(float(fl["spacing_mm"]), 1.0),
+                ))
+        base = (design.get("structural") or {}).get("base_rebar") or {}
+        if base.get("bar"):
+            rows.append(_schedule_row(
+                "E", "基腳上下層筋", base["bar"],
+                int(round(base.get("spacing_mm") or 200)),
+                1000.0 / max(float(base.get("spacing_mm") or 200), 1.0),
+            ))
+        rows.append(_schedule_row(
+            "F", "地錨承壓網", "D13", 200, 5.0,
+            spacing_text="200（雙向）", checked=False,
+        ))
+        return rows
+
+    if wt == "mse":
+        st = design.get("structural") or {}
+        bar = st.get("bar") or "D13"
+        spacing = int(round(st.get("spacing_mm") or 260))
+        rows.append(_schedule_row("A", "面版水平筋", bar, spacing,
+                                  1000.0 / max(float(spacing), 1.0)))
+        rows.append(_schedule_row("B", "面版豎向筋", bar, spacing,
+                                  1000.0 / max(float(spacing), 1.0)))
+        return rows
+
+    return rows
+
+
+def _rebar_geometry(wt, design, q, result):
+    """Bars/spacings actually drawn as repeated dots in S-02."""
+
+    if wt in ("gravity", "semigravity"):
+        mass = design.get("mass") or {}
+        return {"stem_bar": mass["face_bar"],
+                "stem_spacing_mm": mass["face_spacing_mm"],
+                "base_bar": mass["base_bar"],
+                "base_spacing_mm": mass["base_spacing_mm"]}
+    if wt == "cantilever":
+        stem = (design.get("structural") or {}).get("stem") or {}
+        main = stem.get("main") or {}
+        members = ((design.get("structural") or {}).get("base") or {}).get("members") or []
+        base = _member_flex(members[0]) if members else {}
+        return {"stem_bar": main.get("bar", "D16"),
+                "stem_spacing_mm": main.get("spacing_mm", 200),
+                "base_bar": base.get("bar", "D16"),
+                "base_spacing_mm": base.get("spacing_mm", 210)}
+    if wt == "counterfort":
+        slabs = (result.get("structure") or {}).get("slabs") or []
+        wall = [m for m in slabs if "牆板" in str(m.get("member")) and "鉛直" in str(m.get("member"))]
+        base = [m for m in slabs if "踵板" in str(m.get("member")) or "趾板" in str(m.get("member"))]
+        wall = min(wall, key=lambda m: float(_member_flex(m).get("spacing_mm") or 1e9)) if wall else None
+        base = min(base, key=lambda m: float(_member_flex(m).get("spacing_mm") or 1e9)) if base else None
+        wf, bf = _member_flex(wall), _member_flex(base)
+        return {"stem_bar": wf.get("bar", "D16"),
+                "stem_spacing_mm": wf.get("spacing_mm", 240),
+                "base_bar": bf.get("bar", "D16"),
+                "base_spacing_mm": bf.get("spacing_mm", 180)}
+    if wt == "anchored":
+        members = [m for m in ((result.get("wall") or {}).get("members") or [])
+                   if "鉛直" in str(m.get("member"))]
+        wall = min(members, key=lambda m: float(_member_flex(m).get("spacing_mm") or 1e9)) if members else None
+        wf = _member_flex(wall)
+        base = (design.get("structural") or {}).get("base_rebar") or {}
+        return {"stem_bar": wf.get("bar", "D16"),
+                "stem_spacing_mm": wf.get("spacing_mm", 180),
+                "base_bar": base.get("bar", "D16"),
+                "base_spacing_mm": base.get("spacing_mm", 200)}
+    if wt == "mse":
+        st = design.get("structural") or {}
+        return {"stem_bar": st.get("bar", "D13"),
+                "stem_spacing_mm": st.get("spacing_mm", 260),
+                "base_bar": "D13", "base_spacing_mm": 200}
+    return {}
+
+
+def _auto_wall_extent(q):
+    """Estimate the drawn S-01/S-02 model extent before choosing a scale."""
+
+    g = _WG.parse(q)
+    xs = [p[0] for p in g.points]
+    ys = [p[1] for p in g.points]
+    wt = str(q.get("wall_type") or "").strip().lower()
+    # 右側留 0.95 m：背填／反濾層之外還有尺寸線與鋼筋標註；
+    # 原本 0.50 會讓 3 m 重力式估 3.35 m、實際 bbox 3.79 m，
+    # 自動比例誤選 1:20 後才在出圖前被 183 mm 視口上限擋下。
+    left, right = 0.90, 0.95
+    top, bottom = 0.80, 0.90
+    if wt == "counterfort":
+        # 背填＋反濾層會突出底板尾端，右側另留圖說空間。
+        back = float(q.get("backfill_thickness_m", 0.3))
+        right = max(right, back + 0.55)
+    if wt == "anchored":
+        # The S-01/S-02 typical section shows the first 2 m of anchor and
+        # breaks the line; full anchor length belongs to the anchor detail.
+        alpha = math.radians(float(q.get("inclination_deg") or 20))
+        xs.append(float(q.get("wall_thickness_m", 0.3)) + 2.0 * math.cos(alpha))
+        right = max(right, 0.95)
+        bottom = max(bottom, 1.10)
+    if wt == "mse":
+        # 加勁材長度 L 是斷面外廓的一部分，先前只估面版厚度會低估總寬。
+        xs.append(float(q.get("face_panel_thickness_m") or 0.20)
+                  + float(q["reinforcement_length_m"]))
+        right = max(right, 0.55)
+        bottom = max(bottom, float(q.get("embedment_m") or 0.0) + 0.80)
+    return (max(xs) - min(xs) + left + right,
+            max(ys) - min(ys) + top + bottom)
 
 
 # --------------------------------------------------------------------------- #
@@ -551,8 +1100,10 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
 
     vw, vh = m2mm(mw), m2mm(mh)
     # 視口不得超出去框可用區（E7）。4 m 高的牆在 1:20 會超高 → 自動降比例。
-    # 可用區：x 22.0 ~ (X1-10)、y 34.0 ~ (Y1-4)
-    avail_w, avail_h = (X1 - 10.0) - 22.0, (Y1 - 4.0) - 34.0
+    # 可用區：x 22.0 ~ 205.0、y 34.0 ~ (Y1-4)
+    # 右欄（x >= 210）保留給圖例／配筋表／尺寸表／說明。視口若延伸到右欄，
+    # 圖例文字會壓在斷面線條上（S-01 實測發生），因此寬度上限固定為 183 mm。
+    avail_w, avail_h = 183.0, (Y1 - 4.0) - 34.0
     if geom.get("slope_deg") is not None:
         # 邊坡圖的右欄要放「坡面圖例／部位圖例／斷面尺寸表」，視口不可頂到 x≥210
         # （否則 E10 疊字、W1 圖例壓視口）。寬度上限讓到 184 mm。
@@ -574,10 +1125,22 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
                           view_center_point=(wcx, wcy), view_height=mh)
     vp.dxf.status = 2
     vp.dxf.flags |= 16384          # 鎖定視口比例
+    # 視口框線不可出圖：放到「不列印」圖層，否則 PDF 會多一圈矩形框。
+    _vp_layer = "00_視口框"
+    if _vp_layer not in doc.layers:
+        _l = doc.layers.add(_vp_layer, color=7)
+    else:
+        _l = doc.layers.get(_vp_layer)
+    _l.dxf.plot = 0
+    _l.dxf.lineweight = 15          # E17：顏色 7 對應 0.15 mm（即使不列印仍須符表）
+    vp.dxf.layer = _vp_layer
 
-    is_grav = geom.get("wall_type") == "gravity"
+    is_grav = geom.get("wall_type") in ("gravity", "semigravity")
     is_chan = geom.get("wall_type") == "channel"
     is_slope = geom.get("slope_deg") is not None
+    is_mse = geom.get("wall_type") == "mse"
+    # 加勁式只有 RC 面版、沒有底板，保護層依面版取 50 mm；其餘牆型 75 mm。
+    _cover_default = 50 if (is_mse or is_chan) else 75
 
     def put(x, y, s, h=3.0, layer=L_FRAME):
         t = lay.add_text(s, height=h, dxfattribs={"layer": layer, "style": "TOMO"})
@@ -637,72 +1200,104 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
     put(vx0 + 2 * seg - 1.6, sy - 5.0, "1 m", 3.0, L_SCALE)
     put(vx0, sy + 5.5, "比例尺 1:%d" % scale, 4.0, L_SCALE)
 
-    # ---- 鋼筋圖例／配筋表（右上空白區）----
+    # ---- 右欄排版：由上而下動態累加 ----
+    # 先前各區塊用固定 y（278／222／158／88），只要資料列數一變就互相重疊；
+    # 現在統一由 RX／RY_TOP 起算，每個區塊結束後才接下一個。
+    # 圖框內頂線實測在 y≈281 mm；原本 278 會讓 5 mm 標題字頂端穿出框線
+    # （S-01/S-02 的「鋼筋圖例／配筋表」都被切掉上半）。下移 7 mm。
+    RX, RY_TOP = 210.0, 271.0
+    ROW_H, TITLE_H, GAP_H = 6.0, 5.0, 6.0
+    _cursor = {"y": RY_TOP}
+
+    def _title(text, layer=L_LEGEND, h=TITLE_H):
+        put(RX, _cursor["y"], text, h, layer)
+        _cursor["y"] -= (h + 4.0)
+
+    def _row(a, b=None, dx=62.0, h=3.0, layer=L_LEGEND):
+        put(RX, _cursor["y"], a, h, layer)
+        if b is not None:
+            put(RX + dx, _cursor["y"], b, h, layer)
+        _cursor["y"] -= ROW_H
+
+    def _gap(v=GAP_H):
+        _cursor["y"] -= v
+
     # 一般斷面圖放「鋼筋圖例」（示意）；S-02 配筋圖放「配筋表」（依配筋設計結果）。
-    lx, ly = 210.0, 260.0
+    # 邊坡沒有鋼筋 —— 印「鋼筋圖例」會與圖名性質相反（同型錯誤先前已踩過一次）。
     if is_slope:
-        # 邊坡沒有鋼筋 —— 印「鋼筋圖例」會與圖名性質相反（同型錯誤先前已踩過一次）
-        put(lx, 278.0, "坡面圖例", 5.0, L_LEGEND)
+        _title("坡面圖例")
         _sl = [("① 坡頂平台", "整平後植生"), ("② 坡面（植生）", "草種撒播或舖植"),
                ("③ 坡趾", "坡腳排水／護坡"), ("④ 坡面排水溝", "坡頂、坡腳各一道"),
                ("⑤ 最不利滑動圓", "圓弧滑動分析結果"),
                ("⑥ 地下水位", "虛線（未調查時以無水計）")]
-        _y = 268.0
         for _a, _b in _sl:
-            put(lx, _y, _a, 3.0, L_LEGEND)
-            put(lx + 52, _y, _b, 3.0, L_LEGEND)
-            _y -= 7.0
-        rows = []
+            _row(_a, _b, dx=52.0)
     else:
-        put(lx, 278.0, "配筋表" if rebar_schedule else "鋼筋圖例", 5.0, L_LEGEND)
+        _title("配筋表" if rebar_schedule else "鋼筋圖例")
+
     if rebar_schedule:
         # 欄位：筋號 / 位置 / 鋼筋 / 間距 / 每米支數
-        put(lx, 270.0, "筋號", 3.0, L_LEGEND)
-        put(lx + 12.0, 270.0, "位置", 3.0, L_LEGEND)
-        put(lx + 52.0, 270.0, "鋼筋", 3.0, L_LEGEND)
-        put(lx + 76.0, 270.0, "間距", 3.0, L_LEGEND)
-        put(lx + 96.0, 270.0, "支/米", 3.0, L_LEGEND)
-        msp_ = lay
-        y = 263.0
+        put(RX, _cursor["y"], "筋號", 3.0, L_LEGEND)
+        put(RX + 10.0, _cursor["y"], "位置", 3.0, L_LEGEND)
+        put(RX + 48.0, _cursor["y"], "鋼筋", 3.0, L_LEGEND)
+        put(RX + 68.0, _cursor["y"], "間距", 3.0, L_LEGEND)
+        put(RX + 88.0, _cursor["y"], "支/米", 3.0, L_LEGEND)
+        _cursor["y"] -= ROW_H
         for row in rebar_schedule:
-            put(lx, y, row["no"], 3.0, L_LEGEND)
-            put(lx + 12.0, y, row["pos"][:9], 3.0, L_LEGEND)
-            put(lx + 52.0, y, row["bar"], 3.0, L_LEGEND)
-            put(lx + 76.0, y, "%d" % row["spacing"], 3.0, L_LEGEND)
-            put(lx + 96.0, y, "%.1f" % row["per_m"], 3.0, L_LEGEND)
-            y -= 7.0
-        put(lx, y - 1.0, "保護層 %d mm" % int(case.get("_cover_mm", 75)), 3.0, L_LEGEND)
-        rows = []
-    # rebar_schedule 已自繪配筋表 → 不可再走「鋼筋圖例」的 rows（否則兩套內容疊在同一位置）
-    if rebar_schedule:
-        rows = []
-    elif is_slope:
-        rows = []
-    elif is_chan:
-        rows = [("A  D13@200 溝壁內側筋（雙層）", "13 mm"),
-                ("B  D13@200 溝壁外側筋（雙層）", "13 mm"),
-                ("C  D13@200 溝底筋", "13 mm"),
-                ("   保護層", "50 mm")]
-    elif is_grav:
-        # 重力式靠自重穩定，僅需構造筋（不設雙層主筋、無獨立底板筋）
-        rows = [("A  D13@250 牆面構造筋（單層）", "13 mm"),
-                ("B  D13@250 牆背構造筋（單層）", "13 mm"),
-                ("C  D16@200 底部縱向構造筋", "16 mm"),
-                ("   保護層", "75 mm")]
+            put(RX, _cursor["y"], row["no"], 3.0, L_LEGEND)
+            put(RX + 10.0, _cursor["y"], row["pos"][:8], 3.0, L_LEGEND)
+            put(RX + 48.0, _cursor["y"], row["bar"], 3.0, L_LEGEND)
+            spacing = row.get("spacing")
+            spacing_txt = (str(int(round(spacing))) if spacing
+                           else (row.get("spacing_text") or "—"))
+            per_m = row.get("per_m")
+            put(RX + 68.0, _cursor["y"], spacing_txt, 3.0, L_LEGEND)
+            put(RX + 88.0, _cursor["y"], ("%.1f" % per_m) if per_m else "—",
+                3.0, L_LEGEND)
+            _cursor["y"] -= ROW_H
+        _row("保護層", "%d mm" % int(case.get("_cover_mm", _cover_default)),
+             dx=14.0, h=3.0)
     else:
-        rows = [("A  D16@200 牆身主筋（雙層）", "16 mm"),
-                ("B  D13@250 分布筋", "13 mm"),
-                ("C  D16@200 底板筋（上下層）", "16 mm"),
-                ("   保護層", "75 mm")]
-    y = ly
-    for name, spec in rows:
-        put(lx, y, name, 3.0, L_LEGEND)
-        put(lx + 62, y, spec, 3.0, L_LEGEND)
-        y -= 7.0
+        if is_slope:
+            rows = []
+        elif is_chan:
+            rows = [("A  D13@200 溝壁內側筋（雙層）", "13 mm"),
+                    ("B  D13@200 溝壁外側筋（雙層）", "13 mm"),
+                    ("C  D13@200 溝底筋", "13 mm"),
+                    ("   保護層", "50 mm")]
+        elif is_grav:
+            # 重力式／半重力式靠自重穩定，僅需名目構造筋（非撓曲主筋）
+            rows = [("A  D13@250 牆面豎向筋", "13 mm"),
+                    ("B  D13@250 牆面水平筋", "13 mm"),
+                    ("C  D16@200 底部縱筋", "16 mm"),
+                    ("   保護層", "75 mm")]
+        elif is_mse:
+            # 加勁式只有 RC 面版，沒有底板；先前共用一般牆型的圖例，
+            # 會印出根本不存在的「C 底板筋」。圖例改依實際面版配筋。
+            _rg = geom.get("rebar_geom") or {}
+            _mb = str(_rg.get("stem_bar", "D13"))
+            _ms = int(round(float(_rg.get("stem_spacing_mm", 260))))
+            rows = [("A  %s@%d 面版水平筋" % (_mb, _ms), "%s mm" % _mb[1:]),
+                    ("B  %s@%d 面版豎向筋" % (_mb, _ms), "%s mm" % _mb[1:]),
+                    ("   保護層", "50 mm")]
+        else:
+            # S-01 只畫牆身與底板的代表點；圖例數值取自同一份配筋設計，
+            # 以免「圖例 D16@200、配筋表 D16@260」兩張圖各說各話。
+            _rg = geom.get("rebar_geom") or {}
+            _sb = str(_rg.get("stem_bar", "D16"))
+            _ss = int(round(float(_rg.get("stem_spacing_mm", 200))))
+            _bb = str(_rg.get("base_bar", "D16"))
+            _bs = int(round(float(_rg.get("base_spacing_mm", 210))))
+            rows = [("A  %s@%d 牆身豎向筋（雙層）" % (_sb, _ss), "%s mm" % _sb[1:]),
+                    ("B  D13@250 分布筋（示意）", "13 mm"),
+                    ("C  %s@%d 底板筋（上下層）" % (_bb, _bs), "%s mm" % _bb[1:]),
+                    ("   保護層", "75 mm")]
+        for name, spec in rows:
+            _row(name, spec)
 
     # ---- 部位圖例 ----
-    px, py = 210.0, 208.0
-    put(px, 222.0, "部位圖例", 5.0, L_LEGEND)
+    _gap(6.0)
+    _title("部位圖例")
     if is_slope:
         parts = [("1", "坡頂平台"), ("2", "坡面（植生）"), ("3", "坡趾"),
                  ("4", "坡面排水溝"), ("5", "滑動圓"), ("6", "地下水位")]
@@ -711,18 +1306,29 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
     elif geom.get("wall_type") == "gravity":
         parts = [("1", "牆身（梯形斷面）"), ("2", "底寬 BL"), ("3", "背填級配碎石"),
                  ("4", "反濾層"), ("5", "洩水管／排水孔"), ("6", "基礎開挖線")]
+    elif geom.get("wall_type") == "semigravity":
+        parts = [("1", "牆身（厚牆＋前後坡）"), ("2", "底板"), ("3", "背填級配碎石"),
+                 ("4", "反濾層"), ("5", "洩水管／排水孔"), ("6", "基礎開挖線")]
+    elif geom.get("wall_type") == "counterfort":
+        parts = [("1", "牆板"), ("2", "底板（前趾＋踵板）"), ("3", "背填級配碎石"),
+                 ("4", "反濾層"), ("5", "洩水管／排水孔"), ("6", "扶壁（虛線，斷面外）"),
+                 ("7", "基礎開挖線")]
+    elif geom.get("wall_type") == "anchored":
+        parts = [("1", "RC 牆面"), ("2", "基腳"), ("3", "背填級配碎石"),
+                 ("4", "反濾層"), ("5", "洩水管／排水孔"), ("6", "地錨（詳錨碇詳圖）"),
+                 ("7", "基礎開挖線")]
+    elif geom.get("wall_type") == "mse":
+        parts = [("1", "RC 預鑄／場鑄面版"), ("2", "加勁區填方"), ("3", "加勁材"),
+                 ("4", "基礎埋入段"), ("5", "洩水管／排水孔"), ("6", "基礎開挖線")]
     else:
         parts = [("1", "牆身"), ("2", "底板"), ("3", "背填級配碎石"),
                  ("4", "反濾層"), ("5", "洩水管／排水孔"), ("6", "基礎開挖線")]
-    y = py
     for k, v in parts:
-        put(px, y, k, 3.0, L_LEGEND)
-        put(px + 6, y, v, 3.0, L_LEGEND)
-        y -= 7.0
+        _row(k, v, dx=6.0)
 
     # ---- 斷面尺寸表 ----
-    gx, gy = 210.0, 144.0
-    put(gx, 158.0, "斷面尺寸表", 5.0, L_LEGEND)
+    _gap(6.0)
+    _title("斷面尺寸表")
     if geom.get("wall_type") == "channel":
         data = [("溝深 H", "%.2f m" % geom["H"]),
                 ("內寬 B", "%.2f m" % geom["B"]),
@@ -743,6 +1349,33 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
                 ("地下水位", ("%.2f H" % geom["GW"]) if geom["GW"] > 0 else "無")]
         if geom.get("slip"):
             data.append(("最不利滑動圓", "FS = %.2f" % geom["slip"]["FS"]))
+    elif geom.get("wall_type") == "counterfort":
+        heel = geom["BL"] - geom.get("toe_length_m", 0.0) - geom["T"]
+        data = [("牆板高 H／有效高", "%.2f／%.2f m" % (
+                    geom["H"], geom["H"] - geom.get("front_soil_depth_m", 0.0))),
+                ("牆板厚 ts", "%.2f m" % geom["T"]),
+                ("底板 B／tb", "%.2f／%.2f m" % (geom["BL"], geom["BT"])),
+                ("前趾／踵板", "%.2f／%.2f m" % (geom.get("toe_length_m", 0.0), heel)),
+                ("扶壁 S／tc", "%.2f／%.2f m" % (
+                    geom.get("counterfort_spacing_m", 0),
+                    geom.get("counterfort_thickness_m", 0)))]
+    elif geom.get("wall_type") == "anchored":
+        data = [("牆高 H", "%.2f m" % geom["H"]),
+                ("有效高", "%.2f m" % (geom["H"] - geom.get("TOE", 0.0))),
+                ("牆面厚 t", "%.2f m" % geom["T"]),
+                ("基腳寬 B", "%.2f m" % geom["BL"]),
+                ("基腳厚 tb", "%.2f m" % geom["BT"]),
+                ("地錨排數", "%d 排" % geom.get("anchor_rows", 0)),
+                ("水平間距", "%.2f m" % geom.get("horizontal_spacing_m", 0)),
+                ("地錨俯角", "%.1f°" % geom.get("inclination_deg", 0))]
+    elif geom.get("wall_type") == "mse":
+        data = [("牆高 H", "%.2f m" % geom["H"]),
+                ("埋入深度", "%.2f m" % geom.get("embedment_m", 0)),
+                ("有效高", "%.2f m" % (geom["H"] - geom.get("embedment_m", 0))),
+                ("RC 面版厚 t", "%.2f m" % geom["T"]),
+                ("加勁材長 L", "%.2f m" % geom["BL"]),
+                ("加勁材層距", "%.2f m" % geom.get("vertical_spacing_m", 0)),
+                ("排水孔", "Ø%d cm × %d 排" % (round(geom["WD"] * 100), geom["NZ"]))]
     else:
         is_grav2 = geom.get("wall_type") == "gravity"
         data = [("牆高 H", "%.2f m" % geom["H"]),
@@ -755,14 +1388,12 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
                  ("反濾層厚", "%.2f m" % geom["FILT"])]
         if geom.get("TOE", 0) > 1e-9:
             data.append(("牆趾覆土", "%.2f m（≥0.60 m）" % geom["TOE"]))
-    y = gy
     for k, v in data:
-        put(gx, y, k, 3.0, L_LEGEND)
-        put(gx + 62, y, v, 3.0, L_LEGEND)
-        y -= 7.0
+        _row(k, v)
 
-    # ---- 說明（左下，避開技師圖記區 x>=363.5）----
-    put(210.0, 88.0, "說明", 5.0, L_DESC)
+    # ---- 說明（右欄最下方，避開標題欄；不再壓在斷面上）----
+    _gap(6.0)
+    _title("說明", layer=L_DESC)
     # 注意分支順序：配筋圖（rebar_schedule）必須先判，否則會被 is_chan 攔走，
     # 導致 D-02 配筋圖上印著「鋼筋尺寸與間距為示意」——那正好跟事實相反。
     if is_slope:
@@ -796,6 +1427,42 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
             "5. 搭接與錨定長度依混凝土結構設計規範，本圖未標示。",
             "6. 鋼筋施工前須經技師核可；公式採 ACI 318 常用式，版次待核。",
         ]
+    elif rebar_schedule and is_grav:
+        notes = [
+            "1. 本圖為擋土牆配筋圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
+            "2. 本牆為重力式／半重力式，靠自重維持穩定；牆身不設撓曲主筋。",
+            "3. 圖示鋼筋為溫度收縮與構造需求之名目鋼筋，非由強度計算控制。",
+            "4. 筋號與間距詳右側配筋表；保護層 75 mm（迎土面）。",
+            "5. 搭接與錨定長度依混凝土結構設計規範，本圖未標示；止滑榫另依實際設置設計。",
+            "6. 鋼筋施工前須經技師核可；名目鋼筋量應與數量表一致。",
+        ]
+    elif rebar_schedule and geom.get("wall_type") == "counterfort":
+        notes = [
+            "1. 本圖為扶壁式擋土牆配筋圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
+            "2. 牆板三帶彎矩、踵板連續版、趾板懸臂、扶壁 T 梁與繫筋均依設計結果配置。",
+            "3. 扶壁以虛線表示，實體斷面為兩扶壁間之標準斷面；扶壁主筋與箍筋詳配筋表。",
+            "4. 筋號與間距詳右側配筋表；保護層 75 mm（迎土面）。",
+            "5. 搭接、錨定與彎鉤長度依混凝土結構設計規範；施工詳圖須另繪。",
+            "6. 鋼筋量已含 12% 搭接、錨定與損耗，並與數量表、預算書同源。",
+        ]
+    elif rebar_schedule and geom.get("wall_type") == "anchored":
+        notes = [
+            "1. 本圖為錨定式擋土牆配筋圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
+            "2. 牆面以各排地錨與基底為支承之連續梁設計，四向筋依正負彎矩配置。",
+            "3. 地錨僅畫前 2 m 並以折斷線收尾；自由段、錨碇段與錨頭詳圖應另製。",
+            "4. 筋號與間距詳右側配筋表；保護層 75 mm（迎土面）。",
+            "5. 基腳採上下層橫向筋與縱向分布筋，已計入鋼筋量；錨頭鋼鈑與螺旋筋另計。",
+            "6. 深層穩定與握裹強度未在本圖檢核，須另案分析並以試驗確認。",
+        ]
+    elif rebar_schedule and geom.get("wall_type") == "mse":
+        notes = [
+            "1. 本圖為加勁式擋土牆 RC 面版配筋圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
+            "2. RC 面版以加勁材層距與面版寬度較大者作單向版初步設計。",
+            "3. 加勁材以水平虛線表示；材料規格、拉斷與拉出檢核詳計算書。",
+            "4. 筋號與間距詳右側配筋表；面版保護層 50 mm。",
+            "5. 面版－加勁材連接器、吊裝與溫度收縮細節須依產品型錄另計。",
+            "6. 鋼筋量僅計 RC 面版，不含加勁材、連接器與基礎處理。",
+        ]
     elif rebar_schedule:
         notes = [
             "1. 本圖為擋土牆配筋圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
@@ -805,6 +1472,30 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
             "5. 底板筋分上、下層；上層筋依各板淨壓力方向配置，下層為分布筋。",
             "6. 鋼筋施工前須經技師核可；公式採 ACI 318 常用式，版次待核。",
         ]
+    elif geom.get("wall_type") == "counterfort":
+        notes = [
+            "1. 本圖為扶壁式擋土牆標準斷面圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
+            "2. 扶壁以虛線表示，實體斷面為兩扶壁間之標準斷面。",
+            "3. 排水孔依水土保持技術規範第121條配置，須設反濾層與洩水管。",
+            "4. 背填須使用透水性良好之級配碎石並分層夯實。",
+            "5. 本圖未含扶壁配筋、地質資料與深層穩定；正式設計須另附計算書。",
+        ]
+    elif geom.get("wall_type") == "anchored":
+        notes = [
+            "1. 本圖為錨定式擋土牆標準斷面圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
+            "2. 地錨僅畫前 2 m 並以折斷線收尾；錨碇段長度與詳圖另製。",
+            "3. 排水孔依水土保持技術規範第121條配置，須設反濾層與洩水管。",
+            "4. 地錨施工前須做握裹試驗，並確認錨碇段位於用地範圍內。",
+            "5. 本圖未含地錨詳圖、深層穩定與台階開挖；正式設計須另附計算書。",
+        ]
+    elif geom.get("wall_type") == "mse":
+        notes = [
+            "1. 本圖為加勁式擋土牆標準斷面圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
+            "2. 加勁材以水平虛線示意；層距、長度與材料規格依計算書配置。",
+            "3. 面版後方須設排水層，避免靜水壓累積。",
+            "4. 基礎須整平夯實，埋入段不得任意開挖移除。",
+            "5. 本圖未含加勁材連接細部、複合滑動與整體圓弧滑動；須另案檢核。",
+        ]
     else:
         notes = [
         "1. 本圖為擋土牆標準斷面圖，尺寸單位為公尺（m），比例 1:%d。" % scale,
@@ -812,15 +1503,23 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
         "   須設反濾層與洩水管防止阻塞。",
         "3. 伸縮縫依第121條每 20～40 m 一處；本單元長 20 m 設 1 處。",
         "4. 背填須使用透水性良好之級配碎石並分層夯實。",
-        "5. 牆趾（主動土壓力側）覆土 %.2f m（不得小於 0.60 m），夯實後方得計入被動土壓；" % geom.get("TOE", 0.0),
-        "   覆土不得開挖移除，損壞時應即回填夯實。",
-        "6. 鋼筋尺寸與間距為示意，正式配筋須依結構計算結果調整並經技師核可。",
-        "7. 本圖未含高程與地質資料；施工前須依實際地探與現地測量覆核。",
         ]
-    y = 80.0
+        if geom.get("TOE", 0.0) > 1e-9:
+            notes += [
+                "5. 牆趾（主動土壓力側）覆土 %.2f m（不得小於 0.60 m），夯實後方得計入被動土壓；"
+                % geom["TOE"],
+                "   覆土不得開挖移除，損壞時應即回填夯實。",
+            ]
+        notes += [
+            "6. 鋼筋尺寸與間距為示意，正式配筋須依結構計算結果調整並經技師核可。",
+            "7. 本圖未含高程與地質資料；施工前須依實際地探與現地測量覆核。",
+        ]
+    # 說明行距 5.2 mm（字高 3.0），確保 7 行仍留在標題欄之上。
     for s in notes:
-        put(210.0, y, s, 3.0, L_DESC)
-        y -= 6.0
+        put(RX, _cursor["y"], s, 3.0, L_DESC)
+        _cursor["y"] -= 5.2
+    if _cursor["y"] < 62.0:
+        print("警告：右欄說明已接近標題欄（最後一行 y=%.1f mm）" % _cursor["y"])
 
     return lay, (cx, cy, vw, vh)
 
@@ -855,12 +1554,15 @@ def main():
             mh = _H + 2.0
             _avail_w_slope = 184.0
         elif model == "wall":
-            mh = float(q.get("height_m", 3)) + float(q.get("base_thickness_m", 0) or 0) + 0.9
-            mw = float(q.get("base_width_m", 2)) + 1.4
+            try:
+                mw, mh = _auto_wall_extent(q)
+            except Exception:
+                mh = float(q.get("height_m", 3)) + float(q.get("base_thickness_m", 0) or 0) + 0.9
+                mw = float(q.get("base_width_m", 2)) + 1.9
         else:
             mh = float(q.get("depth_m", 1)) + float(q.get("base_thickness_m", 0) or 0) + 0.9
             mw = float(q.get("inner_width_m", 1)) + 2 * float(q.get("wall_thickness_m", 0.15)) + 1.4
-        _aw = _avail_w_slope if model == "slope" else 378.3
+        _aw = _avail_w_slope if model == "slope" else 183.0
         need = max(mh * 1000.0 / 249.4, mw * 1000.0 / _aw)
         cands = [x for x in DR.STANDARD_SCALES if x >= need]
         a.scale = cands[0] if cands else max(DR.STANDARD_SCALES)
@@ -871,54 +1573,42 @@ def main():
         DR.require_standard_scale(a.scale)
 
     # ---- S-02 配筋圖：先跑配筋設計，取得各構材實際筋號與間距 ----
-    rb_design, rb_schedule = None, None
+    rb_design, rb_schedule, _rb_geom = None, None, None
+    # S-01 的「鋼筋圖例」也要跟 S-02 同源。先前 S-01 走示意值，
+    # 會出現「S-01 寫 D16@200、S-02 配筋表寫 D16@260」兩張圖各說各話。
+    if not a.rebar and model == "wall":
+        try:
+            import sys as _sys
+            _dd = os.path.join(ROOT, "tools", "design")
+            if _dd not in _sys.path:
+                _sys.path.insert(0, _dd)
+            import wall_system as _WS
+            _wr0 = _WS.analyse(q, case)
+            _rd0 = _WS.rebar_design(q, _wr0)
+            _rb_geom = _rebar_geometry(
+                _rd0.get("wall_type"), _rd0, q, _wr0)
+        except Exception as ex:
+            print("警告：S-01 無法取得配筋設計，圖例改用示意值：%s" % ex)
     if a.rebar:
         import sys as _sys
         _dd = os.path.join(ROOT, "tools", "design")
         if _dd not in _sys.path:
             _sys.path.insert(0, _dd)
         try:
-            import retaining_wall as _RW
             import rc_design as _RC
+            import wall_system as _WS
         except Exception as ex:
             raise SystemExit(f"配筋圖需要 tools\\design 模組：{ex}")
         if model == "wall":
-            _wr = _RW.analyse(q, soil=case.get("soil") or {},
-                              seismic={"kh": float((case.get("seismic") or {}).get("kh", 0) or 0)})
-            if _wr["wall_type"] == "gravity":
-                rb_design = {"gravity": True}
-                rb_schedule = [
-                    {"no": "A", "pos": "牆面構造筋", "bar": "D13", "spacing": 250, "per_m": 4.0},
-                    {"no": "B", "pos": "牆背構造筋", "bar": "D13", "spacing": 250, "per_m": 4.0},
-                    {"no": "C", "pos": "底部縱向筋", "bar": "D16", "spacing": 200, "per_m": 5.0},
-                ]
-            else:
-                _stem = _RC.design_cantilever_stem(q, _wr)
-                _base = _RC.design_base_slab(q, _wr)
-                rb_design = {"stem": _stem, "base": _base}
-                rb_schedule = []
-                _mk = [("A", "牆身主筋（牆背側）", _stem["main"]),
-                       ("B", "牆身分布筋（牆面側）", None),
-                       ("C", "踵板上層筋", None),
-                       ("D", "趾板上層筋", None)]
-                _ms = _stem["main"]
-                rb_schedule.append({"no": "A", "pos": "牆身主筋(背側)",
-                                    "bar": _ms.get("bar", "D16"),
-                                    "spacing": int(_ms.get("spacing_mm", 200)),
-                                    "per_m": 1000.0 / max(_ms.get("spacing_mm", 200), 1)})
-                rb_schedule.append({"no": "B", "pos": "牆身分布筋(面側)",
-                                    "bar": _stem.get("dist_bar", "D13"),
-                                    "spacing": int(_stem.get("dist_spacing_mm", 250)),
-                                    "per_m": 1000.0 / max(_stem.get("dist_spacing_mm", 250), 1)})
-                if _base:
-                    for _i, _bm in enumerate(_base["members"]):
-                        _bmf = _bm["main"]
-                        rb_schedule.append({
-                            "no": "C" if _i == 0 else "D",
-                            "pos": "踵板上層筋" if _i == 0 else "趾板上層筋",
-                            "bar": _bmf.get("bar", "D16"),
-                            "spacing": int(_bmf.get("spacing_mm", 210)),
-                            "per_m": 1000.0 / max(_bmf.get("spacing_mm", 210), 1)})
+            _wr = _WS.analyse(q, case)
+            rb_design = _WS.rebar_design(q, _wr)
+            rb_schedule = _build_rebar_schedule(
+                rb_design.get("wall_type"), rb_design, q, _wr)
+            if not rb_schedule:
+                raise SystemExit("配筋表為空：wall_type=%s 沒有可列印的鋼筋列。"
+                                 % rb_design.get("wall_type"))
+            _rb_geom = _rebar_geometry(
+                rb_design.get("wall_type"), rb_design, q, _wr)
         else:
             # 排水溝：溝壁以懸臂板考慮，僅計溝內水壓力
             import channel_hydraulics as _CH
@@ -939,6 +1629,8 @@ def main():
                  "per_m": 1000.0 / max(_cw.get("dist_spacing_mm", 200), 1)},
                 {"no": "C", "pos": "溝底構造筋", "bar": "D13", "spacing": 200, "per_m": 5.0},
             ]
+            _rb_geom = {"stem_bar": _cm.get("bar", "D16"),
+                        "stem_spacing_mm": _cm.get("spacing_mm", 200)}
     proj = a.project or (case.get("project") or {}).get("full_name") or "擋土牆工程"
 
     doc = ezdxf.readfile(a.template)
@@ -969,26 +1661,15 @@ def main():
     ensure_layers(doc)
     ds = ensure_dimstyle(doc, a.scale)
 
-    _rb_geom = None
-    if a.rebar and isinstance(rb_design, dict) and rb_design.get("channel"):
-        _cmm = rb_design["channel"]["main"]
-        _rb_geom = {"stem_bar": _cmm.get("bar", "D16"),
-                    "stem_spacing_mm": _cmm.get("spacing_mm", 200)}
-    elif a.rebar and isinstance(rb_design, dict) and rb_design.get("stem"):
-        _rb_geom = {
-            "stem_bar": rb_design["stem"]["main"].get("bar", "D16"),
-            "stem_spacing_mm": rb_design["stem"]["main"].get("spacing_mm", 200),
-            "base_bar": (rb_design.get("base") or {}).get("members", [{}])[0].get(
-                "main", {}).get("bar", "D16"),
-            "base_spacing_mm": (rb_design.get("base") or {}).get("members", [{}])[0].get(
-                "main", {}).get("spacing_mm", 210),
-        }
     if model == "channel":
         geom = draw_channel_section(doc, q, a.scale, ds, rebar=_rb_geom)
     elif model == "slope":
         geom = draw_slope_section(doc, q, a.scale, ds)      # 邊坡無配筋圖
     else:
         geom = draw_section(doc, q, a.scale, ds, rebar=_rb_geom)
+    if _rb_geom:
+        # 讓 S-01 的鋼筋圖例與 S-02 共用同一份設計值，不再各自寫死。
+        geom["rebar_geom"] = dict(_rb_geom)
     if a.rebar and model == "slope":
         raise SystemExit("邊坡沒有 RC 構材，不產配筋圖（--rebar 不適用）")
     if a.rebar:
@@ -1001,7 +1682,7 @@ def main():
             geom["title_note"] = "擋土牆配筋圖"
             geom["drawing_no"] = "S-02"
             case = dict(case)
-            case["_cover_mm"] = 75
+            case["_cover_mm"] = 50 if q.get("wall_type") == "mse" else 75
     lay, vp = build_paper(doc, geom, case, a.scale, proj, a.sheet_no,
                           rebar_schedule=rb_schedule)
 

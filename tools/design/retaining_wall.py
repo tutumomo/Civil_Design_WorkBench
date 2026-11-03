@@ -422,7 +422,11 @@ def _analyse_semigravity(q, soil=None, seismic=None, foundation_soil=None, backf
             "centroid": (round(geom.centroid_m[0], 4), round(geom.centroid_m[1], 4)),
             "components": rows,
         },
-        "soil": soil,
+        # 報告／數量共用同一份土工參數契約。半重力式的摩擦係數可能是由
+        # foundation_soil 或 tan(2φ/3) 推得，不能只留在區域變數裡，否則
+        # case_core 取 res["soil"]["base_friction"] 會 KeyError，讓第 6～8 章
+        # 整批消失（實測 4 m 半重力式報告 design_sections_error='base_friction'）。
+        "soil": dict(soil, base_friction=friction),
         "foundation_soil": foundation_soil,
         "backfill": backfill,
         "seismic": {"kh": kh, "kv": kv},

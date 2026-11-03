@@ -26,7 +26,7 @@
 用法
 ----
     set PYTHONIOENCODING=utf-8
-    C:\\Python312\\python.exe D:\\公司案件.AI\\tools\\case_package\\case_package.py ^
+    python <專案根目錄>\\tools\\case_package\\case_package.py ^
         <案件主檔.json> [--out-dir DIR] [--only boq,report,drawing] [--no-pdf] [--allow-placeholder]
 
 產出
@@ -52,7 +52,7 @@ import sys
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))          # D:\公司案件.AI
+ROOT = os.path.dirname(os.path.dirname(HERE))          # <專案根目錄>
 PY = python_exe()
 
 TOOLS = {
@@ -205,27 +205,42 @@ def run_drawing(master, out_dir):
     except Exception:
         _mdl_d = (master.get("quantities") or {}).get("model") or "road"
     if _mdl_d == "road":
-        meta = d.get("road_edges_meta") or "AC刨鋪5cm工程/model/road_edges_meta.json"
+        # 案件主檔一律用 _case_path；out_dir 現在是 out\<案名>，dirname(out_dir) 不再是案件資料夾。
+        case_json = master.get("_case_path") or os.path.join(ROOT, "cases",
+                                                             master.get("name") or "", "case.json")
+        # 不可寫死某個案名：預設找「該案自己的 model\road_edges_meta.json」。
+        meta = d.get("road_edges_meta") or os.path.join(
+            os.path.dirname(case_json), "model", "road_edges_meta.json")
         meta = meta if os.path.isabs(meta) else os.path.join(ROOT, meta)
         pav_dxf = os.path.join(os.path.dirname(dxf),
                                os.path.basename(dxf).replace("_現況平面圖_A3", "_刨鋪範圍_TWD97"))
+        takeoff = None
         if os.path.exists(meta):
             pcmd = [PY, TOOLS["paving"], meta, "--out", pav_dxf,
-                    "--case", os.path.join(os.path.dirname(out_dir), "case.json")]
+                    "--case", case_json]
             pcode, plog = _run(pcmd, os.path.join(out_dir, "_log_drawing_paving.txt"))
             tail = tail + "\n[刨鋪範圍產生]\n" + plog
             if pcode != 0:
                 code = pcode
             files += _files([pav_dxf])
-            tcmd = [PY, TOOLS["takeoff"], pav_dxf, "--case",
-                    os.path.join(os.path.dirname(out_dir), "case.json"), "--tol", "1.0"]
+            if pcode == 0:
+                takeoff = "刨鋪範圍"
+        elif os.path.exists(pav_dxf):
+            # 實測邊線檔（road_edges_meta.json）可能已被清掉，但刨鋪範圍圖還在。
+            # 這時不能直接跳過量測 —— 面積是 AC 體積的唯一來源，跳過等於放行未對帳的數量。
+            files += _files([pav_dxf])
+            takeoff = "刨鋪範圍（沿用既有 DXF，無 road_edges_meta.json）"
+        else:
+            code = 1
+            extra_note = "；⚠ 找不到 road_edges_meta.json，也沒有既有刨鋪範圍 DXF，無法對帳"
+        if takeoff:
+            tcmd = [PY, TOOLS["takeoff"], pav_dxf, "--case", case_json, "--tol", "1.0"]
             tcode, tlog = _run(tcmd, os.path.join(out_dir, "_log_drawing_takeoff.txt"))
-            tail = tail + "\n[圖／數對帳 刨鋪範圍]\n" + tlog
+            tail = tail + "\n[圖／數對帳 %s]\n" % takeoff + tlog
             if tcode != 0:
                 code = tcode
-            extra_note = "；圖／數對帳相符" if tcode == 0 else "；圖／數對帳未通過"
-        else:
-            extra_note = "；⚠ 找不到 road_edges_meta.json，刨鋪範圍未量測"
+            extra_note = "；%s；圖／數對帳%s" % (
+                takeoff, "相符" if tcode == 0 else "未通過")
 
     return {"axis": "drawing", "name": AXIS_NAMES["drawing"], "ok": code == 0,
             "returncode": code, "files": files, "log": tail,
@@ -244,8 +259,9 @@ def run_section(master, out_dir, no_pdf):
                 "returncode": None, "files": [],
                 "note": "section 軸只支援 civil-case/1 統一案件檔", "log": ""}
 
-    # scale 可為整數（1:N）或 "auto"（由 make_wall_section 依斷面外廓自動挑標準比例）
-    _sc = sec.get("scale", 20)
+    # scale 可為整數（1:N）或 "auto"（由 make_wall_section 依斷面外廓自動挑標準比例）。
+    # 預設 auto：右欄保留 183 mm 後，原本寫死 1:20 的 4 m 牆會超寬，不能再當預設。
+    _sc = sec.get("scale", "auto")
     scale = "auto" if str(_sc).lower() == "auto" else int(_sc)
     out = sec.get("out") or os.path.join(out_dir, "S-01_擋土牆標準斷面圖.dxf")
     out = out if os.path.isabs(out) else os.path.join(ROOT, out)

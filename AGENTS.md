@@ -99,6 +99,8 @@ egs\`）。
 - `tools\case_package\case_package.py`：**三軸一鍵交付**（設計圖＋預算書＋設計報告）。讀 `cases\<案名>\case.json` → 先一致性檢查 → 派生兩軸輸入 → 跑三軸 → 產 `<案名>_案件交付清單.md`。任一種不合格即退出碼 1。
 - `C:\Program\ArtCraft\GridCraft\gridcraft-cli.exe`：工程預算書與 `.xlsx` 試算表處理工具（353 個指令；`boq_build.py` 底下就是呼叫它）。
 
+- **擋土牆配筋牆型分流（2026-11-04）**：一律走 `rc_design.design_wall_rebar(q, wall_res)`。`gravity`／`semigravity`＝名目構造鋼筋（D13@250 雙向＋D16@200 底部縱筋、ρ≥0.002；3 m 重力式 43.86 kg/m）；`cantilever`＝莖板＋底板撓曲配筋；`counterfort`／`anchored`／`mse`＝由各引擎的構材設計彙總 `kg/m`；`gabion`／`crib`／`masonry_wet`／`masonry_dry`／`sandwich`＝明示不適用 RC 鋼筋、量為 0。**不可再對所有 `wall_type` 直接呼叫 `design_cantilever_stem()`**——曾使 3 m 重力式多算 52%（66.8→43.86 kg/m）、預算多 20,511 元。加勁式面版配筋目前為單向版初步設計，面版－加勁材連接與局部承壓仍須另核。
+
 ## 4B. 預算書編列原則：可微調項與方向（2026-10-28 使用者指定，必須遵守）
 
 編列預算書時**有兩項會刻意偏離標稱費率，用來把總計調到目標金額**。這是正常作業，**不是錯誤**：
@@ -135,7 +137,8 @@ egs\`）。
 - **Before estimating a design flow (設計流量／集水區水文分析)**, read [`docs/設計計算產線.md`](docs/設計計算產線.md) §3.4 並用 `tools\design\hydrology.py`（第 16~19 條；第16條推估值為下限）。
 - **Before sizing or checking a drainage channel (排水溝斷面選配／水力檢核)**, read [`docs/設計計算產線.md`](docs/設計計算產線.md)（曼寧、流速上下限、出水高、福祿數；參數已依水保規範第78、83~86條條文值）並用 `tools\design\channel_hydraulics.py`，**不要用猜的斷面**。
 - **Before drawing a water-surface profile or backwater (水面線／迴水／沿線出水高檢核)**, use `tools\design\channel_profile.py` or `design_run("channel_profile", ...)`：標準步法由下游控制水深往上游算，**不要拿單一斷面的正常水深當整條溝的水深**。
-- **Before designing rebar for a wall stem or channel wall (配筋設計)**, read [`docs/設計計算產線.md`](docs/設計計算產線.md) §3.6（兩個坑：fs 不可一律取 0.6fy、重力式免結構配筋）並用 `tools\design\rc_design.py`。
+- **Before designing rebar for a wall stem or channel wall (配筋設計)**, read [`docs/設計計算產線.md`](docs/設計計算產線.md) §3.6（三個坑：fs 不可一律取 0.6fy、重力式／半重力式走名目構造鋼筋而非撓曲配筋、牆型一律走 `design_wall_rebar()` 分流）並用 `tools\design\rc_design.py`。
+- **Before designing or drawing rebar for any retaining wall type (擋土牆配筋／S-01 與 S-02 配筋圖)**, read [`docs/擋土牆配筋設計SOP.md`](docs/擋土牆配筋設計SOP.md)：六型分流、每延米鋼筋／模板（**擋土牆 12%、箱涵 6%，不可混用**）、S-01 與 S-02 圖例同源、回歸與驗收數據。**不可對所有牆型直接呼叫 `design_cantilever_stem()`**。
 - **Before sizing a sediment basin or checking its wall/outlet/overflow (沉砂池容量、結構配筋、出水口、溢流)**, read [`docs\設計計算產線.md`](docs/設計計算產線.md) §3.9 並用 `tools\design\sediment_basin.py`；容量用 USLE 與第 92／93 條，結構用 `--structure`，水理用 `--design-q`，**不要再用「每公頃 30 m³」直接當設計值**（那是下水道標準的複核值）。
 - **Before checking a slope (邊坡穩定分析／容許坡角)**, read [`docs/設計計算產線.md`](docs/設計計算產線.md) §3.7 並用 `tools\design\slope_stability.py`（第 72、73 條；例外要往保守倒、圓弧採坡趾圓族）。
 - **Before sizing or checking a retaining wall (擋土牆斷面選配／穩定檢核)**, read [`docs/設計計算產線.md`](docs/設計計算產線.md)（三個會算錯的關鍵：梯形方向、踵板覆土、承載 FS 重複計算）並用 `tools\design\retaining_wall.py`，**不要用慣例值直接出圖**。

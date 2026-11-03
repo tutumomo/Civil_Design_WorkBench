@@ -235,17 +235,24 @@ def build_box_culvert(name, length, cell_count, clear_w, clear_h, wall_t,
         "soil_unit_weight_kn_m3": 18.0,
         "soil_phi_deg": 30.0,
         "surcharge_kpa": 0.0,
-        "traffic_load_kpa": 10.0,
+        # 一定要指定車載重型式：只給 traffic_load_kpa 會被當成 custom 定值，
+        # 看似有活載、其實不是 H-20／40T 的輪載換算（本專案曾因此漏計車載重）。
+        "traffic_type": "h20",
+        "traffic_load_kpa": 0.0,
+        "traffic_lanes": 4,
         "groundwater_depth_m": None,
         "internal_water_depth_m": 0.0,
         "load_factor": 1.7,
-        "_note": "土工與活載參數為**假設值**，須依鑽探、道路等級與實際覆土替換。",
+        "_note": ("土工與車載重參數為**假設值**，須依鑽探、道路等級與實際覆土替換；"
+                  "traffic_type 可選 h20／h20_s16／trailer_40t／none／custom。"),
     }
     case["quantities"]["notes"] = [
         "箱涵尺寸為**範例值**：%d 孔 %.2f m × %.2f m、涵長 %.1f m、覆土 %.2f m。"
         "正式設計前須用 `tools\\design\\box_culvert.py` 完成水力與平面構架檢核。"
         % (cell_count, clear_w, clear_h, length, cover),
-        "混凝土量採外框矩形減孔洞；數量表不含翼牆、保護工、路面結構與損耗。",
+        "混凝土量採外框矩形減孔洞；數量表不含翼牆、保護工與路面結構。",
+        "鋼筋量採構架配筋設計值（含 6% 搭接與損耗），模板量含內壁、頂版底面、"
+        "底板頂面與兩端斷面。",
         "設計流量與土工參數目前為假設值，未完成前不得當作正式設計。",
     ]
     case["boq"]["items"] = _boq([
@@ -256,9 +263,9 @@ def build_box_culvert(name, length, cell_count, clear_w, clear_h, wall_t,
         {"name": "結構用混凝土 fc'=280 kgf/cm2（含澆置）", "unit": "m3",
          "qty_from": "concrete_volume_m3", "price": 3500.0, "note": "假設值，須詢價"},
         {"name": "鋼筋及加工組立", "unit": "kg",
-         "qty_from": "rebar_kg", "price": 32.0,
-         "note": "假設值；正式預算須以配筋設計值或詢價確認"},
-        {"name": "模板（箱涵內壁及底板頂面）", "unit": "m2",
+         "qty_from": "rebar_kg_design", "price": 32.0,
+         "note": "採構架配筋設計值（含 6% 搭接與損耗）；單價為假設值，須詢價"},
+        {"name": "模板（箱涵內壁、頂版底面及底板頂面）", "unit": "m2",
          "qty_from": "formwork_m2", "price": 520.0, "note": "假設值，須詢價"},
         {"name": "頂版覆土回填及夯實", "unit": "m3",
          "qty_from": "soil_cover_volume_m3", "price": 420.0, "note": "假設值，須詢價"},
@@ -327,7 +334,8 @@ def main():
     # channel
     ap.add_argument("--inner-width", type=float, default=0.5, help="channel：內寬 m")
     ap.add_argument("--depth", type=float, default=0.9, help="channel：溝深 m")
-    ap.add_argument("--wall-thickness", type=float, default=0.15, help="channel：壁厚 m")
+    ap.add_argument("--wall-thickness", type=float, default=None,
+                    help="channel：壁厚 m（預設 0.15）／box_culvert：外牆厚 m（預設 0.35）")
     ap.add_argument("--base-thickness-c", type=float, default=0.15, help="channel：底厚 m")
     # box culvert
     ap.add_argument("--cell-count", type=int, default=1, choices=[1, 2, 3],
@@ -362,11 +370,15 @@ def main():
                           toe_soil_depth=a.toe_soil_depth)
     elif a.model == "channel":
         case = build_channel(a.name, a.length, a.inner_width, a.depth,
-                             a.wall_thickness, a.base_thickness_c)
+                             a.wall_thickness if a.wall_thickness is not None else 0.15,
+                             a.base_thickness_c)
     elif a.model == "box_culvert":
+        # 排水溝壁厚預設 0.15 m，但箱涵外牆沿用 0.15 m 會使剪力容量為 0；
+        # 兩個模型的預設值必須分開，不能共用同一個 argparse default。
+        wall_t = a.wall_thickness if a.wall_thickness is not None else 0.35
         case = build_box_culvert(
             a.name, a.length, a.cell_count, a.clear_width, a.clear_height,
-            a.wall_thickness, a.top_thickness, a.bottom_thickness,
+            wall_t, a.top_thickness, a.bottom_thickness,
             a.interior_thickness, a.cover,
         )
     else:

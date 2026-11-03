@@ -521,7 +521,7 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
     warnings.append("地錨最大水平伸入 %.1f m，請確認在用地／地權範圍內（公路邊坡 C6.3）。" % max_reach)
     warnings += EP.passive_warnings(passive, kh > 0)
 
-    return {
+    out = {
         "wall_type": "anchored",
         "wall_label": SPEC["label"],
         "geometry": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in g.items() if k != "anchors"},
@@ -546,6 +546,9 @@ def analyse(q: Mapping[str, Any], soil: Mapping[str, Any] | None = None,
         "warnings": warnings,
         "pass": all(c["ok"] for c in checks),
     }
+    out["reinforcement"] = RC.design_anchored_wall_steel(q, out, cc=cc)
+    out["rebar_kg_per_m"] = out["reinforcement"]["total_kg_per_m"]
+    return out
 
 
 def format_report(res: Mapping[str, Any]) -> str:
@@ -563,6 +566,8 @@ def format_report(res: Mapping[str, Any]) -> str:
            pr["P_earth_kN_per_m"], pr["p_max_kPa"], pr["p_surcharge_kPa"],
            "；地震增量 %.1f kN/m（均佈 %.2f kPa，含牆面慣性）" % (pr["dPae_kN_per_m"], pr["p_seismic_kPa"])
            if res["seismic"]["kh"] > 0 else ""),
+        "牆面配筋量：%.2f kg/m（含 %.0f%% 搭接、錨定與損耗）"
+        % (res["rebar_kg_per_m"], res["reinforcement"]["lap_allowance"] * 100.0),
         "",
     ]
     for a in res["anchors"]:

@@ -89,6 +89,26 @@ C:\Python312\python.exe tools\selftest\regression.py
 - 追蹤值必須是**實際進預算的那個量**（例：箱涵 `rebar_kg_design`），
   不是舊的假設值；數量、預算、報告三處對不上就是 regression 的 bug。
 
+### 4.1 乾淨 checkout 驗收（2026-11-04 新增，必做）
+
+工作區全綠**不代表**推上去的 commit 能重現；多智能體共用工作區時，常有關鍵
+修正只存在別人的未提交檔案裡。收工前必須用 HEAD 開一個乾淨 worktree 重跑：
+
+```powershell
+git worktree add --detach _temp\cleancheck HEAD
+cd _temp\cleancheck
+$env:PYTHONIOENCODING='utf-8'
+C:\Python312\python.exe tools\selftest\regression.py
+cd ..\..
+git worktree remove --force _temp\cleancheck
+```
+
+- 只要有一案在乾淨 checkout 失敗，就是**有檔案沒進 commit**；補進白名單、
+  重跑，不可用「我本機有那個檔」結案。
+- 2026-11-04 實例：dirty tree 11 案全綠，乾淨 checkout 卻只剩 2 案過——
+  `boq_build.py`／`make_report.py` 的 `parents[1]` 修正與 3 m 重力式的
+  `scale: auto` 都沒進版。補齊後才 11 案全綠。
+
 ---
 
 ## 5. 交付六道閘門（有案件交付才跑）

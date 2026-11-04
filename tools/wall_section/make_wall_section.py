@@ -187,9 +187,73 @@ def ensure_tomo(doc):
     st.dxf.width = 1.0
 
 
-def ensure_dimstyle(doc, scale):
+def unit_spec(unit):
+    """圖面尺寸單位（m／cm）。
+
+    **模型空間永遠是公尺**（AGENTS.md §2：公制公尺、$INSUNITS=6），
+    這裡只改「圖面標註單位」：以尺寸樣式的線性換算係數（dimlfac）、
+    小數位（dimdec）與字尾（dimpost）達成，不動幾何。
+    """
+    u = str(unit or "m").strip().lower()
+    if u in ("cm", "公分"):
+        return {"key": "cm", "label": "cm", "factor": 100.0, "dec": 0,
+                # DIMPOST 必須含 "<>" 佔位符，否則 ezdxf 與 AutoCAD 都視為
+                # 無效格式（DXFValueError: Invalid dimpost string）。
+                "post": "<> cm"}
+    if u in ("m", "公尺", "meter", "metre"):
+        return {"key": "m", "label": "m", "factor": 1.0, "dec": 2,
+                "post": "<> m"}
+    raise SystemExit("圖面單位只支援 m 或 cm（收到 %s）" % unit)
+
+
+def fmt_len(value_m, unit="m", dec=None):
+    """把公尺值格式化成「圖面單位」的長度字串。
+
+    m  → "3.00 m"（小數 2 位）；cm → "300 cm"（整數）。
+    右欄尺寸表、說明文字與配筋表長度欄都走這裡，確保同一張圖上
+    不會出現「標註是 cm、右欄卻寫 m」的混用。
+    """
+    us = unit_spec(unit)
+    if us["key"] == "cm":
+        return "%d cm" % int(round(float(value_m) * 100.0))
+    if dec is None:
+        dec = 2
+    return "%.*f m" % (dec, float(value_m))
+
+
+def unit_name(unit="m"):
+    """圖面單位的正式名稱（供說明文字用）。"""
+    return "公分（cm）" if unit_spec(unit)["key"] == "cm" else "公尺（m）"
+
+
+_NOTE_LEN_RE = None
+
+
+def notes_in_unit(notes, unit="m"):
+    """把說明文字裡的「數值 + m」統一轉成圖面單位。
+
+    說明文字在各分支硬寫「尺寸單位為公尺（m）」與「H=3.00 m」之類的句子；
+    圖面單位改成 cm 時若不跟著改，右欄會與尺寸標註打架。
+    這裡以正則統一處理：`<數字> m` → `<數值> cm`（cm 單位時），
+    並把「尺寸單位為公尺（m）」換成對應的單位名稱。
+    """
+    import re
+    global _NOTE_LEN_RE
+    if _NOTE_LEN_RE is None:
+        _NOTE_LEN_RE = re.compile(r"(?<![\w.])(\d+(?:\.\d+)?)\s*m(?![\w])")
+    un = unit_name(unit)
+    out = []
+    for n in notes:
+        t = n.replace("尺寸單位為公尺（m）", "尺寸單位為%s" % un)
+        t = _NOTE_LEN_RE.sub(lambda m: fmt_len(float(m.group(1)), unit), t)
+        out.append(t)
+    return out
+
+
+def ensure_dimstyle(doc, scale, unit="m"):
     name = "TOMO尺寸"
     h = model_h(3.0, scale)                    # 本文 3 mm 換算
+    us = unit_spec(unit)
     if name not in doc.dimstyles:
         ds = doc.dimstyles.add(name)
     else:
@@ -202,7 +266,10 @@ def ensure_dimstyle(doc, scale):
     ds.dxf.dimtad = 1
     ds.dxf.dimtih = 0
     ds.dxf.dimtoh = 0
-    ds.dxf.dimdec = 2
+    ds.dxf.dimdec = us["dec"]
+    # 線性換算係數：模型為公尺，標註要 cm 時乘 100（不動幾何）。
+    ds.dxf.dimlfac = us["factor"]
+    ds.dxf.dimpost = us["post"]
     ds.dxf.dimdsep = 46                     # ord('.')：小數點用「.」，不可用「,」
     ds.dxf.dimlunit = 2
     ds.dxf.dimclrd = 3
@@ -1086,7 +1153,8 @@ def _auto_wall_extent(q):
 # --------------------------------------------------------------------------- #
 # 圖紙空間：視口、比例尺、圖例、說明、標題欄
 # --------------------------------------------------------------------------- #
-def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
+def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
+                unit="m"):
     msp = doc.modelspace()
     from ezdxf import bbox as _bbox
     box = _bbox.extents(msp)
@@ -1193,12 +1261,15 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
         lay.add_lwpolyline(poly, close=True, dxfattribs={"layer": L_SCALE})
         if i == 0:
             lay.add_solid(poly, dxfattribs={"layer": L_SCALE})
+    us = unit_spec(unit)
     put(vx0 - 0.8, sy - 5.0, "0", 3.0, L_SCALE)
     # 3 mm 字約 5 mm 寬；seg < 8 mm 時（例如 1:100 只有 5 mm）中間標籤會與端點標籤疊字（E10）
+    # 刻度只標數值、單位寫在標題（"尺寸單位：m／cm"），避免「0.5 m」與「1 m」在 1:50 疊字。
     if seg >= 8.0:
-        put(vx0 + seg - 1.2, sy - 5.0, "0.5", 3.0, L_SCALE)
-    put(vx0 + 2 * seg - 1.6, sy - 5.0, "1 m", 3.0, L_SCALE)
-    put(vx0, sy + 5.5, "比例尺 1:%d" % scale, 4.0, L_SCALE)
+        put(vx0 + seg - 1.2, sy - 5.0, "%g" % (us["factor"] / 2.0), 3.0, L_SCALE)
+    put(vx0 + 2 * seg - 1.6, sy - 5.0, "%g" % us["factor"], 3.0, L_SCALE)
+    put(vx0, sy + 5.5, "比例尺 1:%d（尺寸單位：%s）" % (scale, us["label"]),
+        4.0, L_SCALE)
 
     # ---- 右欄排版：由上而下動態累加 ----
     # 先前各區塊用固定 y（278／222／158／88），只要資料列數一變就互相重疊；
@@ -1221,6 +1292,11 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
 
     def _gap(v=GAP_H):
         _cursor["y"] -= v
+
+    # 右欄尺寸表／說明一律走 fmt_len()，與尺寸標註（dimlfac）同一單位，
+    # 避免「圖上標 300 cm、右欄卻寫 3.00 m」或反之。
+    def L(v, dec=None):
+        return fmt_len(v, unit, dec)
 
     # 一般斷面圖放「鋼筋圖例」（示意）；S-02 配筋圖放「配筋表」（依配筋設計結果）。
     # 邊坡沒有鋼筋 —— 印「鋼筋圖例」會與圖名性質相反（同型錯誤先前已踩過一次）。
@@ -1330,64 +1406,64 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
     _gap(6.0)
     _title("斷面尺寸表")
     if geom.get("wall_type") == "channel":
-        data = [("溝深 H", "%.2f m" % geom["H"]),
-                ("內寬 B", "%.2f m" % geom["B"]),
-                ("外寬 W", "%.2f m" % geom["W"]),
-                ("溝壁厚 t", "%.2f m" % geom["T"]),
-                ("溝底厚 tb", "%.2f m" % geom["BT"]),
-                ("總高", "%.2f m" % (geom["H"] + geom["BT"])),
-                ("最小構造厚度", "0.15 m")]
+        data = [("溝深 H", L(geom["H"])),
+                ("內寬 B", L(geom["B"])),
+                ("外寬 W", L(geom["W"])),
+                ("溝壁厚 t", L(geom["T"])),
+                ("溝底厚 tb", L(geom["BT"])),
+                ("總高", L(geom["H"] + geom["BT"])),
+                ("最小構造厚度", L(0.15))]
     elif geom.get("slope_deg") is not None:
         # 邊坡斷面尺寸表
-        data = [("坡高 H", "%.2f m" % geom["H"]),
+        data = [("坡高 H", L(geom["H"])),
                 ("坡角 β", "%.1f°" % geom["slope_deg"]),
-                ("水平投影", "%.2f m" % geom["run"]),
-                ("坡面斜長", "%.2f m" % geom["face"]),
+                ("水平投影", L(geom["run"])),
+                ("坡面斜長", L(geom["face"])),
                 ("坡度", "1 : %.2f" % (1.0 / math.tan(math.radians(geom["slope_deg"])))),
-                ("階段平台", ("%d 階 × %.2f m" % (geom["BN"], geom["BW"]))
+                ("階段平台", ("%d 階 × %s" % (geom["BN"], L(geom["BW"])))
                  if geom["BN"] else "無"),
                 ("地下水位", ("%.2f H" % geom["GW"]) if geom["GW"] > 0 else "無")]
         if geom.get("slip"):
             data.append(("最不利滑動圓", "FS = %.2f" % geom["slip"]["FS"]))
     elif geom.get("wall_type") == "counterfort":
         heel = geom["BL"] - geom.get("toe_length_m", 0.0) - geom["T"]
-        data = [("牆板高 H／有效高", "%.2f／%.2f m" % (
-                    geom["H"], geom["H"] - geom.get("front_soil_depth_m", 0.0))),
-                ("牆板厚 ts", "%.2f m" % geom["T"]),
-                ("底板 B／tb", "%.2f／%.2f m" % (geom["BL"], geom["BT"])),
-                ("前趾／踵板", "%.2f／%.2f m" % (geom.get("toe_length_m", 0.0), heel)),
-                ("扶壁 S／tc", "%.2f／%.2f m" % (
+        data = [("牆板高 H／有效高", "%s／%s" % (
+                    L(geom["H"]), L(geom["H"] - geom.get("front_soil_depth_m", 0.0)))),
+                ("牆板厚 ts", L(geom["T"])),
+                ("底板 B／tb", "%s／%s" % (L(geom["BL"]), L(geom["BT"]))),
+                ("前趾／踵板", "%s／%s" % (L(geom.get("toe_length_m", 0.0)), L(heel))),
+                ("扶壁 S／tc", "%s／%s" % (
                     geom.get("counterfort_spacing_m", 0),
-                    geom.get("counterfort_thickness_m", 0)))]
+                    L(geom.get("counterfort_thickness_m", 0))))]
     elif geom.get("wall_type") == "anchored":
-        data = [("牆高 H", "%.2f m" % geom["H"]),
-                ("有效高", "%.2f m" % (geom["H"] - geom.get("TOE", 0.0))),
-                ("牆面厚 t", "%.2f m" % geom["T"]),
-                ("基腳寬 B", "%.2f m" % geom["BL"]),
-                ("基腳厚 tb", "%.2f m" % geom["BT"]),
+        data = [("牆高 H", L(geom["H"])),
+                ("有效高", L(geom["H"] - geom.get("TOE", 0.0))),
+                ("牆面厚 t", L(geom["T"])),
+                ("基腳寬 B", L(geom["BL"])),
+                ("基腳厚 tb", L(geom["BT"])),
                 ("地錨排數", "%d 排" % geom.get("anchor_rows", 0)),
-                ("水平間距", "%.2f m" % geom.get("horizontal_spacing_m", 0)),
+                ("水平間距", L(geom.get("horizontal_spacing_m", 0))),
                 ("地錨俯角", "%.1f°" % geom.get("inclination_deg", 0))]
     elif geom.get("wall_type") == "mse":
-        data = [("牆高 H", "%.2f m" % geom["H"]),
-                ("埋入深度", "%.2f m" % geom.get("embedment_m", 0)),
-                ("有效高", "%.2f m" % (geom["H"] - geom.get("embedment_m", 0))),
-                ("RC 面版厚 t", "%.2f m" % geom["T"]),
-                ("加勁材長 L", "%.2f m" % geom["BL"]),
-                ("加勁材層距", "%.2f m" % geom.get("vertical_spacing_m", 0)),
+        data = [("牆高 H", L(geom["H"])),
+                ("埋入深度", L(geom.get("embedment_m", 0))),
+                ("有效高", L(geom["H"] - geom.get("embedment_m", 0))),
+                ("RC 面版厚 t", L(geom["T"])),
+                ("加勁材長 L", L(geom["BL"])),
+                ("加勁材層距", L(geom.get("vertical_spacing_m", 0))),
                 ("排水孔", "Ø%d cm × %d 排" % (round(geom["WD"] * 100), geom["NZ"]))]
     else:
         is_grav2 = geom.get("wall_type") == "gravity"
-        data = [("牆高 H", "%.2f m" % geom["H"]),
-                ("頂寬 T", "%.2f m" % geom["T"]),
-                ("底寬 BL", "%.2f m" % geom["BL"])]
+        data = [("牆高 H", L(geom["H"])),
+                ("頂寬 T", L(geom["T"])),
+                ("底寬 BL", L(geom["BL"]))]
         if not is_grav2:
-            data.append(("底板厚 BT", "%.2f m" % geom["BT"]))
+            data.append(("底板厚 BT", L(geom["BT"])))
         data += [("排水孔", "Ø%d cm × %d 排" % (round(geom["WD"] * 100), geom["NZ"])),
-                 ("背填厚", "%.2f m" % geom["BACK"]),
-                 ("反濾層厚", "%.2f m" % geom["FILT"])]
+                 ("背填厚", L(geom["BACK"])),
+                 ("反濾層厚", L(geom["FILT"]))]
         if geom.get("TOE", 0) > 1e-9:
-            data.append(("牆趾覆土", "%.2f m（≥0.60 m）" % geom["TOE"]))
+            data.append(("牆趾覆土", "%s（≥%s）" % (L(geom["TOE"]), L(0.60))))
     for k, v in data:
         _row(k, v)
 
@@ -1514,6 +1590,8 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
             "6. 鋼筋尺寸與間距為示意，正式配筋須依結構計算結果調整並經技師核可。",
             "7. 本圖未含高程與地質資料；施工前須依實際地探與現地測量覆核。",
         ]
+    # 說明文字的長度值一併換成圖面單位（m／cm），與尺寸標註、右欄尺寸表一致。
+    notes = notes_in_unit(notes, unit)
     # 說明行距 5.2 mm（字高 3.0），確保 7 行仍留在標題欄之上。
     for s in notes:
         put(RX, _cursor["y"], s, 3.0, L_DESC)
@@ -1537,6 +1615,8 @@ def main():
     ap.add_argument("--template", default=TEMPLATE)
     ap.add_argument("--out", required=True)
     ap.add_argument("--publish", action="store_true")
+    ap.add_argument("--unit", default="m", choices=["m", "cm"],
+                    help="圖面尺寸標註單位（m／cm）；模型空間一律為公尺")
     ap.add_argument("--rebar", action="store_true",
                     help="產出 S-02 配筋圖：鋼筋依配筋設計配置，右欄改為配筋表")
     a = ap.parse_args()
@@ -1659,7 +1739,7 @@ def main():
             print(f"  ⚠ 無法刪除版面 {name}：{ex}")
     ensure_tomo(doc)
     ensure_layers(doc)
-    ds = ensure_dimstyle(doc, a.scale)
+    ds = ensure_dimstyle(doc, a.scale, a.unit)
 
     if model == "channel":
         geom = draw_channel_section(doc, q, a.scale, ds, rebar=_rb_geom)
@@ -1684,7 +1764,7 @@ def main():
             case = dict(case)
             case["_cover_mm"] = 50 if q.get("wall_type") == "mse" else 75
     lay, vp = build_paper(doc, geom, case, a.scale, proj, a.sheet_no,
-                          rebar_schedule=rb_schedule)
+                          rebar_schedule=rb_schedule, unit=a.unit)
 
     # 版面自檢：模型文字字高必須等於 3/4/5 mm（換算後）
     doc.layouts.set_active_layout(LAYOUT_NAME)      # publish 以 CTAB 出圖，必須是斷面圖

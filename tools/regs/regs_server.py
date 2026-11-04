@@ -11,6 +11,7 @@ out/design_workbench/runs. Regulation indexes and topics.json remain read-only.
 """
 import argparse
 import json
+import os
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -525,6 +526,24 @@ class Handler(BaseHTTPRequestHandler):
             if u.path == "/api/design/catalog":
                 import design_api
                 return self.json({"calculators": design_api.list_calculators()})
+            if u.path == "/api/design/section/capabilities":
+                import design_section
+                return self.json({"capabilities": design_section.capability_map()})
+            if u.path == "/api/design/section/file":
+                import design_section
+                rel = (q.get("path") or "").strip()
+                f = os.path.abspath(os.path.join(design_section._out_root(), rel))
+                root = os.path.abspath(design_section._out_root())
+                if not f.startswith(root + os.sep) or not os.path.isfile(f):
+                    return self.json({"error": "not found"}, 404)
+                ctype = {
+                    ".pdf": "application/pdf",
+                    ".dwg": "application/acad",
+                    ".dxf": "image/vnd.dxf",
+                    ".png": "image/png",
+                }.get(os.path.splitext(f)[1].lower(), "application/octet-stream")
+                with open(f, "rb") as fh:
+                    return self.send(200, fh.read(), ctype)
             if u.path == "/api/design/health":
                 import design_api
                 return self.json({"ok": True, "version": VERSION,
@@ -567,7 +586,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path != "/api/design/run":
+        if u.path not in ("/api/design/run", "/api/design/section"):
             return self.json({"error": "not found"}, 404)
         try:
             length = int(self.headers.get("Content-Length", "0"))
@@ -578,6 +597,19 @@ class Handler(BaseHTTPRequestHandler):
             payload = body.get("payload")
             if not isinstance(payload, dict):
                 return self.json({"error": "payload 必須是 JSON 物件"}, 400)
+            if u.path == "/api/design/section":
+                import design_section
+                try:
+                    res = design_section.generate(
+                        calc, payload,
+                        unit=str(body.get("unit", "m")),
+                        scale=body.get("scale", "auto"),
+                        project=str(body.get("project", "") or ""),
+                        publish=bool(body.get("publish", True)),
+                    )
+                except design_section.SectionError as ex:
+                    return self.json({"ok": False, "error": str(ex)}, 400)
+                return self.json(res)
             import design_api
             return self.json(
                 design_api.run_calculation(

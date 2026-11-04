@@ -982,7 +982,7 @@
     line-height: 14px;
     color: var(--text-2);
   }
-  .refs-panel, .case-panel, .history-panel {
+  .refs-panel, .case-panel, .history-panel, .drawing-panel {
     margin-top: 16px;
     border: 1px solid var(--line-strong);
     border-radius: 8px;
@@ -1004,6 +1004,17 @@
     padding: 12px 14px;
     border-top: 1px solid var(--line);
   }
+  .drawing-panel select {
+    margin-left: 4px;
+    padding: 3px 6px;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 12px;
+  }
+  .drawing-panel .case-panel-head { flex-wrap: wrap; gap: 8px; }
   .ref-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1581,6 +1592,20 @@ let currentRules = {};
 let advCollapsed = false;
 let runHistory = [];
 let pyodideReadyPromise = null;
+// 「設計圖」能力表：本機伺服器提供 /api/design/section；Cloudflare 靜態版沒有
+// Python 後端（只有 Pyodide），出圖需 AutoCAD／ezdxf，故該端點不存在。
+let sectionCapabilities = null;
+
+async function fetchSectionCapabilities() {
+  try {
+    const r = await fetch("/api/design/section/capabilities");
+    if (r.ok) {
+      const d = await r.json();
+      return d.capabilities || {};
+    }
+  } catch (e) {}
+  return {};
+}
 
 function loadHistoryFromStorage() {
   try {
@@ -1706,6 +1731,7 @@ function filterCatalog(query) {
 
 async function boot() {
   loadHistoryFromStorage();
+  sectionCapabilities = await fetchSectionCapabilities();
   const data = await fetchCatalogData();
   catalog = data.calculators;
   const groups = new Map();
@@ -2899,7 +2925,7 @@ function recordRunHistory(calcId, p, d) {
 function buildCaseExport(calcId, p, d) {
   const categoryMap = {
     wall_stability: "wall", block_wall: "wall", counterfort_wall: "wall", mse_wall: "wall", anchored_wall: "wall",
-    channel_hydraulics: "channel", channel_profile: "channel", channel_cover: "channel", box_culvert: "channel",
+    channel_hydraulics: "channel", channel_profile: "channel", channel_cover: "channel", box_culvert: "box_culvert",
     slope_stability: "slope"
   };
   const cat = categoryMap[calcId] || "wall";
@@ -3200,6 +3226,40 @@ function renderResult(d) {
   ` : "";
 
   const { caseObj, cliCmd } = buildCaseExport(current.id, payload, d);
+  // ---- 設計圖（斷面圖＋配筋圖）：計算通過才可按 ----
+  const sectionCap = (sectionCapabilities && sectionCapabilities[current.id]) || null;
+  const sectionSupported = !!(sectionCap && sectionCap.supported);
+  const sectionUnits = (sectionCap && sectionCap.units) || [
+    { value: "m", label: "M（公尺）" },
+    { value: "cm", label: "cm（公分）" }
+  ];
+  const sectionScales = (sectionCap && sectionCap.scales) || [
+    { value: "auto", label: "自動" },
+    ...[10, 20, 25, 30, 40, 50, 60, 75, 100, 200].map(s => ({ value: s, label: `1:${s}` }))
+  ];
+  const sectionPanelHtml = !sectionSupported
+    ? `<div class="drawing-panel" id="drawingpanel">
+         <div class="case-panel-head"><span>🖼️ 設計圖</span></div>
+         <div class="case-panel-body"><p class="hint">此版本（雲端／靜態）沒有出圖後端；請於本機工作台（<code>設計工作台.bat</code>）執行同一組參數，即可產出 S-01 斷面圖與 S-02 配筋圖。</p></div>
+       </div>`
+    : `<div class="drawing-panel" id="drawingpanel">
+         <div class="case-panel-head">
+           <span>🖼️ 設計圖（${esc(sectionCap.title || "斷面圖＋配筋圖")}）</span>
+           <div style="display:flex;gap:8px;align-items:center">
+             <label class="hint">圖面單位
+               <select id="drawunit">${sectionUnits.map(u => `<option value="${esc(u.value)}">${esc(u.label)}</option>`).join("")}</select>
+             </label>
+             <label class="hint">比例
+               <select id="drawscale">${sectionScales.map(s => `<option value="${esc(s.value)}">${esc(s.label)}</option>`).join("")}</select>
+             </label>
+             <button class="btn small" id="drawbtn" ${ok ? "" : "disabled title=\"計算結果未通過，請先修正參數\""}>產生設計圖</button>
+           </div>
+         </div>
+         <div class="case-panel-body">
+           <p class="hint" style="margin:0 0 6px">模型空間一律為公尺；「圖面單位」只改標註與右欄尺寸表（m／cm），幾何不變。比例 <code>auto</code> 會依斷面外廓自動挑最小的標準比例。</p>
+           <div id="drawresult" class="hint">${ok ? "按「產生設計圖」開始出圖（DXF／DWG／PDF）。" : "⚠ 計算結果未通過，設計圖按鈕已停用。"}</div>
+         </div>
+       </div>`;
 
   $("#result").innerHTML = `
     <div class="result-top">
@@ -3226,6 +3286,7 @@ function renderResult(d) {
         <textarea id="casejsontext" readonly style="min-height:180px;font-family:var(--mono);font-size:12px">${esc(JSON.stringify(caseObj, null, 2))}</textarea>
       </div>
     </div>
+    ${sectionPanelHtml}
     <pre class="summary">${esc(d.summary)}</pre>
     ${rows ? `<div class="table-wrap"><table><thead><tr><th>檢核項目</th><th>計算值</th><th>準則</th><th>單位</th><th>安全裕度／使用率</th><th>結果</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
     ${warn.length ? `<div class="warn"><ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
@@ -3263,6 +3324,46 @@ function renderResult(d) {
       a.download = "case.json";
       a.click();
       URL.revokeObjectURL(a.href);
+    };
+  }
+  if ($("#drawbtn")) {
+    const drawBtn = $("#drawbtn");
+    drawBtn.onclick = async () => {
+      const out = $("#drawresult");
+      const unit = $("#drawunit") ? $("#drawunit").value : "m";
+      const scale = $("#drawscale") ? $("#drawscale").value : "auto";
+      drawBtn.disabled = true;
+      drawBtn.textContent = "出圖中…";
+      out.innerHTML = "⏳ 正在產製斷面圖與配筋圖（DXF → DWG → PDF），約需 10～30 秒，請勿關閉頁面。";
+      try {
+        const resp = await fetch("/api/design/section", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({calculator: current.id, payload, unit, scale})
+        });
+        let data = null;
+        try { data = await resp.json(); } catch (e) { data = null; }
+        if (!resp.ok || !data || !data.ok) {
+          throw new Error((data && data.error) || `伺服器回應 HTTP ${resp.status}`);
+        }
+        const links = (data.files || [])
+          .filter(f => f.rel)
+          .map(f => {
+            const url = `/api/design/section/file?path=${encodeURIComponent(f.rel)}`;
+            return `<a class="btn small" href="${url}" target="_blank" rel="noopener" download="${esc(f.name)}">${esc(f.name)}</a>`;
+          }).join(" ");
+        const notes = (data.notes || []).length
+          ? `<div style="color:var(--amber);margin-top:6px">${data.notes.map(n => `⚠ ${esc(n)}`).join("<br>")}</div>`
+          : "";
+        out.innerHTML = `✅ 已產出 ${(data.files || []).length} 個檔案（比例 1:${esc(String(data.scale || scale))}、圖面單位 ${esc(data.unit || unit)}）
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">${links}</div>
+          <div>輸出目錄：<code>${esc(data.out_dir || "")}</code></div>${notes}`;
+      } catch (e) {
+        out.innerHTML = `❌ 出圖失敗：${esc(e.message || String(e))}<br><span class="hint">請確認本機工作台（<code>設計工作台.bat</code>）與 AutoCAD（accoreconsole）可用。</span>`;
+      } finally {
+        drawBtn.disabled = false;
+        drawBtn.textContent = "產生設計圖";
+      }
     };
   }
   document.querySelectorAll("[data-history-load]").forEach(btn => {

@@ -36,6 +36,7 @@
 import argparse
 import math
 import os
+import re
 import sys
 import time
 
@@ -626,7 +627,7 @@ def _unit_weight(bar):
 # 圖紙空間：視口、比例尺、右欄表格、標題欄
 # --------------------------------------------------------------------------- #
 def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
-                drawing_no):
+                drawing_no, unit="m"):
     msp = doc.modelspace()
     from ezdxf import bbox as _bbox
     box = _bbox.extents(msp)
@@ -706,11 +707,14 @@ def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
         lay.add_lwpolyline(poly, close=True, dxfattribs={"layer": L_SCALE})
         if i == 0:
             lay.add_solid(poly, dxfattribs={"layer": L_SCALE})
+    us = MWS.unit_spec(unit)
     put(vx0 - 0.8, sy - 5.0, "0", 3.0, L_SCALE)
+    # 刻度只標數值、單位寫在標題，避免「0.5 m」與「1 m」在較小比例尺疊字（E10）。
     if seg >= 8.0:
-        put(vx0 + seg - 1.2, sy - 5.0, "0.5", 3.0, L_SCALE)
-    put(vx0 + 2 * seg - 1.6, sy - 5.0, "1 m", 3.0, L_SCALE)
-    put(vx0, sy + 5.5, "比例尺 1:%d" % scale, 4.0, L_SCALE)
+        put(vx0 + seg - 1.2, sy - 5.0, "%g" % (us["factor"] / 2.0), 3.0, L_SCALE)
+    put(vx0 + 2 * seg - 1.6, sy - 5.0, "%g" % us["factor"], 3.0, L_SCALE)
+    put(vx0, sy + 5.5, "比例尺 1:%d（尺寸單位：%s）" % (scale, us["label"]),
+        4.0, L_SCALE)
 
     # ---- 右欄：由上而下動態累加 ----
     RX, RY_TOP = 210.0, 271.0
@@ -733,7 +737,8 @@ def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
     if tables.get("rebar_rows"):
         _title("配筋表")
         for dx, txt in [(0.0, "編號"), (9.0, "位置"), (60.0, "筋號"),
-                        (72.0, "間距(mm)"), (92.0, "長度(m)"), (114.0, "支/m"),
+                        (72.0, "間距(mm)"), (92.0, "長度(%s)" % us["label"]),
+                        (114.0, "支/m"),
                         (128.0, "單位重"), (145.0, "重量(kg/m)")]:
             put(RX + dx, cur["y"], txt, 3.0, L_LEGEND)
         cur["y"] -= ROW_H
@@ -742,7 +747,9 @@ def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
             put(RX + 9.0, cur["y"], r["pos"], 3.0, L_LEGEND)
             put(RX + 60.0, cur["y"], str(r["bar"]), 3.0, L_LEGEND)
             put(RX + 72.0, cur["y"], str(r["spacing_mm"]), 3.0, L_LEGEND)
-            put(RX + 92.0, cur["y"], "%.2f" % float(r["length_m"]), 3.0, L_LEGEND)
+            put(RX + 92.0, cur["y"],
+                MWS.fmt_len(float(r["length_m"]), unit).split(" ")[0],
+                3.0, L_LEGEND)
             put(RX + 114.0, cur["y"], "%.2f" % float(r["per_m"]), 3.0, L_LEGEND)
             put(RX + 128.0, cur["y"], "%.3f" % float(r["unit_kg_m"]), 3.0, L_LEGEND)
             put(RX + 145.0, cur["y"], "%.2f" % float(r["kg_per_m"]), 3.0, L_LEGEND)
@@ -770,23 +777,23 @@ def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
         _gap(6.0)
         _title("斷面尺寸表")
         data = [("孔數", "%d 孔" % g["n"]),
-                ("每孔淨寬 B", "%.2f m" % g["B"]),
-                ("每孔淨高 H", "%.2f m" % g["H"]),
-                ("外牆厚", "%.2f m" % g["tw"]),
-                ("中間牆厚", "%.2f m" % g["ti"]),
-                ("頂版厚", "%.2f m" % g["tt"]),
-                ("底板厚", "%.2f m" % g["tb"]),
-                ("外寬 W", "%.2f m" % g["W"]),
-                ("外高", "%.2f m" % g["Htot"]),
-                ("覆土厚", "%.2f m" % g["cover_depth"]),
-                ("涵長", "%.1f m" % g["length_m"])]
+                ("每孔淨寬 B", MWS.fmt_len(g["B"], unit)),
+                ("每孔淨高 H", MWS.fmt_len(g["H"], unit)),
+                ("外牆厚", MWS.fmt_len(g["tw"], unit)),
+                ("中間牆厚", MWS.fmt_len(g["ti"], unit)),
+                ("頂版厚", MWS.fmt_len(g["tt"], unit)),
+                ("底板厚", MWS.fmt_len(g["tb"], unit)),
+                ("外寬 W", MWS.fmt_len(g["W"], unit)),
+                ("外高", MWS.fmt_len(g["Htot"], unit)),
+                ("覆土厚", MWS.fmt_len(g["cover_depth"], unit)),
+                ("涵長", MWS.fmt_len(g["length_m"], unit, dec=1))]
         for k, v in data:
             _row(k, v)
 
     # ---- 說明 ----
     _gap(6.0)
     _title("說明", layer=L_DESC)
-    for n in tables.get("notes", []):
+    for n in MWS.notes_in_unit(tables.get("notes", []), unit):
         # 說明欄寬度上限＝技師執業圖記區左緣（x=363.5）− 右欄起點 − 間距
         for line in _wrap_note(n, 148.0, 4.0):
             put(RX, cur["y"], line, 4.0, L_DESC)
@@ -802,7 +809,14 @@ def _wrap_note(text, max_mm, h):
     說明文字長度會直接影響 E9（超出圖框內框）——右欄可用寬度約 195 mm，
     4 mm 字的中文一行約 39 字，超過就會被判定壓出圖框。
     """
+    # 先把「數值 + 單位」綁成一個不可拆的詞（以哨兵字元代替中間的空白），
+    # 避免折行時變成「20」/「cm」兩行；輸出前再把哨兵還原成空白。
+    text = re.sub(r"(\d+(?:\.\d+)?)\s(m|cm|mm|kg)\b",
+                  lambda m: m.group(1) + "\x01" + m.group(2), text)
+
     def _w(ch):
+        if ch == "\x01":
+            return 0.0
         return 1.2 * h if ord(ch) >= 0x2E80 else 0.8 * h
 
     lines, cur, w = [], "", 0.0
@@ -822,7 +836,7 @@ def _wrap_note(text, max_mm, h):
         w += cw
     if cur:
         lines.append(cur)
-    return lines
+    return [ln.replace("\x01", " ") for ln in lines]
 
 
 # --------------------------------------------------------------------------- #
@@ -884,6 +898,8 @@ def main():
     ap.add_argument("--rebar", action="store_true",
                     help="產出配筋圖 S-02（右欄為配筋表）")
     ap.add_argument("--publish", action="store_true", help="另產 DWG 與 PDF")
+    ap.add_argument("--unit", default="m", choices=["m", "cm"],
+                    help="圖面尺寸標註單位（m／cm）；模型空間一律為公尺")
     ap.add_argument("--project", default=None)
     ap.add_argument("--sheet-no", default=None)
     ap.add_argument("--template", default=TEMPLATE)
@@ -936,7 +952,7 @@ def main():
 
     MWS.ensure_tomo(doc)
     ensure_layers(doc)
-    ds = MWS.ensure_dimstyle(doc, a.scale)
+    ds = MWS.ensure_dimstyle(doc, a.scale, a.unit)
 
     cover_m = float(payload.get("cover_mm", 50.0)) / 1000.0
     g["cover_m"] = cover_m
@@ -958,7 +974,7 @@ def main():
                 {"rebar_rows": table if a.rebar else [],
                  "qty_rows": qty_table if a.rebar else [],
                  "notes": notes},
-                title_note, drawing_no)
+                title_note, drawing_no, unit=a.unit)
 
     doc.layouts.set_active_layout(LAYOUT_NAME)
     out = os.path.abspath(a.out)

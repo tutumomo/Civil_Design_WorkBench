@@ -1,19 +1,21 @@
 # 箱涵計算 SOP（單孔／雙孔／三孔）
 
-> 版本：1.0（2026-11-03）
+> 版本：1.1（2026-11-04：補內角 45° 加腋與角隅補強筋（X 形交叉斜筋）、
+> 修正模板／混凝土公式與損耗率敘述、同步出圖工具）
 >
 > 適用：現場澆置 RC 箱涵，單孔、雙孔、三孔，矩形斷面，覆土完成後承受
 > H-20／H-20 S-16／40T 拖車或自訂均佈車載。
 >
 > 不適用：預鑄箱涵、拱形／圓形涵洞、四孔以上（引擎未建構架拓樸）、
-> 斜交箱涵、分期施工與三維角隅補強。上述型式須另案建模。
+> 斜交箱涵、分期施工與三維（三向）角隅補強。上述型式須另案建模。
+> **二維內角角隅補強筋（X 形交叉斜筋）已納入**（見 §6.6）。
 >
 > 本 SOP 是計算流程與檢核清單，不取代技師簽認。正式設計須由依法登記之
 > 土木／結構技師覆核。
 
 ---
 
-## 0. 工具現況（2026-11-03）
+## 0. 工具現況（2026-11-04）
 
 | 項目 | 內容 |
 |---|---|
@@ -21,9 +23,10 @@
 | 構架分析 | `tools\design\frame_analysis.py`（支援頂版局部均佈載重） |
 | RC 配筋 | `tools\design\rc_design.py` |
 | 水力 | `tools\design\culvert_hydraulics.py`＋引擎內建 Manning |
+| 出圖 | `tools\box_section\make_box_section.py`（S-01 標準斷面圖／S-02 配筋圖）；流程見 `docs\箱涵斷面圖產線.md` |
 | 工作台 id | `box_culvert`（群組「箱涵」） |
 | 工作台網址 | `http://127.0.0.1:8765/design`（`regs_server.py --web`） |
-| CLI 自測 | `C:\Python312\python.exe tools\design\box_culvert.py --selftest`（16 項） |
+| CLI 自測 | `C:\Python312\python.exe tools\design\box_culvert.py --selftest`（20 項） |
 | 上架檢核 | `C:\Python312\python.exe tools\selftest\design_launch_check.py box_culvert` |
 | MCP | `design_show("box_culvert")` → `design_run("box_culvert", {...})` |
 | 主題卡 | `tools\regs\topics.json`「箱涵」 |
@@ -272,6 +275,42 @@ y_n + freeboard_min_m ≤ clear_height_m
 > 這裡是「總量分置兩面」，不是每面都配一份總量。舊 Excel 常每面同量
 > 配置，照抄會多一倍。
 
+### 6.6 內角 45° 加腋與角隅補強筋
+
+#### 6.6.1 內角加腋（倒角）
+
+過往標準圖（`標準圖圖庫\箱涵與管涵\` C106／C110／C111／C112）的箱涵
+**內角皆有 45° 倒角**，本引擎照辦。輸入欄位 `inner_chamfer_m`
+（預設 **0.20 m**，設 0 表示不做加腋）。
+
+- 尺寸限制：不得大於「牆厚／中牆厚／淨高」三者中最小者的一半，
+  違反直接報錯（`BoxCulvertError`），不默默截斷。
+- 影響：**淨斷面積**（每孔內空扣 `2c²`）、**模板**（斜面 `4nc√2`）、
+  **孔內淨空體積**。
+- 幾何與數量公式見 §7.2／§7.3；出圖見 `docs\箱涵斷面圖產線.md` §3。
+
+#### 6.6.2 角隅補強筋（X 形交叉斜筋）
+
+做法依公司標準圖 **C110／C111「箱涵鋼筋詳圖」**：每個內角沿涵長方向
+每 `corner_rebar_spacing_mm`（預設 200 mm）一組 **X 形交叉斜筋**，
+每組 2 支 45° 斜筋。
+
+```text
+單支長度 = t·√2 + 2×corner_rebar_anchor_m      （t＝該角所在牆厚）
+支數     = ⌈L / spacing⌉ × 角數 × 2
+角數     = 外牆角 4 + 中間牆角 4(n−1) = 4n
+```
+
+| 項目 | 預設 | 說明 |
+|---|---|---|
+| `corner_rebar` | D13 | 筋號（D10~D19 可選） |
+| `corner_rebar_spacing_mm` | 200 | 沿涵長間距 |
+| `corner_rebar_anchor_m` | 0.10 | 兩端錨入版與牆的長度 |
+
+> **屬構造筋，不參與構架分析**：構架以矩形剛接斷面計算，內力對本筋
+> 偏保守，因此只計入鋼筋量與出圖，不求解其應力需求。正式設計仍須由
+> 技師依實際斷面覆核。
+
 ---
 
 ## 7. Step 5：數量
@@ -291,29 +330,39 @@ y_n + freeboard_min_m ≤ clear_height_m
 
 `6%` 含搭接、錨定與裁剪損耗，可用 `rebar_loss_rate` 覆寫（0～0.5）。
 
-> `rc_design.LAP_ALLOWANCE = 12%` 仍供擋土牆／排水溝使用，**箱涵不共用**。
+> **全專案鋼筋損耗率一律 6%（含搭接）**（2026-11-04 使用者指示）：
+> `rc_design.LAP_ALLOWANCE`＝0.06、`box_culvert.REBAR_LOSS_RATE`＝0.06，
+> 擋土牆／排水溝／箱涵**共用同一常數**，不得另切 12% 或 5%。
 
 ### 7.2 模板
 
-只計涵內側：
+只計涵內側（含內角 45° 加腋）：
 
 ```text
-每延米 m²/m = n·B（頂版底面）
-            + n·B（底板頂面）
-            + 2n·H（外牆內面＋中牆兩面）
-            = 2n(B + H)
+每延米 m²/m = n(B−2c)（頂版底面）
+             + n(B−2c)（底板頂面）
+             + 2n(H−2c)（外牆內面＋中牆兩面）
+             + 4n·c·√2（內角加腋斜面）
+             = n(2B + 2H − 8c + 4c√2)
 
 總量 m² = 每延米 × L + 2A（兩端端模）
 ```
 
 外側貼土面、施工縫、開口、翼牆不計。若外側需雙面模板或免拆模板，須另加。
 
+> `c`＝`inner_chamfer_m`。`c=0` 時退化為 `2n(B+H)`。
+> 三孔 B=3.00、H=2.50、c=0.20 → 31.594 m²/m（不含加腋為 33.000）。
+
 ### 7.3 混凝土
 
 ```text
-每延米 m³/m = A = B_o·H_o − n·B·H
+每延米 m³/m = A = B_o·H_o − n(B·H − 2c²)
 總量 m³     = A × L
 ```
+
+> 內角 45° 加腋每角扣 `c²/2`，每孔 4 角共扣 `2c²`。
+> 三孔 B=3.00、H=2.50、c=0.20、外框 10.30×3.35 → **12.245 m³/m**
+> （不含加腋為 12.005）。
 
 ### 7.4 輸出欄位
 
@@ -328,7 +377,10 @@ y_n + freeboard_min_m ≤ clear_height_m
 | `quantities.formwork_m2_per_m` | m²/m | 每延米模板 |
 | `quantities.formwork_m2` | m² | 含兩端端模 |
 | `quantities.formwork_end_faces_m2` | m² | 兩端端模 |
-| `quantities.formwork_breakdown` | – | 頂版底面／底板頂面／牆內面 |
+| `quantities.formwork_breakdown` | – | 頂版底面／底板頂面／牆內面／內角加腋斜面 |
+| `quantities.inner_chamfer_m` | m | 內角 45° 加腋邊長 |
+| `quantities.inner_chamfer_area_m2_per_m` | m²/m | 加腋扣除面積（`n×2c²`） |
+| `reinforcement.quantity.rows[]` | – | 配筋表逐列（含角隅補強筋 2 列） |
 
 ---
 
@@ -354,14 +406,32 @@ y_n + freeboard_min_m ≤ clear_height_m
 - `rebar_kg_design`／`formwork_m2_design`：由 `case_core.quantity_context()`
   呼叫引擎後寫入，供預算選用。
 
-案件可在 `boq.items` 用 `qty_from` 指向設計值：
+案件**必須**在 `boq.items` 用 `qty_from` 指向設計值（新建案件樣板
+`case_new.py` 已預設如此）：
 
 ```json
 {"name": "鋼筋及加工組立", "qty_from": "rebar_kg_design", "unit": "kg"}
+{"name": "模板（箱涵內壁、頂版底面及底板頂面）", "qty_from": "formwork_m2", "unit": "m2"}
 ```
 
 > 設計值與假設值差超過 25% 時，`case_core.consistency()` 會警告。
 > 不要為了讓預算好看而默默改回假設值。
+
+分析參數只有一份來源：`case_core._box_culvert_kwargs()`。數量、預算、報告與
+設計閘門都吃同一組 `traffic_type`／`cover_mm`／`allowable_bearing_kpa`；
+回歸也直接呼叫它，不得自己再組一套預設值。報告的數量表、每延米、淨量／
+含損耗量／總量與模板量都取自同一份引擎結果。
+
+三孔 3.0×2.5、L=20 m、覆土 0.6 m、H-20 的對帳範例：
+
+```text
+混凝土 244.90 m³（12.245 m³/m）｜鋼筋 19,309.7 kg（965.49 kg/m，含 6%）
+模板 656.37 m²（31.594 m²/m）｜預算總計 2,789,634 元
+交付清單與 xlsx 回讀一致；S-01／S-02 圖數對帳差異 0.0000%
+```
+
+> 上列數字已含**內角 45° 加腋（c=0.20）與角隅補強筋（X 形交叉斜筋，
+> D13@200）**。角隅補強筋 77.50 kg/m（未含損耗）是本次新增。
 
 ---
 
@@ -371,8 +441,8 @@ y_n + freeboard_min_m ≤ clear_height_m
 $env:PYTHONIOENCODING='utf-8'
 $PY = 'C:\Python312\python.exe'
 
-& $PY tools\design\box_culvert.py --selftest                      # 16/16
-& $PY tools\selftest\design_core_selftest.py                      # 142 tests OK
+& $PY tools\design\box_culvert.py --selftest                      # 20/20
+& $PY tools\selftest\design_core_selftest.py                      # 158 tests OK
 & $PY tools\selftest\design_workbench_selftest.py                 # 0 failure
 & $PY tools\selftest\design_launch_check.py box_culvert           # 0 FAIL
 & $PY tools\selftest\regression.py                                # 基準相符
@@ -380,8 +450,8 @@ $PY = 'C:\Python312\python.exe'
 
 驗收門檻：
 
-- 引擎自測 16/16。
-- 核心 142 tests OK。
+- 引擎自測 20/20。
+- 核心 158 tests OK。
 - 工作台 0 failure。
 - 上架檢核 0 FAIL（WARN 需逐項說明）。
 - 回歸基準全部相符；`--update` 只用在**刻意**改變設計值時，且回報要寫
@@ -408,15 +478,19 @@ $PY = 'C:\Python312\python.exe'
 
 ## 11. 限制與待辦
 
-1. 未含三維角隅補強、施工縫、開口補強、錨定／搭接長度細節與正式配筋詳圖。
+1. 未含三維（三向）角隅補強、施工縫、開口補強、錨定／搭接長度細節與
+   正式配筋詳圖；**二維內角角隅補強筋已納入**（§6.6.2）。
 2. 鋼筋量是排筋概估，不是裁剪表；正式數量須依配筋圖重算。
 3. 土工參數須以鑽探報告替換；`none` 不等於已檢核。
 4. 軸彎互制為單軸、兩層鋼筋；雙向彎矩、剪力牆行為、地震組合、二階效應未納入。
 5. 保護層採單一 `cover_mm`；底版貼地澆置宜 75 mm。
 6. 車載與其他載重共用 `load_factor`，未拆分靜／活載因數。
-7. 模板只計涵內側與兩端端模；外側貼土面、施工縫、翼牆不計。
+7. 模板只計涵內側（含內角加腋斜面）與兩端端模；外側貼土面、施工縫、
+   翼牆不計。
 8. 進口控制採 HDS-5 迴歸式，與附錄 N 線解圖約有 5～8% 差異；沖刷深度未檢核。
 9. 多孔假設各孔同尺寸、流量平均分配。
+10. 角隅補強筋屬構造筋，不檢核其在加腋處的應力需求。
+11. 平面剛接斷面假設；不等剛接與不均勻沉陷未納入。
 
 ---
 

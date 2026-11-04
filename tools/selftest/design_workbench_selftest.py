@@ -398,6 +398,14 @@ def main() -> int:
         "workbench posts to design API",
         "/api/design/run" in page and "/api/design/catalog" in page,
     )
+    checks.check(
+        "workbench design-drawing panel is gated by the calculation verdict",
+        'id="drawbtn"' in page
+        and '${ok ? "" : "disabled' in page
+        and "/api/design/section" in page
+        and 'id="drawunit"' in page
+        and 'id="drawscale"' in page,
+    )
     checks.check("workbench displays advisory rows", 'c.severity === "advisory"' in page)
     checks.check(
         "workbench renders rule-driven selects",
@@ -514,6 +522,16 @@ def main() -> int:
         checks.check(
             "GET /api/design/catalog",
             len(catalog.get("calculators") or []) == len(calculators),
+        )
+        caps = _request_json(base + "/api/design/section/capabilities")
+        cmap = caps.get("capabilities") or {}
+        box_cap = cmap.get("box_culvert") or {}
+        checks.check(
+            "GET /api/design/section/capabilities",
+            box_cap.get("supported") is True
+            and (cmap.get("wall_stability") or {}).get("supported") is True
+            and "cm" in [u.get("value") for u in box_cap.get("units") or []]
+            and 60 in [s.get("value") for s in box_cap.get("scales") or []],
         )
         rc_beam = _request_json(
             base + "/api/design/run",

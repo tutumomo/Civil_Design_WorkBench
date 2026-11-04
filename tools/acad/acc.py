@@ -69,7 +69,7 @@ def to_dxf(src, dst):
     shutil.copy2(out, dst); return dst
 
 def publish(dxf, pdf=True, paper="ISO full bleed A3 (420.00 x 297.00 公釐)", ctb=None,
-            pc3="DWG To PDF.pc3", orient="_L"):
+            pc3="DWG To PDF.pc3", orient="_L", layout=""):
     """DXF → 同名 DWG(2018)；pdf=True 時以目前配置(CTAB)出 PDF，配置範圍 1:1。"""
     if not ACC and CADCRAFT:
         base = os.path.splitext(dxf)[0]
@@ -97,13 +97,14 @@ def publish(dxf, pdf=True, paper="ISO full bleed A3 (420.00 x 297.00 公釐)", c
                 raise SystemExit("CADCraft 出圖 PDF 失敗：\n" + p_pdf.stderr)
             res[".pdf"] = pdf_path
         return res
+    ctb = ctb or (PROJECT_CTB if os.path.exists(PROJECT_CTB) else "monochrome.ctb")
     copies = []
     if os.path.isabs(ctb) or os.sep in ctb or "/" in ctb:
         copies = [ctb]
         ctb = "{W}\\" + os.path.basename(ctb)          # 複製到英文暫存區再指定
     L = [r'_SAVEAS 2018 "{W}\out.dwg"']
     if pdf:
-        L += ["_-PLOT", "_Y", "", pc3, paper, "_M", orient, "_N", "_L", "1:1", "0,0",
+        L += ["_-PLOT", "_Y", layout, pc3, paper, "_M", orient, "_N", "_L", "1:1", "0,0",
               "_Y", ctb, "_Y", "_N", "_N", "_N", r'"{W}\out.pdf"', "_N", "_Y"]
     work, log = run(dxf, L, copies=copies)
     base = os.path.splitext(dxf)[0]; res = {}
@@ -118,5 +119,6 @@ if __name__ == "__main__":
     a = sp.add_parser("todxf"); a.add_argument("src"); a.add_argument("dst")
     b = sp.add_parser("publish"); b.add_argument("dxf"); b.add_argument("--pdf", action="store_true")
     b.add_argument("--paper", default="ISO full bleed A3 (420.00 x 297.00 公釐)"); b.add_argument("--ctb", default=None)
+    b.add_argument("--layout", default="", help="圖紙空間名稱；省略則用目前配置(CTAB)")
     A = ap.parse_args()
-    print(to_dxf(A.src, A.dst) if A.cmd == "todxf" else publish(A.dxf, A.pdf, A.paper, A.ctb))
+    print(to_dxf(A.src, A.dst) if A.cmd == "todxf" else publish(A.dxf, A.pdf, A.paper, A.ctb, layout=A.layout))

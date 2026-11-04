@@ -1,8 +1,9 @@
 import sys as _sys
 from pathlib import Path as _P
 _sys.path.insert(0, str(_P(__file__).resolve().parents[1]))
-from project_paths import accoreconsole as _acc  # noqa: E402
+from project_paths import accoreconsole as _acc, artcraft_cli as _art  # noqa: E402
 ACC = _acc()
+CADCRAFT = _art("CADCraft")
 """AutoCAD 核心主控台 (accoreconsole) 封裝：DWT/DWG→DXF、DXF→DWG+PDF。
 已處理的坑（docs\\踩坑紀錄.md L 節）：中文路徑→複製到英文暫存區；.scr 用 cp950 且 newline=""；
 腳本必給完整路徑；卡在提示時逾時強制結束；中文版圖紙名「…公釐」。不碰使用者開著的 AutoCAD 視窗。
@@ -12,7 +13,7 @@ ACC = _acc()
 出圖型式預設用本專案的 tools\\acad\\plot\\monochrome.ctb（顏色 1~8 對應規定的線粗）；
 該檔不存在時才退回 AutoCAD 的 monochrome.ctb。
 """
-import os, sys, glob, shutil, subprocess, uuid, argparse
+import os, sys, glob, shutil, subprocess, uuid, argparse, json
 
 def find_acc():
     c = [ACC] if ACC else []
@@ -44,7 +45,24 @@ def run(infile, lines, timeout=240, copies=()):
     open(os.path.join(work, "acc_log.txt"), "w", encoding="utf-8").write(log)
     return work, log
 
+def _paper_layout(dxf, default="Layout1"):
+    """CADCraft 出圖要指定配置名稱；各工具建的配置叫「斷面圖」「全區工程位置圖」等，
+    不能寫死。以 ezdxf 讀第一個非 Model 的配置；讀不到才退回預設值。"""
+    try:
+        import ezdxf
+        doc = ezdxf.readfile(str(dxf))
+        names = [l.name for l in doc.layouts if l.name.lower() != "model"]
+        return names[0] if names else default
+    except Exception:
+        return default
+
+
 def to_dxf(src, dst):
+    if not ACC and CADCRAFT:
+        p = subprocess.run([CADCRAFT, "convert", str(src), str(dst)], capture_output=True, text=True)
+        if p.returncode != 0 or not os.path.exists(dst):
+            raise SystemExit("CADCraft convert 失敗：\n" + p.stderr)
+        return dst
     work, log = run(src, [r'_DXFOUT "{W}\out.dxf" _V 2018 16'])
     out = os.path.join(work, "out.dxf")
     if not os.path.exists(out): raise SystemExit("DXFOUT 失敗：\n" + log[-1500:])
@@ -53,7 +71,32 @@ def to_dxf(src, dst):
 def publish(dxf, pdf=True, paper="ISO full bleed A3 (420.00 x 297.00 公釐)", ctb=None,
             pc3="DWG To PDF.pc3", orient="_L"):
     """DXF → 同名 DWG(2018)；pdf=True 時以目前配置(CTAB)出 PDF，配置範圍 1:1。"""
-    ctb = ctb or (PROJECT_CTB if os.path.exists(PROJECT_CTB) else "monochrome.ctb")
+    if not ACC and CADCRAFT:
+        base = os.path.splitext(dxf)[0]
+        dwg = base + ".dwg"
+        p = subprocess.run([CADCRAFT, "convert", str(dxf), str(dwg)], capture_output=True, text=True)
+        if p.returncode != 0 or not os.path.exists(dwg):
+            raise SystemExit("CADCraft 轉 DWG 失敗：\n" + p.stderr)
+        res = {".dwg": dwg}
+        if pdf:
+            pdf_path = base + ".pdf"
+            plot_args = {
+                "path": str(pdf_path),
+                "layout": _paper_layout(dxf),
+                "landscape": True,
+                "plotArea": "layout",
+                "fit": False,
+                "scale": 1.0
+            }
+            cmd = "plot " + json.dumps(plot_args, ensure_ascii=False)
+            p_pdf = subprocess.run([CADCRAFT, "run", str(dxf), "--cmd", cmd], capture_output=True, text=True)
+            if not os.path.exists(pdf_path):
+                cmd_fallback = "plot " + json.dumps({"path": str(pdf_path), "fit": True}, ensure_ascii=False)
+                subprocess.run([CADCRAFT, "run", str(dxf), "--cmd", cmd_fallback], capture_output=True, text=True)
+            if not os.path.exists(pdf_path):
+                raise SystemExit("CADCraft 出圖 PDF 失敗：\n" + p_pdf.stderr)
+            res[".pdf"] = pdf_path
+        return res
     copies = []
     if os.path.isabs(ctb) or os.sep in ctb or "/" in ctb:
         copies = [ctb]

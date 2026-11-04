@@ -58,7 +58,7 @@ class BoxCulvertError(ValueError):
 TONF_TO_KN = 9.80665
 
 # 箱涵鋼筋數量損耗（含搭接、錨定與裁剪），依使用者指定採 6%。
-# 註：rc_design.LAP_ALLOWANCE = 12% 仍供擋土牆／排水溝使用，勿一併改動。
+# 2026-11-04 起 rc_design.LAP_ALLOWANCE 亦為 6%，全專案 RC 鋼筋損耗率一致。
 REBAR_LOSS_RATE = 0.06
 
 

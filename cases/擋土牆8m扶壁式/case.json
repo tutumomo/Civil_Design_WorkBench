@@ -50,7 +50,7 @@
   "notes": [
    "斷面與配筋由 tools/design/wall_system.py 分流至 counterfort_wall.py；牆板、踵板、趾板、扶壁、箍筋與繫筋均納入配筋量。",
    "土工參數為假設值（γ=18 kN/m³、φ=30°、c=0、容許承載力 300 kPa），正式設計前須以鑽探結果重算。",
-   "鋼筋量含 12% 搭接、錨定與損耗；模板為正面、兩端與扶壁兩側模板。"
+   "鋼筋量含 6% 搭接、錨定與損耗；模板為正面、兩端與扶壁兩側模板。"
   ]
  },
  "boq": {
@@ -59,7 +59,7 @@
    {"no": "01", "name": "施工測量及放樣", "unit": "式", "qty": 1, "price": 4000.0, "note": "經驗值"},
    {"no": "02", "name": "擋土牆基礎開挖（含兩側工作面）", "unit": "m3", "qty_from": "excavation_m3", "price": 70.0, "note": "契約「機具挖方(一般)」"},
    {"no": "03", "name": "結構用混凝土 fc'=210 kgf/cm2（含澆置）", "unit": "m3", "qty_from": "concrete_volume_m3", "price": 3190.0, "note": "預拌混凝土含澆置搬運"},
-   {"no": "04", "name": "鋼筋及加工組立 SD280／SD420", "unit": "kg", "qty_from": "rebar_kg_design", "price": 35.0, "note": "採扶壁式配筋設計值，含 12% 搭接與損耗"},
+   {"no": "04", "name": "鋼筋及加工組立 SD280／SD420", "unit": "kg", "qty_from": "rebar_kg_design", "price": 35.0, "note": "採扶壁式配筋設計值，含 6% 搭接與損耗"},
    {"no": "05", "name": "模板（一般土木結構模板）", "unit": "m2", "qty_from": "formwork_m2", "price": 1230.0, "note": "含正面、兩端與扶壁兩側"},
    {"no": "06", "name": "背填級配碎石（含夯實）", "unit": "m3", "qty_from": "backfill_gravel_m3", "price": 770.0, "note": "透水性級配碎石"},
    {"no": "07", "name": "排水孔 Ø5 cm（含洩水管及反濾層）", "unit": "孔", "qty_from": "weep_hole_count", "price": 275.0, "note": "第121條配置"},

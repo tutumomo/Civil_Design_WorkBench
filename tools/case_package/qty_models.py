@@ -367,10 +367,10 @@ MODELS = {
                  "basis": "斷面積×L，扣排水孔"},
                 {"label": "鋼筋（設計，含搭接損耗）", "key": "rebar_kg_design",
                  "unit": "kg", "decimals": 1,
-                 "basis": "配筋設計 kg/m × 牆長；牆體含 12% 搭接、錨定與損耗"},
+                 "basis": "配筋設計 kg/m × 牆長；牆體含 6% 搭接、錨定與損耗"},
                 {"label": "鋼筋（每延米）", "key": "rebar_kg_per_m_design",
                  "unit": "kg/m", "decimals": 2,
-                 "basis": "配筋設計值，已含 12% 搭接與損耗"},
+                 "basis": "配筋設計值，已含 6% 搭接與損耗"},
                 {"label": "模板", "key": "formwork_m2", "unit": "m²", "decimals": 2,
                  "basis": "正面＋頂面＋兩端；牆背貼土不計"},
                 {"label": "模板（每延米）", "key": "template_per_meter",
@@ -396,7 +396,7 @@ MODELS = {
                  "basis": "層數 × 加勁長 × 牆長", "show_if": {"wall_type": "mse"}},
             ],
             "note": "混凝土體積已扣排水孔；鋼筋為配筋設計值（重力式與半重力式為名目"
-                    "構造鋼筋，其餘 RC 牆型為構材撓曲配筋），已含 12% 搭接損耗；"
+                    "構造鋼筋，其餘 RC 牆型為構材撓曲配筋），已含 6% 搭接損耗；"
                     "rebar_kg（含鋼量假設值）僅作交叉檢查，不進預算。",
         },
         "notes": [

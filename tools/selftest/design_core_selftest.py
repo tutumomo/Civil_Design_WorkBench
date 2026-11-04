@@ -424,9 +424,10 @@ class WallRebarTests(unittest.TestCase):
             mass["subtotal_kg_per_m"] * (1.0 + mass["lap_allowance"]),
             places=3,
         )
-        # 3 m 重力式（T=0.30、BL=1.95）實測總量 43.86 kg/m；
+        # 3 m 重力式（T=0.30、BL=1.95）實測總量 41.51 kg/m；
         # 舊版誤套懸臂公式為 66.8 kg/m（多算 52%）。
-        self.assertAlmostEqual(mass["total_kg_per_m"], 43.857, places=2)
+        # 2026-11-04 損耗率 12%→6%（使用者指示）：43.857 → 41.507。
+        self.assertAlmostEqual(mass["total_kg_per_m"], 41.507, places=2)
 
     def test_semigravity_uses_nominal_steel(self) -> None:
         res = RW.analyse(self.SEMIGRAVITY)
@@ -443,7 +444,8 @@ class WallRebarTests(unittest.TestCase):
         self.assertIn("stem", out["structural"])
         self.assertIn("base", out["structural"])
         self.assertIn("main", out["structural"]["stem"])
-        self.assertAlmostEqual(out["total_kg_per_m"], 138.46, delta=1.0)
+        # 2026-11-04 損耗率 12%→6%（使用者指示）：138.46 → 131.04。
+        self.assertAlmostEqual(out["total_kg_per_m"], 131.04, delta=1.0)
 
     def test_unknown_wall_type_is_rejected(self) -> None:
         with self.assertRaises(ValueError):
@@ -544,7 +546,8 @@ class WallRebarTests(unittest.TestCase):
         out = DA.run_calculation("wall_stability", payload, persist=False)
         self.assertTrue(out["ok"])
         rebar = out["result"]["rebar"]
-        self.assertAlmostEqual(rebar["total_kg_per_m"], 138.461, places=2)
+        # 2026-11-04 損耗率 12%→6%（使用者指示）：138.461 → 131.043。
+        self.assertAlmostEqual(rebar["total_kg_per_m"], 131.043, places=2)
         self.assertIn("配筋設計", out["summary"])
         self.assertTrue(any("撓曲" in c["item"] for c in out["checks"]))
         for check in out["checks"]:
@@ -2378,14 +2381,15 @@ class WallCasePipelineTests(unittest.TestCase):
         model, q, issues = CASE.quantity_context(case)
         self.assertEqual(model, "wall")
         self.assertFalse([i for i in issues if i["level"] == "error"])
-        self.assertAlmostEqual(q["rebar_kg_per_m_design"], 58.48, delta=0.05)
-        self.assertAlmostEqual(q["rebar_kg_design"], 1169.5, delta=1.0)
+        # 2026-11-04 損耗率 12%→6%（使用者指示）：58.48 → 55.34 kg/m。
+        self.assertAlmostEqual(q["rebar_kg_per_m_design"], 55.34, delta=0.05)
+        self.assertAlmostEqual(q["rebar_kg_design"], 1106.8, delta=1.0)
 
         sections = CASE._design_sections("wall", q, case)
         notes = "".join(sections["comparison"]["notes"])
         self.assertIn("半重力式", notes)
         self.assertNotIn("懸臂式（薄牆", notes)
-        self.assertIn("已含 12% 搭接損耗", "".join(
+        self.assertIn("已含 6% 搭接損耗", "".join(
             sections["reinforcement"]["notes"]))
 
     def test_unknown_wall_type_does_not_fall_back_to_cantilever(self) -> None:

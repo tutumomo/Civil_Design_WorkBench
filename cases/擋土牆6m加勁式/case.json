@@ -65,7 +65,7 @@
    {"no": "01", "name": "施工測量及放樣", "unit": "式", "qty": 1, "price": 4000.0, "note": "經驗值"},
    {"no": "02", "name": "擋土牆基礎開挖（含工作面）", "unit": "m3", "qty_from": "excavation_m3", "price": 70.0, "note": "契約「機具挖方(一般)」"},
    {"no": "03", "name": "RC 面版混凝土 fc'=210 kgf/cm2（含澆置）", "unit": "m3", "qty_from": "concrete_volume_m3", "price": 3190.0, "note": "僅 RC 面版"},
-   {"no": "04", "name": "鋼筋及加工組立 SD280／SD420", "unit": "kg", "qty_from": "rebar_kg_design", "price": 35.0, "note": "採 RC 面版配筋設計值，含 12% 搭接與損耗"},
+   {"no": "04", "name": "鋼筋及加工組立 SD280／SD420", "unit": "kg", "qty_from": "rebar_kg_design", "price": 35.0, "note": "採 RC 面版配筋設計值，含 6% 搭接與損耗"},
    {"no": "05", "name": "RC 面版模板", "unit": "m2", "qty_from": "formwork_m2", "price": 1230.0, "note": "面版正面模板"},
    {"no": "06", "name": "加勁區級配填方（含夯實）", "unit": "m3", "qty_from": "backfill_gravel_m3", "price": 770.0, "note": "加勁區填方"},
    {"no": "07", "name": "土工格網加勁材（含舖設）", "unit": "m2", "qty_from": "mse_reinforcement_area_m2", "price": 320.0, "note": "10 層×5.40 m×20 m；單價為假設值"},

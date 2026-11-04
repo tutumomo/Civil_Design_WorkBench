@@ -1443,7 +1443,7 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None):
             "3. 扶壁以虛線表示，實體斷面為兩扶壁間之標準斷面；扶壁主筋與箍筋詳配筋表。",
             "4. 筋號與間距詳右側配筋表；保護層 75 mm（迎土面）。",
             "5. 搭接、錨定與彎鉤長度依混凝土結構設計規範；施工詳圖須另繪。",
-            "6. 鋼筋量已含 12% 搭接、錨定與損耗，並與數量表、預算書同源。",
+            "6. 鋼筋量已含 6% 搭接、錨定與損耗，並與數量表、預算書同源。",
         ]
     elif rebar_schedule and geom.get("wall_type") == "anchored":
         notes = [

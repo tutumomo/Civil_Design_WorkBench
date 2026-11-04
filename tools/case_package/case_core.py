@@ -630,8 +630,10 @@ def _advanced_wall_sections(res, q, case):
             ],
             "notes": [
                 "牆板四向筋、踵板上下層、趾板下層、扶壁主筋／箍筋與繫筋均已納入。",
-                "鋼筋量 %.2f kg/m（含 12%% 搭接與損耗）× %.1f m = %.1f kg；"
-                "模板 %.2f m²（%.2f m²/m）。" % (total, L, total * L, form, form / max(L, 1e-9)),
+                "鋼筋量 %.2f kg/m（含 %.0f%% 搭接與損耗）× %.1f m = %.1f kg；"
+                "模板 %.2f m²（%.2f m²/m）。"
+                % (total, float((design or {}).get("lap_allowance") or 0) * 100.0,
+                   L, total * L, form, form / max(L, 1e-9)),
                 "⚠ 扶壁式未做止滑榫榫部鋼筋；整體圓弧滑動與地下水須另案檢核。",
             ],
         }
@@ -703,8 +705,10 @@ def _advanced_wall_sections(res, q, case):
             ],
             "notes": [
                 "牆面四向筋與地錨承壓區 D13@200 補強網均已計入。",
-                "鋼筋量 %.2f kg/m（含 12%% 搭接與損耗）× %.1f m = %.1f kg；"
-                "模板 %.2f m²（%.2f m²/m）。" % (total, L, total * L, form, form / max(L, 1e-9)),
+                "鋼筋量 %.2f kg/m（含 %.0f%% 搭接與損耗）× %.1f m = %.1f kg；"
+                "模板 %.2f m²（%.2f m²/m）。"
+                % (total, float((design or {}).get("lap_allowance") or 0) * 100.0,
+                   L, total * L, form, form / max(L, 1e-9)),
                 "⚠ 整體（深層）穩定不在本引擎內，須另跑 slope_stability.py；"
                 "握裹強度須以證明試驗確認。",
             ],
@@ -772,8 +776,10 @@ def _advanced_wall_sections(res, q, case):
                 _rebar_summary_table(design, q, "加勁式面版鋼筋量彙總表"),
             ],
             "notes": [
-                "RC 面版鋼筋量 %.2f kg/m（含 12%% 搭接與損耗）× %.1f m = %.1f kg；"
-                "面版模板 %.2f m²（%.2f m²/m）。" % (total, L, total * L, form, form / max(L, 1e-9)),
+                "RC 面版鋼筋量 %.2f kg/m（含 %.0f%% 搭接與損耗）× %.1f m = %.1f kg；"
+                "面版模板 %.2f m²（%.2f m²/m）。"
+                % (total, float((design or {}).get("lap_allowance") or 0) * 100.0,
+                   L, total * L, form, form / max(L, 1e-9)),
                 "塊狀面版不配置 RC 鋼筋；本表僅適用 RC 預鑄／場鑄面版。",
                 "⚠ 面版－加勁材連接與局部承壓僅於輸入產品容量時檢核；"
                 "整體圓弧滑動須另用 slope_stability.py。",

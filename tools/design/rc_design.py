@@ -1018,7 +1018,10 @@ def design_channel_wall(q, hy_res, cc=None):
 
 
 STEEL_DENSITY = 7850.0        # kg/m³
-LAP_ALLOWANCE = 0.12          # 搭接、錨定與損耗
+# 搭接、錨定與損耗率：**全專案 RC 鋼筋一律 6%（含搭接）**。
+# 2026-11-04 使用者指示：擋土牆、排水溝與箱涵的鋼筋損耗率一致採 6%，
+# 先前把擋土牆／排水溝另切 12% 屬未經授權的分家，已撤除。
+LAP_ALLOWANCE = 0.06
 
 
 def _kg(As_mm2_per_m, bar_len_m):
@@ -1104,7 +1107,7 @@ def rebar_kg_per_m_channel(q, design_channel):
             "lap_allowance": LAP_ALLOWANCE}
 
 
-def est_rebar_kg(design, length_m, faces=2, extra_ratio=0.12):
+def est_rebar_kg(design, length_m, faces=2, extra_ratio=0.06):
     """【舊】僅供回溯比對；**有單位錯誤**（未乘鋼筋長度），請改用 rebar_kg_per_m()。"""
     total = 0.0
     d = design.get("main") or {}

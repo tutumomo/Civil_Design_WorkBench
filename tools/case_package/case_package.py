@@ -60,6 +60,7 @@ TOOLS = {
     "report": os.path.join(ROOT, "tools", "report", "make_report.py"),
     "check": os.path.join(ROOT, "tools", "a3_sheet", "check_delivery.py"),
     "section": os.path.join(ROOT, "tools", "wall_section", "make_wall_section.py"),
+    "box_section": os.path.join(ROOT, "tools", "box_section", "make_box_section.py"),
     "takeoff": os.path.join(ROOT, "tools", "takeoff", "dxf_takeoff.py"),
     "paving": os.path.join(ROOT, "tools", "takeoff", "paving_extent.py"),
     "price_audit": os.path.join(ROOT, "tools", "boq", "price_audit.py"),
@@ -252,6 +253,12 @@ def run_section(master, out_dir, no_pdf):
     """擋土牆斷面圖軸：需要 master["section"]（scale／out）或 quantities.model == wall。"""
     case_path = master.get("_case_path")
     sec = master.get("section")
+    _mdl = (master.get("quantities") or {}).get("model")
+    _is_box = (_mdl == "box_culvert")
+    if not sec and _is_box:
+        # 箱涵斷面圖（S-01／S-02）是箱涵案的必要交件，案件檔沒寫 section 也要產。
+        sec = {"scale": "auto"}
+        master["section"] = sec
     if not sec:
         return None
     if not case_path:
@@ -263,11 +270,14 @@ def run_section(master, out_dir, no_pdf):
     # 預設 auto：右欄保留 183 mm 後，原本寫死 1:20 的 4 m 牆會超寬，不能再當預設。
     _sc = sec.get("scale", "auto")
     scale = "auto" if str(_sc).lower() == "auto" else int(_sc)
-    out = sec.get("out") or os.path.join(out_dir, "S-01_擋土牆標準斷面圖.dxf")
+    _tool = TOOLS["box_section"] if _is_box else TOOLS["section"]
+    _default_name = ("S-01_箱涵標準斷面圖.dxf" if _is_box
+                     else "S-01_擋土牆標準斷面圖.dxf")
+    out = sec.get("out") or os.path.join(out_dir, _default_name)
     out = out if os.path.isabs(out) else os.path.join(ROOT, out)
     os.makedirs(os.path.dirname(out), exist_ok=True)
 
-    cmd = [PY, TOOLS["section"], case_path, "--scale", str(scale), "--out", out]
+    cmd = [PY, _tool, case_path, "--scale", str(scale), "--out", out]
     if sec.get("project"):
         cmd += ["--project", sec["project"]]
     if not no_pdf:
@@ -286,12 +296,13 @@ def run_section(master, out_dir, no_pdf):
 
     # 另產配筋圖（鋼筋依配筋設計配置、右欄為配筋表）：擋土牆 S-02、排水溝 D-02
     rebar_out = None
-    _mdl = (master.get("quantities") or {}).get("model")
-    if _mdl in ("wall", "channel", "slope") and _mdl != "slope":
+    if _mdl in ("wall", "channel", "slope", "box_culvert") and _mdl != "slope":
         rebar_out = os.path.join(
             os.path.dirname(out),
-            "S-02_擋土牆配筋圖.dxf" if _mdl == "wall" else "D-02_排水溝配筋圖.dxf")
-        rcmd = [PY, TOOLS["section"], case_path, "--scale", str(scale),
+            {"wall": "S-02_擋土牆配筋圖.dxf",
+             "channel": "D-02_排水溝配筋圖.dxf",
+             "box_culvert": "S-02_箱涵配筋圖.dxf"}[_mdl])
+        rcmd = [PY, _tool, case_path, "--scale", str(scale),
                 "--rebar", "--out", rebar_out]
         if not no_pdf:
             rcmd.append("--publish")
@@ -313,9 +324,16 @@ def run_section(master, out_dir, no_pdf):
         pass
     if ok and rebar_out:
         rbc = [PY, TOOLS["check"], rebar_out, "--scale", str(scale), "--layout", "斷面圖",
-               "--building-layer", "30_擋土牆混凝土", "--hatch-layer", "31_擋土牆剖面線"]
-        _rbl = (("30_擋土牆混凝土", "40_鋼筋", "41_排水孔", "42_尺寸") if _mdl == "wall"
-                else ("30_擋土牆混凝土", "40_鋼筋", "34_溝內腔", "42_尺寸"))
+               "--building-layer",
+               "30_箱涵混凝土" if _is_box else "30_擋土牆混凝土",
+               "--hatch-layer",
+               "31_箱涵剖面線" if _is_box else "31_擋土牆剖面線"]
+        if _is_box:
+            _rbl = ("30_箱涵混凝土", "40_鋼筋", "34_箱涵內腔", "42_尺寸")
+        elif _mdl == "wall":
+            _rbl = ("30_擋土牆混凝土", "40_鋼筋", "41_排水孔", "42_尺寸")
+        else:
+            _rbl = ("30_擋土牆混凝土", "40_鋼筋", "34_溝內腔", "42_尺寸")
         for lay in _rbl:
             rbc += ["--require-layer", lay]
         rcode2, rlog2 = _run(rbc, os.path.join(out_dir, "_log_section_check_rebar.txt"))
@@ -330,6 +348,9 @@ def run_section(master, out_dir, no_pdf):
         if _model == "channel":
             req_layers = ("30_擋土牆混凝土", "34_溝內腔", "40_鋼筋", "42_尺寸")
             _bld, _htc = "30_擋土牆混凝土", "31_擋土牆剖面線"
+        elif _model == "box_culvert":
+            req_layers = ("30_箱涵混凝土", "34_箱涵內腔", "40_鋼筋", "42_尺寸")
+            _bld, _htc = "30_箱涵混凝土", "31_箱涵剖面線"
         elif _model == "slope":
             # 邊坡沒有混凝土／鋼筋／排水孔 —— 必要圖層是坡面線、坡體、尺寸
             req_layers = ("35_坡面線", "36_坡體", "42_尺寸")

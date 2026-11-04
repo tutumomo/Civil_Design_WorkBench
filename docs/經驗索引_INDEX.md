@@ -135,6 +135,7 @@
 | **EXP-G29** | 兩個 agent 同時改 `tools\design\`，後寫的 patch 以舊版為底，吃掉前一個修正 | 開工先認領 ownership；動筆前 `git diff -- <file>`；共用檔只改最小 hunk；改完立刻跑該模組 selftest 並回報「改了哪些、沒動哪些」。共享目錄不會自動合併語意。 | 本輪以 `wall_system.py` 單一入口收斂六型，避免各檔重複實作 | `§AC.5` |
 | **EXP-G30** | 原工作區 regression 11 案全綠，push 後乾淨 checkout 只剩 2 案過 | 收工必跑「乾淨 checkout 驗收」：`git worktree add --detach _temp\cleancheck HEAD` → 在該目錄重跑 `regression.py`。失敗即代表有檔案沒進 commit；看 `out\<案名>\_log_*.txt` 的 `CMD:` 與 traceback 回溯。 | 本輪抓到 `boq_build`／`make_report` 的 `parents[1]` 與 3 m 重力式 `scale:auto` 未進版；補齊後 11 案全綠 | `§AC.6`、SOP §4.1 |
 | **EXP-G31** | 引擎／SOP 已有配筋，工作台 `wall_stability` 卻完全沒有配筋欄位與結果；線上更只剩舊標題 | 以「使用者可見契約」驗收：`CATALOG.field_rules`、`example`、`result.rebar(_summary)`、`summary` 四處都要有；`_run_wall()` 兩條 return 都接 `_attach_wall_rebar()`，`size=true` 用 `extra_check` 讓候選斷面同時過穩定與配筋。改完必重建＋部署 Cloudflare，並用瀏覽器 `executeDesignRun` 實跑（`/api/design/health` 過不代表版本新）。 | 本機／線上 catalog 14 欄、14 檢核、138.46 kg/m；156 tests OK、regression 11 案相符 | `§AD` |
+| **EXP-G32** | 使用者說「鋼筋損耗一律 6%」，但程式裡擋土牆／排水溝是 12%、箱涵才是 6% | 使用者的數值指示是**全專案預設，不得自行畫邊界**；若真只限某類，先問過再寫。程式常數與「勿一併改動」之類註解會被後續 agent 當成規格。改動時讓文字與數值**從同一常數動態取值**（`lap_allowance`），並同步基準與案件說明文字。 | 本輪 12%→6%：懸臂 138.46→131.04、扶壁 621.47→588.18、排水溝 24.27→22.97 kg/m；回歸 23 項差異全等於 ×0.9464 | `§AE` |
 
 ## 8. 智能體作業環境（Harness — 回合中斷／成本）
 

@@ -2380,7 +2380,12 @@ def _wall_rebar_lines(design: Mapping[str, Any]) -> list[str]:
 
     wt = str(design.get("wall_type") or "")
     total = float(design.get("total_kg_per_m") or 0.0)
-    lines = ["", "配筋設計（含 12%% 搭接、錨定與損耗）：%.2f kg/m" % total]
+    rate = float(design.get("lap_allowance") or 0.0)
+    if rate <= 0:
+        import rc_design as RC
+        rate = RC.LAP_ALLOWANCE
+    lines = ["", "配筋設計（含 %.0f%% 搭接、錨定與損耗）：%.2f kg/m"
+              % (rate * 100.0, total)]
     if wt in ("gravity", "semigravity"):
         mass = design.get("mass") or {}
         lines.append(

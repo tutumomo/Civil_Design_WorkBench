@@ -224,6 +224,19 @@ C:\Python312\python.exe tools\wall_section\make_wall_section.py `
 
 ---
 
+## 9B. 工作台入口（2026-11-04 補）
+
+| 牆型 | 計算器 | 配筋顯示 |
+|---|---|---|
+| 重力／半重力／懸臂 | `wall_stability`「擋土牆穩定與配筋」 | 穩定與配筋**同一頁**；可設 fc′、fy、保護層、牆身／底板主筋、牆面／底部構造筋，結果含每延米鋼筋量與撓曲／剪力／裂縫檢核 |
+| 扶壁／錨定／加勁 | `counterfort_wall`／`anchored_wall`／`mse_wall` | 各計算器 summary 已含配筋明細與檢核 |
+| 疊砌／砌石 | `block_wall` | 明示不適用 RC 鋼筋（量為 0） |
+
+> 自動選配（`size: true`）已把配筋納入關卡：只通過穩定但有裂縫 NG 的斷面會被淘汰，
+> 回傳的是「穩定＋配筋都過」的最小斷面。
+
+---
+
 ## 10. 快速指令
 
 ```powershell
@@ -235,6 +248,7 @@ $py = "C:\Python312\python.exe"
 
 # 2. 跑設計
 & $py tools\design\design_cli.py run counterfort_wall _temp\cc8.json
+& $py tools\design\design_cli.py show wall_stability   # 重力／半重力／懸臂（含配筋）
 
 # 3. 三軸交付
 & $py tools\case_package\case_package.py "cases\擋土牆8m扶壁式\case.json" --allow-placeholder

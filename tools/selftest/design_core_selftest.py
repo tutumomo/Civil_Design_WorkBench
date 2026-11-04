@@ -532,6 +532,32 @@ class WallRebarTests(unittest.TestCase):
         self.assertFalse(out["structural"]["applicable"])
         self.assertEqual(out["structural"]["rows"], [])
 
+    def test_workbench_wall_stability_includes_rebar(self) -> None:
+        """工作台擋土牆計算器必須同時回傳配筋，不能只給穩定分析。"""
+        payload = dict(self.CANTILEVER)
+        payload.update({
+            "soil": {"gamma": 18.0, "phi_deg": 30.0, "c_kpa": 0.0,
+                     "allowable_bearing_kpa": 200.0},
+            "fc_mpa": 21.0, "fy_mpa": 420, "cover_mm": 75,
+            "stem_bar": "auto", "base_bar": "auto",
+        })
+        out = DA.run_calculation("wall_stability", payload, persist=False)
+        self.assertTrue(out["ok"])
+        rebar = out["result"]["rebar"]
+        self.assertAlmostEqual(rebar["total_kg_per_m"], 138.461, places=2)
+        self.assertIn("配筋設計", out["summary"])
+        self.assertTrue(any("撓曲" in c["item"] for c in out["checks"]))
+        for check in out["checks"]:
+            self.assertIn("item", check)
+            self.assertIn("limit", check)
+            self.assertIn("unit", check)
+
+        # 指定筋號要真的改變配筋結果
+        payload["stem_bar"] = "D19"
+        out2 = DA.run_calculation("wall_stability", payload, persist=False)
+        stem = out2["result"]["rebar"]["structural"]["stem"]["main"]
+        self.assertEqual(stem["bar"], "D19")
+
 
 class EarthPressureTests(unittest.TestCase):
     def test_rankine_triangle(self) -> None:

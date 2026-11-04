@@ -94,6 +94,14 @@ def _pick_bars(
     return name, spacing, 1000.0 / spacing * ab
 
 
+def _single_pref(value):
+    """把 UI 的單一筋號（或 auto）轉成 flexure_design 需要的 tuple。"""
+    v = str(value or "").strip()
+    if not v or v.lower() == "auto" or v not in REBAR_SIZES:
+        return None
+    return (v,)
+
+
 def select_bars(
     As_req_mm2_per_m,
     h_mm,
@@ -932,7 +940,8 @@ def design_cantilever_stem(q, wall_res, cc=None):
     Mu = 1.7 * M_stem
     Vu = 1.7 * V_stem
 
-    flex = flexure_design(Mu, b_mm=1000.0, h_mm=T * 1000.0, cc=c)
+    flex = flexure_design(Mu, b_mm=1000.0, h_mm=T * 1000.0, cc=c,
+                          bar_prefer=_single_pref(q.get("stem_bar")))
     shr = shear_check(Vu, b_mm=1000.0, h_mm=T * 1000.0, cc=c)
     if flex.get("ok"):
         cw = crack_width(flex["As_prov_mm2"], spacing_mm=flex["spacing_mm"],
@@ -1268,7 +1277,8 @@ def design_base_slab(q, wall_res, cc=None):
     for name, M_s, V_s in (("踵板（上方覆土區）", abs(M_heel), abs(V_heel)),
                            ("趾板（前趾區）", abs(M_toe), abs(V_toe))):
         Mu, Vu = 1.7 * M_s, 1.7 * V_s
-        flex = flexure_design(Mu, b_mm=1000.0, h_mm=BT * 1000.0, cc=c)
+        flex = flexure_design(Mu, b_mm=1000.0, h_mm=BT * 1000.0, cc=c,
+                              bar_prefer=_single_pref(q.get("base_bar")))
         shr = shear_check(Vu, b_mm=1000.0, h_mm=BT * 1000.0, cc=c)
         if flex.get("ok"):
             cw = crack_width(flex["As_prov_mm2"], spacing_mm=flex["spacing_mm"],

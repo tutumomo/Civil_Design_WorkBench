@@ -93,6 +93,12 @@ def net_area(meas, gross_layer="30_擋土牆混凝土", void_layers=("34_溝內�
     return round(gross - void, 4), round(gross, 4), round(void, 4)
 
 
+# 各模型的混凝土圖層（擋土牆／排水溝沿用舊名，箱涵另立）
+SECTION_LAYERS = {
+    "box_culvert": ("30_箱涵混凝土", ("34_箱涵內腔",)),
+}
+
+
 REBAR_LAYER = "40_鋼筋"
 
 
@@ -220,6 +226,18 @@ def check_rebar(dxf_path, case_path):
                                  float(_hy.get("slope") or 0.005),
                                  {"manning_n": float(_hy.get("manning_n") or 0.014)})
                 want.add(int(RC.design_channel_wall(q, _hr)["main"]["spacing_mm"]))
+            elif model == "box_culvert":
+                # 箱涵：8 個受拉面各自的設計間距（頂／底板、內外牆、中間牆兩面）
+                _bd = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   "..", "box_section")
+                if _bd not in sys.path:
+                    sys.path.insert(0, _bd)
+                import make_box_section as MBS
+                _res = MBS.analyse_box(case, q)
+                for _e in (_res.get("reinforcement") or {}).get("elements", []):
+                    _sp = (_e.get("flexure") or {}).get("spacing_mm")
+                    if _sp:
+                        want.add(int(_sp))
         except Exception:
             pass
     # 水平列若只有 2 點（重力式牆面有坡度，同一高度的前後兩根筋距離會逐層變化），
@@ -297,13 +315,24 @@ def check_case(case_path, dxf_path, tol_pct=0.5):
     case = CC.load(case_path)
     model, q, _ = CC.quantity_context(case)
     meas = measure(dxf_path)
-    net, gross, void = net_area(meas)
+    gross_layer, void_layers = SECTION_LAYERS.get(
+        model, ("30_擋土牆混凝土", ("34_溝內腔",)))
+    net, gross, void = net_area(meas, gross_layer, void_layers)
 
     # 扶壁式的 S-01/S-02 是「兩扶壁間」的實體斷面，扶壁以虛線表示；
     # 混凝土體積仍含扶壁分攤。對帳必須用 section_area_typical_m2，
     # 否則會把扶壁分攤算成圖面漏畫（8 m 案實測差 27.9%）。
     _key = getattr(QM, "DRAWN_SECTION_AREA_KEY", "")
-    expect = float((q.get(_key) if _key else None) or q.get("section_area_m2") or 0)
+    if model == "box_culvert":
+        # 箱涵的斷面積鍵名由數量模型定義，這裡直接由幾何輸入重算（外框－孔洞），
+        # 不寫死鍵名也避免與 qty_models 的鍵名不一致。
+        # 孔洞是含內角 45° 加腋的八邊形：每孔淨空 = B×H − 2c²（4 個角各 c²/2）。
+        _c = float(q.get("inner_chamfer_m", 0.0) or 0.0)
+        expect = (float(q["outer_width_m"]) * float(q["outer_height_m"])
+                  - int(q["cell_count"]) * (float(q["clear_width_m"])
+                  * float(q["clear_height_m"]) - 2.0 * _c * _c))
+    else:
+        expect = float((q.get(_key) if _key else None) or q.get("section_area_m2") or 0)
     diff_pct = (abs(net - expect) / expect * 100.0) if expect else None
     rows = [
         {"item": "圖面混凝土外框面積", "drawn": gross, "model": None, "unit": "m²"},

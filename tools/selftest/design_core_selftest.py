@@ -1198,9 +1198,13 @@ class BoxCulvertTests(unittest.TestCase):
         for n in (1, 2, 3):
             section = self.section(n)
             result = BC.analyse(section, design_flow_m3s=1.0)
+            # 孔洞是含內角 45° 加腋的八邊形：每孔淨空 = B×H − 2c²
+            # （4 個內角各切掉 c²/2）。
+            c = section.inner_chamfer_m
             expected = (
                 section.outer_width_m * section.outer_height_m
-                - n * section.clear_width_m * section.clear_height_m
+                - n * (section.clear_width_m * section.clear_height_m
+                       - 2.0 * c * c)
             )
             self.assertAlmostEqual(
                 result["quantities"]["concrete_area_m2_per_m"], expected, places=12
@@ -1210,6 +1214,74 @@ class BoxCulvertTests(unittest.TestCase):
                 expected * section.length_m,
                 places=9,
             )
+
+    def test_inner_chamfer_limits_and_geometry(self) -> None:
+        # 加腋邊長不得大於牆厚／中牆厚／淨高一半／淨寬一半
+        with self.assertRaises(BC.BoxCulvertError):
+            BC.BoxCulvertSection.from_mapping(
+                {
+                    "cell_count": 1,
+                    "clear_width_m": 3.0,
+                    "clear_height_m": 2.5,
+                    "wall_thickness_m": 0.35,
+                    "interior_wall_thickness_m": 0.30,
+                    "top_slab_thickness_m": 0.40,
+                    "bottom_slab_thickness_m": 0.45,
+                    "inner_chamfer_m": 0.40,     # > 中牆厚 0.30
+                }
+            )
+        sec = self.section(3)
+        c = sec.inner_chamfer_m
+        self.assertAlmostEqual(c, 0.20, places=9)
+        # 單孔淨空 = B×H − 2c²（4 個內角各切 c²/2）
+        self.assertAlmostEqual(
+            sec.clear_void_area_per_cell_m2,
+            3.0 * 2.5 - 2.0 * c * c,
+            places=12,
+        )
+        # 模板每延米 = n(B−2c)×2 + 2n(H−2c) + 4nc√2
+        result = BC.analyse(sec, design_flow_m3s=1.0)
+        fb = result["quantities"]["formwork_breakdown"]
+        expect = (3 * (3.0 - 2 * c) * 2 + 2 * 3 * (2.5 - 2 * c)
+                  + 4 * 3 * c * math.sqrt(2.0))
+        # 引擎輸出已四捨五入到小數 3 位，比對用 3 位
+        self.assertAlmostEqual(
+            result["quantities"]["formwork_m2_per_m"], expect, places=3)
+        self.assertAlmostEqual(
+            fb["inner_chamfer_faces_m2_per_m"], 4 * 3 * c * math.sqrt(2.0),
+            places=3)
+
+    def test_corner_reinforcement_is_x_shaped_cross_bars(self) -> None:
+        """角隅補強筋：X 形交叉斜筋，角數 4n，每組 2 支，長度 t√2＋2×錨固。"""
+        sec = self.section(3)
+        result = BC.analyse(sec, design_flow_m3s=1.0)
+        rows = result["reinforcement"]["quantity"]["rows"]
+        corner = [r for r in rows if str(r["item"]).startswith("角隅補強筋")]
+        self.assertEqual(len(corner), 2, "外牆角與中間牆角應各一列")
+        total_kg = 0.0
+        for r in corner:
+            t = r["wall_thickness_m"]
+            expect_len = t * math.sqrt(2.0) + 2 * sec.corner_rebar_anchor_m
+            # 引擎輸出已四捨五入到小數 3 位，比對用 3 位
+            self.assertAlmostEqual(r["length_m"], expect_len, places=3)
+            groups = math.ceil(sec.length_m
+                               / (sec.corner_rebar_spacing_mm / 1000.0))
+            self.assertEqual(r["count"], groups * r["corner_count"] * 2)
+            self.assertEqual(r["bar"], sec.corner_rebar)
+            total_kg += r["kg"]
+        # 角數 4n（外牆 4 角＋中間牆 4(n−1) 角）
+        self.assertEqual(corner[0]["corner_count"], 4)
+        self.assertEqual(corner[1]["corner_count"], 8)
+        # 鋼筋總量必須含角隅補強筋（含 6% 搭接與損耗）
+        q = result["quantities"]
+        self.assertAlmostEqual(
+            q["rebar_kg_per_m_net"],
+            result["reinforcement"]["quantity"]["subtotal_kg_per_m"], places=2)
+        self.assertAlmostEqual(
+            q["rebar_kg_per_m"],
+            result["reinforcement"]["quantity"]["subtotal_kg_per_m"] * 1.06,
+            places=2)
+        self.assertGreater(total_kg, 0.0)
 
     def test_face_reinforcement_covers_inner_outer_and_distribution(self) -> None:
         result = BC.analyse(self.section(3), design_flow_m3s=5.0)

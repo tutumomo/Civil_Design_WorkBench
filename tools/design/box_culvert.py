@@ -329,6 +329,14 @@ class BoxCulvertSection:
     fc_mpa: float = 28.0
     fy_mpa: float = 420.0
     cover_mm: float = 50.0
+    # 內角 45° 加腋（倒角）邊長。過往標準圖（標準圖圖庫\箱涵與管涵 C105~C112）
+    # 內角皆有 45° 倒角：300×200 箱涵 20 cm、400×300 箱涵 30 cm。
+    inner_chamfer_m: float = 0.20
+    # 角隅補強筋（X 形交叉斜筋）。做法依公司標準圖 C110／C111「箱涵鋼筋詳圖」：
+    # 每個內角沿涵長方向每 corner_rebar_spacing_mm 一組 X 形交叉斜筋。
+    corner_rebar: str = "D13"
+    corner_rebar_spacing_mm: float = 200.0
+    corner_rebar_anchor_m: float = 0.10
 
     @classmethod
     def from_mapping(cls, data: Mapping[str, Any] | Any) -> "BoxCulvertSection":
@@ -340,6 +348,23 @@ class BoxCulvertSection:
         if n not in (1, 2, 3):
             raise BoxCulvertError("cell_count must be 1, 2 or 3.")
         wall = _num("wall_thickness_m", data.get("wall_thickness_m"), minimum=1e-6)
+        interior_wall = _num(
+            "interior_wall_thickness_m",
+            data.get("interior_wall_thickness_m", wall),
+            minimum=1e-6,
+        )
+        clear_h = _num("clear_height_m", data.get("clear_height_m"), minimum=1e-6)
+        # 加腋邊長不得大於相鄰構件厚度（否則切穿牆），也不得吃掉一半淨空
+        chamfer = _num(
+            "inner_chamfer_m", data.get("inner_chamfer_m", 0.20), minimum=0.0
+        )
+        clear_w = _num("clear_width_m", data.get("clear_width_m"), minimum=1e-6)
+        _limit = min(wall, interior_wall, 0.5 * clear_h, 0.5 * clear_w)
+        if chamfer > _limit + 1e-9:
+            raise BoxCulvertError(
+                "inner_chamfer_m（內角加腋邊長）不得大於 %.3f m"
+                "（牆厚／中牆厚／淨高／淨寬 的最小值）。" % _limit
+            )
         return cls(
             cell_count=n,
             clear_width_m=_num("clear_width_m", data.get("clear_width_m"), minimum=1e-6),
@@ -353,11 +378,7 @@ class BoxCulvertSection:
                 data.get("bottom_slab_thickness_m"),
                 minimum=1e-6,
             ),
-            interior_wall_thickness_m=_num(
-                "interior_wall_thickness_m",
-                data.get("interior_wall_thickness_m", wall),
-                minimum=1e-6,
-            ),
+            interior_wall_thickness_m=interior_wall,
             length_m=_num("length_m", data.get("length_m", 20.0), minimum=1e-6),
             cover_depth_m=_num(
                 "cover_depth_m", data.get("cover_depth_m", 0.6), minimum=0.0
@@ -371,6 +392,18 @@ class BoxCulvertSection:
             fc_mpa=_num("fc_mpa", data.get("fc_mpa", 28.0), minimum=1e-6),
             fy_mpa=_num("fy_mpa", data.get("fy_mpa", 420.0), minimum=1e-6),
             cover_mm=_num("cover_mm", data.get("cover_mm", 50.0), minimum=0.0),
+            inner_chamfer_m=chamfer,
+            corner_rebar=str(data.get("corner_rebar", "D13")),
+            corner_rebar_spacing_mm=_num(
+                "corner_rebar_spacing_mm",
+                data.get("corner_rebar_spacing_mm", 200.0),
+                minimum=0.0,
+            ),
+            corner_rebar_anchor_m=_num(
+                "corner_rebar_anchor_m",
+                data.get("corner_rebar_anchor_m", 0.10),
+                minimum=0.0,
+            ),
         )
 
     @property
@@ -389,6 +422,24 @@ class BoxCulvertSection:
             + self.clear_height_m
             + self.top_slab_thickness_m
         )
+
+    @property
+    def chamfer_area_per_cell_m2(self) -> float:
+        """單一孔內角 45° 加腋的面積（4 個角 × c²/2）。"""
+        c = self.inner_chamfer_m
+        return 2.0 * c * c
+
+    @property
+    def clear_void_area_per_cell_m2(self) -> float:
+        """單一孔的淨空面積（矩形淨空扣掉 4 個加腋角）。"""
+        return (self.clear_width_m * self.clear_height_m
+                - self.chamfer_area_per_cell_m2)
+
+    @property
+    def net_section_area_m2(self) -> float:
+        """每延米淨混凝土斷面積（外框 − 孔洞含加腋）。"""
+        return (self.outer_width_m * self.outer_height_m
+                - self.cell_count * self.clear_void_area_per_cell_m2)
 
     @property
     def wall_centers_x_m(self) -> list[float]:
@@ -438,6 +489,9 @@ class BoxCulvertSection:
             "length_m": self.length_m,
             "cover_depth_m": self.cover_depth_m,
             "cover_mm": self.cover_mm,
+            "inner_chamfer_m": self.inner_chamfer_m,
+            "corner_rebar": self.corner_rebar,
+            "corner_rebar_spacing_mm": self.corner_rebar_spacing_mm,
         }
 
 
@@ -1139,6 +1193,11 @@ def _steel_quantity(
             }
         )
 
+    # 角隅補強筋（內角 45° 加腋處的構造筋）
+    _corner = _corner_reinforcement_row(section)
+    if _corner:
+        rows.extend(_corner["rows"])
+
     subtotal = sum(row["kg"] for row in rows)
     total = subtotal * (1.0 + loss_rate)
     return {
@@ -1151,8 +1210,82 @@ def _steel_quantity(
         "lap_allowance": loss_rate,
         "basis": (
             "依理想化排筋計數（主筋長度取構材外寬／外高、分佈筋取涵長），"
-            "含 {:.0f}% 搭接、錨定與損耗；未含角隅補強、開口補強與施工縫。"
+            "含 {:.0f}% 搭接、錨定與損耗；角隅補強筋依 X 形交叉斜筋配置"
+            "（每內角沿涵長間距見配筋表）；"
+            "未含開口補強與施工縫。"
         ).format(loss_rate * 100.0),
+    }
+
+
+def _corner_reinforcement_row(section: BoxCulvertSection) -> dict[str, Any] | None:
+    """角隅補強筋：X 形交叉斜筋（構造筋，不參與構架分析）。
+
+    做法依公司標準圖（標準圖圖庫\\箱涵與管涵 C110／C111「箱涵鋼筋詳圖」）：
+    每個內角（牆與頂／底板之交角）沿涵長方向每 ``corner_rebar_spacing_mm``
+    一組 X 形交叉斜筋；每組 2 支 45° 斜筋，橫向跨越該角所在牆厚 t，
+    縱向投影亦取 t（45°），兩端各延伸 ``corner_rebar_anchor_m`` 錨入版與牆。
+
+    角數：外牆 4 角＋中間牆 4(n−1) 角＝4n 角（每孔 4 角，內外牆分屬不同厚度）。
+    屬構造筋：構架分析以矩形剛接斷面計算，內力對本筋保守，故不納入分析。
+    """
+    spacing_m = section.corner_rebar_spacing_mm / 1000.0
+    if spacing_m <= 1e-9:
+        return None
+    n = section.cell_count
+    L = section.length_m
+    bar = section.corner_rebar
+    unit = _bar_unit_weight_kg_m(bar)
+    groups_per_corner = math.ceil(L / spacing_m)
+    anchor = section.corner_rebar_anchor_m
+
+    # 角數：外牆 4 角；中間牆 4(n−1) 角（單孔時無中間牆）。
+    groups = [("外牆角", section.wall_thickness_m, 4)]
+    if n > 1:
+        groups.append(
+            ("中間牆角", section.interior_wall_thickness_m, 4 * (n - 1))
+        )
+    rows: list[dict[str, Any]] = []
+    for label, thickness, corners in groups:
+        bar_len = thickness * math.sqrt(2.0) + 2.0 * anchor
+        count = groups_per_corner * corners * 2      # 每組 2 支交叉斜筋
+        rows.append(
+            {
+                "item": "角隅補強筋（%s）" % label,
+                "arrangement": (
+                    "每角沿涵長每 %d mm 一組 X 形交叉斜筋（每組 2 支 45° 斜筋）"
+                    % int(section.corner_rebar_spacing_mm)
+                ),
+                "bar": bar,
+                "spacing_mm": int(section.corner_rebar_spacing_mm),
+                "count": int(count),
+                "length_m": round(bar_len, 3),
+                "kg": round(count * bar_len * unit, 2),
+                "corner_count": corners,
+                "groups_per_corner": int(groups_per_corner),
+                "wall_thickness_m": round(thickness, 4),
+                "basis": (
+                    "%s共 %d 角，每角沿涵長每 %d mm 一組，每組 2 支 45° 交叉斜筋，"
+                    "跨越該角所在牆厚 t=%.3f m，單支長度 t√2＋2×%.2f m 錨固。"
+                    "屬構造筋，不參與構架分析（構架以矩形剛接斷面計算，對內力保守）。"
+                    % (label, corners, int(section.corner_rebar_spacing_mm),
+                       thickness, anchor)
+                ),
+            }
+        )
+    if len(rows) == 1:
+        rows[0]["item"] = "角隅補強筋（全部）"
+    return {
+        "item": rows[0]["item"],
+        "arrangement": rows[0]["arrangement"],
+        "bar": bar,
+        "spacing_mm": int(section.corner_rebar_spacing_mm),
+        "count": sum(int(r["count"]) for r in rows),
+        "length_m": rows[0]["length_m"],
+        "kg": round(sum(float(r["kg"]) for r in rows), 2),
+        "rows": rows,
+        "corner_count": 4 * n,
+        "groups_per_corner": int(groups_per_corner),
+        "basis": " ".join(str(r["basis"]) for r in rows),
     }
 
 
@@ -1163,13 +1296,15 @@ def _formwork_quantity(section: BoxCulvertSection) -> dict[str, Any]:
     b = section.clear_width_m
     h = section.clear_height_m
     l = section.length_m
-    soffit = n * b
-    base_top = n * b
-    wall_faces = 2.0 * n * h
-    per_m = soffit + base_top + wall_faces
-    concrete_area = (
-        section.outer_width_m * section.outer_height_m - n * b * h
-    )
+    c = section.inner_chamfer_m
+    # 內角 45° 加腋後：頂版底面與底板頂面各收 c、牆內面上下各收 c，
+    # 另加 4n 個 45° 斜面（斜長 c√2）。
+    soffit = n * (b - 2.0 * c)
+    base_top = n * (b - 2.0 * c)
+    wall_faces = 2.0 * n * (h - 2.0 * c)
+    haunch = 4.0 * n * c * math.sqrt(2.0)
+    per_m = soffit + base_top + wall_faces + haunch
+    concrete_area = section.net_section_area_m2
     end_faces = 2.0 * concrete_area
     return {
         "per_m": round(per_m, 3),
@@ -1179,9 +1314,11 @@ def _formwork_quantity(section: BoxCulvertSection) -> dict[str, Any]:
             "top_slab_soffit_m2_per_m": round(soffit, 3),
             "bottom_slab_top_m2_per_m": round(base_top, 3),
             "wall_inner_faces_m2_per_m": round(wall_faces, 3),
+            "inner_chamfer_faces_m2_per_m": round(haunch, 3),
         },
         "basis": (
-            "每延米＝頂版底面 nB＋底板頂面 nB＋牆內面 2nH；"
+            "每延米＝頂版底面 n(B−2c)＋底板頂面 n(B−2c)＋牆內面 2n(H−2c)"
+            "＋內角加腋斜面 4nc√2（c＝內角 45° 加腋邊長）；"
             "外側貼土面不計，另加兩端斷面端模 2A。"
         ),
     }
@@ -1722,10 +1859,7 @@ def analyse(
         "採 50 mm 時須確認實際暴露條件與業主規定。"
     )
     # Exact gross concrete area = outer rectangle minus clear cell voids.
-    concrete_area = (
-        section.outer_width_m * section.outer_height_m
-        - section.cell_count * section.clear_width_m * section.clear_height_m
-    )
+    concrete_area = section.net_section_area_m2
     self_weight_kn_m = concrete_area * section.concrete_unit_weight_kn_m3
     checks: list[dict[str, Any]] = [
         {
@@ -1885,6 +2019,9 @@ def analyse(
         "quantities": {
             "concrete_area_m2_per_m": concrete_area,
             "concrete_volume_m3": concrete_area * section.length_m,
+            "inner_chamfer_m": section.inner_chamfer_m,
+            "inner_chamfer_area_m2_per_m": (
+                section.cell_count * section.chamfer_area_per_cell_m2),
             "clear_volume_m3_per_m": (
                 section.cell_count * section.clear_width_m * section.clear_height_m
             ),
@@ -2055,11 +2192,40 @@ def selftest() -> int:
         rq["subtotal_kg"] * 1.06,
         tol=0.2,
     )
+    # 內角 45° 加腋（c=0.20，預設）：頂／底板內面各收 c、牆內面上下各收 c，
+    # 另加 4n 個 45° 斜面（斜長 c√2）。
     c.close(
-        "模板每延米＝2n(B+H)",
+        "模板每延米＝n(2(B−2c)＋2(H−2c)＋4c√2)",
         qty["formwork_m2_per_m"],
-        2.0 * 3.0 * (3.0 + 2.5),
+        3.0 * (2 * (3.0 - 2 * 0.20) + 2 * (2.5 - 2 * 0.20)
+                + 4 * 0.20 * math.sqrt(2.0)),
+        tol=1e-3,   # 引擎每延米模板量取小數三位
+    )
+    c.close(
+        "內角加腋面積＝n×2c²",
+        qty["inner_chamfer_area_m2_per_m"],
+        3.0 * 2 * 0.20 ** 2,
         tol=1e-9,
+    )
+    corner_rows = {
+        row["item"]: row for row in rq["rows"]
+        if str(row.get("item", "")).startswith("角隅補強筋")
+    }
+    c.close(
+        "角隅補強筋外牆角支數（4 角×100 組×2 支）",
+        corner_rows["角隅補強筋（外牆角）"]["count"],
+        4 * math.ceil(20.0 / 0.20) * 2,
+    )
+    c.close(
+        "角隅補強筋中間牆角支數（8 角×100 組×2 支）",
+        corner_rows["角隅補強筋（中間牆角）"]["count"],
+        8 * math.ceil(20.0 / 0.20) * 2,
+    )
+    c.close(
+        "角隅補強筋外牆角單支長度＝t√2＋2×0.10",
+        corner_rows["角隅補強筋（外牆角）"]["length_m"],
+        0.35 * math.sqrt(2.0) + 2 * 0.10,
+        tol=1e-3,
     )
     c.close(
         "模板總量＝每延米×L＋兩端端模",

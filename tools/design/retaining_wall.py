@@ -671,14 +671,20 @@ def format_report(res):
             L.append("  [%s] %s = %.3f m（允許 %.3f～%.3f）" % (
                 "OK" if c["ok"] else "NG", c["item"], c["value"], c["limit"][0], c["limit"][1]))
         else:
+            _small = (abs(float(c.get("limit") or 0.0)) < 0.01
+                      or abs(float(c.get("value") or 0.0)) < 0.01)
+            _fmt = "%.4f" if _small else "%.2f"
             if relation == "le":
-                criterion = "≤ %.2f" % c["limit"]
+                criterion = "≤ " + (_fmt % c["limit"])
             elif relation == "ge":
-                criterion = "≥ %.2f" % c["limit"]
+                criterion = "≥ " + (_fmt % c["limit"])
             else:
-                criterion = "≥ %.2f" % c["limit"]
-            L.append("  [%s] %s = %.2f（%s）" % (
-                "OK" if c["ok"] else "NG", c["item"], c["value"], criterion))
+                criterion = "≥ " + (_fmt % c["limit"])
+            L.append("  [%s] %s = %s（%s）" % (
+                "OK" if c["ok"] else "NG", c["item"], _fmt % c["value"], criterion))
+    extra = res.get("rebar_summary") or []
+    if extra:
+        L.extend(extra)
     L.append("")
     L.append("綜合判定：%s" % ("全部通過" if res["pass"] else "未通過，須調整斷面"))
     return "\n".join(L)
@@ -687,7 +693,8 @@ def format_report(res):
 # 断面選配（真正的「設計」：依穩定需求反推斷面）
 # --------------------------------------------------------------------------- #
 def size_section(H, soil=None, wall_type="gravity", kh=0.0,
-                 t_choices=None, bl_ratio=None, min_bl=0.9, toe_passive=None):
+                 t_choices=None, bl_ratio=None, min_bl=0.9, toe_passive=None,
+                 extra_check=None):
     """在給定牆高與土工參數下，找出**通過所有穩定檢核**的最小斷面。
 
     搜尋策略（由小到大、先省料後保險）：
@@ -696,6 +703,9 @@ def size_section(H, soil=None, wall_type="gravity", kh=0.0,
 
     toe_passive：併入每個候選斷面的牆趾被動土壓力欄位
     （toe_soil_depth_m／include_passive／passive_ratio）。
+
+    extra_check(q, res) → bool：穩定通過後再加驗的條件（例如配筋裂縫），
+    讓自動選配找到的斷面是「穩定＋配筋都過」而不只是穩定過。
 
     回傳 (best, tried_count)；best 為含 q 與 res 的 dict，找不到則 None。
     """
@@ -706,6 +716,11 @@ def size_section(H, soil=None, wall_type="gravity", kh=0.0,
         "allowable_bearing_kpa": 200.0, "base_friction": 0.5, "foundation": "soil",
     }, **(soil or {}))
     toe_passive = dict(toe_passive or {})
+
+    def _ok(cand, res):
+        if not res.get("pass"):
+            return False
+        return True if extra_check is None else bool(extra_check(cand, res))
 
     if t_choices is None:
         t_choices = ([0.30, 0.35, 0.40, 0.45, 0.50, 0.60] if wall_type == "gravity"
@@ -728,7 +743,7 @@ def size_section(H, soil=None, wall_type="gravity", kh=0.0,
                             "base_width_m": BL, "base_thickness_m": round(bt_r * H, 2), **toe_passive}
                     tried += 1
                     res = analyse(cand, soil, {"kh": kh})
-                    if res["pass"]:
+                    if _ok(cand, res):
                         area = res["geometry"]["area_m2_per_m"]
                         if best is None or area < best["res"]["geometry"]["area_m2_per_m"]:
                             best = {"q": cand, "res": res}
@@ -736,7 +751,7 @@ def size_section(H, soil=None, wall_type="gravity", kh=0.0,
             if wall_type == "gravity":
                 tried += 1
                 res = analyse(cand, soil, {"kh": kh})
-                if res["pass"]:
+                if _ok(cand, res):
                     if best is None or res["geometry"]["area_m2_per_m"] < best["res"]["geometry"]["area_m2_per_m"]:
                         best = {"q": cand, "res": res}
 
@@ -750,7 +765,7 @@ def size_section(H, soil=None, wall_type="gravity", kh=0.0,
                             "base_width_m": BL, "base_thickness_m": round(bt_r * H, 2), **toe_passive}
                     tried += 1
                     res = analyse(cand, soil, {"kh": kh})
-                    if res["pass"]:
+                    if _ok(cand, res):
                         if best is None or res["geometry"]["area_m2_per_m"] < best["res"]["geometry"]["area_m2_per_m"]:
                             best = {"q": cand, "res": res}
     return best, tried

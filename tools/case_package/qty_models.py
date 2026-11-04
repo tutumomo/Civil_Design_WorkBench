@@ -422,6 +422,12 @@ MODELS = {
             "excavation_work_m": 0.50,
             "excavation_depth_m": 0.30,
             "rebar_ratio_kg_m3": 90.0,
+            # 內角 45° 加腋（倒角）邊長：過往標準圖 300×200 箱涵用 20 cm、
+            # 400×300 用 30 cm。設 0 表示不做加腋。
+            "inner_chamfer_m": 0.20,
+            # 角隅補強筋（X 形交叉斜筋）：做法依標準圖 C110／C111。
+            "corner_rebar": "D13",
+            "corner_rebar_spacing_mm": 200,
         },
         "derive": [
             {"key": "outer_width_m", "expr":
@@ -435,9 +441,11 @@ MODELS = {
              "note": "外高＝底板厚＋淨高＋頂版厚"},
             {"key": "concrete_area_m2", "expr":
                 "outer_width_m * outer_height_m"
-                " - cell_count * clear_width_m * clear_height_m",
+                " - cell_count * (clear_width_m * clear_height_m"
+                " - 2 * inner_chamfer_m ** 2)",
              "verify_tol_pct": 0,
-             "note": "精確斷面積＝外框矩形－各孔淨空矩形（不按桿件中心線相加）"},
+             "note": "精確斷面積＝外框矩形－各孔淨空矩形"
+                     "（內角 45° 加腋每角扣 c²/2；不按桿件中心線相加）"},
             {"key": "concrete_volume_m3", "expr":
                 "concrete_area_m2 * length_m",
              "verify_tol_pct": 0},
@@ -449,10 +457,13 @@ MODELS = {
              "verify_tol_pct": 0,
              "note": "頂版以上覆土體積（不含路面結構）"},
             {"key": "formwork_m2", "expr":
-                "cell_count * (2 * clear_height_m + 2 * clear_width_m) * length_m"
+                "cell_count * (2 * (clear_width_m - 2 * inner_chamfer_m)"
+                " + 2 * (clear_height_m - 2 * inner_chamfer_m)"
+                " + 4 * inner_chamfer_m * sqrt(2)) * length_m"
                 " + 2 * concrete_area_m2",
              "verify_tol_pct": 0,
-             "note": "頂版底面＋底板頂面＋牆內面＝2n(B+H)，另加兩端斷面；外側埋土面不計"},
+             "note": "頂版底面＋底板頂面＋牆內面＋內角加腋斜面，另加兩端斷面；"
+                     "外側埋土面不計"},
             {"key": "excavation_m3", "expr":
                 "(outer_width_m + 2 * excavation_work_m)"
                 " * (outer_height_m + excavation_depth_m) * length_m",
@@ -496,6 +507,9 @@ MODELS = {
                  "basis": "斷面積×涵長"},
                 {"label": "模板", "key": "formwork_m2", "unit": "m²", "decimals": 2,
                  "basis": "頂版底面＋底板頂面＋牆內面＋兩端"},
+                {"label": "內角 45° 加腋", "key": "inner_chamfer_m", "unit": "m",
+                 "decimals": 2,
+                 "basis": "內角倒角邊長；標準圖 300×200 用 0.20、400×300 用 0.30"},
                 {"label": "基礎開挖", "key": "excavation_m3", "unit": "m³", "decimals": 2,
                  "basis": "含工作面與超挖"},
                 {"label": "頂版覆土", "key": "soil_cover_volume_m3", "unit": "m³", "decimals": 2,

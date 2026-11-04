@@ -37,7 +37,10 @@
    "interior_wall_thickness_m": 0.3,
    "top_slab_thickness_m": 0.4,
    "bottom_slab_thickness_m": 0.45,
-   "cover_depth_m": 0.6
+   "cover_depth_m": 0.6,
+   "inner_chamfer_m": 0.2,
+   "corner_rebar": "D13",
+   "corner_rebar_spacing_mm": 200
   },
   "notes": [
    "箱涵尺寸為**範例值**：3 孔 3.00 m × 2.50 m、涵長 20.0 m、覆土 0.60 m。正式設計前須用 `tools\\design\\box_culvert.py` 完成水力與平面構架檢核。",

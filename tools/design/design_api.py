@@ -660,6 +660,9 @@ def _example_box_culvert() -> dict[str, Any]:
         "cover_mm": 50.0,
         "cover_depth_m": 0.60,
         "length_m": 20.0,
+        "inner_chamfer_m": 0.20,
+        "corner_rebar": "D13",
+        "corner_rebar_spacing_mm": 200,
         "traffic_type": "h20_s16",
         "traffic_lanes": 4,
         "crack_limit_mm": 0.30,
@@ -702,6 +705,37 @@ def _box_culvert_field_rules() -> dict[str, Any]:
         ]
     )
     return {
+        "inner_chamfer_m": {
+            "type": "number",
+            "label": "內角 45° 加腋邊長（m）",
+            "step": 0.05,
+            "min": 0,
+            "max": 1.0,
+            "hint": "內角倒角（加腋）邊長，45° 斜面；過往標準圖 300×200 箱涵用 20 cm、"
+                    "400×300 用 30 cm。不得大於牆厚／中牆厚／淨高的一半；"
+                    "設 0 表示不做加腋。",
+        },
+        "corner_rebar": {
+            "type": "select",
+            "label": "角隅補強筋",
+            "choices": [
+                {"value": "D10", "label": "D10"},
+                {"value": "D13", "label": "D13"},
+                {"value": "D16", "label": "D16"},
+                {"value": "D19", "label": "D19"},
+            ],
+            "hint": "內角加腋處之角隅補強筋（X 形交叉斜筋）筋號；"
+                    "做法依標準圖 C110／C111。屬構造筋，不參與構架分析。",
+        },
+        "corner_rebar_spacing_mm": {
+            "type": "number",
+            "label": "角隅補強筋間距 (mm)",
+            "step": 10,
+            "min": 0,
+            "max": 500,
+            "hint": "每個內角沿涵長方向的 X 形交叉斜筋間距；"
+                    "標準圖 C110／C111 用 200 mm。設 0 表示不設角隅補強筋。",
+        },
         "traffic_type": {
             "type": "select",
             "label": "車載標準",
@@ -1778,7 +1812,7 @@ CATALOG: list[dict[str, Any]] = [
         "description": "參數化箱涵平面剛架、土水壓與 H-20／H-20 S-16／40T 拖車車載、內外側逐面配筋（正負彎矩包絡）、縱向分佈筋、裂縫與鋼筋量概估、撓曲／剪力／軸彎互制、浮力，以及附錄 N／O 進口／出口控制水理。",
         "engine": "box_culvert.py",
         "codes": ["公路排水設計規範", "公路橋梁設計規範", "水土保持技術規範 §87", "建築物混凝土結構設計規範"],
-        "limitations": "翼牆與端牆只檢核有輸入的幾何值（§6.5），不檢核沖刷深度；低水頭出口控制未做迴水曲線；配筋已做內外側分層與縱向分佈筋，但仍無三維角隅補強、施工階段、開口補強、錨定／搭接長度細節與正式配筋詳圖；車載與其他載重共用 load_factor，未拆分靜載／活載因數。",
+        "limitations": "翼牆與端牆只檢核有輸入的幾何值（§6.5），不檢核沖刷深度；低水頭出口控制未做迴水曲線；配筋已做內外側分層、縱向分佈筋與內角加腋處之角隅補強筋（X 形交叉斜筋，構造筋），但仍未計施工階段、開口補強、錨定／搭接長度細節與正式配筋詳圖；車載與其他載重共用 load_factor，未拆分靜載／活載因數。",
         "field_rules": _box_culvert_field_rules(),
         "example": _example_box_culvert(),
     },

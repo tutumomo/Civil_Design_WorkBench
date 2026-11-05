@@ -2,7 +2,7 @@
 
 > 適用：使用者以口述方式提出 3D CAD 參數化設計需求，由 MiniMax Code 產出參數化模型、匯出檔與成果圖。
 > 執行檔：`C:\Program Files\SolidCraft\solidcraft-cli.exe`（v0.24.0）
-> 工具鏈：`D:\公司案件.AI\tools\solidcraft\`
+> 工具鏈：`<專案根目錄>\tools\solidcraft\`
 
 ---
 
@@ -34,10 +34,12 @@ SolidCraft 的模型是**參數驅動的特徵樹**，不是一堆固定幾何�
 
 ## 3. 一鍵交付（標準流程）
 
+在專案根目錄執行（先 `cd` 到專案根目錄，以下路徑皆為相對路徑；產出依 AGENTS.md §1.1 落 `out\`）：
+
 ```bat
 set PYTHONIOENCODING=utf-8
-C:\Python312\python.exe D:\公司案件.AI\tools\solidcraft\sc_build.py ^
-  <建模腳本.json> --out-dir "D:\公司案件.AI\<案名>\<模型名>" --name <模型名> ^
+python tools\solidcraft\sc_build.py ^
+  <建模腳本.json> --out-dir "out\<案名>\<模型名>" --name <模型名> ^
   --param "B=400 mm" --param "H=350 mm" ^
   --formats step,stl,3mf --views iso,top,front ^
   --expect-volume 1978527378.44 --tol 0.01 --expect-bbox 2000x600x3400
@@ -92,8 +94,8 @@ C:\Python312\python.exe D:\公司案件.AI\tools\solidcraft\sc_build.py ^
 `file.export` `file.save` `file.insert_step` `file.insert_mesh` `file.export_view_dxf`
 
 完整命令目錄（474 筆，每筆含 id/label/params）：
-`D:\公司案件.AI\docs\solidcraft_commands.txt`
-分組摘要：`D:\公司案件.AI\docs\solidcraft_commands_summary.txt`
+`docs\solidcraft_commands.txt`
+分組摘要：`docs\solidcraft_commands_summary.txt`
 
 ---
 

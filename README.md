@@ -203,6 +203,8 @@ CIVIL_AI_REGS_DB   # 規範索引 sqlite（預設 data/法規/_regs_index.sqlite
 ARTCRAFT_HOME      # ArtCraft 安裝根目錄（Windows 預設 C:\Program\ArtCraft）
 AUTOCAD_HOME       # AutoCAD 安裝目錄（含 accoreconsole.exe）
 SOLIDCRAFT_CLI     # SolidCraft CLI 完整路徑
+INGETRAZO_HOME     # IngeTrazo 安裝根目錄（預設 C:\Program Files\IngeTrazo）
+INGETRAZO_MCP      # IngeTrazo MCP 橋完整路徑（預設 <HOME>\ingetrazo-mcp.exe）
 BLENDER            # Blender 執行檔
 CAD_FONTS          # CAD 字體庫目錄（預設＝專案內 CAD_FONTS/，已隨 repo 附）
 CIVIL_AI_STD_BLOCKS # 公司標準元件 DWG 資料夾（_ref 重建腳本用）
@@ -221,9 +223,13 @@ macOS／Linux：寫進 `~/.bashrc` 或 `~/.zshrc` 的 `export ARTCRAFT_HOME=...`
 | `規範索引 missing` | 還沒跑 `python tools/regs/build_index.py`（需先 `fetch_regs.py`） |
 | `找不到 ArtCraft` | 未安裝或路徑非預設，設 `ARTCRAFT_HOME` |
 | 產不出 DWG | 平台未安裝 AutoCAD 或 CADCraft，或 `accoreconsole` 不在預設路徑。可設 `AUTOCAD_HOME` 或安裝/指定 `CADCraft` |
+| IngeTrazo MCP 工具呼叫失敗 | 它只是 GUI 的橋：先開 IngeTrazo → 開文件 → Extensões ▸ AI Bridge (MCP)，再跑 `python tools\ingetrazo\ingetrazo_check.py --call`；`tools/list` 過關不代表能用 |
+| 想要 Claude Code 跨 session 記住專案脈絡 | 裝 claude-mem：`powershell -ExecutionPolicy Bypass -File ".agents\setup\claude-mem-install.ps1"`（需 Node 20+）。它只影響 Claude Code 的記憶，**不改本專案任何產線行為**，見 [`docs/claude-mem安裝與使用.md`](docs/claude-mem安裝與使用.md) |
 
 完整清單（13 套 ArtCraft 對照、MCP 伺服器、Skills、資料取得方式、給智能體的自動配置指令範本）見
-**[`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)**。
+**[`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)**；
+IngeTrazo（3D／BIM、GUI＋MCP 橋）見 **[`docs/IngeTrazo操作指引.md`](docs/IngeTrazo操作指引.md)**；
+Claude Code 的跨 session 持久記憶見 **[`docs/claude-mem安裝與使用.md`](docs/claude-mem安裝與使用.md)**。
 
 ## 核心概念：案件主檔是唯一數據來源
 
@@ -263,6 +269,7 @@ macOS／Linux：寫進 `~/.bashrc` 或 `~/.zshrc` 的 `export ARTCRAFT_HOME=...`
 | 報告 | `tools/report/` | 14 章骨架；`verify_report.py` 做 R1~R16 回讀驗證 |
 | 規範 | `tools/regs/` | 下載、索引、查詢、**已驗證公式／表格庫** |
 | 品管 | `tools/a3_sheet/check_delivery.py`、`tools/selftest/` | E1~E18 出圖品管、圖數對帳、全案回歸 |
+| 外部 3D／BIM（選用） | IngeTrazo 0.6.0＋MCP 橋 | 3D 構造、IFC4／數量 CSV、地形剖面；**只補能力、不進交件**，見 `docs/IngeTrazo操作指引.md` |
 
 ## 規範公式圖表庫
 

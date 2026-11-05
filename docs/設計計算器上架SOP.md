@@ -280,7 +280,7 @@ curl.exe -s -X POST http://127.0.0.1:8765/api/design/run ^
 
 # 2. 部署至已認領的 Foil Newsstand 永久帳號（勿加 --temporary）
 $env:CLOUDFLARE_ACCOUNT_ID = 'e2c04af8447f8efcbf6ca597d6d3ad36'
-Set-Location D:\Civil_Design_WorkBench\_temp\cloudflare_design
+Set-Location <專案根目錄>\_temp\cloudflare_design
 npx wrangler deploy
 ```
 
@@ -322,6 +322,9 @@ npx wrangler deploy
 | 回歸基準不符 | 真的改變了設計數值（例：鋼筋損耗 12%→6%、模板補上頂版底面） | 先列差異與原因，確認是本次刻意變更才 `regression.py --update`；回報要寫前後值 |
 | Excel 公式與程式不一致 | 只看工作表文字標籤，沒看儲存格實際數值 | 用 `xlrd` 逐格 dump 公式列與數值列；**以數值為準**（工作簿曾把 `1.2` 寫成 `1+0.3`） |
 | 同一數量有兩套算法 | 引擎與 `qty_models` 各寫一份 | 數量只能有一個定義：改引擎時同步 `qty_models`／`case.json`，並用回歸鎖住 |
+| 工具單獨執行就 `ModuleNotFoundError: project_paths` | `tools\<子夾>\` 的檔案把專案根寫成 `parents[2]`（=`tools\`） | 改 `parents[1]`；驗收時**脫離 `case_package` 直接跑** `-h` |
+| 回歸全綠但產物是舊的 | 讀 `cases\<案名>\out` 與舊 `交付狀態.json` | 一律 `--out-dir out\<案名>`，`ok` 只看本次退出碼與本次各軸狀態 |
+| 回歸永遠 exit 1 | 既有案件資料缺口（如 `boq.items` 空）混在新失敗裡 | 基準已記錄的 `ok=false` 列「既有未通過」；只有新變紅才失敗 |
 | 資訊性數字被當成檢核 | 例如「車載重換算均佈」沒有 limit | 不要放 `checks`；由 `summary`、`result` 或報告本文呈現 |
 | Cloudflare 線上版沒看到更新或報 `9109` | 誤加 `--temporary` 吃到過期臨時憑證或產生新網址 | 移除 `--temporary`，設定 `$env:CLOUDFLARE_ACCOUNT_ID='e2c04af8447f8efcbf6ca597d6d3ad36'` 跑 `npx wrangler deploy` |
 

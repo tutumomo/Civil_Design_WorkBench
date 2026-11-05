@@ -1,7 +1,7 @@
 # CadCraft Studio 操作指引（CivilCraft／TakeoffCraft 實測版）
 
 > 實測日期：2026-10-28｜版本：CadCraft Studio 0.7（`C:\Program\CadCraft Studio\`）
-> 測試成果：`D:\公司案件.AI\_cadcraft_studio測試\`｜客戶端：`tools\cadcraft_studio\ccs.py`
+> 測試成果：`<專案根目錄>\_cadcraft_studio測試\`（遷移前舊路徑的產物，現已不存在）｜客戶端：`tools\cadcraft_studio\ccs.py`
 
 ## 1. 定位與能力邊界
 
@@ -12,7 +12,7 @@
 
 ## 2. 連線（每次 Studio 重啟都要重新取得 token）
 
-1. 使用者開啟 app → Settings › Assistants 打開連線 → Folders 加入 `D:\公司案件.AI`。
+1. 使用者開啟 app → Settings › Assistants 打開連線 → Folders 加入 `<專案根目錄>`（實際磁碟路徑以當下專案根目錄為準）。
 2. 使用者於 Studio Hub「Assistants」卡片複製 **Token** 給 AI。**token 不得寫入任何檔案**，只放環境變數：
    ```bash
    export PYTHONIOENCODING=utf-8 CCS_TOKEN='<token>'

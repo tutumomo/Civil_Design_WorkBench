@@ -1,8 +1,9 @@
-# 六套 CAD 工具／技能能力邊界與重疊度評估
+# 七套 CAD 工具／技能能力邊界與重疊度評估
 
-> 評估日期：2026-10-28｜範圍：CADCraft CLI、SolidCraft、Blender 技能、AutoCAD MCP、text-to-cad（cadgen）、CadCraft Studio（8 apps）
-> 方法：**全部以本機實測為準**（版本、指令數、工具數、實際出圖與轉檔）；無法實測者標「推論」並註明依據。
-> 目的：回答「這六套各自能到哪裡、哪裡互相重疊、本專案該用哪一套」。
+> 評估日期：2026-10-28（原六套）｜**2026-11-03 追加 IngeTrazo 0.6.0**
+> 範圍：CADCraft CLI、SolidCraft、Blender 技能、AutoCAD MCP、text-to-cad（cadgen）、CadCraft Studio（8 apps）、**IngeTrazo**
+> 方法：**以本機實測為準**（版本、指令數、工具數、實際出圖與轉檔）；IngeTrazo 為本機安裝＋官方文件＋原始碼查證，**建模尚未實跑**，已標示。
+> 目的：回答「這七套各自能到哪裡、哪裡互相重疊、本專案該用哪一套」。
 
 ---
 
@@ -12,17 +13,19 @@
 |---|---|
 | 誰能**產交付級 2D 圖紙**（A3／圖框／視口／DWG） | **CADCraft CLI**（相容 >80% AutoCAD 功能，支援跨平台產出 DWG 與出圖）、**AutoCAD MCP**、CADCraft Studio 的 CadCraft。本專案以 `make_sheet.py`＋`acc.py`（Windows）或 CADCraft CLI 產出標準交付 DWG |
 | 誰能**做 3D 實體** | **SolidCraft**、**text-to-cad**（皆參數化精確實體）；Blender 只做網格／渲染，不算實體 CAD |
-| 誰是**唯一沒有替代品**的 | CadCraft Studio 的 **CivilCraft（地形／土方／LandXML）**、**TakeoffCraft（圖面數量）**；以及 **Blender 的渲染／動畫** |
+| 誰能**做 3D 建築／土木 BIM 並出 IFC4＋數量** | **IngeTrazo**（GUI＋MCP 橋；IFC4、數量 CSV、比例 PDF／公尺 DXF） |
+| 誰是**唯一沒有替代品**的 | CadCraft Studio 的 **CivilCraft（地形／土方／LandXML）**、**TakeoffCraft（圖面數量）**；以及 **Blender 的渲染／動畫**（IngeTrazo 可出 3D 示意圖與剖面，但不取代渲染管線） |
 | 最大誤用風險 | 拿 AutoCAD MCP 當「土木出圖機」（它講 mm／ISO 製造語彙）；拿 Blender 當 CAD；拿 SolidCraft 排 A3 |
 
-**重疊的本質**：六套裡真正互相重疊的只有兩群——
+**重疊的本質**：七套裡真正互相重疊的有三群——
 ① **2D 圖面生產群**（CADCraft CLI ≈ AutoCAD MCP ≈ Studio/CadCraft）；
-② **3D 參數化實體群**（SolidCraft ≈ text-to-cad）。
+② **3D 參數化實體群**（SolidCraft ≈ text-to-cad）；
+③ **3D 幾何／視覺群**（IngeTrazo ≈ Blender 的網格與示意，部分 ≈ Studio/CivilCraft 的地形）。
 其餘四處（地形土方、圖面數量、渲染、細節圖庫）**彼此不重疊，也沒有替代品**。
 
 ---
 
-## 1. 六套到底是什麼（本質分類）
+## 1. 七套到底是什麼（本質分類）
 
 | # | 名稱 | 實際實體（本機路徑） | 版本（實測） | 執行模式 | 幾何核心 | 原生格式 |
 |---|---|---|---|---|---|---|
@@ -32,6 +35,7 @@
 | 4 | **AutoCAD MCP** | `~\.mcp\autocad-mcp-pro`（1.6.0，Claude Code 用）／`~\.agents\mcp\autocad-mcp-pro`（1.7.0，Codex 用） | **1.6.0／1.7.0** | MCP stdio（`ezdxf` 純 DXF 後端；`com` 後端已禁用） | `ezdxf`（Python）＋可選 ODA | DXF（DWG 需外部工具） |
 | 5 | **text-to-cad 技能**（`cad`／`dxf`） | `~\.agents\skills\cad`｜引擎 `cadgen==0.7.26`（`uvx` 安裝） | cadgen **0.7.26** | `uvx` 執行的 Python 腳本 ＋ headless viewer | **build123d／OpenCASCADE**（B-rep） | STEP／STL／3MF／GLB／DXF |
 | 6 | **CadCraft Studio** | `C:\Program\CadCraft Studio\`（shell 0.7，8 apps） | **0.7** | **只有本機 HTTP MCP**，需人開視窗＋每次換 token | 8 個 Web 技術 app 各自 | 依 app（DXF／DWG／LandXML／PDF／xlsx） |
+| 7 | **IngeTrazo** | `C:\Program Files\IngeTrazo\`（`ingetrazo.exe`＋`ingetrazo-mcp.exe`） | **0.6.0** | **GUI 常駐＋stdio MCP 橋**（`127.0.0.1:4763`）；**無 headless** | 自研推拉實體／BIM（Z-up、公尺） | `.igz`／IFC4／DXF／PDF／DAE／glTF／OBJ／STL |
 
 ### 1.1 CadCraft Studio 的 8 個 app（實測目錄確認）
 
@@ -39,7 +43,8 @@
 
 **關鍵事實（推論，依據：同名產品線、指令語彙一致、CLI 亦有 `mcp` 子命令）**：
 Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族的同一引擎**，只是一個有 GUI 外殼、一個是 headless。
-→ **Studio 單獨不算「第七套」**，它是「CadCraft ＋ 7 個旁支 app」的套裝；其中只有 CivilCraft／TakeoffCraft 是別處沒有的能力。
+→ **Studio 不另計一套**（它是「CadCraft ＋ 7 個旁支 app」的套裝；其中只有 CivilCraft／TakeoffCraft 是別處沒有的能力）。
+第 7 套是 **IngeTrazo**，與 Studio 無關。
 
 ---
 
@@ -154,24 +159,52 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 | **ModelCraft** | 3D 模型呈現 | ≈ Blender（推論） |
 | **MarkupCraft** | 圖面標註／紅線 | ≈ AutoCAD MCP `entity_create_revcloud`／`markup` 類（推論） |
 
-**共同硬限制**：**沒有 headless CLI**。必須「人開視窗 → Settings › Assistants 開連線 → 把 token 給 AI → Folders 加 `D:\公司案件.AI`」，
+**共同硬限制**：**沒有 headless CLI**。必須「人開視窗 → Settings › Assistants 開連線 → 把 token 給 AI → Folders 加 `<專案根目錄>`」，
 且 **token 在 Studio 重啟後失效、要人手動換**。→ **不能進自動化產線**，只能當「需要時人工開的資料處理機」。
+
+### 2.7 IngeTrazo 0.6.0（GUI＋MCP 橋）
+
+> 依據：本機安裝實查（`C:\Program Files\IngeTrazo\`）＋官網＋官方手冊＋`ingetrazo_mcp.py` 原始碼。
+> **建模端到端尚未實跑**（需 GUI 開文件＋AI Bridge）；下列能力為文件與程式碼口徑。
+
+| 能做 | 備註 |
+|---|---|
+| **精確 3D 建模** | 推拉時直接輸入尺寸；**公尺制、Z-up**；布林／旋轉體／擠出；實體需過水密（hermeticity）檢查 |
+| **BIM 與數量** | 牆／版／柱／門窗標記 → **IFC4** 匯出＋**數量 CSV** |
+| **地形與測量** | 3D 衛星地形、縱斷面、專案北；WebODM 無人機網格；GPS／全測站 **UTM CSV** |
+| **出圖** | 具比例的 **PDF 圖紙**（圖框、尺寸、標題欄、多張圖紙）；目前視圖匯出 **DXF（公尺）** 給 IngeCAD |
+| **格式** | 匯入 DWG／DXF／SKP（OpenSKP）／OBJ／DAE／glTF／STL；匯出 DAE／glTF／OBJ／STL／IFC4／DXF／PDF |
+| **AI 協作** | 內建助手（自備 key／Ollama）；**MCP 橋**讓外部智能體在開著的視窗即時建模：`run_python`／`query_model`／`screenshot`／`undo`／`redo` |
+| **資產** | 1,510 個元件、427 種材質；Blender 外掛算圖 |
+
+| 不能做 | 說明 |
+|---|---|
+| **headless／批次** | ❗無 CLI 建模模式；必須 GUI 常駐、文件已開、**Extensões ▸ AI Bridge (MCP)** 已啟動 |
+| **本專案交付契約** | ❗無 TWD97／TOMO（`gbenor.shx`＋`CHINA1.SHX`）／`數字_中文` 圖層／`A3圖框.dwt`／**DWG 2018** |
+| **座標系直接沿用** | ❗地形與 GPS 是 **UTM WGS84**，不是 `EPSG:3826`；未轉換就帶入 TWD97 圖面必錯 |
+| **STEP** | 匯出清單沒有 STEP；要給廠商 CNC 仍用 SolidCraft／text-to-cad |
+| **多客戶端** | 官方明講一次只接受一個 MCP 客戶端，且只聽 `127.0.0.1` |
+| **圖紙空間可程式化排版** | PDF 有自己的版面邏輯，但沒有本專案 `make_sheet.py` 的三區挖空與 E1~E18 品管 |
+
+**本專案定位**：`3D 構造建模 ＋ BIM 數量 ＋ 地形剖面 ＋ 示意出圖`。
+交付檔案仍回 `make_sheet.py` → `acc.py` → `check_delivery.py`；IngeTrazo 的 PDF／DXF 只當「參考圖／中間幾何」。
 
 ---
 
 ## 3. 重疊度矩陣
 
 > 3＝高度重疊（可互換）；2＝部分重疊（功能交集明顯）；1＝邊緣接觸；0＝無關
-> CC＝CADCraft CLI｜SC＝SolidCraft｜BL＝Blender｜AM＝AutoCAD MCP｜TC＝text-to-cad｜CS＝CadCraft Studio
+> CC＝CADCraft CLI｜SC＝SolidCraft｜BL＝Blender｜AM＝AutoCAD MCP｜TC＝text-to-cad｜CS＝CadCraft Studio｜IZ＝IngeTrazo
 
-| | CC | SC | BL | AM | TC | CS |
-|---|---|---|---|---|---|---|
-| **CC** CADCraft CLI | — | 0 | 1 | **3** | 1 | **3** |
-| **SC** SolidCraft | | — | 1 | 1 | **3** | 2 |
-| **BL** Blender | | | — | 0 | 2 | 2 |
-| **AM** AutoCAD MCP | | | | — | 1 | 2 |
-| **TC** text-to-cad | | | | | — | 2 |
-| **CS** Studio | | | | | | — |
+| | CC | SC | BL | AM | TC | CS | IZ |
+|---|---|---|---|---|---|---|---|
+| **CC** CADCraft CLI | — | 0 | 1 | **3** | 1 | **3** | 1 |
+| **SC** SolidCraft | | — | 1 | 1 | **3** | 2 | 2 |
+| **BL** Blender | | | — | 0 | 2 | 2 | 2 |
+| **AM** AutoCAD MCP | | | | — | 1 | 2 | 1 |
+| **TC** text-to-cad | | | | | — | 2 | 0 |
+| **CS** Studio | | | | | | — | 2 |
+| **IZ** IngeTrazo | | | | | | | — |
 
 ### 3.1 重疊解讀
 
@@ -198,6 +231,17 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 | 離線 | ✅ 完全離線 | ✗ 首次需 `uvx` 連網下載 |
 | 3MF／GLB | 3MF ✅ | 4 種格式全支援 |
 
+**重疊群 C：3D 幾何／視覺（IZ ↔ BL ↔ CS/CivilCraft；IZ ↔ SC 部分）＝可互換度約 40%**
+交集是「立體幾何＋看得到」，但**產物與用途不同**：
+
+| | IngeTrazo | Blender | Studio/CivilCraft | SolidCraft |
+|---|---|---|---|---|
+| 幾何 | 推拉實體＋BIM 標記 | 多邊形網格 | 地形 TIN／土方 | 參數特徵樹（B-rep） |
+| 數量 | ✅ IFC4＋CSV | ✗ | ✅ 土方／挖填 | ✅ 體積自檢 |
+| 座標 | UTM WGS84（需轉換） | 任意 | 可設 EPSG:3826（需人工） | 區域座標／mm |
+| 交付 | 比例 PDF／公尺 DXF | 渲染圖／動畫 | LandXML／DWG | STEP／STL |
+| 自動化 | MCP（GUI 需開） | headless `--background` | 無 headless、token 人工 | headless CLI |
+
 **不重疊的部分（真正不可替代）**
 
 | 能力 | 唯一提供者 | 對本專案的價值 |
@@ -211,11 +255,11 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 
 ## 4. 本專案建議分工（決策表）
 
-> 前提：交付契約是 **m／TWD97 TM2／TOMO／A3 1:600-1:700／DWG 2018 ＋ `check_delivery.py` 退出碼 0**。六套裡**沒有任何一套原生支援這套契約**，所以主線必須是自建工具鏈，其餘六套只補「它做不了的那一段」。
+> 前提：交付契約是 **m／TWD97 TM2／TOMO／A3 1:600-1:700／DWG 2018 ＋ `check_delivery.py` 退出碼 0**。七套裡**沒有任何一套原生支援這套契約**，所以主線必須是自建工具鏈，其餘七套只補「它做不了的那一段」。
 
 | 工作 | 用哪一套 | 理由（實測） |
 |---|---|---|
-| 現況底圖（NLSC／OSM／建物 SHP） | `tools\site_basemap`（自建） | 六套都沒有國土測繪圖資接取 |
+| 現況底圖（NLSC／OSM／建物 SHP） | `tools\site_basemap`（自建） | 七套都沒有國土測繪圖資接取 |
 | A3 圖紙排版＋視口裁切 | `tools\a3_sheet\make_sheet.py`（自建） | 已內建三區挖空；CADCraft／MCP 都要自己重寫 |
 | **交件 DWG** | **`tools\acad\acc.py`（accoreconsole）** | 規範要求 AutoCAD 2018；`acc.py` 是既有驗收路徑 |
 | **PDF／PNG 預覽** | **可改走 `cadcraft-cli run --cmd plot`** | 實測完整重現、免 AutoCAD、無 COM 衝突風險 |
@@ -225,6 +269,8 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 | **3D 斷面／擋土牆／溝渠** | **SolidCraft** | 專案已完成 U 型溝／擋土牆範本＋體積自檢流程 |
 | 需要 STEP 給外部廠商／要 git 版控模型 | text-to-cad（cadgen） | 純 Python 可 diff；但**要連網安裝**，離線案場不可用 |
 | 3D 示意圖／動畫給業主 | Blender | 唯一渲染／動畫路徑 |
+| **3D 建築／構造 BIM、IFC4、數量 CSV** | **IngeTrazo**（GUI＋MCP 橋） | 唯一能出 IFC4＋BIM 數量；需 GUI 開文件＋AI Bridge |
+| 地形剖面／無人機地形／3D 透視 | IngeTrazo（土方仍用 CivilCraft） | 讀 WebODM 網格與 UTM CSV；**剖面可看，土方計算不取代 CivilCraft** |
 | 土方／整地／LandXML | **Studio/CivilCraft**（人工開窗） | 無替代；但**先請使用者改公制＋EPSG:3826** |
 | 圖面數量／估價 | **Studio/TakeoffCraft**（人工開窗） | 有估價與損耗，MCP 沒有 |
 | 細部大樣 | `G:\...\Detail Manager` 圖庫 ＋ ezdxf | 圖庫比任何工具都重要 |
@@ -238,6 +284,9 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 5. **不要用 SolidCraft 排 A3** — 它沒有圖紙空間概念。
 6. **不要用 text-to-cad 於離線案場** — 首次需 `uvx` 下載。
 7. **不要相信 `drawing_understand` 的單位推論** — 已實測會把公尺圖判成英寸。
+8. **不要把 IngeTrazo 的 UTM 座標直接當 TWD97** — 地形／GPS 是 WGS84 UTM，與 `EPSG:3826` 不同；未轉換就疊圖必偏移。
+9. **不要拿 IngeTrazo 的 PDF／DXF 交件** — 沒有 TOMO、沒有本專案 A3 圖框、沒有 DWG 2018；交件仍走 `make_sheet.py`＋`acc.py`。
+10. **不要排 IngeTrazo 無人批次** — 無 headless，且一次只接受一個 MCP 客戶端；關掉 GUI 就全斷。
 
 ---
 
@@ -268,6 +317,7 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 | AutoCAD MCP | 1.6.0（Claude Code）／1.7.0（Codex） | 一致（242／243 tools） |
 | CADCraft CLI | 文件未標 | **0.13.0** |
 | Blender | 5.2.3 | 一致 |
+| IngeTrazo | 0.6.0 | **0.6.0**（GUI 與 `ingetrazo-mcp.exe` 同安裝；建模端到端待實跑） |
 
 ---
 
@@ -280,6 +330,7 @@ cadcraft-cli commands                          → 441 指令（Tools72/Draw52/M
 solidcraft-cli commands | grep -c '"id"'        → 493
 autocad-mcp tools/list（ezdxf，1.6.0）          → 242 tools
 C:\Program\CadCraft Studio\app\apps\            → 8 個 app 目錄
+python tools\ingetrazo\ingetrazo_check.py       → 安裝路徑＋橋＋5 tools（--call 需 GUI 開橋）
 ```
 
 ### 6.2 CADCraft 出圖與轉檔
@@ -297,11 +348,11 @@ acc.py todxf out.dwg 回讀                       → model 68、layout 100、IM
 
 ### 6.3 證據檔案位置
 
-`D:\公司案件.AI\_cad_assess\`：`cadcraft_plot.pdf`／`cadcraft_plot.png`／`acad_plot.png`／`cadcraft_conv.dwg`／`cadcraft_conv_回讀.dxf`／`model_only.dwg`／`model_only_回讀.dxf`
+`<專案根目錄>\_cad_assess\`（遷移前舊路徑的產物，現已不存在）：`cadcraft_plot.pdf`／`cadcraft_plot.png`／`acad_plot.png`／`cadcraft_conv.dwg`／`cadcraft_conv_回讀.dxf`／`model_only.dwg`／`model_only_回讀.dxf`
 
 ---
 
 ## 7. 一句話收束
 
-> **六套裡有三套在做同一件事（2D 圖面）、兩套在做同一件事（3D 實體）、只有四件事沒人替代（地形土方、圖面數量、渲染、圖庫）。**
+> **七套裡有三套在做同一件事（2D 圖面）、兩套在做同一件事（3D 參數化實體）、IngeTrazo 另佔「3D BIM＋地形＋示意出圖」一段；只有四件事沒人替代（地形土方、圖面數量、渲染、圖庫）。**
 > 本專案的正確姿勢不是「選一套全包」，而是：**自建工具鏈守住契約 → 缺哪一段補哪一套**。

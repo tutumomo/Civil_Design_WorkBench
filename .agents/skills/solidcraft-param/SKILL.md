@@ -6,7 +6,7 @@ description: 以 SolidCraft CLI 建立參數化 3D CAD 模型並交付（STEP/ST
 # SolidCraft 參數化 3D CAD 設計技能（`solidcraft-param`）
 
 > 本技能封裝 SolidCraft CLI 的參數化建模工作法。
-> 詳細操作手冊見 [`<專案根目錄>/docs\SolidCraft操作指引.md`](file:///D:/公司案件.AI/docs/SolidCraft操作指引.md)。
+> 詳細操作手冊見 [`docs\SolidCraft操作指引.md`](../../../docs/SolidCraft操作指引.md)。
 > 執行檔：`C:\Program Files\SolidCraft\solidcraft-cli.exe`（v0.24.0）
 
 ## 1. 核心原則

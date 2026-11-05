@@ -1,14 +1,14 @@
 # AutoCAD MCP（autocad-mcp-pro 1.6.0）操作指引（純 DXF 模式實測版）
 
-> 實測日期：2026-10-28｜安裝：`<使用者家目錄>\mcp\autocad-mcp-pro\.venv`｜測試成果：`D:\公司案件.AI\_autocad_mcp測試\`
+> 實測日期：2026-10-28｜安裝：`<使用者家目錄>\mcp\autocad-mcp-pro\.venv`｜測試成果：`<專案根目錄>\_autocad_mcp測試\`（遷移前舊路徑的產物，現已不存在）
 
 ## 1. 設定（已套用）
 
 | 用戶端 | 設定檔 | 後端 | 允許資料夾 |
 |---|---|---|---|
-| Claude Code（本工作區） | `D:\公司案件.AI\.mcp.json` | `ezdxf`（純 DXF，不碰 AutoCAD 視窗） | `D:\公司案件.AI` |
-| Claude Desktop | `%APPDATA%\Claude\claude_desktop_config.json`（改前備份 `.bak_20261028105125`） | 由 `com` 改 `ezdxf` | 由 `D:\公司案件` 改 `D:\公司案件.AI` |
-| Codex | `~\.codex\config.toml`（另一份安裝 `~\.agents\mcp\autocad-mcp-pro`，autocad-mcp-pro **1.7.0**） | 由 `com` 改 `ezdxf`（2026-10-28 改；改前備份 `config.toml.bak_202610281145`） | `D:\公司案件.AI` |
+| Claude Code（本工作區） | `.mcp.json` | `ezdxf`（純 DXF，不碰 AutoCAD 視窗） | `<專案根目錄>` |
+| Claude Desktop | `%APPDATA%\Claude\claude_desktop_config.json`（改前備份 `.bak_20261028105125`） | 由 `com` 改 `ezdxf` | 由 `D:\公司案件` 改 `<專案根目錄>`（遷移前） |
+| Codex | `~\.codex\config.toml`（另一份安裝 `~\.agents\mcp\autocad-mcp-pro`，autocad-mcp-pro **1.7.0**） | 由 `com` 改 `ezdxf`（2026-10-28 改；改前備份 `config.toml.bak_202610281145`） | `<專案根目錄>` |
 
 - Claude Code 首次在本工作區開新對話會詢問是否啟用 `.mcp.json` 的 `autocad`，同意即可；工具以 `mcp__autocad__*` 出現（242 個，延遲載入）。
 - **禁止**改回 `com` 後端：會操作共用 GUI AutoCAD，違反 AGENTS.md §3。
@@ -32,9 +32,9 @@
 |---|---|
 | `system_status.active_backend` | `ezdxf` ✔（`system_about` 顯示 `active_backend: ezdxf`） |
 | 工具數 | 243 個（`TOOL_PROFILE=full` + `TOOL_PACKS=all`） |
-| 工作區內寫檔 | `D:\公司案件.AI\_codex_mcp測試\codex_ezdxf_probe.dxf` 建立成功（18,637 B） |
+| 工作區內寫檔 | `<專案根目錄>\_codex_mcp測試\codex_ezdxf_probe.dxf` 建立成功（18,637 B；遷移前舊路徑的產物，現已不存在） |
 | 圖面內容 | `drawing_audit` 0 錯誤；ezdxf 回讀：`$INSUNITS=6`、圖層 `10_道路邊線_現況`、LINE 長度 10.0 m ✔ |
-| **越權寫入 `D:\公司案件\`** | `drawing_save_as` 與 `drawing_open` **皆被拒**：`Path rejected: ... is not inside any allowed directory. Allowed directories: D:\公司案件.AI` ✔；該處未產生任何檔案 |
+| **越權寫入 `D:\公司案件\`** | `drawing_save_as` 與 `drawing_open` **皆被拒**：`Path rejected: ... is not inside any allowed directory. Allowed directories: <專案根目錄>`（遷移前實測原文） ✔；該處未產生任何檔案 |
 
 - 重現腳本：`<使用者家目錄>\.agents\mcp\autocad-mcp-pro\codex_ezdxf_test.py`（以 `mcp` stdio client 帶上述 env 直啟 `autocad-mcp.exe`）。
 

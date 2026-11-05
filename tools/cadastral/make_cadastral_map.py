@@ -12,7 +12,7 @@
 
 用法
   python make_cadastral_map.py --lat 24.1114 --lon 120.6579 --radius 50 ^
-      --out D:\公司案件.AI\地籍套繪_xxx --scale 500 --publish --check
+      --out <專案根目錄>\\地籍套繪_xxx --scale 500 --publish --check
 
 注意
   * 地籍界址以地政事務所核發之地籍圖謄本／複丈成果圖為準，本圖僅供規劃參考。

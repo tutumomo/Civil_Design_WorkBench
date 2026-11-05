@@ -1,5 +1,6 @@
 """案址經緯度 → TWD97 現況平面線稿 DXF（道路邊線、道路用地界、建物+Hatch、指北、比例尺）
-說明見 D:\\公司案件.AI\\docs\\現況平面底圖作業流程.md；踩坑見 docs\\踩坑紀錄.md   v2 2026-10-22
+說明見 <專案根目錄>\\docs\\現況平面底圖作業流程.md；踩坑見 docs\\踩坑紀錄.md   v2 2026-10-22
+（本檔為 v2 舊版備份，現行程式為同目錄的 site_basemap.py；保留僅供追溯）
 """
 import argparse, os, sys, json, time, math, shutil, numpy as np, cv2, ezdxf
 from shapely.geometry import LineString, Polygon, box

@@ -70,9 +70,20 @@ claude_desktop_config.json
 
 # ---------------- CAD／Office 中間檔 ----------------
 *.bak
+*.bak-*
 *.dwl
 *.dwl2
 *.tmp
 ~$*
 *.bak_*
 tools/solidcraft/_dev/
+
+# ---------------- 其他 AI 工具的本機記憶（不進本專案版控） ----------------
+.workbuddy-ai/
+
+# ---------------- 一次性探測腳本（依 AGENTS.md §1.1 應放 _temp/） ----------------
+chat-*/
+
+# ---------------- 標準圖的渲染預覽（可重跑產生，非交付物） ----------------
+_ref/components_dxf/*.png
+

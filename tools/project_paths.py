@@ -1,10 +1,11 @@
 """專案路徑與外部工具解析（跨平台、無絕對路徑）。
 
-所有工具都應該從這裡取路徑，不要在個別檔案裡寫死 `D:\\公司案件.AI` 或
-`C:\\Python312\\python.exe`。本模組的解析順序：
+所有工具都應該從這裡取路徑，不要寫死磁碟絕對路徑（例如 Windows 的
+`D:\\某資料夾`、`C:\\Python312\\python.exe`）。本模組的解析順序：
 
 1. **環境變數**（優先）：`CIVIL_AI_ROOT`、`CIVIL_AI_REGS_DB`、`ARTCRAFT_HOME`、
-   `CIVIL_AI_PYTHON`、`AUTOCAD_HOME`、`SOLIDCRAFT_CLI`
+   `CIVIL_AI_PYTHON`、`AUTOCAD_HOME`、`SOLIDCRAFT_CLI`、`INGETRAZO_HOME`、
+   `INGETRAZO_MCP`
 2. **專案根目錄**：由本檔位置往上推（`tools/project_paths.py` → 上兩層），
    因此整個資料夾搬到任何磁碟、任何作業系統都成立
 3. **外部程式**：先找環境變數，再找各平台的常見安裝位置，最後找 `PATH`
@@ -190,6 +191,43 @@ def accoreconsole() -> str | None:
     return found or shutil.which("accoreconsole")
 
 
+def ingetrazo_home() -> Path | None:
+    """IngeTrazo 安裝根目錄：`INGETRAZO_HOME` → 各平台預設位置。"""
+    p = _env_path("INGETRAZO_HOME")
+    if p and p.is_dir():
+        return p
+    cands = [
+        Path(r"C:\Program Files\IngeTrazo"),
+        Path(r"D:\Program Files\IngeTrazo"),
+        Path.home() / "IngeTrazo",
+        Path("/opt/IngeTrazo"),
+        Path("/Applications/IngeTrazo.app/Contents/MacOS"),
+    ]
+    for c in cands:
+        if c.is_dir():
+            return c
+    return None
+
+
+def ingetrazo_mcp() -> str | None:
+    """IngeTrazo 的 MCP 橋接伺服器：`INGETRAZO_MCP` → 安裝目錄 → PATH。
+
+    這個執行檔只是 stdio → 本機 TCP（預設 `127.0.0.1:4763`）的橋。
+    工具要真的能用，IngeTrazo GUI 必須開著、已開文件，並在
+    「擴充功能 ▸ AI Bridge (MCP)」啟動橋接；否則 `tools/list` 仍可通，
+    但每次工具呼叫都會回「請先啟動 AI Bridge」。
+    """
+    p = _env_path("INGETRAZO_MCP")
+    if p:
+        return str(p) if p.is_file() else None
+    home = ingetrazo_home()
+    if home:
+        found = _first_existing([home / "ingetrazo-mcp.exe", home / "ingetrazo-mcp"])
+        if found:
+            return found
+    return shutil.which("ingetrazo-mcp") or shutil.which("ingetrazo-mcp.exe")
+
+
 def solidcraft_cli() -> str | None:
     """SolidCraft CLI：`SOLIDCRAFT_CLI` → 常見安裝位置 → PATH。"""
     p = _env_path("SOLIDCRAFT_CLI")
@@ -205,16 +243,49 @@ def solidcraft_cli() -> str | None:
     return found or shutil.which("solidcraft-cli")
 
 
+_BLENDER_CACHE: dict[str, str | None] = {}
+
+
 def blender_exe() -> str | None:
-    """Blender 執行檔（選用）：`BLENDER` 環境變數 → PATH → 常見安裝位置。"""
-    p = os.environ.get("BLENDER")
-    if p:
-        return p
-    cands = [Path("/Applications/Blender.app/Contents/MacOS/Blender"), Path("/usr/bin/blender")]
-    for r in (Path(r"C:\Program Files\Blender Foundation"),):
-        if r.is_dir():
-            cands += sorted(r.glob("Blender */blender.exe"), reverse=True)
-    return _first_existing(cands) or shutil.which("blender")
+    r"""Blender 執行檔（選用）：環境變數 → **MSIX 套件** → PATH → 常見安裝位置。
+
+    本機 Blender 是 Microsoft Store（MSIX）封裝，exe 位於
+    `C:\Program Files\WindowsApps\...\Blender\blender.exe`，
+    只掃 `Program Files\Blender Foundation` 會得到「未安裝」的**假陰性**，
+    因此這裡改為優先呼叫 `blender_runner.find_blender()`（會查 Get-AppxPackage）。
+    """
+    if "v" in _BLENDER_CACHE:
+        return _BLENDER_CACHE["v"]
+    exe: str | None = None
+    for key in ("BLENDER", "CIVIL_AI_BLENDER"):
+        cand = os.environ.get(key)
+        if cand and Path(cand).exists():
+            exe = cand
+            break
+    if exe is None:
+        try:  # MSIX：延遲載入，避免循環匯入
+            try:
+                from blender.blender_runner import find_blender  # type: ignore
+            except ImportError:
+                import sys as _sys
+                _tools = str(Path(__file__).resolve().parent)
+                if _tools not in _sys.path:
+                    _sys.path.insert(0, _tools)
+                from blender.blender_runner import find_blender  # type: ignore
+            found = (find_blender() or {}).get("exe")
+            if found and Path(found).exists():
+                exe = found
+        except Exception:
+            exe = None
+    if exe is None:
+        cands = [Path("/Applications/Blender.app/Contents/MacOS/Blender"), Path("/usr/bin/blender")]
+        for r in (Path(r"C:\Program Files\Blender Foundation"),
+                  Path(r"D:\Program Files\Blender Foundation")):
+            if r.is_dir():
+                cands += sorted(r.glob("Blender */blender.exe"), reverse=True)
+        exe = _first_existing(cands) or shutil.which("blender")
+    _BLENDER_CACHE["v"] = exe
+    return exe
 
 
 def cad_fonts_dir() -> Path | None:
@@ -275,6 +346,8 @@ def report() -> dict:
         "artcraft": {a: artcraft_cli(a) for a in ARTCRAFT_APPS},
         "accoreconsole": accoreconsole(),
         "solidcraft": solidcraft_cli(),
+        "ingetrazo_home": str(ingetrazo_home()) if ingetrazo_home() else None,
+        "ingetrazo_mcp": ingetrazo_mcp(),
         "blender": blender_exe(),
         "cad_fonts": str(cad_fonts_dir()) if cad_fonts_dir() else None,
         "cad_font_files": {n: (str(cad_font(n)) if cad_font(n) else None)
@@ -312,6 +385,9 @@ def main(argv=None) -> int:
             acc_desc = "—（未安裝 AutoCAD；沒有也能產 DXF，但缺少 DWG 轉檔工具）"
     print(f"accoreconsole: {acc_desc}")
     print(f"SolidCraft   : {info['solidcraft'] or '—（選用）'}")
+    iz = info["ingetrazo_mcp"]
+    print(f"IngeTrazo    : {info['ingetrazo_home'] or '—（選用；未安裝或設定 INGETRAZO_HOME）'}")
+    print(f"  MCP 橋     : {iz or '—（找不到 ingetrazo-mcp；設定 INGETRAZO_MCP）'}")
     print(f"Blender      : {info['blender'] or '—（選用）'}")
     print(f"CAD 字體庫   : {info['cad_fonts'] or '—（TOMO 樣式的 gbenor.shx / CHINA1.SHX 找不到）'}")
     for k, v in info["cad_font_files"].items():

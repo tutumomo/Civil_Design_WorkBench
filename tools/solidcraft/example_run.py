@@ -6,8 +6,8 @@
 這是「口述需求 → 參數化模型 → 交付」的標準示範案例。
 用法：
     set PYTHONIOENCODING=utf-8
-    C:\\Python312\\python.exe D:\\公司案件.AI\\tools\\solidcraft\\example_run.py ^
-        --out D:\\公司案件.AI\\SolidCraft範例\\U型溝渠
+    python <專案根目錄>\\tools\\solidcraft\\example_run.py ^
+        --out <專案根目錄>\\SolidCraft範例\\U型溝渠
 
 輸出：
     U型溝渠.step          B-rep 實體（可匯入 AutoCAD / Revit / Rhino）

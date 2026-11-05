@@ -10,7 +10,7 @@ from project_paths import solidcraft_cli  # noqa: E402
         [--expect-bbox 80x50x6]             # 預期外框尺寸 mm（X×Y×Z），容許 0.01 mm
         [--views iso,top,front]
 退出碼：0=建構成功且驗證通過；1=建構失敗或驗證不符
-說明：見 D:\\公司案件.AI\\docs\\SolidCraft操作指引.md
+說明：見 <專案根目錄>\\docs\\SolidCraft操作指引.md
 """
 import os, sys, json, argparse, datetime, subprocess
 

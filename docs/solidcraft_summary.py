@@ -1,7 +1,8 @@
 """把 SolidCraft 命令目錄整理成分組摘要（供快速查表）"""
 import json, collections, io
+from pathlib import Path
 
-P = r"D:\公司案件.AI\docs\solidcraft_commands.txt"
+P = Path(__file__).resolve().parent / "solidcraft_commands.txt"
 raw = io.open(P, encoding="utf-8").read()
 cmds = json.loads(raw)
 print(f"命令總數 {len(cmds)}")

@@ -55,6 +55,7 @@ STAMP_ZONE = (363.50, 29.00, 410.30, 80.90)       # 技師執業圖記區（須�
 TEMPLATE_LAYERS = {"圖框", "執業圖記開關", "Defpoints", "VIEWPORTS", "0"}
 
 LAYER_RE = re.compile(r"^\d{2}_")
+MPU = 1000.0     # 每模型單位多少 mm；--units cm 時於 main() 改 10
 
 
 def est_width(s, h):
@@ -99,6 +100,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("dxf")
     ap.add_argument("--scale", type=int, default=600)
+    ap.add_argument("--units", choices=["m", "cm"], default="m",
+                    help="模型空間單位。m(預設) 時 INSUNITS=6、1000mm/單位；"
+                         "cm 時 INSUNITS=5、10mm/單位")
     ap.add_argument("--layout", default=None, help="預設取第一個非 Model 版面")
     ap.add_argument("--building-layer", default="20_建物")
     ap.add_argument("--hatch-layer", default="21_建物_HATCH")
@@ -113,6 +117,9 @@ def main():
     a = ap.parse_args()
 
     errs, warns, info = [], [], {}
+    if a.units == "cm":
+        global MPU
+        MPU = 10.0
     doc = ezdxf.readfile(a.dxf)
 
     # ---- E1 audit ----
@@ -124,8 +131,11 @@ def main():
     # ---- E2 單位 ----
     iu, mm = doc.header.get("$INSUNITS"), doc.header.get("$MEASUREMENT")
     info["INSUNITS"], info["MEASUREMENT"] = iu, mm
-    if iu != 6 or mm != 1:
-        errs.append("E2 單位不對：$INSUNITS=%s（應 6）、$MEASUREMENT=%s（應 1）" % (iu, mm))
+    info["units"] = a.units
+    want_iu = 6 if a.units == "m" else 5
+    if iu != want_iu or mm != 1:
+        errs.append("E2 單位不對：$INSUNITS=%s（%s 應 %d）、$MEASUREMENT=%s（應 1）"
+                    % (iu, a.units, want_iu, mm))
 
     # ---- E3/E4 字型 ----
     tomo = doc.styles.get("TOMO") if "TOMO" in doc.styles else None
@@ -161,7 +171,7 @@ def main():
         errs.append("E5 出圖視口有 %d 個（應為 1）" % len(vps))
     for v in vps:
         w, h, vh = v.dxf.width, v.dxf.height, v.dxf.view_height
-        real = vh * 1000.0 / h if h else 0
+        real = vh * MPU / h if h else 0
         info["viewport"] = {"w": round(w, 2), "h": round(h, 2),
                             "view_height": round(vh, 3), "scale": round(real, 1),
                             "center": [round(v.dxf.center.x, 2), round(v.dxf.center.y, 2)]}
@@ -177,8 +187,8 @@ def main():
         msp = doc.modelspace()
         mb = ezb.extents(msp, fast=True)
         if mb.has_data:
-            need_w = w * a.scale / 1000.0
-            need_h = h * a.scale / 1000.0
+            need_w = w * a.scale / MPU
+            need_h = h * a.scale / MPU
             cx, cy = v.dxf.view_center_point.x, v.dxf.view_center_point.y
             win = (cx - need_w / 2, cy - need_h / 2, cx + need_w / 2, cy + need_h / 2)
             mw, mh = mb.extmax.x - mb.extmin.x, mb.extmax.y - mb.extmin.y
@@ -289,7 +299,7 @@ def main():
     for e in msp.query("TEXT MTEXT"):
         if e.dxf.layer in off:
             continue
-        h = text_h(e) * 1000.0 / a.scale
+        h = text_h(e) * MPU / a.scale
         if not legal(h):
             txt = (e.dxf.text if e.dxftype() == "TEXT" else e.plain_text()).strip().replace("\n", "/")
             bad_h.append("模型「%s」出圖 %.2f mm" % (txt[:16], h))

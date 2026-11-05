@@ -1,9 +1,9 @@
-# 口語操作手冊：ArtCraft 15 套＋SolidCraft／Blender／text-to-cad／AutoCAD MCP
+# 口語操作手冊：ArtCraft 15 套＋SolidCraft／Blender／text-to-cad／AutoCAD MCP／IngeTrazo
 
 > 建立：2026-10-29（2026-11-02 新增 `TextureCraft` 與 `Craft Anything`）｜全部本機實測。
 > 用途：使用者用口語下令 → 智能體查本表決定用哪套、怎麼下指令，**一律走無視窗 CLI（headless）**，不搶使用者正在用的視窗。
 > 完整指令清單：`docs\artcraft_commands\<App>.txt`（SolidCraft 與 CraftAnything 為 `.json`）。查單一指令參數：`<cli> describe <id>`（Deck／Design／Sound／SolidCraft）或 `craft-anything-cli <tool> --help`，或在清單檔中搜尋。
-> CAD 類能力邊界的深入評估見 `docs\六套CAD工具能力邊界與重疊度.md`，本檔不重複。
+> CAD 類能力邊界的深入評估見 `docs\七套CAD工具能力邊界與重疊度.md`，本檔不重複；IngeTrazo 的 GUI＋橋啟動順序見 `docs\IngeTrazo操作指引.md`。
 
 ## 0. 口語 → 工具 對照（先查這張）
 
@@ -12,6 +12,7 @@
 | 「出圖／轉 DWG／DXF 轉 PDF、PNG」 | **CADCraft**（相容 >80% 以上 AutoCAD 功能，支援直接產出 DWG 與出圖；土木交件亦可走 `make_sheet.py`＋`acc.py`） | `cadcraft-cli convert IN.dxf OUT.dwg`（或 `OUT.pdf`） |
 | 「畫一條線／改圖層／量面積」（2D 編修） | **CADCraft** `run --cmd`；或 AutoCAD MCP（見 §3 警告） | `run in.dxf --cmd 'line {...}' --save out.dxf` |
 | 「做一個 3D 實體／擋土牆模型／出 STEP、STL」 | **SolidCraft**（參數特徵樹）或 **text-to-cad**（Python build123d） | `solidcraft-cli run script.json --out x.step` |
+| 「做 3D 建築／構造模型、BIM 標記、IFC4、數量 CSV、地形剖面」 | **IngeTrazo**（GUI 開著＋AI Bridge；MCP 名稱 `ingetrazo`） | 先開 app→開文件→Extensões ▸ AI Bridge (MCP)；再由智能體呼叫 `run_python`／`query_model`／`screenshot` |
 | 「給 3D 模型上混凝土／砌石材質、烘焙 AO／Normal 貼圖、渲染 PBR 圖」 | **TextureCraft**（3D PBR 材質貼圖與烘焙，類 Substance Painter） | `texturecraft-cli new in.glb out.tcraft --sample`；`bake`；`export`；`render out.tcraft out.png --samples 64` |
 | 「把模型渲染成漂亮圖／做旋轉動畫／STL 轉 GLB」 | **Blender** 技能（或 **TextureCraft** `render`） | `blender_run.py recipe_render.py --input x.stl --out x.png` |
 | 「分析這個舊程式（.exe/.dll/.apk/.asar/SQLite）怎麼算的／擷取某網站並重建」 | **Craft Anything**（全能逆向剖析與潔淨室重建平台） | `craft-anything-cli triage <target>`；`rebuild <url_or_path>`；`db-sqlite-show` |
@@ -81,9 +82,9 @@
 3. **WordCraft `run` 只認一個 `--save`**：要 docx＋pdf 時先存 docx，再 `convert x.docx x.pdf`。
 4. 位置單位：DeckCraft 為 pt（投影片 960×540，左上原點、y 向下）；CADCraft 為圖面單位（本專案 m）；SolidCraft 預設 mm。
 5. CADCraft `run` 的 `--cmd` 可用 `"{last}"` 串接上一指令回傳的 handle。
-6. 產物寫在 `D:\公司案件.AI\` 底下；MCP 模式可加 `--automation-read-root/--automation-write-root D:\公司案件.AI` 限縮檔案存取。
+6. 產物寫在 `<專案根目錄>\` 底下（在專案根目錄執行時用相對路徑）；MCP 模式可加 `--automation-read-root/--automation-write-root <專案根目錄>` 限縮檔案存取。
 
-## 3. 非 ArtCraft 工具（狀態 2026-10-29）
+## 3. 非 ArtCraft 工具（狀態 2026-11-03）
 
 | 工具 | 狀態 | 怎麼叫 |
 |---|---|---|
@@ -92,6 +93,7 @@
 | **text-to-cad（cadgen）** | ⚠ 版本不一致：PATH 上是 **0.6.5**（pip --user），技能要求 `cadgen +0.8.2` 啟動器（`~\.local\bin\cadgen` 不存在），舊文件記 0.7.26（uvx）。`step snapshot` 可用 | 建模前先 `cadgen doctor`；需新版時另議安裝 |
 | **AutoCAD MCP Pro** | ⚠ **目前接的是 GUI AutoCAD（`com` 後端）**：`~\.codex\config.toml` 的 `AUTOCAD_MCP_BACKEND="com"`，與 `docs\AutoCAD_MCP操作指引.md` 記載「已改 ezdxf」不符。實測 `drawing_new` 會在使用者的 AutoCAD 開新圖；AutoCAD 忙碌時畫線回「接收者已拒絕這個呼叫」 | 改回 `ezdxf` 屬「修改 MCP 設定檔」，**須使用者點名同意**。未改前：除非使用者明說要操作他開著的 AutoCAD，否則不用此 MCP，改用 CADCraft／ezdxf |
 | **CadCraft Studio**（8 apps） | 未重測（需使用者開視窗並給 token） | 見 `docs\CadCraft_Studio操作指引.md` |
+| **IngeTrazo 0.6.0** | ⏳ 已登記：`ingetrazo-mcp.exe` 5 支工具；**專案 MCP 設定待 `--apply`、建模端到端待 GUI 開文件＋AI Bridge** | 先跑 `python tools\mcp\register_all.py --only ingetrazo --apply`，再開 app＋橋，最後 `python tools\ingetrazo\ingetrazo_check.py --call`；用法 `docs\IngeTrazo操作指引.md` |
 
 ## 4. 什麼時候「不」直接用這些 App
 

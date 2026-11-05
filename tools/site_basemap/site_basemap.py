@@ -4,6 +4,7 @@
 import argparse, os, sys, json, time, math, shutil, numpy as np, cv2, ezdxf
 from shapely.geometry import LineString, Polygon, box
 sys.path[:0] = [os.path.dirname(os.path.abspath(__file__)), os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]
+from project_paths import ROOT  # noqa: E402
 from drawing_rules import (H_BODY, H_NOTE, H_TITLE, model_h, require_standard_scale,
                            add_plot_layer, tag_plot_style, PLAN_LAYER_COLORS, PLAN_LAYERS_OFF)
 from nlsc import fetch_twd97, to97, from97, S

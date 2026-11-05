@@ -1,5 +1,5 @@
 import sys as _sys
-_sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parents[2]))
+_sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parents[1]))
 from project_paths import solidcraft_cli  # noqa: E402
 """SolidCraft 3D 參數化設計：命令腳本 → 模型建構 → 匯出 → 量測驗證 → 截圖 → 紀錄（一鍵交付）
 用法：

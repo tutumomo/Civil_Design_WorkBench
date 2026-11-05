@@ -169,7 +169,7 @@
   {
    "command": "parameters.export",
    "params": {
-    "path": "D:\\公司案件.AI\\SolidCraft範例\\擋土牆\\RC擋土牆_參數表.csv",
+    "path": "RC擋土牆_參數表.csv",
     "format": "csv"
    }
   }

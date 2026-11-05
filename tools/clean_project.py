@@ -4,7 +4,7 @@
 1. `_temp/` 依 AGENTS.md §1.1 定義為「可無條件整批刪除」→ 整批清掉（工作台工具已移到 tools/regs/）。
 2. 根目錄散落的一次性腳本、測試輸出、日誌 → 刪除。
 3. `_cad_assess/`、`_boq_assess/`（能力評估測試產物）→ 刪除。
-4. **不動**：完整案例(參考用)/、cases/、data/、標準圖圖庫/、_ref/components_dxf/、out/、tools.excel/、SolidCraft範例/、A3圖框.dwt。
+4. **不動**：完整案例(參考用)/、cases/、data/、標準圖圖庫/（含 A3圖框.dwt）、_ref/components_dxf/、out/、tools.excel/、SolidCraft範例/。
 5. 每項都印出大小，最後印回收空間。
 
 用法：python _temp/clean_project.py --dry-run   # 先看會刪什麼
@@ -43,12 +43,11 @@ KEEP_NOTE = """
   完整案例(參考用)/   使用者參考案例
   cases/              案件主檔
   data/               法規與圖資（現已入版控）
-  標準圖圖庫/         166 張公司標準圖
+  標準圖圖庫/         166 張公司標準圖（含 A3圖框.dwt 出圖樣板，make_sheet 需要）
   _ref/components_dxf/ 已轉好的 DXF（入版控）
   out/                交付物唯一落點
   tools.excel/        使用者既有 Excel 設計表
   SolidCraft範例/     範例
-  A3圖框.dwt          出圖樣板（make_sheet 需要）
 """
 
 

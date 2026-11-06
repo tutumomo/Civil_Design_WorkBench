@@ -209,6 +209,25 @@ def _quote_ps(text: str) -> str:
     return "'" + str(text).replace("'", "''") + "'"
 
 
+def _parse_args(pairs: list[str] | None) -> dict:
+    """把 `--arg KEY=VALUE` 轉成腳本可見的 ARGS dict（值會自動轉數字）。"""
+    out: dict = {}
+    for item in pairs or []:
+        if "=" not in item:
+            raise SystemExit(f"--arg 需為 KEY=VALUE 形式，收到：{item}")
+        key, raw = item.split("=", 1)
+        key = key.strip()
+        for cast in (int, float):
+            try:
+                out[key] = cast(raw)
+                break
+            except ValueError:
+                continue
+        else:
+            out[key] = raw
+    return out
+
+
 def _blender_argv(blender: dict, job_dir: Path, blend_file: str | None,
                   extra_args: tuple[str, ...] | list[str] = ()) -> list[str]:
     argv = ["-b"]
@@ -544,6 +563,9 @@ def _cli() -> int:
     p_run.add_argument("script")
     p_run.add_argument("--blend")
     p_run.add_argument("--timeout", type=float, default=300)
+    p_run.add_argument("--arg", action="append", default=[], metavar="KEY=VALUE",
+                       help="傳給腳本的全域 ARGS（可重複）。MSIX 啟動的 Blender 收不到呼叫端 $env:，"
+                            "覆寫參數一律用這個。")
 
     p_render = sub.add_parser("render", help="渲染靜態圖")
     p_render.add_argument("output")
@@ -565,7 +587,8 @@ def _cli() -> int:
         payload = info(probe=a.probe)
     elif a.cmd == "run":
         payload = run_python(Path(a.script).read_text(encoding="utf-8-sig"),
-                            job_name=Path(a.script).stem, blend_file=a.blend, timeout_s=a.timeout)
+                            job_name=Path(a.script).stem, blend_file=a.blend, timeout_s=a.timeout,
+                            args=_parse_args(a.arg))
     elif a.cmd == "render":
         w, h = (a.resolution.lower().split("x") + ["1080"])[:2]
         script = Path(a.script).read_text(encoding="utf-8-sig") if a.script else None

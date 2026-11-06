@@ -243,6 +243,27 @@ def solidcraft_cli() -> str | None:
     return found or shutil.which("solidcraft-cli")
 
 
+def cadcraft_studio_exe() -> str | None:
+    """CadCraft Studio 執行檔（GUI 視窗，供人類檢視／互動驗收）：`CADCRAFT_STUDIO_EXE` → 常見安裝位置 → PATH。
+
+    注意：此為 WebView2/WebAssembly 視窗殼層，無 headless CLI，不可用於背景批次轉檔。
+    AI 背景轉檔與出圖一律使用 `artcraft_cli("CADCraft")`（即 `cadcraft-cli.exe`）。
+    詳細分工規範見 `docs/CadCraft與CadCraft_Studio分工規範.md`。
+    """
+    p = _env_path("CADCRAFT_STUDIO_EXE")
+    if p:
+        return str(p) if p.is_file() else None
+    local_app = Path(os.environ.get("LOCALAPPDATA", ""))
+    found = _first_existing([
+        Path(r"C:\Program\CadCraft Studio\CadCraft Studio.exe"),
+        Path(r"C:\Program Files\CadCraft Studio\CadCraft Studio.exe"),
+        local_app / "Programs" / "CadCraft Studio" / "CadCraft Studio.exe",
+        Path.home() / "CadCraft Studio" / "CadCraft Studio.exe",
+        Path("/Applications/CadCraft Studio.app/Contents/MacOS/CadCraft Studio"),
+    ])
+    return found or shutil.which("cadcraft-studio") or shutil.which("CadCraft Studio.exe")
+
+
 _BLENDER_CACHE: dict[str, str | None] = {}
 
 
@@ -344,6 +365,7 @@ def report() -> dict:
         "out": str(OUT),
         "artcraft_home": str(art) if art else None,
         "artcraft": {a: artcraft_cli(a) for a in ARTCRAFT_APPS},
+        "cadcraft_studio": cadcraft_studio_exe(),
         "accoreconsole": accoreconsole(),
         "solidcraft": solidcraft_cli(),
         "ingetrazo_home": str(ingetrazo_home()) if ingetrazo_home() else None,
@@ -377,6 +399,10 @@ def main(argv=None) -> int:
     print(f"ArtCraft   : {info['artcraft_home'] or '（未安裝，或設定 ARTCRAFT_HOME）'}")
     for k, v in info["artcraft"].items():
         print(f"  {k:<12} {'OK  ' + v if v else '—'}")
+    if info.get("cadcraft_studio"):
+        print(f"CadCraftStudio: {info['cadcraft_studio']}  [OK]（人類可視化驗收視窗，無 headless CLI）")
+    else:
+        print("CadCraftStudio: —（未安裝或未設定 CADCRAFT_STUDIO_EXE）")
     acc_desc = info['accoreconsole']
     if not acc_desc:
         if info["artcraft"].get("CADCraft"):

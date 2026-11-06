@@ -56,7 +56,9 @@ egs\`）。
   4. 紀錄時間一律取本機系統時間：`C:\Python312\python.exe -c "import datetime;print(datetime.datetime.now())"`。
   5. **暫存與輸出位置**：批次作業前先把 `$env:TEMP`／`$env:TMP` 指向 `<專案根目錄>/_temp`（或直接用 `tools/project_paths.py` 的 `temp_dir()`），並 `os.makedirs` 出 `out\<案名>` 與 `_temp\<主題>`；中間檔（DXF／PNG／log）寫 `_temp`，交付檔寫 `out`（§1.1）。
 
-- **不碰共用 GUI AutoCAD**：轉檔與出圖一律走無介面 `accoreconsole.exe`（經 `tools\acad\acc.py`）或 `CADCraft CLI`（`cadcraft-cli`，相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖），避免多智能體 COM 衝突。
+- **不碰共用 GUI AutoCAD，並嚴格區隔兩套同名 CadCraft**：
+  - **AI 後台自動化代工（轉檔、出圖、無人值守運算）**：走無介面 `accoreconsole.exe`（經 `tools\acad\acc.py`）或 `CADCraft CLI`（`tools/project_paths.py` 之 `artcraft_cli("CADCraft")` 即 `C:\Program\ArtCraft\CADCraft\cadcraft-cli.exe`，相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖）。
+  - **人類視覺化驗收與特定互動模組**：`CadCraft Studio`（`C:\Program\CadCraft Studio\CadCraft Studio.exe`，內含 8 套網頁技術 App 如 CadCraft/CivilCraft/TakeoffCraft）為 **GUI 視窗看板**，無 headless CLI，嚴禁 AI 嘗試用腳本操控其介面做背景轉檔；僅供人類開圖檢視或依 `docs/CadCraft_Studio操作指引.md` 在已開視窗時協助。詳見 `docs/CadCraft與CadCraft_Studio分工規範.md`。
 - **完稿重開驗證（Reopen & Check）**：寫檔成功 ≠ 圖面可用。每次產出 CAD 檔必須重讀驗證並將實際出圖之 PDF 轉為 PNG 目視檢查；回報時須列出風險限制、數據來源與自評可信度（1–10）。
 
 ## 4. 確定性工具鏈（Deterministic Scripts）
@@ -133,6 +135,7 @@ egs\`）。
 - **When text shows as boxes/wrong glyphs, or you need to add or verify CAD fonts (字型／字體顯示異常、要新增字型)**, read [`docs\字型設定_CADCraft與AutoCAD.md`](docs/字型設定_CADCraft與AutoCAD.md)（SHX 只有 AutoCAD 讀、CADCraft 只吃已安裝 TTF/TTC、`CADCRAFT_FONTALT`／`CADCRAFT_FONTFALLBACK` 只認檔名且不能指資料夾；附雜湊驗收法）。
 - **Before using the `autocad` MCP tools (`mcp__autocad__*`)**, read [`docs/AutoCAD_MCP操作指引.md`](docs/AutoCAD_MCP操作指引.md)（僅限 `ezdxf` 後端；DWG 一律經 `acc.py`；`drawing_understand` 單位推論不可信；文字須補 TOMO）。
 - **When doing terrain / cut-fill / LandXML work (CivilCraft) or quantity takeoff from DWG/DXF/PDF (TakeoffCraft)**, read [`docs/CadCraft_Studio操作指引.md`](docs/CadCraft_Studio操作指引.md) first（需使用者開視窗並提供 token；token 不落地；CivilCraft 須先改公制；DWG 只能匯出 2000 版）。
+- **When choosing between CADCraft (ArtCraft CLI) and CadCraft Studio, or automating CAD operations vs opening GUI for review (兩套同名 CadCraft 分工與自動化邊界)**, read [`docs/CadCraft與CadCraft_Studio分工規範.md`](docs/CadCraft與CadCraft_Studio分工規範.md)（AI 後台代工一律用 `cadcraft-cli.exe`，Studio 僅作為人類開圖看板與特種互動模組）。
 - **Before producing or modifying any drawing (basemap, A3 sheet, detail)**, read [`本項目的出圖規定(不定期新增).md`](<本項目的出圖規定(不定期新增).md>)（使用者不定期新增）並遵守；已工具化的條文集中於 `tools\drawing_rules.py`（字高 本文 3／附註 4／標題 5 mm、模型空間依比例換算、標準比例尺清單、顏色 1~8 → 線粗），出圖樣式的實作與 CTB 說明見 `docs\出圖樣式與線粗.md`，規定新增時須同步該檔。；**既有舊圖要改成新樣式時用 `tools\acad\apply_plot_style.py`**，不要重跑整條產線
 - **After changing any tool under `tools\` (改過工具後)**, run `tools\selftest\regression.py`；它會跑完所有既有案件的全軸並比對基準（FS、斷面積、通水容量、配筋間距、預算）。若改到 `tools\design\`，另必跑 `tools\selftest\design_core_selftest.py` 與 `tools\selftest\design_workbench_selftest.py`；若改到查詢台，再跑 `tools\regs\regq_selftest.py`。說明見 [`docs\回歸測試.md`](docs/回歸測試.md)。
 - **When checking whether a budget's unit prices are sourced or assumed (單價可信度)**, run `tools\boq\price_audit.py <case.json>`；價格庫在 `tools\boq\prices\`，案件工項要有 `code` 才比對得到（沒有 key 就等於沒有連結）。說明見 [`docs\單價庫與查證覆蓋率.md`](docs/單價庫與查證覆蓋率.md)。

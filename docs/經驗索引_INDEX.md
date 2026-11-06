@@ -32,6 +32,7 @@
 | **EXP-B9** | 掃描藍曬圖歪斜/透視變形，或圖面缺細部衛浴/門窗 | 採「大尺寸圖數值定正交結構與外牆」＋「細部藍曬圖比例內插補齊設備」。嚴格正交化水平與垂直線條（圓弧與轉向線除外）。超大圖（139 MP）需設 `Image.MAX_IMAGE_PIXELS = None`。 | `build_sancun_cad.py` | `§AH` |
 | **EXP-B10** | `ezdxf` 建立圖層時噴 `DXFValueError: invalid lineweight: 10` | AutoCAD DXF 線粗為離散值（0, 9, 13, 15, 20, 25, 30, 35, 40, 50 等），不可傳入 10 或任意整數；薄線改用 9 或 13。 | `build_sancun_cad.py` | `§AH` |
 | **EXP-B11** | DXF 轉 DWG 與全圖視覺閉環檢核 | 優先使用 `cadcraft-cli.exe convert file.dxf file.dwg`（<0.5s，無介面、無 COM 衝突），並以 `convert file.dwg file.png` 產出預覽圖經 `read_file` 進行全圖閉環品管。 | CADCraft CLI | `§AH` |
+| **EXP-B12** | 系統中存在兩套同名「CadCraft」（ArtCraft 原生版 vs CadCraft Studio 套件版），不知呼叫何者 | AI 背景自動化代工（轉檔、繪圖、資訊萃取）**一律且唯一**呼叫 ArtCraft 的 `cadcraft-cli.exe`（極速無介面、零 UI 依賴）；CadCraft Studio 為 WebView2 前台視窗，無 headless CLI，僅供人類檢視開圖，嚴禁讓 AI 操縱 Studio 介面轉檔。 | [`CadCraft與CadCraft_Studio分工規範.md`](CadCraft與CadCraft_Studio分工規範.md) | `§AH`, `AGENTS.md §3` |
 
 ---
 

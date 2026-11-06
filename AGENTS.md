@@ -176,6 +176,8 @@ egs\`）。
 - **`regs_server.py` 必須帶 `--mcp`**，否則會以一次性 CLI 結束，看起來像握手失敗。
 - `cadgen`（text-to-cad）的 MCP 只給 CAD Viewer 連結與遙測；建模走 CLI `%APPDATA%\Python\Python312\Scripts\cadgen.exe`（0.6.5）＋`cad`／`dxf`／`step-parts` 技能腳本的 build123d 腳本。
 
+- **When the user asks to turn a hand-drawn / schematic landscape image into a 3D 景觀模擬圖 or 實景意象圖（手繪圖轉 3D）**, read [`docs\3D景觀模擬_作業經驗與踩坑.md`](docs/3D景觀模擬_作業經驗與踩坑.md) first：①**建模前先送 5~7 列「判讀確認表」**並問「我這樣讀對不對」，不要問「你要選哪個方案」——2026-11-06 避車彎案三次返工全是構造物定名看錯（避車彎→誤判停車格、路緣石→誤判擋土牆），不是算圖失敗；②Blender 一律經 `tools\blender\blender_runner.py`（MSIX 版，只掃 `C:\Program Files\Blender Foundation` 會誤判未安裝），`--timeout 1200`，存檔前設 `save_version=0`；③可重用腳本在 `tools\landscape3d\`（`bay_scene.py` 參數集中在檔尾版面常數區，用 `grep -n "BAY_DEPTH =" tools\landscape3d\bay_scene.py` 定位、別抄行號；參數覆寫一律用 `blender_runner.py --arg KEY=VALUE`，MSIX 版收不到呼叫端的 `$env:`；`plan_view.py` 產正交俯視作第二幾何證據——只有透視圖不能證明緣石與坡趾對齊）；④交付清單必含性質聲明／尺寸對照／判讀假設與待確認項／重跑指令／限制／自評可信度。踩坑濃縮版見 `docs\踩坑紀錄.md` §AG。
+
 - **When the user says「收工」、「關帳」or closeout**, read [`docs\專案收工SOP.md`](docs/專案收工SOP.md) and run all 16 steps. 版本採 CalVer `vYYYY.MM.DD-N`；「收工」一律授權 commit、tag 與 push `main`（使用者另說「先不推」才跳過）；只 stage 本次白名單，不得掃入其他 dirty 檔。
 
 ## 6. 交件強制品管門檻（Mandatory Delivery Gate）

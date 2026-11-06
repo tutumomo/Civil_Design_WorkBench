@@ -28,6 +28,10 @@
 | **EXP-B5** | `ezdxf` 新增 `TOMO` 字型或 `Importer` 跨檔併入時字型遺失 | `doc.styles.add("TOMO", font="gbenor.shx")`（`font` 為 keyword-only 參數），再設 `st.dxf.bigfont = "CHINA1.SHX"`；`Importer` 併檔前目標檔須先建立同名 `TOMO` 樣式。 | [`site_basemap.py`](../tools/site_basemap/site_basemap.py) | `§I` |
 | **EXP-B6** | 圖層顏色設對了，E17 仍警告「圖元自帶顏色／線粗會蓋掉圖層設定」，多為 HATCH | `ezdxf` 的 `add_hatch()` 與 `set_pattern_fill()` **預設 `color=7`**；建立填充時兩處都要 `color=256`（BYLAYER）。既有圖用 `tools\acad\apply_plot_style.py` 一次改回。 | `docs\出圖樣式與線粗.md` | `§R` |
 | **EXP-B7** | E17 把「圖層關閉」的圖層（顏色 `-8`）誤判成「顏色不在 1~8」 | 負色值＝圖層關閉，顏色取 `abs()`。`plot_style_issues()` 已處理；換色工具會保留關閉狀態。 | [`drawing_rules.py`](../tools/drawing_rules.py) | `§R` |
+| **EXP-B8** | 建築平面施工圖（S=1:100）轉 DWG 單位混淆（公尺 vs. 公分） | 臺灣建築施工圖標註數值（1220/2570/420/330）一律為公分（cm）；繪圖以 1 unit = 1 cm，DXF 表頭設 `$INSUNITS=5`、`$MEASUREMENT=1`。外牆厚度 25 cm，隔間牆 12 cm。 | 三村活動中心 1F/2F | `§AH` |
+| **EXP-B9** | 掃描藍曬圖歪斜/透視變形，或圖面缺細部衛浴/門窗 | 採「大尺寸圖數值定正交結構與外牆」＋「細部藍曬圖比例內插補齊設備」。嚴格正交化水平與垂直線條（圓弧與轉向線除外）。超大圖（139 MP）需設 `Image.MAX_IMAGE_PIXELS = None`。 | `build_sancun_cad.py` | `§AH` |
+| **EXP-B10** | `ezdxf` 建立圖層時噴 `DXFValueError: invalid lineweight: 10` | AutoCAD DXF 線粗為離散值（0, 9, 13, 15, 20, 25, 30, 35, 40, 50 等），不可傳入 10 或任意整數；薄線改用 9 或 13。 | `build_sancun_cad.py` | `§AH` |
+| **EXP-B11** | DXF 轉 DWG 與全圖視覺閉環檢核 | 優先使用 `cadcraft-cli.exe convert file.dxf file.dwg`（<0.5s，無介面、無 COM 衝突），並以 `convert file.dwg file.png` 產出預覽圖經 `read_file` 進行全圖閉環品管。 | CADCraft CLI | `§AH` |
 
 ---
 
@@ -143,6 +147,10 @@
 | **EXP-G37** | 用「從標記字串找第一個／最後一個符合字串」做文字替換，誤刪 `make_box_section.py` 約 265 行 | **絕不用啟發式字串搜尋做刪除**。改檔一律用「明確行號＋唯一錨點字串」或 `apply_patch`。收工前 `ast.parse` + 數 `def` 數量 + 跑該模組 selftest。 | 逐字重建後 987 行、18 個 def、`ast.parse` 通過 | `§AF.6` |
 | **EXP-G38** | 配筋表重量欄與數量表鋼筋量對不上；或低解析 PNG 上的小數讀錯 | 配筋表「重量(kg/m)」逐列加總必須等於數量表「鋼筋（淨量）」（三孔 910.837 ≈ 910.84 ✅）。`build_tables()` 以 `qrows.get(label)` 取引擎列，**引擎改列名而圖表沒跟著改會靜默變 0**；差異出現時修程式不改圖。**低解析 PNG 不可用來判讀小數**（曾把 47.85 讀成 4.75），數值對帳一律用程式輸出。 | 配筋表 14 列加總＝引擎淨量 | `§AF.7` |
 | **EXP-G39** | `AGENTS.md` 觸發器引用了 `docs\箱涵斷面圖產線.md`，但檔案不存在 | 文件連結與工具同步落地：`AGENTS.md` 先寫觸發器時就必須把 `docs\` 檔案一併建檔，否則收工時觸發器指向空連結。新出圖工具放 `tools\box_section\`（不放 `_temp`）；`case_package.py` 依 `quantities.model=="box_culvert"` 自動改用並補 `section:{scale:auto}`。 | S-01／S-02 產出、E1~E18 各 0 錯誤 | `§AF.8` |
+
+| **EXP-G40** | 手繪景觀圖轉 3D 連續三次返工（把避車彎畫成平行停車格、把路緣石畫成 0.95 m 擋土牆），每次都整組幾何重做 | 返工原因**全是構造物定名看錯，不是工具或算圖失敗**。建模前必送 5~7 列「判讀確認表」（構造物名稱／圖上數字各指什麼／關鍵尺寸／物件數量／打算怎麼畫），問「我這樣讀對不對」，**不要問「你要選哪個方案」**。避車彎＝車道邊線局部外凸＋S 形漸變＋緣石繞行；停車格＝直線＋格線。路緣石 15~25 cm、無壓梁伸縮縫、背側綠帶後直接起坡；擋土牆通常 ≥60 cm、有壓梁與排水孔、牆頂齊土面。 | 定案版 `bay_scene.py` 444 物件／37,593 面，四視角＋俯視平面全數重繪 | `§AG.1`、`§AG.2` |
+| **EXP-G41** | 透視圖看起來「差不多」，但緣石與坡趾其實沒對齊；載入 `.blend` 出圖時對著空場景也回報成功 | 幾何參數只留一份（`bay_edge()`／`toe_y()`／`slope_z()`／`band()`／`sweep()` 同源，改尺寸只改參數區），漸變用 smoothstep；**第二證據用正交俯視**（`plan_view.py`、`ortho_scale 18.0`、1600×900）＋腳本輸出 `RESULT` 實測值逐項核對，不用眼睛驗收。Blender 走 `blender_runner.py`（MSIX 版）；`--blend` 腳本不可呼叫 `read_factory_settings()`、重建前先刪同名物件、物件數為 0 要主動拋錯；存檔前 `save_version=0` 免生 `.blend1`。 | 俯視圖與 `RESULT`：`curb_h_m=0.2`、`bay_edge(5.0)=3.20`、`toe_y(5.0)=4.40` 三處一致 | `§AG.3`、`§AG.4`、`§AG.5` |
+| **EXP-G42** | Blender 腳本明明設了 `$env:BAY_OUT`／`$env:BAY_PREVIEW`，輸出照樣落在 `out\`、照樣跑滿全部視角；腳本從 `_temp` 提升到 `tools\` 後首跑就 `ModuleNotFoundError: project_paths` | 兩個獨立的傳遞失效：① MSIX 版由 `Invoke-CommandInDesktopPackage` 開新行程，**呼叫端的環境變數不繼承**——參數覆寫一律用 `blender_runner.py` 的可重複 `--arg KEY=VALUE`，腳本端讀注入的 `ARGS`；② runner 會把腳本複製成 `_temp\blender\<job>\user_script.py` 再 exec，**`__file__` 指向複本**，要用 `__file__`／`cwd` 向上搜尋 `project_paths.py`，不要數層數或寫死路徑。驗證一律先跑預覽（10.3 s）並寫 `_temp`，別拿正式產出試錯 | `--arg` 路徑實測 job `20261106_132152`（`ok=true`、1 張 1280×720、`_temp\landscape3d\verify_out`）；完整重跑 `20261106_131739`（171.3 s、3 張、主視角 1,547,599 bytes 與前一版相同＝可重現）；失敗對照 `20261106_131643`（0.02 s 即失敗） | `tools\blender\blender_runner.py`（`--arg`／`_parse_args`）、`docs\3D景觀模擬_作業經驗與踩坑.md` §2.1／§2.2／§6 第 16~18 列、`docs\踩坑紀錄.md` §AG.4 | 實測 2026-11-06 |
 
 ## 8. 智能體作業環境（Harness — 回合中斷／成本）
 

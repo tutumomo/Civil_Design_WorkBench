@@ -34,6 +34,47 @@ IngeTrazo 是一套**開源的 3D 建築／土木模型器**（推拉建模、BI
 
 ---
 
+## 1.5 Linux（aarch64）：原始碼建置版（2026-11-07 實測）
+
+官方只出 **x86_64** 的 AppImage／tarball／flatpak／snap（0.6.0 發行檔全是 x86_64 或 macOS／Windows），
+**沒有 aarch64 資產**。aarch64 機器要走原始碼建置；PySide6 6.11.3 有 `manylinux_2_39_aarch64` wheel，
+`manifold3d` 亦有 aarch64 wheel，所以不需要模擬層。
+
+```bash
+git clone --depth 1 https://github.com/ingelibre/ingetrazo.git ~/IngeTrazo
+cd ~/IngeTrazo && python3 -m venv venv
+./venv/bin/python -m pip install -r requirements.txt     # PySide6 6.11.3 / numpy / openskp / ezdxf / manifold3d
+./venv/bin/python main.py --check                        # 應以 OK 結尾
+```
+
+安裝目錄另外放兩個啟動器（未追蹤檔，更新不會被覆蓋）：
+
+| 檔案 | 用途 |
+|---|---|
+| `~/IngeTrazo/ingetrazo` | GUI 啟動器 → `venv/bin/python main.py` |
+| `~/IngeTrazo/ingetrazo-mcp` | MCP 橋（stdio ↔ `127.0.0.1:4763`）→ `venv/bin/python scripts/ingetrazo_mcp.py` |
+
+`project_paths.ingetrazo_home()` 的候選清單本來就有 `~/IngeTrazo`，所以**不需要設 `INGETRAZO_HOME`／`INGETRAZO_MCP`**。
+原始碼版**沒有** `ingetrazo-mcp.exe`，走的是 `scripts/ingetrazo_mcp.py`（只用標準庫，可稽核）。
+
+### 1.5.1 自動更新
+
+```bash
+python tools/ingetrazo/ingetrazo_update.py --check   # 只看有沒有新版（有新版 → 退出碼 2）
+python tools/ingetrazo/ingetrazo_update.py           # 更新（git fetch → reset --hard FETCH_HEAD → 必要時 pip → 自檢）
+~/IngeTrazo/ingetrazo_update                         # 同一支的方便入口
+```
+
+- **依賴只在 `requirements.txt` 有變時才重裝**（省掉每次幾分鐘的 pip）。
+- **GUI 開著時拒絕更新**（改到一半的原始碼會讓 Qt 載入半套模組）；要硬更新加 `--force`。
+- 安裝目錄有**已納入版控**的改動時拒絕更新；`--force` 會先把 `git diff` 存到 `_temp/ingetrazo/local_*.patch`。
+- 不是 git 工作區（官方 tarball／AppImage 版）→ 明確報錯，不做猜測式更新。
+- 更新後自動跑 `main.py --check`，非 OK 即退出碼 1。
+
+> 未實測：BIM／IFC4 匯出、地形 DEM、Sheet composer 在 aarch64 的表現；本輪只驗到「GUI 起得來、MCP 伺服器 tools/list 回 5 支工具、`--check` OK」。
+
+---
+
 ## 2. 能力邊界
 
 ### 2.1 可以做

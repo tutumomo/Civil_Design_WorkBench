@@ -57,6 +57,18 @@ cd ~/IngeTrazo && python3 -m venv venv
 `project_paths.ingetrazo_home()` 的候選清單本來就有 `~/IngeTrazo`，所以**不需要設 `INGETRAZO_HOME`／`INGETRAZO_MCP`**。
 原始碼版**沒有** `ingetrazo-mcp.exe`，走的是 `scripts/ingetrazo_mcp.py`（只用標準庫，可稽核）。
 
+三個啟動器都可以 symlink 到 PATH 目錄直接用（`ingetrazo`／`ingetrazo-mcp`／`ingetrazo_update`）：
+
+```bash
+ln -sfn ~/IngeTrazo/ingetrazo        ~/.local/bin/ingetrazo
+ln -sfn ~/IngeTrazo/ingetrazo-mcp    ~/.local/bin/ingetrazo-mcp
+ln -sfn ~/IngeTrazo/ingetrazo_update ~/.local/bin/ingetrazo_update
+```
+
+**啟動器必須以 `readlink -f "${BASH_SOURCE[0]}"` 解出真實路徑再找 `venv/`**，不能只用 `dirname`：
+走 symlink 呼叫時 `dirname` 拿到的是 `~/.local/bin`，會去找 `~/.local/bin/venv/bin/python` 而報
+「沒有此一檔案或目錄」（2026-11-07 實例）。
+
 ### 1.5.1 自動更新
 
 ```bash

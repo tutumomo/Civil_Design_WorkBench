@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/git/sync_check.py\" 2>/dev/null || python3 \"$CLAUDE_PROJECT_DIR/tools/git/sync_check.py\"",
+            "timeout": 30,
+            "statusMessage": "檢查本機與 GitHub 是否同步…"
+          }
+        ]
+      }
+    ]
+  }
+}

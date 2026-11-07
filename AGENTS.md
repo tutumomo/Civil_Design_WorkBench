@@ -55,9 +55,14 @@ egs\`）。
   3. 超過 60 秒之長工作（抓圖磚、Overpass、`accoreconsole`）輸出導向 `> _log.txt 2>&1` 輪詢，逾時後先檢查檔案時間戳確認冪等才重跑。
   4. 紀錄時間一律取本機系統時間：`C:\Python312\python.exe -c "import datetime;print(datetime.datetime.now())"`。
   5. **暫存與輸出位置**：批次作業前先把 `$env:TEMP`／`$env:TMP` 指向 `<專案根目錄>/_temp`（或直接用 `tools/project_paths.py` 的 `temp_dir()`），並 `os.makedirs` 出 `out\<案名>` 與 `_temp\<主題>`；中間檔（DXF／PNG／log）寫 `_temp`，交付檔寫 `out`（§1.1）。
+- **macOS／Linux 的 Python 執行鐵則**（2026-11-07 建立）：
+  1. **一律用專案內的 `.venv`**：`python3 -m venv .venv` → `.venv/bin/python -m pip install -r requirements.txt`；之後所有指令用 `.venv/bin/python`（`web.sh` 會自動優先用它）。系統 Python 3.14 是 externally-managed 且無套件，缺 `matplotlib` 會讓 `regs_server.py` 整個起不來。
+  2. 中文檔一樣要 `encoding="utf-8"`；不要用 `sed -i`／`cat` 改中文檔（BSD 版行為與 GNU 不同）。
+  3. 沒有 AutoCAD 就不必裝 SHX 字型（`install_cad_fonts.py --apply` 會報「找不到字型目錄」，屬正常）；DWG 由 CADCraft 產出，格式仍是 AutoCAD 2018（`AC1032`）。
 
 - **不碰共用 GUI AutoCAD，並嚴格區隔兩套同名 CadCraft**：
-  - **AI 後台自動化代工（轉檔、出圖、無人值守運算）**：走無介面 `accoreconsole.exe`（經 `tools\acad\acc.py`）或 `CADCraft CLI`（`tools/project_paths.py` 之 `artcraft_cli("CADCraft")` 即 `C:\Program\ArtCraft\CADCraft\cadcraft-cli.exe`，相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖）。
+  - **AI 後台自動化代工（轉檔、出圖、無人值守運算）**：走無介面 `accoreconsole.exe`（經 `tools\acad\acc.py`）或 `CADCraft CLI`（`tools/project_paths.py` 之 `artcraft_cli("CADCraft")`，相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖）。
+  - **macOS 沒有 `*-cli`**：`/Applications/CADCraft.app` 只有 GUI 殼層，直接執行 `convert` 會彈視窗後結束、不產檔。已內建 `tools\artcraft_cli\` 的三支殼層（`cadcraft-cli`／`gridcraft-cli`／`wordcraft-cli`）走 JSON-lines 控制通道，對外維持 Windows CLI 介面，**呼叫端不用改**；`project_paths.artcraft_cli()` 會自動找到它們。詳見 `tools\artcraft_cli\README.md` 與 `docs\環境需求與自動配置.md` §8.5。
   - **人類視覺化驗收與特定互動模組**：`CadCraft Studio`（`C:\Program\CadCraft Studio\CadCraft Studio.exe`，內含 8 套網頁技術 App 如 CadCraft/CivilCraft/TakeoffCraft）為 **GUI 視窗看板**，無 headless CLI，嚴禁 AI 嘗試用腳本操控其介面做背景轉檔；僅供人類開圖檢視或依 `docs/CadCraft_Studio操作指引.md` 在已開視窗時協助。詳見 `docs/CadCraft與CadCraft_Studio分工規範.md`。
 - **完稿重開驗證（Reopen & Check）**：寫檔成功 ≠ 圖面可用。每次產出 CAD 檔必須重讀驗證並將實際出圖之 PDF 轉為 PNG 目視檢查；回報時須列出風險限制、數據來源與自評可信度（1–10）。
 
@@ -67,6 +72,7 @@ egs\`）。
 - `tools\a3_sheet\make_sheet.py`：**A3 出圖首選標準工具**。套用 `A3圖框.dwt`、建立非矩形裁切視口（自動避開左下說明、右上指北針、右下技師圖記區）、鎖定比例，`--publish` 呼叫 `acc.py` 產出 DWG 與 PDF（優先於舊版 `make_a3_sheet.py`）。
 - `tools\a3_sheet\check_delivery.py`：**交件強制品管檢核器**（檢查 E1~E18，含幾何 bbox 壓字、疊字碰撞、顏色→線粗與出圖型式）。
 - `tools\acad\acc.py`：封裝 `accoreconsole.exe` 執行 `todxf`（DWT/DWG→DXF）與 `publish`（DXF→DWG＋PDF）。出圖型式預設用專案自帶的 `tools\acad\plot\monochrome.ctb`（顏色→線粗符合規定；安裝版 monochrome.ctb 實測不符）。
+- `tools\artcraft_cli\`：**macOS／Linux 的 ArtCraft CLI 替代層**（Windows 有真 `*-cli.exe` 時不啟用）。三支殼層 `cadcraft-cli`／`gridcraft-cli`／`wordcraft-cli` 走 App 的 JSON-lines 控制通道，維持 Windows CLI 的子指令介面（`convert`／`run --script`／`eval`／`check`／`convert --update-fields`）。**三個 App 認證方式不同**：CADCraft 每請求帶 `token`、GridCraft 先 `auth` 握手、WordCraft 每請求帶 `key`。限制：CADCraft 出的 PDF 中文為向量（不可抽文字校字）、DWG 仍是 AutoCAD 2018（`AC1032`）。
 - `tools\acad\ctb.py`：**出圖型式表（CTB）讀取／比對／產生**。`report` 列出顏色→線粗、`verify` 與規定表比對（不符退出碼 1）、`build` 由安裝版重產專案 CTB（只改線粗）。
 - `tools\acad\apply_plot_style.py`：**舊圖套新出圖樣式**。規定上線前的 DXF 不必重跑整條產線，只換圖層顏色／線粗、把圖元自帶顏色改回 BYLAYER、補寫 `TOMO_PLOTSTYLE`，幾何與圖紙空間完全不動；`--publish` 另出 DWG＋PDF＋PNG。顏色來源是 `drawing_rules.PLAN_LAYER_COLORS`（與 `site_basemap.py` 共用同一份表）。
 - `tools\cadastral\make_cadastral_map.py`：**地籍套繪圖首選工具**。輸入 WGS84 經緯度＋半徑（預設 50 m）→ 抓臺中市開放 TCLandType 坵塊／段籍（免 token、已做 `resultOffset` 分頁）＋臺中市建物 SHP，產 A3 地籍套繪圖 DXF／DWG（`--publish` 另出 PDF、`--check` 跑 E1~E18）。地號標註先找內接點、放不下改環狀外移＋引線（估寬法與 check_delivery 同一套）；段界自動裁到圖面外 30 m。**界址仍以地籍圖謄本為準，不得作為產權、鑑界或建築線依據。** 說明見 `docs\地籍套繪圖產線.md`。
@@ -191,3 +197,10 @@ python tools/a3_sheet/check_delivery.py <成果.dxf> ^
   --scale 600 --require-dwg ^
   --require-layer 10_道路邊線_現況 --require-layer 20_建物 --require-layer 22_水道
 ```
+
+> macOS／Linux 用 `.venv/bin/python tools/a3_sheet/check_delivery.py …`（參數相同）。
+
+> **版面類錯誤的三個高頻來源**（2026-11-07 整理，詳見 `docs\踩坑紀錄.md` §AI.4）：
+> ① **右欄圖例／說明過寬** → E9／E10（寬度估算要比 `est_width()` 再保守一成，SHX 中文寬度會被低估兩成）；
+> ② **匯入的底圖圖層沒有線粗**（DXF 370 = -3）→ E17（`make_sheet.py` 已內建 `apply_plot_style()`，不要手動補圖）；
+> ③ **右側欄圖例超出圖框內框 410.27** → E9（圖例文字起點不得晚於 `CX+12`）。

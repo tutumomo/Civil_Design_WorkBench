@@ -152,20 +152,20 @@ yy = by - 4; pl([(CX, yy), (X1, yy)])
 yy -= 6; t("圖 例", cx, yy, H_TITLE); yy -= 7.5
 def row(label):
     global yy
-    t(label, CX + 15, yy, H_BODY, TA.MIDDLE_LEFT); y0 = yy; yy -= 6.5; return y0
-y = row("道路邊線(現況)"); pl([(CX + 2.5, y), (CX + 12.5, y)])        # 半形括號：3 mm 全形會超出欄寬
-y = row("道路用地界(地籍)"); pl([(CX + 2.5, y), (CX + 12.5, y)], lt="DASHED")
-y = row("道路中心線"); pl([(CX + 2.5, y), (CX + 12.5, y)], lt="CENTER")
+    t(label, CX + 12, yy, H_BODY, TA.MIDDLE_LEFT); y0 = yy; yy -= 6.5; return y0
+y = row("道路邊線(現況)"); pl([(CX + 2.5, y), (CX + 10.5, y)])        # 半形括號：3 mm 全形會超出欄寬
+y = row("道路用地界(地籍)"); pl([(CX + 2.5, y), (CX + 10.5, y)], lt="DASHED")
+y = row("道路中心線"); pl([(CX + 2.5, y), (CX + 10.5, y)], lt="CENTER")
 y = row("建物")
-r = [(CX + 2.5, y - 2), (CX + 12.5, y - 2), (CX + 12.5, y + 2), (CX + 2.5, y + 2)]; pl(r, True)
+r = [(CX + 2.5, y - 2), (CX + 10.5, y - 2), (CX + 10.5, y + 2), (CX + 2.5, y + 2)]; pl(r, True)
 hb = L.add_hatch(color=256, dxfattribs=FR); hb.set_pattern_fill("ANSI31", color=256, scale=0.5); hb.paths.add_polyline_path(r, is_closed=True)
 y = row("河道")
-r = [(CX + 2.5, y - 2), (CX + 12.5, y - 2), (CX + 12.5, y + 2), (CX + 2.5, y + 2)]; pl(r, True)
+r = [(CX + 2.5, y - 2), (CX + 10.5, y - 2), (CX + 10.5, y + 2), (CX + 2.5, y + 2)]; pl(r, True)
 hb = L.add_hatch(color=256, dxfattribs=FR); hb.set_pattern_fill("DASH", color=256, scale=12, angle=0); hb.paths.add_polyline_path(r, is_closed=True)
 y = row("水流方向")
-pl([(CX + 2.5, y), (CX + 10.5, y)])
+pl([(CX + 2.5, y), (CX + 8.5, y)])
 ha = L.add_hatch(color=256, dxfattribs=FR); ha.set_solid_fill(color=256)
-ha.paths.add_polyline_path([(CX + 9.5, y + 1.2), (CX + 12.5, y), (CX + 9.5, y - 1.2)], is_closed=True)
+ha.paths.add_polyline_path([(CX + 7.5, y + 1.2), (CX + 10.5, y), (CX + 7.5, y - 1.2)], is_closed=True)
 yy += 2.5; pl([(CX, yy), (X1, yy)])
 
 # ---- 6. 右側欄：案址資訊 ----
@@ -204,7 +204,18 @@ def fill(label, value, dx=12.0, dy=0.0, ht=H_BODY):
         L.add_text(value, height=ht, dxfattribs=STY).set_placement((lb.dxf.insert.x + dx, lb.dxf.insert.y + dy))
 fill("設計", A.designer); fill("繪圖", A.drafter); fill("日期", roc)
 fill("比例尺", f"1/{A.scale}", dx=15.0); fill("圖序", A.sheet_no, dx=14.0)
-base.layouts.set_active_layout(P["layout"]); tag_plot_style(base); base.saveas(A.out)
+base.layouts.set_active_layout(P["layout"]); tag_plot_style(base)
+# 出圖樣式：匯入的底圖圖層只帶顏色、沒有線粗（DXF 370 = -3），E17 會擋；
+# 這裡直接套《出圖樣式與線粗》規定（顏色 1~8 → 線粗），圖元顏色改回 BYLAYER。
+# （舊流程是產完再手動跑 tools/acad/apply_plot_style.py；現在直接內建，產線即合規。）
+try:
+    from apply_plot_style import apply_plot_style, normalize_entities
+    _chg = apply_plot_style(base)
+    _ne = normalize_entities(base)
+    print(f"套用出圖樣式：圖層 {len(_chg)} 處、圖元 { _ne } 個改回 BYLAYER")
+except Exception as ex:
+    print("套用出圖樣式略過：", ex)
+base.saveas(A.out)
 
 # ---- 8. 自我檢核（AGENTS.md §7）----
 d = ezdxf.readfile(A.out); errs = len(d.audit().errors)

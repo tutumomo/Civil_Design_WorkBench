@@ -63,6 +63,10 @@
 | **EXP-D3** | 工地範圍內確實無河道／水道，`22_水道` 圖層為空導致 E14 報錯 | 判讀確認無水道（田間灌溉溝非通用電子地圖水道圖層，不可臆造）→ 檢核指令省略 `--require-layer 22_水道`，其餘項目全過；並在交件紀錄寫明差異原因。 | 本案退出碼 0 | `§P` |
 | **EXP-D4** | 依出圖規定把字高放大到 3/4/5 mm 後，右側欄（寬 46.8 mm）文字超出圖框，但 `check_delivery` 沒報錯 | 1. `ezdxf.bbox` 對 `CHINA1.SHX` 中文寬度低估約 2 成（實測中文字寬 ≈ 1.2h、gbenor 英數 ≈ 0.8h），檢核器已改用保守估寬。<br>2. `make_sheet.py` 文字都在「圖框」層，舊版以圖層排除樣板文字會漏檢；已改用 `A3圖框_template.dxf` 文字插入點判定樣板文字。<br>3. 右側欄放不下 4 mm 資料來源 → 移到地圖左下附註區（viewport 非矩形裁切）；圖例改半形括號。<br>4. 底圖 `--scale` 與出圖比例不同時，`make_sheet.py` 自動等比修正模型文字字高。 | `tools/drawing_rules.py`、E15/E16；`tools/a3_sheet/_selftest_rules`（退出碼 0） | 本項目的出圖規定 |
 | **EXP-D5** | `check_delivery.py` 的 E9／E10 一次報 11 項，說明文字跨越 y=29.03 壓到標題欄 | MTEXT 實際高度 ≈ 行數×(5/3)×字高×line_spacing_factor（5 行 4 mm 約 30 mm，必壓標題欄）。改 **4 行 3 mm、插入點 y=51、標題 y=56**。另 `MIDDLE_LEFT` 的 TEXT bbox 下緣會再低 0.1~0.4 mm（本例差 0.19 mm 就判疊字），留淨空別抓太剛好。 | E1~E18 0 錯誤 | `§S` |
+| **EXP-D6** | macOS 上 `CADCraft convert a.dxf b.dwg` 彈視窗後直接結束、不產檔也沒錯誤訊息 | macOS 的 ArtCraft App **沒有 `*-cli`**（只有 GUI 殼層），未知參數的行為就是開 GUI 後結束。改走 JSON-lines 控制通道；本專案已內建 `tools/artcraft_cli/` 三支殼層（`cadcraft-cli`／`gridcraft-cli`／`wordcraft-cli`），對外維持 Windows CLI 介面，呼叫端不用改。認證三套不同：CADCraft 每請求帶 `token`、GridCraft 先 `auth` 握手、WordCraft 每請求帶 **`key`**（憑證檔在 `~/Library/Application Support/WordCraft/`） | 產出 DWG 檔頭 `AC1032`（AutoCAD 2018）、PDF A3 420×297；11 案回歸全相符 | `§AI.1`、`tools/artcraft_cli/README.md` |
+| **EXP-D7** | `check_delivery` E10 判「鋼筋圖例」與「直徑欄」疊字；或 E9 判說明文字跨越技師圖記區 | **不要放寬品管規則，要改版面**：①右欄圖例兩欄間距 62 mm 不夠（ezdxf 實測最長筋號說明 62.94 mm）→ 改 70 mm；②說明單行過寬 → 出圖端自動折行（寬度估算比 `est_width` 保守一成，最大 148 mm）。注意 `est_width()`（CJK 1.2h／英數 0.8h）**低估 SHX 中文寬度約兩成**，估算要留裕度 | 四案 E10 歸零、邊坡案 E9 歸零 | `§AI.4` |
+| **EXP-D8** | 重出 A3 現況平面圖後 E17 報「圖層顏色與線粗不符」10 處 | 匯入的底圖圖層只有顏色、DXF 370 線粗是 `-3`；Windows 上是靠**手動**跑 `apply_plot_style.py` 補的，沒進產線。已內建到 `make_sheet.py` 存檔前（`apply_plot_style()` ＋ `normalize_entities()`），**產線即合規** | E17 0 錯誤、11 案回歸全相符 | `§AI.4` |
+| **EXP-D9** | 案件主檔有填 `project.agency`，報告軸卻一律 exit 4「主辦機關：（空白）」 | `case_core.derive_report()` 重建報告段時漏了 `agency` 欄位。**`--allow-placeholder` 會把「必填欄位沒帶到」的錯誤整個遮住**，報告閘門要在不帶該旗標時也驗一次 | 11 案報告軸 exit 0 | `§AI.3` |
 
 ---
 

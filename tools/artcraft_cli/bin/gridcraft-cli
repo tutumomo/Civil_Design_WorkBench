@@ -1,0 +1,4 @@
+#!/bin/sh
+# macOS 專用：ArtCraft 的 App 套件內沒有 headless CLI，改走控制通道（見 tools/artcraft_cli/README.md）。
+# 這支殼層讓本專案既有的呼叫端（boq_build／acc／make_report）在 macOS 上不用改。
+exec "${PYTHON:-python3}" "$(dirname "$0")/../gridcraft_cli.py" "$@"

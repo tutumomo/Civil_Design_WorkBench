@@ -250,6 +250,56 @@ def notes_in_unit(notes, unit="m"):
     return out
 
 
+def est_text_w(s, h=3.0):
+    """估算文字寬度（mm）：CJK 1.35h、英數 0.9h（比 ezdxf 實測寬度多留約一成安全裕度）。
+
+    與 `tools/a3_sheet/check_delivery.py` 的 `est_width()`（CJK 1.2h／英數 0.8h）
+    同源但略保守 —— ezdxf 對 SHX 中文字寬度會低估約兩成，先量寬再排版才不會壓字。
+    """
+    return sum(1.35 * h if ord(c) >= 0x2E80 else 0.9 * h for c in s)
+
+
+#: 說明文字最寬可用寬度（mm）。右欄自 x=210 起算，右端 410.3 mm 是圖框內框，
+#: x=363.5 mm 起是「技師執業圖記區」必須留白 → 說明單行不得超過 363.5-210-3。
+NOTE_MAX_W = 148.0
+
+#: 可作為斷行點的標點（避免把數字或專有名詞切開）
+_NOTE_BREAKS = " 、，。；：）」』】"
+
+
+def wrap_notes(notes, max_w=NOTE_MAX_W, h=3.0):
+    """說明文字過寬時自動折行，避免壓到技師圖記區（E9）。
+
+    踩坑紀錄 §AM：邊坡標準斷面圖的第 6 條說明（37 字）實際寬度 162 mm，
+    自 x=210 畫到 372 mm，跨進 x≥363.5 的技師圖記區 → check_delivery E9 不通過，
+    整案 exit 1。這裡在出圖端就折行（續行以三個空白縮排），不放寬品管規則。
+    """
+    out = []
+    for s in notes:
+        if est_text_w(s, h) <= max_w:
+            out.append(s)
+            continue
+        line = ""
+        last_break = -1
+        for ch in s:
+            if est_text_w(line + ch, h) > max_w and line.strip():
+                if last_break > 0:
+                    head, tail = line[:last_break], line[last_break:]
+                    line = head.rstrip()
+                else:
+                    head, tail = line, ""
+                    line = ""
+                out.append(line)
+                line = "   " + tail + ch
+            else:
+                line += ch
+            if ch in _NOTE_BREAKS or ch == " ":
+                last_break = len(line) - 1
+        if line.strip():
+            out.append(line)
+    return out
+
+
 def ensure_dimstyle(doc, scale, unit="m"):
     name = "TOMO尺寸"
     h = model_h(3.0, scale)                    # 本文 3 mm 換算
@@ -1369,7 +1419,10 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
                     ("C  %s@%d 底板筋（上下層）" % (_bb, _bs), "%s mm" % _bb[1:]),
                     ("   保護層", "75 mm")]
         for name, spec in rows:
-            _row(name, spec)
+            # 右欄間距加大到 70 mm：鋼筋圖例的筋號說明最寬約 63 mm
+            # （「A  D16@220 牆身豎向筋（雙層）」），擠在 62 mm 會壓到右側
+            # 的「16 mm」直徑欄 → E10 疊字（排水溝／懸臂式／錨定式／扶壁式四案都中）。
+            _row(name, spec, dx=70.0)
 
     # ---- 部位圖例 ----
     _gap(6.0)
@@ -1592,6 +1645,7 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
         ]
     # 說明文字的長度值一併換成圖面單位（m／cm），與尺寸標註、右欄尺寸表一致。
     notes = notes_in_unit(notes, unit)
+    notes = wrap_notes(notes)
     # 說明行距 5.2 mm（字高 3.0），確保 7 行仍留在標題欄之上。
     for s in notes:
         put(RX, _cursor["y"], s, 3.0, L_DESC)

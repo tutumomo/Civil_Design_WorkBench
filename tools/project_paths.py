@@ -169,6 +169,11 @@ def artcraft_cli(app: str) -> str | None:
         w = shutil.which(name)
         if w:
             return w
+    # macOS／Linux：App 套件內沒有 headless `-cli`，改用本專案的控制通道殼層
+    # （tools/artcraft_cli/bin/<stem>，走 JSON-lines 控制通道，見 docs/環境需求與自動配置.md §8）
+    shim = TOOLS / "artcraft_cli" / "bin" / stem
+    if shim.is_file():
+        return str(shim)
     return None
 
 

@@ -1506,6 +1506,7 @@ def derive_report(case):
         "full_name": p.get("full_name") or p.get("name", ""),
         "code": p.get("code"),
         "category": p.get("category", "道路"),
+        "agency": p.get("agency", ""),          # 主辦機關要帶到報告封面（缺了會被 exit 4 擋下）
         "location": p.get("location") or {},
         "crs": p.get("crs") or {"name": "TWD97 TM2 二度分帶", "epsg": "EPSG:3826", "unit": "公尺"},
         "coords": p.get("coords") or [],

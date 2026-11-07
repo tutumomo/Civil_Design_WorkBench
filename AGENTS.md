@@ -45,9 +45,14 @@
 
 ## 3. INV — 智能體作業與工具迴圈紀律（Invariant Execution Mechanics）
 
+- **開工前多端同步檢查（SessionStart 紀律與多機作業）**：
+  本專案常態在多台電腦（公司／家裡／筆電）輪流作業。為避免「換地點忘了先 pull」造成分支分叉或圖檔二進位衝突，智能體開工前或接手新任務時必須依循：
+  1. 執行 `python tools/git/sync_check.py`（macOS/Linux 用 `.venv/bin/python tools/git/sync_check.py`；開工檢查亦掛載於 `.claude/settings.json` 的 `SessionStart` hook 自動提示）。
+  2. **遠端有新提交（`behind > 0`）**：開工前務必先 `git pull --ff-only origin <branch>`。若工作區有已追蹤改動，先 `git stash push -u -m "pre-pull-$(hostname)-$(date +%H%M)"` 再 pull，最後以 `git stash apply` 復原（用 apply 不用 pop，確保遇衝突時安全不掉碼）。
+  3. **殘留鎖定檔（`.git/*.lock`）**：若有殘留，先確認無執行中的 git 程序後清理，避免後續所有 git 指令卡死。
+  4. **本地未推送（`ahead > 0`）**：換地點或收工前務必落實 `docs/專案收工SOP.md` 執行 push，確保遠端為最新。
 - **路徑一律由 `tools/project_paths.py` 解析（跨平台、禁止寫死絕對路徑）**：本專案要能上 GitHub，任何新增程式都不得寫死磁碟絕對路徑（例如 Windows 的 `D:\某資料夾`、`C:\Python312\python.exe`，或 macOS 的 `/Users/<名稱>/...`）。用法 `from project_paths import ROOT, regs_db, artcraft_cli, python_exe, accoreconsole, temp_dir, out_dir`；環境變數可覆寫（`CIVIL_AI_ROOT`、`CIVIL_AI_REGS_DB`、`ARTCRAFT_HOME`、`AUTOCAD_HOME`、`SOLIDCRAFT_CLI`、`CAD_FONTS`、`INGETRAZO_HOME`、`INGETRAZO_MCP`）。環境自我檢查跑 `python tools/project_paths.py`；完整需求與自動配置見 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)，對外說明見 [`README.md`](README.md)。
-- **工具不得住在 `_temp`**：`_temp` 依 §1.1 可整批刪除，凡文件會引用的工具一律放 `tools\`（2026-11-02 已把 `page_crop.py`、`locate_pages.py`、`dump_tables.py`、`audit_qualitative.py`、`audit_skip_reasons.py`、`reconcile_progress.py` 提升到 `tools
-egs\`）。
+- **工具不得住在 `_temp`**：`_temp` 依 §1.1 可整批刪除，凡文件會引用的工具一律放 `tools\`（2026-11-02 已把 `page_crop.py`、`locate_pages.py`、`dump_tables.py`、`audit_qualitative.py`、`audit_skip_reasons.py`、`reconcile_progress.py` 提升到 `tools\regs\`）。
 - **優先呼叫確定性腳本**：嚴禁略過 `tools\` 現成工具而重寫一次性腳本。
 - **Windows 與 Python 執行鐵則**：
   1. 執行 Python（`C:\Python312\python.exe`）前必設 `set PYTHONIOENCODING=utf-8`；讀寫中文檔一律指定 `encoding="utf-8"`（**嚴禁用 PowerShell `Get-Content/Set-Content` 修改中文檔**）。
@@ -187,6 +192,7 @@ egs\`）。
 
 - **When the user asks to turn a hand-drawn / schematic landscape image into a 3D 景觀模擬圖 or 實景意象圖（手繪圖轉 3D）**, read [`docs\3D景觀模擬_作業經驗與踩坑.md`](docs/3D景觀模擬_作業經驗與踩坑.md) first：①**建模前先送 5~7 列「判讀確認表」**並問「我這樣讀對不對」，不要問「你要選哪個方案」——2026-11-06 避車彎案三次返工全是構造物定名看錯（避車彎→誤判停車格、路緣石→誤判擋土牆），不是算圖失敗；②Blender 一律經 `tools\blender\blender_runner.py`（MSIX 版，只掃 `C:\Program Files\Blender Foundation` 會誤判未安裝），`--timeout 1200`，存檔前設 `save_version=0`；③可重用腳本在 `tools\landscape3d\`（`bay_scene.py` 參數集中在檔尾版面常數區，用 `grep -n "BAY_DEPTH =" tools\landscape3d\bay_scene.py` 定位、別抄行號；參數覆寫一律用 `blender_runner.py --arg KEY=VALUE`，MSIX 版收不到呼叫端的 `$env:`；`plan_view.py` 產正交俯視作第二幾何證據——只有透視圖不能證明緣石與坡趾對齊）；④交付清單必含性質聲明／尺寸對照／判讀假設與待確認項／重跑指令／限制／自評可信度。踩坑濃縮版見 `docs\踩坑紀錄.md` §AG。
 
+- **When starting work on another machine, checking git sync status, or before making code changes (開工前同步檢查／多端切換)**, run `python tools/git/sync_check.py`（macOS/Linux 用 `.venv/bin/python tools/git/sync_check.py`）to check remote commits, unpushed commits, and stale `.git/*.lock` files before working.
 - **When the user says「收工」、「關帳」or closeout**, read [`docs\專案收工SOP.md`](docs/專案收工SOP.md) and run all 16 steps. 版本採 CalVer `vYYYY.MM.DD-N`；「收工」一律授權 commit、tag 與 push `main`（使用者另說「先不推」才跳過）；只 stage 本次白名單，不得掃入其他 dirty 檔。
 
 ## 6. 交件強制品管門檻（Mandatory Delivery Gate）

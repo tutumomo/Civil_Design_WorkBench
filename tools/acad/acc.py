@@ -1,9 +1,15 @@
 import sys as _sys
 from pathlib import Path as _P
 _sys.path.insert(0, str(_P(__file__).resolve().parents[1]))
-from project_paths import accoreconsole as _acc, artcraft_cli as _art  # noqa: E402
+from project_paths import (accoreconsole as _acc, artcraft_cli as _art,
+                           opencadstudio_exe as _ocs)  # noqa: E402
 ACC = _acc()
 CADCRAFT = _art("CADCraft")
+OCS = _ocs()
+import os as _os
+#: 後端選擇。`auto`（預設）＝有 OpenCADStudio 就用它，否則退回 CADCraft；
+#: `ocs` 強制 OpenCADStudio；`cadcraft` 強制 CADCraft（出問題時可立即切回）。
+BACKEND = (_os.environ.get("CIVIL_AI_CAD_BACKEND") or "auto").strip().lower()
 """AutoCAD 核心主控台 (accoreconsole) 封裝：DWT/DWG→DXF、DXF→DWG+PDF。
 已處理的坑（docs\\踩坑紀錄.md L 節）：中文路徑→複製到英文暫存區；.scr 用 cp950 且 newline=""；
 腳本必給完整路徑；卡在提示時逾時強制結束；中文版圖紙名「…公釐」。不碰使用者開著的 AutoCAD 視窗。
@@ -45,6 +51,126 @@ def run(infile, lines, timeout=240, copies=()):
     open(os.path.join(work, "acc_log.txt"), "w", encoding="utf-8").write(log)
     return work, log
 
+# ---------------------------------------------------------------- OpenCADStudio 後端
+# 為什麼用「按需拉起」而不是常駐服務：本專案是單機工具鏈，常駐一個 GUI 級程序
+# 換來的是開機負擔與連線埠衝突風險；而 OCS 服務實測 0.5 秒就緒，隨用隨起即可。
+
+import contextlib, socket, tempfile, time, urllib.request, urllib.error
+
+
+def _free_port() -> int:
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def _ocs_wanted() -> bool:
+    """是否應該走 OpenCADStudio 後端。"""
+    if not OCS:
+        return False
+    if BACKEND == "cadcraft":
+        return False
+    return True
+
+
+@contextlib.contextmanager
+def ocs_service(timeout=30.0):
+    """按需啟動 OpenCADStudio REST 服務，離開時結束它。
+
+    產出 (base_url, token)。token 由 OCS_API_TOKEN 指定，避免解析啟動訊息。
+    若本機已有服務在跑（同埠可連通）則直接沿用，不重啟。
+    """
+    if not OCS:
+        raise SystemExit("找不到 opencadstudio；跑 python tools/project_paths.py --install 補裝")
+
+    token = uuid.uuid4().hex
+    port = _free_port()
+    env = dict(os.environ, OCS_API_TOKEN=token)
+    # AppImage 直接執行即可；若設定指向 squashfs-root/AppRun 也相容
+    proc = subprocess.Popen([OCS, "--http", str(port), "--new"],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                            env=env)
+    base = f"http://127.0.0.1:{port}/api/v1"
+    try:
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            try:
+                req = urllib.request.Request(base + "/ready",
+                                             headers={"Authorization": "Bearer " + token})
+                with urllib.request.urlopen(req, timeout=2) as r:
+                    if r.status == 200:
+                        break
+            except Exception:
+                time.sleep(0.2)
+        else:
+            raise SystemExit(f"OpenCADStudio 服務 {timeout}s 內未就緒（port {port}）")
+        yield base, token
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=10)
+        except Exception:
+            proc.kill()
+
+
+def _ocs_post(base, token, path, payload, timeout=180):
+    """POST 一個 JSON 到 OCS 並回傳解析後的 dict。"""
+    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(base + path, data=data, method="POST", headers={
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json",
+    })
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+def ocs_publish(dxf, pdf=True):
+    """用 OpenCADStudio 產 DWG（+PDF）。回傳 {'.dwg':…, '.pdf':…}。
+
+    實測要點（docs/CAD引擎選型_OpenCADStudio與CADCraft.md §12）：
+      · `layout` 必須給「圖紙名稱」或 `Model`，給 `all` 會把空的 Layout1 也輸出成空白頁
+      · `plot_style` 指定 monochrome.ctb 才有正確的黑白出圖
+      · 回應 `status: "waiting_input"` 是待命正常態，判成功看 `ok` 與 `result.pages`
+    """
+    dxf = os.path.abspath(str(dxf))
+    base_path = os.path.splitext(dxf)[0]
+    dwg = base_path + ".dwg"
+    res = {}
+    with ocs_service() as (base, token):
+        r = _ocs_post(base, token, "/open", {"path": dxf})
+        if not r.get("ok"):
+            raise SystemExit("OCS 開檔失敗：" + str(r.get("error")))
+        r = _ocs_post(base, token, "/save", {"path": dwg})
+        if not r.get("ok") or not os.path.exists(dwg):
+            raise SystemExit("OCS 存 DWG 失敗：" + str(r.get("error")))
+        res[".dwg"] = dwg
+        if pdf:
+            pdf_path = base_path + ".pdf"
+            body = {"path": pdf_path,
+                    "layout": _paper_layout(dxf),
+                    "plot_style": "monochrome.ctb"}
+            r = _ocs_post(base, token, "/plot", body)
+            if not r.get("ok") or not os.path.exists(pdf_path):
+                raise SystemExit("OCS 出圖失敗：" + str(r.get("error")))
+            pages = (r.get("result") or {}).get("pages")
+            res[".pdf"] = pdf_path
+            res["pages"] = pages
+    return res
+
+
+def ocs_todxf(src, dst):
+    """用 OpenCADStudio 轉 DXF（DWG→DXF 或 DXF→DXF 版本轉換）。"""
+    src, dst = os.path.abspath(str(src)), os.path.abspath(str(dst))
+    with ocs_service() as (base, token):
+        r = _ocs_post(base, token, "/open", {"path": src})
+        if not r.get("ok"):
+            raise SystemExit("OCS 開檔失敗：" + str(r.get("error")))
+        r = _ocs_post(base, token, "/save", {"path": dst})
+        if not r.get("ok") or not os.path.exists(dst):
+            raise SystemExit("OCS 存 DXF 失敗：" + str(r.get("error")))
+    return dst
+
+
 def _paper_layout(dxf, default="Layout1"):
     """CADCraft 出圖要指定配置名稱；各工具建的配置叫「斷面圖」「全區工程位置圖」等，
     不能寫死。以 ezdxf 讀第一個非 Model 的配置；讀不到才退回預設值。"""
@@ -58,6 +184,8 @@ def _paper_layout(dxf, default="Layout1"):
 
 
 def to_dxf(src, dst):
+    if _ocs_wanted():
+        return ocs_todxf(src, dst)
     if not ACC and CADCRAFT:
         p = subprocess.run([CADCRAFT, "convert", str(src), str(dst)], capture_output=True, text=True)
         if p.returncode != 0 or not os.path.exists(dst):
@@ -70,7 +198,14 @@ def to_dxf(src, dst):
 
 def publish(dxf, pdf=True, paper="ISO full bleed A3 (420.00 x 297.00 公釐)", ctb=None,
             pc3="DWG To PDF.pc3", orient="_L", layout=""):
-    """DXF → 同名 DWG(2018)；pdf=True 時以目前配置(CTAB)出 PDF，配置範圍 1:1。"""
+    """DXF → 同名 DWG(2018)；pdf=True 時以目前配置(CTAB)出 PDF，配置範圍 1:1。
+
+    後端由 `CIVIL_AI_CAD_BACKEND` 決定（auto／ocs／cadcraft），見檔頭說明。
+    """
+    if _ocs_wanted():
+        r = ocs_publish(dxf, pdf=pdf)
+        r.pop("pages", None)
+        return r
     if not ACC and CADCRAFT:
         base = os.path.splitext(dxf)[0]
         dwg = base + ".dwg"

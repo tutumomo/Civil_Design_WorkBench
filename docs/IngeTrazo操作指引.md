@@ -34,6 +34,104 @@ IngeTrazo 是一套**開源的 3D 建築／土木模型器**（推拉建模、BI
 
 ---
 
+## 1.4 macOS（arm64）：官方 DMG 版（2026-11-08 實測安裝並跑通 MCP）
+
+官方 **有** `IngeTrazo-0.6.0-macos-arm64.dmg`（約 105 MB），不用自己建置：
+
+```bash
+# 下載（GitHub Releases，免 API token）
+curl -L -o IngeTrazo.dmg \
+  "https://github.com/ingelibre/ingetrazo/releases/download/v0.6.0/IngeTrazo-0.6.0-macos-arm64.dmg"
+# 掛載 → 複製 .app → 卸載
+hdiutil attach -nobrowse -readonly IngeTrazo.dmg
+cp -R "/Volumes/IngeTrazo 0.6.0/IngeTrazo.app" /Applications/
+hdiutil detach "/Volumes/IngeTrazo 0.6.0" -quiet
+```
+
+| 項目 | 內容 |
+|---|---|
+| 安裝目錄 | `/Applications/IngeTrazo.app/` |
+| 主程式 | `Contents/MacOS/ingetrazo`（13 MB，Mach-O arm64） |
+| MCP 伺服器 | `Contents/MacOS/ingetrazo-mcp`（1.4 MB，Mach-O arm64，**免 Python**） |
+| 橋接外掛 | `Contents/Resources/plugins/ai_bridge.py`（純 Python，可讀可稽核） |
+| 橋接腳本 | `Contents/Resources/scripts/ingetrazo_mcp.py`（只用標準庫） |
+| `project_paths` 解析 | `INGETRAZO_HOME` → `/Applications/IngeTrazo.app/Contents/MacOS`（**已內建此路徑，不用設環境變數**） |
+
+### 1.4.1 橋一定要「自動開」，否則智能體每次呼叫都是 Connection refused
+
+IngeTrazo 的 MCP 橋是**跑在 GUI 行程內的 localhost TCP 伺服器**（預設 `127.0.0.1:4763`），
+官方只提供**手動**開啟方式：Extensions ▸ AI Bridge (MCP)，或側盤 «AI» 分頁的「Start bridge」按鈕。
+
+對本專案（智能體透過 MCP 驅動 IngeTrazo）來說，**每次開 app 都要人手動點一下**不可接受。
+解法是走 IngeTrazo 官方的**使用者外掛 API**（`core/extensions.py` 的 `user_plugins_dir()`）：
+
+```
+~/.local/share/ingetrazo/plugins/<外掛名>.py     ← macOS／Linux
+%APPDATA%\ingetrazo\plugins\<外掛名>.py          ← Windows
+```
+
+外掛只要有 `setup(app)` 函式就會被載入。`auto_ai_bridge.py` 的做法是**呼叫與選單同一支公開 API**
+（`window._ai_bridge_section.start()`），不是 monkey-patch、也不重寫官方邏輯：
+
+```python
+def setup(app) -> None:
+    from PySide6.QtCore import QTimer
+    def attempt():
+        section = getattr(app.window, "_ai_bridge_section", None)
+        if section is not None and not section.running:
+            section.start()
+    QTimer.singleShot(1500, attempt)     # 視窗／文件還沒好，用 timer 重試
+```
+
+- **停用**：把檔名改成 `auto_ai_bridge.py.disabled`（載入器會跳過點開頭的檔名）或直接刪除。
+- **不改官方檔**：`Resources/plugins/ai_bridge.py` 完全沒動，只是多了一個使用者外掛。
+- 本機已裝：`~/.local/share/ingetrazo/plugins/auto_ai_bridge.py`。
+
+### 1.4.2 橋只收一個客戶端 —— 這是官方設計，不是 bug
+
+`_Bridge._serve()` 的 `srv.listen(1)`，且 `_accept` 只接**一個**連線。
+第二個客戶端會**卡住直到逾時**（不是 `Connection refused`，是 `Operation timed out`，180 s）。
+
+實測踩到的順序：
+
+1. OpenCode 的 MCP 客戶端先連著橋 → 佔掉唯一名額。
+2. 另一支腳本（`ingetrazo_check.py --call` 或自建的最小 JSON-RPC 客戶端）再連 → **逾時失敗**。
+3. 看起來像「橋壞了」，其實是被佔住。
+
+**排雷做法**：
+
+```bash
+lsof -nP -iTCP:4763          # 看是誰佔著
+kill <那支 ingetrazo-mcp 的 PID>   # 釋放名額
+```
+
+連帶的效應：**一個橋只能服務一個 MCP 客戶端**。要換客戶端（例如從 OpenCode 換到 Claude Code）
+必須先關掉前一個，或直接殺掉它的 `ingetrazo-mcp` 行程。
+
+### 1.4.3 macOS 沒有 `osascript` 輔助取用權限時，GUI 只能靠外掛
+
+macOS 對 AppleScript 操控其他 App 要求「輔助取用」授權；未授權時
+`System Events` 會回 `osascript不允許輔助取用 (-1728)`，
+**連讀視窗標題都不行**（`get name of every window` 同樣被擋）。
+因此「用 AppleScript 點 Extensions 選單」這條路在未授權機器上不可用——
+本專案改用上面 1.4.1 的外掛方案，同樣不需要 GUI 自動化權限。
+
+### 1.4.4 五支工具實測（2026-11-08，全部 OK）
+
+| 工具 | 實測結果 |
+|---|---|
+| `query_model` | 回群組／面／邊／材質／圖層／包圍盒；新文件含「工程师」比例人形（1.70 m billboard，**不要刪**） |
+| `run_python` | 建方塊成功：`box((0,0,0),(6,4,3), name="TestBox")` → `groups: 2`、`changed: True` |
+| `undo` | 回 `{"ok": true}`，`TestBox` 消失（回到 `groups: 1`） |
+| `redo` | 回 `{"ok": true}`，`TestBox` 復原（`groups: 2`，bounds 0~6 / 0~4 / 0~3） |
+| `screenshot` | 回 PNG base64（28,567 bytes） |
+
+> ⚠️ `run_python` 的**範圍持續存在**於呼叫之間（官方設計），但 `undo`/`redo` 走的是 GUI 的
+> Ctrl+Z 同一條歷史——**每一支 `run_python` 就是一個 undo 步驟**，出錯會整個 rollback。
+> 測試用的幾何記得清乾淨（`groups.remove(g)`）。
+
+---
+
 ## 1.5 Linux（aarch64）：原始碼建置版（2026-11-07 實測）
 
 官方只出 **x86_64** 的 AppImage／tarball／flatpak／snap（0.6.0 發行檔全是 x86_64 或 macOS／Windows），
@@ -189,10 +287,12 @@ python tools\ingetrazo\ingetrazo_check.py     # 橋有沒有開、五支工具�
 
 | 症狀 | 原因 | 解法 |
 |---|---|---|
-| `tools/list` 正常，但每個工具都回「請先啟動 AI Bridge」 | 只開了 exe，app 沒開或橋沒啟動 | 開 IngeTrazo → 開文件 → Extensões ▸ AI Bridge (MCP) |
-| `initialize` 就失敗、程序立刻結束 | 命令路徑錯，或指到 `ingetrazo.exe` 卻沒加 `--mcp` | Windows 用 `ingetrazo-mcp.exe`；Linux 原始碼版用 `ingetrazo --mcp` |
+| `tools/list` 正常，但每個工具都回「請先啟動 AI Bridge」 | 只開了 exe，app 沒開或橋沒啟動 | 開 IngeTrazo → 開文件 → Extensões ▸ AI Bridge (MCP)；macOS 建議改用 §1.4.1 的自動啟動外掛 |
+| **連線逾時 `Operation timed out`（不是 refused）** | **橋只收一個客戶端，名額被別的 `ingetrazo-mcp` 佔住**（§1.4.2） | `lsof -nP -iTCP:4763` 找出佔用者 → `kill` 它的 PID 釋放名額 |
+| `initialize` 就失敗、程序立刻結束 | 命令路徑錯，或指到 `ingetrazo.exe` 卻沒加 `--mcp` | Windows 用 `ingetrazo-mcp.exe`；Linux 原始碼版用 `ingetrazo --mcp`；macOS DMG 版用 `/Applications/IngeTrazo.app/Contents/MacOS/ingetrazo-mcp` |
 | 連線被拒 / `Connection refused` | app 的橋沒開、port 被改、或防火牆擋 loopback | 看 app 顯示的 port；必要時設 `INGETRAZO_AI_PORT` 給**伺服器**（兩邊要一致） |
 | 第一個客戶端可用，第二個不行 | 官方設計：一次一個客戶端 | 關掉前一個客戶端，或改用同一個客戶端 |
+| macOS 上 AppleScript 讀不到 IngeTrazo 視窗 | 沒給「輔助取用」授權 | `osascript不允許輔助取用 (-1728)`；改用 §1.4.1 外掛自動開橋 |
 | 模型畫在很遠的地方／viewport 空白 | 把 UTM／TWD97 絕對座標當區域座標餵進去 | 用專案局部原點建模，或先轉到一致的座標系 |
 | `run_python` 回 `ROLLED BACK` | 腳本丟錯，交易已回滾 | 讀 `error`／`stderr` 修腳本；文件沒被改壞，直接重跑 |
 
@@ -217,8 +317,22 @@ python tools\mcp\mcp_probe.py ingetrazo 30 "C:\Program Files\IngeTrazo\ingetrazo
 python tools\ingetrazo\ingetrazo_check.py --call           # 需 app 開著＋橋啟動
 ```
 
+> macOS／Linux 用 `.venv/bin/python`；`mcp_probe.py` 的最後一個參數是橋接伺服器的完整路徑。
+
 預期：`tools` 回 **5** 支（`run_python`、`query_model`、`screenshot`、`undo`、`redo`）；
 `--call` 回文件摘要（群組數、包圍盒）與 `bridge: listening`。
+
+### 8.1 macOS 全鏈路驗證（2026-11-08 實測通過）
+
+```bash
+open -a IngeTrazo                       # 外掛會自動把橋拉起來
+sleep 20
+lsof -nP -iTCP:4763                     # 應有 LISTEN
+.venv/bin/python tools/ingetrazo/ingetrazo_check.py --call
+```
+
+**注意名額**：若 OpenCode（或任何 MCP 客戶端）已連著橋，`--call` 會**逾時**而不是 refused。
+驗證前先 `lsof -nP -iTCP:4763` 看有沒有既存連線，必要的話殺掉舊的 `ingetrazo-mcp`。
 
 ---
 
@@ -229,6 +343,8 @@ python tools\ingetrazo\ingetrazo_check.py --call           # 需 app 開著＋�
 | `tools\project_paths.py` | `ingetrazo_home()`／`ingetrazo_mcp()` 路徑解析（環境變數優先） |
 | `tools\mcp\register_all.py` | 把 `ingetrazo` 寫進各客戶端設定 |
 | `tools\ingetrazo\ingetrazo_check.py` | 橋接／工具／實際呼叫檢查 |
+| `tools\ingetrazo\ingetrazo_update.py` | 原始碼版自動更新（Linux/macOS 自建者） |
+| `~/.local/share/ingetrazo/plugins/auto_ai_bridge.py` | **macOS／Linux：自動開橋的外掛**（§1.4.1；停用＝改名加 `.disabled`） |
 | `docs\AI工具鏈_MCP整合_2026-11-03.md` | 六條通道的接線與實測總表 |
 | `docs\七套CAD工具能力邊界與重疊度.md` | IngeTrazo 與其他七套的能力邊界 |
 

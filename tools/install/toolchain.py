@@ -257,7 +257,14 @@ def _tool_installed(tool: Tool) -> str | None:
         p = lb / name
         if p.exists() and _verify(str(p), tool):
             return str(p)
-    # 3. ~/.local/opt/<stem>-*/ 內找執行檔
+    # 3. macOS：/Applications/<Stem>.app（挑可獨立執行的那個，launcher stub 不行）
+    if IS_MAC:
+        app = Path("/Applications") / f"{tool.key}.app"
+        if app.is_dir():
+            exe = _macos_app_cli_exe(app, tool)
+            if exe.is_file() and _verify(str(exe), tool):
+                return str(exe)
+    # 4. ~/.local/opt/<stem>-*/ 內找執行檔
     opt = local_opt_dir()
     if opt.is_dir():
         for d in sorted(opt.glob(f"{stem}-*"), reverse=True):
@@ -504,6 +511,86 @@ def configure_opencadstudio(quiet: bool = False) -> bool:
 
 
 
+def _macos_app_cli_exe(app_dir: Path, tool: Tool) -> Path:
+    """回傳 .app 內「可獨立執行」的 CLI 執行檔。
+
+    為什麼不能直接用 `Contents/MacOS/<CFBundleExecutable>`：OpenCADStudio 的
+    `Contents/MacOS/OpenCADStudio` 只是 **launcher stub**，它會去 .app 套件內部
+    找資源；一旦被 symlink 到別處執行，就噴
+    `OpenCADStudio launcher: failed to execute the application`。
+    真正可獨立執行的是同目錄下的 `OpenCADStudio-App`（112 MB 的主程式）。
+
+    通用作法：優先挑名字帶 `-App`／`-app` 後綴的較大檔案；沒有就退回第一個。
+    """
+    macos_dir = app_dir / "Contents" / "MacOS"
+    cands = [c for c in sorted(macos_dir.glob("*")) if c.is_file()]
+    if not cands:
+        return app_dir
+    stem = (tool.bin_stem or tool.key.lower()).lower()
+    preferred = [c for c in cands if c.stem.lower() in (f"{stem}-app", f"{stem}-app-bin")]
+    if preferred:
+        return max(preferred, key=lambda p: p.stat().st_size)
+    # 退回：挑最大的（launcher stub 通常只有幾百 KB）
+    return max(cands, key=lambda p: p.stat().st_size)
+
+
+def _install_macos_dmg(tool: Tool, dmg: Path, dest_dir: Path, asset_name: str,
+                       quiet: bool = False) -> Path | None:
+    """macOS：掛載 .dmg → 複製 .app 到 /Applications → 卸載 → 回傳 app 內執行檔路徑。
+
+    為什麼需要這個：`.dmg` 是磁碟映像，不是可執行檔。先前直接把它搬到
+    `~/.local/opt/` 再 symlink 出去，會得到一個「command not found」的假安裝。
+    """
+    mount_pt = None
+    try:
+        p = subprocess.run(["hdiutil", "attach", "-nobrowse", "-readonly", str(dmg)],
+                           capture_output=True, text=True, timeout=300)
+        if p.returncode != 0:
+            if not quiet:
+                print(f"    ✗ 掛載 DMG 失敗：{(p.stderr or '').strip()[:200]}")
+            return None
+        for line in (p.stdout or "").splitlines():
+            # hdiutil 輸出格式：`/dev/disk8s1  <uuid>  /Volumes/Open CAD Studio`
+            # 掛載點在**最後一欄**（以 tab 分隔），不是行首。
+            parts = [c.strip() for c in line.split("\t") if c.strip()]
+            for c in reversed(parts):
+                if c.startswith("/Volumes/"):
+                    mount_pt = Path(c)
+                    break
+            if mount_pt is not None:
+                break
+        if mount_pt is None or not mount_pt.is_dir():
+            if not quiet:
+                print("    ✗ 找不到 DMG 掛載點")
+            return None
+
+        app = next((c for c in mount_pt.glob("*.app") if c.is_dir()), None)
+        if app is None:
+            if not quiet:
+                print("    ✗ DMG 內找不到 .app")
+            return None
+
+        dest = Path("/Applications") / app.name
+        if dest.exists():
+            if not quiet:
+                print(f"    · {dest} 已存在，改用 ~/.local/opt 內的獨立副本")
+            dest = dest_dir / app.name
+        shutil.copytree(app, dest, dirs_exist_ok=True)
+        if not quiet:
+            print(f"    ✓ 已安裝 {dest}")
+
+        exe = _macos_app_cli_exe(dest, tool)
+        return exe
+    except Exception as e:
+        if not quiet:
+            print(f"    ✗ DMG 安裝失敗：{e}")
+        return None
+    finally:
+        if mount_pt is not None:
+            subprocess.run(["hdiutil", "detach", str(mount_pt), "-quiet"],
+                           capture_output=True, timeout=120)
+
+
 def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
     """安裝單一工具。回傳 {ok, action, detail, pending}。"""
     res = {"key": tool.key, "ok": False, "action": "", "detail": "", "pending": []}
@@ -513,6 +600,20 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
         res.update(ok=True, action="skip", detail=f"已安裝：{existing}")
         if not quiet:
             print(f"  {tool.key:<14} 已安裝  {existing}")
+        # 已安裝也要補命令暴露點：~/.local/bin/<stem> 可能不存在（macOS 走 /Applications）
+        if not IS_WIN:
+            stem = tool.bin_stem or tool.key.lower()
+            lb = local_bin_dir()
+            link = lb / stem
+            if not (link.exists() or link.is_symlink()):
+                try:
+                    lb.mkdir(parents=True, exist_ok=True)
+                    link.symlink_to(existing)
+                    if not quiet:
+                        print(f"    ✓ 已建立 {link} → {existing}")
+                except Exception as e:
+                    if not quiet:
+                        print(f"    ! 建立命令連結失敗：{e}")
         # 已安裝也要補設定：老機器先前裝過，settings.json 仍是 null
         if (tool.bin_stem or "") == "opencadstudio":
             configure_opencadstudio(quiet=quiet)
@@ -570,7 +671,11 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
 
     target: Path | None = None
     try:
-        if tool.kind == "appimage":
+        if asset_name.lower().endswith(".dmg"):
+            # macOS DMG：掛載 → 取出 .app → 複製到 /Applications → 卸載。
+            # （不可直接把 .dmg 當執行檔 symlink 出去，那會得到壞掉的命令。）
+            target = _install_macos_dmg(tool, tmp, dest_dir, asset_name, quiet=quiet)
+        elif tool.kind == "appimage":
             target = dest_dir / asset_name
             shutil.move(str(tmp), target)
             target.chmod(target.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)

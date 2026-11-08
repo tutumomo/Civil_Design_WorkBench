@@ -29,27 +29,31 @@
 | 「片頭動畫／動態字卡／特效合成」 | **EffectCraft**（類 After Effects） | `effectcraft-cli render --project x.ecproj --out out.mp4 --format h264` |
 | 「錄音剪輯／轉檔／正規化音量／混音」 | **SoundCraft**（類 DAW） | `soundcraft-cli convert in out.wav --normalize` |
 
-## 1. ArtCraft 15 套總表（實測 2026-11-02）
+## 1. ArtCraft 15 套總表（冒煙測試實測 2026-11-02）
 
 路徑一律由 `from project_paths import artcraft_cli` 解析（預設 `C:\Program\ArtCraft\<App>\<app>-cli.exe`，其中 `Craft Anything` 為 `C:\Program\ArtCraft\Craft Anything\craft-anything-cli.exe`）。全部支援 `mcp` 子命令（stdio MCP server），也可 `--connect/--bridge` 操作使用者已開的視窗（**需使用者同意才連視窗**）。
 
-| App | 版本 | 指令數 | 讀寫格式（重點） | 冒煙測試 |
-|---|---|---|---|---|
-| CADCraft | 0.12.0~0.13.0 | 441 | DXF／DWG／SVG／PNG／PDF | 相容 >80% AutoCAD 功能，產範例 DXF→DWG/PNG ✔ |
-| GridCraft | 0.12.1 | 353 | xlsx／xls／csv／tsv／json／html／pdf | A3=`=A2*2` 回讀 25 ✔ |
-| WordCraft | 0.11.0 | 643 | docx／doc(讀)／pdf／odt／rtf／html／md／tex／txt／png | 中文 docx→pdf，PdfCraft 回讀文字一致 ✔ |
-| DeckCraft | 0.11.1 | 327 | .deckcraft／pptx／pdf／png／jpeg／gif／md | 中文標題投影片 pptx＋png ✔（目視） |
-| PdfCraft | — | 179 工具 | pdf（另 OCR、PDF/A、偽遮蔽稽核） | info／render／text ✔ |
-| PhotoCraft | 0.16.0 | 940 | pcraft／psd／png／jpg／tif／webp／exr／tga／dds／dpx | 新建 400×300 輸出 png ✔ |
-| LightCraft | 0.14.0 | 376 | jpg／png／tif／webp／avif／jxl／psd／dng（RAW 讀） | 曝光 +0.5 顯影輸出 ✔ |
-| VectorCraft | — | 811 | ai／ait／eps／pdf／svg／psd／png… | png→svg ✔ |
-| DesignCraft | 0.13.0 | 537 | 原生＋pdf（PDF/X-4 檢核） | 範例 4 頁 pdf ✔ |
-| FigCraft | 0.11.2 | 597 | figcraft／fig／json／svg／png／jpg／webp／pdf | svg→png 2400×1600 ✔ |
-| FilmCraft | 0.13.0 | 710 | h264／hevc／prores／dnxhr／mxf／gif／wav／aac… | 專案 inspect ✔（未實際匯出影片） |
-| EffectCraft | — | 734 | ecproj；h264／hevc／av1／prores／webm／gif／png 序列 | 範例合成渲染一格 640×360 ✔（目視） |
-| SoundCraft | — | 482 | wav／aiff…；.scraft 工程檔 | 範例混音 2 秒 wav，-37.8 LUFS ✔ |
-| **TextureCraft** | 0.2.0 | 135 | `.tcraft`；輸入 3D 網格 `.glb/.gltf/.fbx/.dae/.usd/.abc/.obj/.ply/.stl`；匯出 PBR 貼圖與光追渲染 `.png` | `new builtin:sphere`＋`info` ✔ |
-| **Craft Anything** | 0.2.0 | 314（15 toolsets） | `.cany` 調查／重建專案；讀取 `.exe/.dll/.apk/.ipa/.jar/.asar/.wasm/.pyc/.sqlite/.har` 與網站 URL；輸出 Markdown/HTML 報告與重建專案 | `commands` 314 工具盤點 ✔ |
+> **版本與指令數不寫死在文件**：ArtCraft 套裝更新頻繁，版本號一寫進來就變成「每次檢查都不一致」的假警報。
+> 要查目前版本跑 `python tools/project_paths.py --versions`（即時查詢）；歷史基準見 [`docs/已驗證環境快照.md`](已驗證環境快照.md)。
+> 相容性判斷請用下表「冒煙測試」的實際行為，不要比對版本號。
+
+| App | 讀寫格式（重點） | 冒煙測試 |
+|---|---|---|
+| CADCraft | DXF／DWG／SVG／PNG／PDF | 相容 >80% AutoCAD 功能，產範例 DXF→DWG/PNG ✔ |
+| GridCraft | xlsx／xls／csv／tsv／json／html／pdf | A3=`=A2*2` 回讀 25 ✔ |
+| WordCraft | docx／doc(讀)／pdf／odt／rtf／html／md／tex／txt／png | 中文 docx→pdf，PdfCraft 回讀文字一致 ✔ |
+| DeckCraft | .deckcraft／pptx／pdf／png／jpeg／gif／md | 中文標題投影片 pptx＋png ✔（目視） |
+| PdfCraft | pdf（另 OCR、PDF/A、偽遮蔽稽核） | info／render／text ✔ |
+| PhotoCraft | pcraft／psd／png／jpg／tif／webp／exr／tga／dds／dpx | 新建 400×300 輸出 png ✔ |
+| LightCraft | jpg／png／tif／webp／avif／jxl／psd／dng（RAW 讀） | 曝光 +0.5 顯影輸出 ✔ |
+| VectorCraft | ai／ait／eps／pdf／svg／psd／png… | png→svg ✔ |
+| DesignCraft | 原生＋pdf（PDF/X-4 檢核） | 範例 4 頁 pdf ✔ |
+| FigCraft | figcraft／fig／json／svg／png／jpg／webp／pdf | svg→png 2400×1600 ✔ |
+| FilmCraft | h264／hevc／prores／dnxhr／mxf／gif／wav／aac… | 專案 inspect ✔（未實際匯出影片） |
+| EffectCraft | ecproj；h264／hevc／av1／prores／webm／gif／png 序列 | 範例合成渲染一格 640×360 ✔（目視） |
+| SoundCraft | wav／aiff…；.scraft 工程檔 | 範例混音 2 秒 wav，-37.8 LUFS ✔ |
+| **TextureCraft** | `.tcraft`；輸入 3D 網格 `.glb/.gltf/.fbx/.dae/.usd/.abc/.obj/.ply/.stl`；匯出 PBR 貼圖與光追渲染 `.png` | `new builtin:sphere`＋`info` ✔ |
+| **Craft Anything** | `.cany` 調查／重建專案；讀取 `.exe/.dll/.apk/.ipa/.jar/.asar/.wasm/.pyc/.sqlite/.har` 與網站 URL；輸出 Markdown/HTML 報告與重建專案 | `commands` 工具盤點 ✔ |
 
 ### 1.1 新增工具詳解：`TextureCraft` 與 `Craft Anything`（2026-11-02）
 
@@ -88,7 +92,7 @@
 
 | 工具 | 狀態 | 怎麼叫 |
 |---|---|---|
-| **SolidCraft 0.25.1** | ✔ 實測：box 2000×500×1500 mm → STEP＋STL，體積 1.5×10⁹ mm³ 正確 | `C:\Program Files\SolidCraft\solidcraft-cli.exe run script.json --out x.step --out x.stl`；細節 `docs\SolidCraft操作指引.md` |
+| **SolidCraft** | ✔ 實測：box 2000×500×1500 mm → STEP＋STL，體積 1.5×10⁹ mm³ 正確（版本查 `--versions`） | `C:\Program Files\SolidCraft\solidcraft-cli.exe run script.json --out x.step --out x.stl`；細節 `docs\SolidCraft操作指引.md` |
 | **Blender 5.2.3**（Store 版） | ✔ 實測：上述 STL → 渲染 PNG | `C:\Python312\python.exe %USERPROFILE%\.agents\skills\blender\scripts\blender_run.py <recipe> ... --result x.json`（stdout 拿不到，結果看 `--result`） |
 | **text-to-cad（cadgen）** | ⚠ 版本不一致：PATH 上是 **0.6.5**（pip --user），技能要求 `cadgen +0.8.2` 啟動器（`~\.local\bin\cadgen` 不存在），舊文件記 0.7.26（uvx）。`step snapshot` 可用 | 建模前先 `cadgen doctor`；需新版時另議安裝 |
 | **AutoCAD MCP Pro** | ⚠ **目前接的是 GUI AutoCAD（`com` 後端）**：`~\.codex\config.toml` 的 `AUTOCAD_MCP_BACKEND="com"`，與 `docs\AutoCAD_MCP操作指引.md` 記載「已改 ezdxf」不符。實測 `drawing_new` 會在使用者的 AutoCAD 開新圖；AutoCAD 忙碌時畫線回「接收者已拒絕這個呼叫」 | 改回 `ezdxf` 屬「修改 MCP 設定檔」，**須使用者點名同意**。未改前：除非使用者明說要操作他開著的 AutoCAD，否則不用此 MCP，改用 CADCraft／ezdxf |

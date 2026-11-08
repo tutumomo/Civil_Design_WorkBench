@@ -67,6 +67,7 @@
   3. **殘留鎖定檔（`.git/*.lock`）**：若有殘留，確認無執行中的 git 程序後清理，避免所有 git 指令卡死。
   4. **本地未推送（`ahead > 0`）**：換地點或收工前務必落實 `docs/專案收工SOP.md` 執行 push，確保遠端為最新。
 - **路徑一律由 `tools/project_paths.py` 解析（跨平台、禁止寫死絕對路徑）**：本專案程式不得寫死磁碟絕對路徑。用法 `from project_paths import ROOT, regs_db, artcraft_cli, python_exe, accoreconsole, opencadstudio_exe, temp_dir, out_dir`；環境變數可覆寫。環境自我檢查跑 `python tools/project_paths.py`；說明見 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)。
+- **外部工具版本不寫死**：ArtCraft 13 套、SolidCraft 與 Blender 更新頻繁，文件與程式**不得把版本號當規格或檢核條件**（否則每次 app 更新就產生假警報，卻抓不到真正的 API 變更）。要查目前版本跑 `python tools/project_paths.py --versions`；要留紀錄時只新增到 [`docs/已驗證環境快照.md`](docs/已驗證環境快照.md)（標日期、註明僅供追溯）。相容性以實際冒煙測試為準。
 - **【硬性】新機器／換機器／使用者說「更新必備工具」「裝好環境」時，必須執行安裝而非只做檢查**：
   ```bash
   python tools/project_paths.py --install            # 偵測並補裝缺漏的第三方工具

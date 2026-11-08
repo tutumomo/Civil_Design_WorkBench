@@ -79,6 +79,36 @@ def _ocs_wanted() -> bool:
     return True
 
 
+def _kill_tree(proc, grace=10.0):
+    """殺掉整個 process group（AppImage 外殼 ＋ 它 spawn 的 opencadstudio 子進程）。"""
+    import signal
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            proc.wait(timeout=grace)
+        except Exception:
+            proc.kill()
+        return
+    try:
+        pgid = os.getpgid(proc.pid)
+        os.killpg(pgid, signal.SIGTERM)
+    except Exception:
+        proc.terminate()
+        pgid = None
+    try:
+        proc.wait(timeout=grace)
+    except Exception:
+        try:
+            if pgid is not None:
+                os.killpg(pgid, signal.SIGKILL)
+            else:
+                proc.kill()
+        except Exception:
+            pass
+    time.sleep(0.2)
+
+
 @contextlib.contextmanager
 def ocs_service(timeout=30.0):
     """按需啟動 OpenCADStudio REST 服務，離開時結束它。
@@ -95,7 +125,7 @@ def ocs_service(timeout=30.0):
     # AppImage 直接執行即可；若設定指向 squashfs-root/AppRun 也相容
     proc = subprocess.Popen([OCS, "--http", str(port), "--new"],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                            env=env)
+                            env=env, start_new_session=True)
     base = f"http://127.0.0.1:{port}/api/v1"
     try:
         deadline = time.time() + timeout
@@ -115,15 +145,11 @@ def ocs_service(timeout=30.0):
         # Windows：opencadstudio 是 .cmd 包裝時，terminate() 只殺到 cmd.exe，
         # 真正的 OpenCADStudio.exe 會變孤兒（實測跑一次回歸殘留 17 個 --http 實例、約 2.9 GB），
         # 因此一律用 taskkill /T 連子行程一起殺。
-        if os.name == "nt":
-            subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        else:
-            proc.terminate()
-        try:
-            proc.wait(timeout=10)
-        except Exception:
-            proc.kill()
+        # Linux／macOS：AppImage 的 AppRun 也是外殼，只 terminate 外殼同樣留孤兒
+        # （2026-11-08 實測殘留 6 個 --http 實例）；且孤兒結束時會把記憶體裡的舊設定
+        # 回寫 settings.json，把已設好的 fonts_folder 蓋回 null。
+        # 因此用 start_new_session 開獨立 process group，結束時整組殺。
+        _kill_tree(proc)
 
 
 def _ocs_post(base, token, path, payload, timeout=180):

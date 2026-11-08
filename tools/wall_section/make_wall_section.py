@@ -183,7 +183,7 @@ def ensure_tomo(doc):
     if st is None:
         st = doc.styles.add("TOMO", font="gbenor.shx")
     st.dxf.font = "gbenor.shx"
-    st.dxf.bigfont = "CHINA1.SHX"
+    st.dxf.bigfont = "CHINESE.SHX"
     st.dxf.width = 1.0
 
 

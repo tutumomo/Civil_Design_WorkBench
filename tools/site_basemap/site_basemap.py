@@ -110,7 +110,7 @@ if not A.no_osm and not A.cache:
 # ---- DXF ----
 doc = ezdxf.new("R2018", setup=True)
 doc.header["$INSUNITS"] = 6; doc.header["$MEASUREMENT"] = 1; doc.header["$LUNITS"] = 2
-sty = doc.styles.add("TOMO", font="gbenor.shx"); sty.dxf.bigfont = "CHINA1.SHX"
+sty = doc.styles.add("TOMO", font="gbenor.shx"); sty.dxf.bigfont = "CHINESE.SHX"
 # 出圖樣式（2026-10-29）：顏色 1~8 對應線粗；重要 5/6、一般 1/7、次要 8
 LAYERS = PLAN_LAYER_COLORS          # 單一來源：tools/drawing_rules.py
 for k, c in LAYERS.items(): add_plot_layer(doc, k, color=c)
@@ -201,7 +201,7 @@ json.dump({"name": A.name, "lat": A.lat, "lon": A.lon, "crs": "EPSG:3826", "cent
 
 # ---- 自我檢核（AGENTS.md §7）：重讀 DXF、檢查單位與字型、輸出套疊圖與線稿預覽 ----
 d2 = ezdxf.readfile(fn); errs = len(d2.audit().errors); s2 = d2.styles.get("TOMO")
-assert d2.header["$INSUNITS"] == 6 and s2.dxf.font == "gbenor.shx" and s2.dxf.bigfont == "CHINA1.SHX"
+assert d2.header["$INSUNITS"] == 6 and s2.dxf.font == "gbenor.shx" and s2.dxf.bigfont == "CHINESE.SHX"
 col = {"10_道路邊線_現況": (255, 255, 255), "11_道路用地界_地籍": (0, 0, 255), "20_建物": (0, 255, 255), "22_水道": (255, 160, 0)}
 over = cv2.cvtColor(np.asarray(ortho), cv2.COLOR_RGB2BGR).copy(); paper = np.full_like(over, 255)
 for e in d2.modelspace().query("LWPOLYLINE"):

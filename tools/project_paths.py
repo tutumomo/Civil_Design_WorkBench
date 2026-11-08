@@ -350,7 +350,7 @@ def opencadstudio_exe() -> str | None:
 
 
 def cad_fonts_dir() -> Path | None:
-    """CAD 字體庫（TOMO 樣式用 gbenor.shx + CHINA1.SHX）。
+    """CAD 字體庫（TOMO 樣式用 gbenor.shx + CHINESE.SHX）。
 
     解析順序：`CAD_FONTS` 環境變數 → **專案內 `CAD_FONTS/`（已隨 repo 附）** →
     AutoCAD 安裝目錄的 Fonts 子目錄 → 舊的 `c:\\CadFont[S]`。
@@ -414,7 +414,7 @@ def report() -> dict:
         "blender": blender_exe(),
         "cad_fonts": str(cad_fonts_dir()) if cad_fonts_dir() else None,
         "cad_font_files": {n: (str(cad_font(n)) if cad_font(n) else None)
-                           for n in ("gbenor.shx", "CHINA1.SHX")},
+                           for n in ("gbenor.shx", "CHINESE.SHX")},
     }
 
 
@@ -487,7 +487,7 @@ def main(argv=None) -> int:
     print(f"IngeTrazo    : {info['ingetrazo_home'] or '—（選用；未安裝或設定 INGETRAZO_HOME）'}")
     print(f"  MCP 橋     : {iz or '—（找不到 ingetrazo-mcp；設定 INGETRAZO_MCP）'}")
     print(f"Blender      : {info['blender'] or '—（選用）'}")
-    print(f"CAD 字體庫   : {info['cad_fonts'] or '—（TOMO 樣式的 gbenor.shx / CHINA1.SHX 找不到）'}")
+    print(f"CAD 字體庫   : {info['cad_fonts'] or '—（TOMO 樣式的 gbenor.shx / CHINESE.SHX 找不到）'}")
     for k, v in info["cad_font_files"].items():
         print(f"  {k:<14} {v or '—'}")
 

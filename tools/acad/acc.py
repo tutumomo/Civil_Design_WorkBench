@@ -106,7 +106,14 @@ def ocs_service(timeout=30.0):
             raise SystemExit(f"OpenCADStudio 服務 {timeout}s 內未就緒（port {port}）")
         yield base, token
     finally:
-        proc.terminate()
+        # Windows：opencadstudio 是 .cmd 包裝時，terminate() 只殺到 cmd.exe，
+        # 真正的 OpenCADStudio.exe 會變孤兒（實測跑一次回歸殘留 17 個 --http 實例、約 2.9 GB），
+        # 因此一律用 taskkill /T 連子行程一起殺。
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            proc.terminate()
         try:
             proc.wait(timeout=10)
         except Exception:

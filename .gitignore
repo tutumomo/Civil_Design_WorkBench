@@ -74,6 +74,8 @@ claude_desktop_config.json
 *.bak-*
 *.dwl
 *.dwl2
+# OpenCADStudio 存檔時產生的鎖定檔（每存一張圖留一個，不是交付物）
+*.ocs.lock
 *.tmp
 ~$*
 *.bak_*

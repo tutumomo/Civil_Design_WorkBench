@@ -173,7 +173,13 @@ class Tool:
 #:   OpenCADStudio-v2026.44-linux-aarch64.AppImage
 #:   OpenCADStudio-v2026.44-linux-x86_64.AppImage
 #:   OpenCADStudio-v2026.44-macos-arm64.dmg
-#:   OpenCADStudio-v2026.44-windows-x86_64-installer.msi
+#:   OpenCADStudio-v2026.44-windows-x86_64-portable.exe（另有 -installer.msi，不用它）
+#:
+#: Windows 一律取 **portable exe**，不取 MSI：
+#:   - MSI 靜默安裝要管理員，實測 `msiexec /i ... /qn` 回 1603，等於什麼都沒裝成；
+#:   - 取 MSI 時產出的 `~/.local/bin/opencadstudio.cmd` 只會變成「執行那個 .msi」，
+#:     而 `acc.py` 的 `--http` 服務模式根本不會起來；
+#:   - portable exe 是單檔可直接執行，`taskkill /T` 也殺得到本體（MSI 走殼層會留孤兒）。
 TOOLS: list[Tool] = [
     Tool(
         key="OpenCADStudio",
@@ -183,8 +189,8 @@ TOOLS: list[Tool] = [
             ("linux", "x86_64"): [r"linux-x86_64\.AppImage$"],
             ("macos", "aarch64"): [r"macos-arm64\.dmg$"],
             ("macos", "x86_64"): [r"macos-x86_64\.dmg$"],
-            ("windows", "x86_64"): [r"windows-x86_64-installer\.msi$"],
-            ("windows", "aarch64"): [r"windows-arm64-installer\.msi$"],
+            ("windows", "x86_64"): [r"windows-x86_64-portable\.exe$"],
+            ("windows", "aarch64"): [r"windows-arm64-portable\.exe$"],
         },
         kind="appimage",
         bin_stem="opencadstudio",

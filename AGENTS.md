@@ -66,7 +66,14 @@
   2. **遠端有新提交（`behind > 0`）**：開工前務必先 `git pull --ff-only origin <branch>`。若工作區有已追蹤改動，先 `git stash push -u -m "pre-pull-$(hostname)-$(date +%H%M)"` 再 pull，最後以 `git stash apply` 復原。
   3. **殘留鎖定檔（`.git/*.lock`）**：若有殘留，確認無執行中的 git 程序後清理，避免所有 git 指令卡死。
   4. **本地未推送（`ahead > 0`）**：換地點或收工前務必落實 `docs/專案收工SOP.md` 執行 push，確保遠端為最新。
-- **路徑一律由 `tools/project_paths.py` 解析（跨平台、禁止寫死絕對路徑）**：本專案程式不得寫死磁碟絕對路徑。用法 `from project_paths import ROOT, regs_db, artcraft_cli, python_exe, accoreconsole, temp_dir, out_dir`；環境變數可覆寫。環境自我檢查跑 `python tools/project_paths.py`；說明見 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)。
+- **路徑一律由 `tools/project_paths.py` 解析（跨平台、禁止寫死絕對路徑）**：本專案程式不得寫死磁碟絕對路徑。用法 `from project_paths import ROOT, regs_db, artcraft_cli, python_exe, accoreconsole, opencadstudio_exe, temp_dir, out_dir`；環境變數可覆寫。環境自我檢查跑 `python tools/project_paths.py`；說明見 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)。
+- **【硬性】新機器／換機器／使用者說「更新必備工具」「裝好環境」時，必須執行安裝而非只做檢查**：
+  ```bash
+  python tools/project_paths.py --install            # 偵測並補裝缺漏的第三方工具
+  python tools/project_paths.py --install --dry-run  # 先看計畫
+  ```
+  **只跑 `python tools/project_paths.py` 是唯讀回報，不會安裝任何東西**——它印出 OK／— 清單後就結束，缺的工具仍然缺。要宣稱「環境已備妥」之前，必須先跑過 `--install` 且其退出碼為 0，並在回報中貼出該指令的總結段。
+  安裝規範：免 root、成品落 `~/.local/opt/<name>-<ver>/`、`~/.local/bin/` 建 symlink、來源為官方 GitHub Releases；symlink 衝突時改建 `<name>-new` 並印出 `mv` 指令交使用者確認，不直接覆蓋。
 - **工具不得住在 `_temp/`**：`_temp/` 依 §1.1 可整批刪除，凡會長期引用的工具一律放 `tools/`。
 - **優先呼叫確定性腳本**：嚴禁略過 `tools/` 現成工具而重寫一次性腳本。
 - **跨平台 Python 執行鐵則**：
@@ -89,7 +96,7 @@
 | `tools/site_basemap/site_basemap.py` | 輸入案址經緯度 → 產出 TWD97 現況平面線稿 DXF | `render_dxf.py` 產 PNG 檢核；`docs/現況平面底圖作業流程.md` |
 | `tools/a3_sheet/make_sheet.py` | **A3 出圖標準工具**：套用 DWT 圖框、非矩形視口、出 DWG/PDF | 優先於舊版；搭配 `tools/a3_sheet/check_delivery.py` |
 | `tools/a3_sheet/check_delivery.py` | **交件強制品管檢核器**：檢查 E1~E18（bbox 壓字、疊字碰撞、顏色線粗、出圖型式） | 退出碼必須為 0 方可交件；見 §6 |
-| `tools/acad/acc.py` | 封裝 `accoreconsole` 執行 DWT/DWG→DXF（`todxf`）與 DXF→DWG+PDF（`publish`） | 專案出圖型式預設使用 `tools/acad/plot/monochrome.ctb` |
+| `tools/acad/acc.py` | 封裝 `accoreconsole` 執行 DWT/DWG→DXF（`todxf`）與 DXF→DWG+PDF（`publish`）；Linux 後端由 `CIVIL_AI_CAD_BACKEND` 選 `auto`／`ocs`／`cadcraft`（預設 auto，有 OpenCADStudio 就用它） | 專案出圖型式預設使用 `tools/acad/plot/monochrome.ctb`；後端差異見 `docs/環境需求與自動配置.md` §8.7 |
 | `tools/acad/ctb.py` | CTB 讀取、比對與產生工具（`report`/`verify`/`build`） | `docs/出圖樣式與線粗.md` |
 | `tools/acad/apply_plot_style.py` | 舊圖套用新出圖樣式（換顏色線粗、補寫 `TOMO_PLOTSTYLE`，幾何不動） | 來源為 `drawing_rules.PLAN_LAYER_COLORS` |
 | `tools/cadastral/make_cadastral_map.py` | **地籍套繪圖首選工具**：抓台中開放坵塊/段籍＋建物 SHP 產 A3 地籍套繪圖 | `docs/地籍套繪圖產線.md`（僅供參考，不得作產權鑑界依據） |

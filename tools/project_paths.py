@@ -20,8 +20,10 @@
 
 命令列檢查環境::
 
-    python tools/project_paths.py            # 印出所有解析結果
-    python tools/project_paths.py --json     # 給安裝腳本吃的 JSON
+    python tools/project_paths.py                    # 印出所有解析結果
+    python tools/project_paths.py --json             # 給安裝腳本吃的 JSON
+    python tools/project_paths.py --install          # 自動補齊缺漏的第三方工具（免 root）
+    python tools/project_paths.py --install --dry-run # 只看安裝計畫，不下載
 """
 from __future__ import annotations
 
@@ -314,6 +316,39 @@ def blender_exe() -> str | None:
     return exe
 
 
+def opencadstudio_exe() -> str | None:
+    """OpenCADStudio（AutoCAD 開源平替）執行檔。
+
+    解析順序：`OPENCADSTUDIO_EXE` → `~/.local/bin/opencadstudio`
+    → `~/.local/opt/opencadstudio-*/` 內的 AppImage／AppRun → PATH。
+    未安裝回傳 None；補裝用 `python tools/project_paths.py --install`。
+    """
+    p = _env_path("OPENCADSTUDIO_EXE")
+    if p and p.is_file():
+        return str(p)
+
+    names = ["opencadstudio.exe", "opencadstudio.cmd", "opencadstudio"]
+    home = Path.home()
+    for n in names:
+        c = home / ".local" / "bin" / n
+        if c.is_file():
+            return str(c)
+
+    opt = home / ".local" / "opt"
+    if opt.is_dir():
+        for d in sorted(opt.glob("opencadstudio-*"), reverse=True):
+            for pat in ("**/AppRun", "**/*.AppImage", "**/opencadstudio"):
+                for c in sorted(d.glob(pat)):
+                    if c.is_file():
+                        return str(c)
+
+    for n in names:
+        w = shutil.which(n)
+        if w:
+            return str(w)
+    return None
+
+
 def cad_fonts_dir() -> Path | None:
     """CAD 字體庫（TOMO 樣式用 gbenor.shx + CHINA1.SHX）。
 
@@ -373,6 +408,7 @@ def report() -> dict:
         "cadcraft_studio": cadcraft_studio_exe(),
         "accoreconsole": accoreconsole(),
         "solidcraft": solidcraft_cli(),
+        "opencadstudio": opencadstudio_exe(),
         "ingetrazo_home": str(ingetrazo_home()) if ingetrazo_home() else None,
         "ingetrazo_mcp": ingetrazo_mcp(),
         "blender": blender_exe(),
@@ -384,9 +420,19 @@ def report() -> dict:
 
 def main(argv=None) -> int:
     import argparse
-    ap = argparse.ArgumentParser(description="印出專案路徑與外部工具的解析結果（跨平台、無絕對路徑寫死）")
+    ap = argparse.ArgumentParser(
+        description="印出專案路徑與外部工具的解析結果；加 --install 可自動補裝缺漏工具")
     ap.add_argument("--json", action="store_true", help="輸出 JSON（給安裝腳本用）")
+    ap.add_argument("--install", action="store_true",
+                    help="偵測並自動安裝缺漏的第三方工具（免 root，來源為官方 GitHub Releases）")
+    ap.add_argument("--dry-run", action="store_true", help="搭配 --install：只印計畫，不下載")
+    ap.add_argument("--only", metavar="NAME", help="搭配 --install：只處理某一個工具")
     a = ap.parse_args(argv)
+
+    if a.install:
+        sys.path.insert(0, str(TOOLS / "install"))
+        from toolchain import check_and_install
+        return check_and_install(dry=a.dry_run, only=a.only)
     info = report()
     if a.json:
         print(json.dumps(info, ensure_ascii=False, indent=1))
@@ -415,6 +461,10 @@ def main(argv=None) -> int:
         else:
             acc_desc = "—（未安裝 AutoCAD；沒有也能產 DXF，但缺少 DWG 轉檔工具）"
     print(f"accoreconsole: {acc_desc}")
+    if info.get("opencadstudio"):
+        print(f"OpenCADStudio: {info['opencadstudio']}  [OK]（開源 CAD 平替；DWG/DXF、CTB 出圖、MCP）")
+    else:
+        print("OpenCADStudio: —（未安裝；跑 python tools/project_paths.py --install 自動補齊）")
     print(f"SolidCraft   : {info['solidcraft'] or '—（選用）'}")
     iz = info["ingetrazo_mcp"]
     print(f"IngeTrazo    : {info['ingetrazo_home'] or '—（選用；未安裝或設定 INGETRAZO_HOME）'}")

@@ -454,6 +454,17 @@ def main():
     a = ap.parse_args()
 
     case = json.load(open(a.case, encoding="utf-8"))
+
+    # 若傳入統一案件檔（civil-case/1），自動透過 case_core 派生出 boq_case
+    if case.get("schema") == "civil-case/1" or ("boq" in case and "items" not in case):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "case_package"))
+        import case_core
+        case = case_core.derive_boq(case)
+
+    if isinstance(case.get("project"), dict):
+        p = case["project"]
+        case["project"] = p.get("full_name") or p.get("name", "未命名")
+
     items = case.get("items", [])
     if not items:
         sys.exit("案件 JSON 沒有 items")

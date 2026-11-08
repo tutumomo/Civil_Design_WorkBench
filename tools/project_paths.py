@@ -418,6 +418,15 @@ def report() -> dict:
     }
 
 
+
+def _auto_installable_missing(info: dict) -> list[str]:
+    """回傳目前缺少、但可由 toolchain 自動下載安裝的工具名稱清單。"""
+    missing = []
+    # OpenCADStudio
+    if not info.get("opencadstudio"):
+        missing.append("OpenCADStudio")
+    return missing
+
 def main(argv=None) -> int:
     import argparse
     ap = argparse.ArgumentParser(
@@ -427,12 +436,20 @@ def main(argv=None) -> int:
                     help="偵測並自動安裝缺漏的第三方工具（免 root，來源為官方 GitHub Releases）")
     ap.add_argument("--dry-run", action="store_true", help="搭配 --install：只印計畫，不下載")
     ap.add_argument("--only", metavar="NAME", help="搭配 --install：只處理某一個工具")
+    ap.add_argument("--configure", action="store_true",
+                    help="只寫入工具設定（如 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾），不下載")
     a = ap.parse_args(argv)
 
     if a.install:
         sys.path.insert(0, str(TOOLS / "install"))
         from toolchain import check_and_install
         return check_and_install(dry=a.dry_run, only=a.only)
+
+    if a.configure:
+        sys.path.insert(0, str(TOOLS / "install"))
+        from toolchain import configure_opencadstudio
+        ok = configure_opencadstudio(quiet=False)
+        return 0 if ok else 1
     info = report()
     if a.json:
         print(json.dumps(info, ensure_ascii=False, indent=1))
@@ -473,6 +490,36 @@ def main(argv=None) -> int:
     print(f"CAD 字體庫   : {info['cad_fonts'] or '—（TOMO 樣式的 gbenor.shx / CHINA1.SHX 找不到）'}")
     for k, v in info["cad_font_files"].items():
         print(f"  {k:<14} {v or '—'}")
+
+    missing_apps = _auto_installable_missing(info)
+    if missing_apps:
+        print()
+        print(f"檢測到缺少可自動安裝的工具：{'、'.join(missing_apps)}")
+        # 判斷是否為互動式終端機或非互動環境
+        auto_yes = os.environ.get("CIVIL_AI_AUTO_INSTALL", "").lower() in ("1", "true", "yes")
+        should_install = False
+        if auto_yes:
+            print("（偵測到 CIVIL_AI_AUTO_INSTALL=1，自動同意安裝）")
+            should_install = True
+        else:
+            try:
+                ans = input(f"是否立即幫您自動下載並安裝 {'、'.join(missing_apps)}？[y/N] ").strip().lower()
+                should_install = (ans in ("y", "yes"))
+            except (EOFError, KeyboardInterrupt):
+                print()
+                print("提示：在命令列執行 `python tools/project_paths.py --install` 即可一鍵補齊。")
+                should_install = False
+
+        if should_install:
+            print()
+            print("開始自動安裝...")
+            sys.path.insert(0, str(TOOLS / "install"))
+            from toolchain import check_and_install
+            rc = check_and_install()
+            return rc
+        else:
+            return 1
+
     return 0
 
 

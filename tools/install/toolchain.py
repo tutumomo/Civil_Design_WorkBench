@@ -428,6 +428,82 @@ def _place_symlink(tool: Tool, target: Path, dry: bool) -> list[str]:
     return pending
 
 
+def opencadstudio_config_dir() -> Path:
+    """OpenCADStudio 的設定目錄（跨平台）。
+
+    Linux  : ~/.config/OpenCADStudio
+    Windows: %APPDATA%/OpenCADStudio
+    macOS  : ~/Library/Application Support/OpenCADStudio
+    可用 OCS_CONFIG_DIR 覆寫（OCS 本身也認這個變數）。
+    """
+    env = os.environ.get("OCS_CONFIG_DIR")
+    if env:
+        return Path(env)
+    if IS_WIN:
+        base = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
+        return Path(base) / "OpenCADStudio"
+    if IS_MAC:
+        return Path.home() / "Library" / "Application Support" / "OpenCADStudio"
+    return Path.home() / ".config" / "OpenCADStudio"
+
+
+def configure_opencadstudio(quiet: bool = False) -> bool:
+    """把 TOMO 字型夾與 CTB 出圖樣式夾寫進 OpenCADStudio 的 settings.json。
+
+    為什麼要這一步：OCS 的 `settings.fonts_folder` 預設是 null，開 TOMO 圖面會警告
+    `Missing fonts: CHINA1.SHX, gbenor.shx`；`plot_styles_folder` 預設 null 則無法套
+    monochrome.ctb。兩者都指向本專案內的路徑即可（實測可即時生效、無須重啟）。
+
+    只覆蓋這兩個鍵，其餘設定原樣保留；原檔先備份為 settings.json.bak。
+    """
+    try:
+        here = Path(__file__).resolve().parent
+        tools_dir = here.parent
+        if str(tools_dir) not in sys.path:
+            sys.path.insert(0, str(tools_dir))
+        from project_paths import ROOT, cad_fonts_dir
+
+        fonts_dir = cad_fonts_dir() or (ROOT / "CAD_FONTS")
+        plot_dir = ROOT / "tools" / "acad" / "plot"
+
+        if not fonts_dir.is_dir():
+            if not quiet:
+                print(f"    ! 找不到字型夾 {fonts_dir}，略過 OpenCADStudio 設定")
+            return False
+
+        cfg_dir = opencadstudio_config_dir()
+        cfg_dir.mkdir(parents=True, exist_ok=True)
+        cfg_file = cfg_dir / "settings.json"
+
+        d = {}
+        if cfg_file.is_file():
+            try:
+                d = json.loads(cfg_file.read_text(encoding="utf-8"))
+            except Exception:
+                d = {}
+            # 破壞性操作前先整檔備份（使用者約定 2026-11-02）
+            shutil.copy2(cfg_file, cfg_file.with_suffix(".json.bak"))
+
+        if not isinstance(d.get("settings"), dict):
+            d["settings"] = {}
+
+        d["settings"]["fonts_folder"] = str(fonts_dir.resolve())
+        d["settings"]["plot_styles_folder"] = str(plot_dir.resolve())
+
+        cfg_file.write_text(json.dumps(d, ensure_ascii=False, indent=4) + "\n",
+                            encoding="utf-8")
+        if not quiet:
+            print(f"    ✓ 字型夾   → {fonts_dir.resolve()}")
+            print(f"    ✓ 出圖樣式 → {plot_dir.resolve()}")
+            print(f"    ✓ 已寫入 {cfg_file}")
+        return True
+    except Exception as e:
+        if not quiet:
+            print(f"    ! 設定 OpenCADStudio 失敗：{e}")
+        return False
+
+
+
 def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
     """安裝單一工具。回傳 {ok, action, detail, pending}。"""
     res = {"key": tool.key, "ok": False, "action": "", "detail": "", "pending": []}
@@ -437,6 +513,9 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
         res.update(ok=True, action="skip", detail=f"已安裝：{existing}")
         if not quiet:
             print(f"  {tool.key:<14} 已安裝  {existing}")
+        # 已安裝也要補設定：老機器先前裝過，settings.json 仍是 null
+        if (tool.bin_stem or "") == "opencadstudio":
+            configure_opencadstudio(quiet=quiet)
         return res
 
     if tool.kind == "manual":
@@ -527,6 +606,8 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
 
     res["pending"] = _place_symlink(tool, target, dry=False)
     res.update(ok=True, action="installed", detail=str(target))
+    if (tool.bin_stem or "") == "opencadstudio":
+        configure_opencadstudio(quiet=quiet)
     return res
 
 

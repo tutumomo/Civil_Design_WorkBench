@@ -88,6 +88,9 @@
   - **AI 後台自動化代工（轉檔、出圖、無人值守運算）**：走無介面 `accoreconsole.exe`（經 `tools/acad/acc.py`）或 `CADCraft CLI`（`tools/project_paths.py` 之 `artcraft_cli("CADCraft")`）。
   - **macOS CLI 替代層**：使用 `tools/artcraft_cli/` 封裝之 JSON-lines 殼層，維持 CLI 子指令介面。
   - **人類視覺化驗收看板**：`CadCraft Studio` 為 GUI 視窗看板，無 headless CLI，嚴禁 AI 嘗試用腳本操控其介面做背景轉檔；僅供人類開圖檢視。詳見 `docs/CadCraft與CadCraft_Studio分工規範.md`。
+- **改動留痕與驗證閉環（Git Commit & Test-Before-Delivery）**：
+  1. 每次實質改動（修改工具、新增功能、修復 bug、重構或升級規範）完成後，都必須建立對應的 Git commit，確保異動具備語意化說明，以便後續追蹤、審計與快速回滾。
+  2. 每次改動後，都必須編寫、補充或同步更新相關測試與檢核腳本；在交付給使用者前，必須執行測試與全案回歸，確保所有測試與品管驗證全部通過（退出碼為 0），嚴禁未經驗證即宣稱完成。
 - **完稿重開驗證（Reopen & Check）**：寫檔成功 ≠ 圖面可用。每次產出 CAD 檔必須重讀驗證並將實際出圖之 PDF 轉為 PNG 目視檢查；回報時須列出風險限制、數據來源與自評可信度（1–10）。
 
 ## 4. 確定性工具註冊表（Deterministic Tool Registry）

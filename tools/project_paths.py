@@ -320,6 +320,7 @@ def opencadstudio_exe() -> str | None:
     """OpenCADStudio（AutoCAD 開源平替）執行檔。
 
     解析順序：`OPENCADSTUDIO_EXE` → `~/.local/bin/opencadstudio`
+    → macOS `/Applications/OpenCADStudio.app/Contents/MacOS/OpenCADStudio`
     → `~/.local/opt/opencadstudio-*/` 內的 AppImage／AppRun → PATH。
     未安裝回傳 None；補裝用 `python tools/project_paths.py --install`。
     """
@@ -333,6 +334,21 @@ def opencadstudio_exe() -> str | None:
         c = home / ".local" / "bin" / n
         if c.is_file():
             return str(c)
+
+    # macOS：安裝程式會把 .app 放進 /Applications。
+    # 注意：`Contents/MacOS/OpenCADStudio` 只是 launcher stub，被 symlink 到別處
+    # 執行會噴 "failed to execute the application"；真正可獨立執行的是
+    # 同目錄下的 `OpenCADStudio-App`（主程式）。優先挑它。
+    if sys.platform == "darwin":
+        app = Path("/Applications") / "OpenCADStudio.app"
+        macos_dir = app / "Contents" / "MacOS"
+        if macos_dir.is_dir():
+            cands = [c for c in macos_dir.glob("*") if c.is_file()]
+            app_bin = [c for c in cands if c.stem.lower() == "opencadstudio-app"]
+            if app_bin:
+                return str(max(app_bin, key=lambda p: p.stat().st_size))
+            if cands:
+                return str(max(cands, key=lambda p: p.stat().st_size))
 
     opt = home / ".local" / "opt"
     if opt.is_dir():

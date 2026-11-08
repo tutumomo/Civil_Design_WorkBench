@@ -73,6 +73,7 @@
   python tools/project_paths.py --install --dry-run  # 先看計畫
   ```
   **只跑 `python tools/project_paths.py` 是唯讀回報，不會安裝任何東西**——它印出 OK／— 清單後就結束，缺的工具仍然缺。要宣稱「環境已備妥」之前，必須先跑過 `--install` 且其退出碼為 0，並在回報中貼出該指令的總結段。
+  **`--install` 會一併寫好 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾**（`settings.fonts_folder` → `CAD_FONTS/`、`settings.plot_styles_folder` → `tools/acad/plot/`）；已安裝的機器也會補寫。只想重寫設定、不下載時用 `python tools/project_paths.py --configure`。驗證方式是開一張 TOMO 圖後看 REST 回應的 `state.missing_fonts` 是否為 `[]`，不要只憑「沒有警告」判斷。詳見 `docs/環境需求與自動配置.md` §8.8。
   安裝規範：免 root、成品落 `~/.local/opt/<name>-<ver>/`、`~/.local/bin/` 建 symlink、來源為官方 GitHub Releases；symlink 衝突時改建 `<name>-new` 並印出 `mv` 指令交使用者確認，不直接覆蓋。
 - **工具不得住在 `_temp/`**：`_temp/` 依 §1.1 可整批刪除，凡會長期引用的工具一律放 `tools/`。
 - **優先呼叫確定性腳本**：嚴禁略過 `tools/` 現成工具而重寫一次性腳本。

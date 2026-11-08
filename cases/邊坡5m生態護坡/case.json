@@ -94,6 +94,6 @@
  "report": {},
  "section": {
   "scale": "auto",
-  "out": "cases/邊坡5m生態護坡/E-01_邊坡標準斷面圖.dxf"
+  "out": "out/邊坡5m生態護坡/E-01_邊坡標準斷面圖.dxf"
  }
 }

@@ -702,7 +702,7 @@
  },
  "section": {
   "scale": "auto",
-  "out": "cases/擋土牆3m重力式/S-01_擋土牆標準斷面圖.dxf",
+  "out": "out/擋土牆3m重力式/S-01_擋土牆標準斷面圖.dxf",
   "_note": "擋土牆標準斷面圖（A3／1:20），由 tools\\wall_section 產製；case_package 會自動跑 check_delivery E1~E18 驗圖。"
  }
 }

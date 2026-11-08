@@ -48,8 +48,8 @@
 ## 2. DOM — 土木設計領域常數與交付契約（Durable Domain Facts）
 - **輸出格式**：交件預設必須包含 **`.dwg`**（AutoCAD 2018 格式，由 `accoreconsole` 或 `CADCraft CLI` 產出；CADCraft 相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖），`.dxf` 為工作檔。
 - **單位與座標系**：公制公尺（DXF 必設 `$INSUNITS=6`、`$MEASUREMENT=1`）；平面座標採 **TWD97 TM2 二度分帶（`EPSG:3826`）**，圖面即真實座標（台中一帶 `E≈215,000, N≈2,669,000` 屬正常假東移 `250,000`），嚴禁任意平移縮放。
-- **文字樣式（`TOMO`）**：字體庫、英文 `gbenor.shx` ＋ 中文大字體 `CHINA1.SHX`。
-  - `ezdxf` 寫法：`st = doc.styles.add("TOMO", font="gbenor.shx"); st.dxf.bigfont = "CHINA1.SHX"`（禁留 `Standard`/`Only1`）。
+- **文字樣式（`TOMO`）**：字體庫、英文 `gbenor.shx` ＋ 中文大字體 `CHINESE.SHX`。
+  - `ezdxf` 寫法：`st = doc.styles.add("TOMO", font="gbenor.shx"); st.dxf.bigfont = "CHINESE.SHX"`（禁留 `Standard`/`Only1`）。
   - **SHX 只有 AutoCAD／`accoreconsole` 認得；CADCraft 不讀 SHX**（只吃**已安裝**的 TTF/OTF/TTC）。用 CADCraft 校對本專案圖面時設 `CADCRAFT_FONTALT=msjh.ttc`（**只認檔名**，家族名稱與完整路徑實測無效）；**沒有任何環境變數可以指定字型資料夾**。機制、實測雜湊見 [`docs/字型設定_CADCraft與AutoCAD.md`](docs/字型設定_CADCraft與AutoCAD.md)。
 - **圖層與色彩**：命名採 `數字前綴_中文說明`（底圖影像 `00_`、道路 `10_`、建物 `20_`、水道 `22_`、圖框說明 `90_`）；房屋與圖框文字設為 `ACI 7`（白/黑自動反轉色），禁用黃色 `ACI 2`。內嵌影像（IMAGE）須與 DXF 放同資料夾。**出圖型式一律 `monochrome.ctb`，顏色 1~8 對應固定線粗**（不重要 0.10／一般 0.15~0.20／重要 0.35~0.40 mm）；新圖層一律用 `drawing_rules.add_plot_layer()` 建，說明見 `docs/出圖樣式與線粗.md`。
 - **現況平面圖必備要素**：平滑化道路邊線與中心線、依實際方位角正交化之建物輪廓＋逐棟 `ANSI31` Hatch、標註名稱之河道雙岸線、指北針、比例尺。

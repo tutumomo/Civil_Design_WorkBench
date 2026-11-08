@@ -451,7 +451,7 @@ def configure_opencadstudio(quiet: bool = False) -> bool:
     """把 TOMO 字型夾與 CTB 出圖樣式夾寫進 OpenCADStudio 的 settings.json。
 
     為什麼要這一步：OCS 的 `settings.fonts_folder` 預設是 null，開 TOMO 圖面會警告
-    `Missing fonts: CHINA1.SHX, gbenor.shx`；`plot_styles_folder` 預設 null 則無法套
+    `Missing fonts: CHINESE.SHX, gbenor.shx`；`plot_styles_folder` 預設 null 則無法套
     monochrome.ctb。兩者都指向本專案內的路徑即可（實測可即時生效、無須重啟）。
 
     只覆蓋這兩個鍵，其餘設定原樣保留；原檔先備份為 settings.json.bak。

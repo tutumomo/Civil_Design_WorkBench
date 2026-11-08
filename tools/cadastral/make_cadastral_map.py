@@ -96,7 +96,7 @@ def admin_of(lat, lon):
 
 
 def est_width(s, h):
-    """CHINA1.SHX 中文字約 1.2h 寬、gbenor 英數約 0.8h（與 check_delivery 同一個估法）"""
+    """CHINESE.SHX 中文字約 1.2h 寬、gbenor 英數約 0.8h（與 check_delivery 同一個估法）"""
     return sum(1.2 * h if ord(c) >= 0x2E80 else 0.8 * h for c in s)
 
 
@@ -558,7 +558,7 @@ def main():
     doc.header["$MEASUREMENT"] = 1
     st = doc.styles.get("TOMO") if "TOMO" in doc.styles else doc.styles.add("TOMO", font="gbenor.shx")
     st.dxf.font = "gbenor.shx"
-    st.dxf.bigfont = "CHINA1.SHX"
+    st.dxf.bigfont = "CHINESE.SHX"
     ensure_linetypes(doc)
 
     add_plot_layer(doc, L_BLDG, 4)

@@ -7,9 +7,15 @@ ACC = _acc()
 CADCRAFT = _art("CADCraft")
 OCS = _ocs()
 import os as _os
-#: 後端選擇。`auto`（預設）＝有 OpenCADStudio 就用它，否則退回 CADCraft；
-#: `ocs` 強制 OpenCADStudio；`cadcraft` 強制 CADCraft（出問題時可立即切回）。
-BACKEND = (_os.environ.get("CIVIL_AI_CAD_BACKEND") or "auto").strip().lower()
+#: 後端選擇。
+#: `cadcraft`（預設）＝CADCraft，中文 SHX 出圖正確，為正式交付後端。
+#: `ocs`        ＝OpenCADStudio，供檢視／GUI／MCP 使用，但**中文 SHX 出圖會亂碼**，勿用於交件。
+#: `auto`       ＝有 OCS 就用它（同 `ocs` 的風險），僅在明確知道圖面無 SHX 中文時使用。
+#: 2026-11-08 實測：同一張 D-01 排水溝標準斷面圖，cadcraft 出圖中文正確，
+#: OpenCADStudio 出圖把「鋼筋圖例／部位圖例／斷面尺寸表／說明」渲染成亂碼
+#: （鋼殘圖瞰／窀位圖瞰／斷轍喜渡桶／說雕），PDF 由 1,051,072 bytes 掉到 116,474 bytes。
+#: 因此預設值由 `auto` 改回 `cadcraft`。
+BACKEND = (_os.environ.get("CIVIL_AI_CAD_BACKEND") or "cadcraft").strip().lower()
 """AutoCAD 核心主控台 (accoreconsole) 封裝：DWT/DWG→DXF、DXF→DWG+PDF。
 已處理的坑（docs\\踩坑紀錄.md L 節）：中文路徑→複製到英文暫存區；.scr 用 cp950 且 newline=""；
 腳本必給完整路徑；卡在提示時逾時強制結束；中文版圖紙名「…公釐」。不碰使用者開著的 AutoCAD 視窗。

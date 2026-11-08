@@ -97,7 +97,7 @@
 | `tools/site_basemap/site_basemap.py` | 輸入案址經緯度 → 產出 TWD97 現況平面線稿 DXF | `render_dxf.py` 產 PNG 檢核；`docs/現況平面底圖作業流程.md` |
 | `tools/a3_sheet/make_sheet.py` | **A3 出圖標準工具**：套用 DWT 圖框、非矩形視口、出 DWG/PDF | 優先於舊版；搭配 `tools/a3_sheet/check_delivery.py` |
 | `tools/a3_sheet/check_delivery.py` | **交件強制品管檢核器**：檢查 E1~E18（bbox 壓字、疊字碰撞、顏色線粗、出圖型式） | 退出碼必須為 0 方可交件；見 §6 |
-| `tools/acad/acc.py` | 封裝 `accoreconsole` 執行 DWT/DWG→DXF（`todxf`）與 DXF→DWG+PDF（`publish`）；Linux 後端由 `CIVIL_AI_CAD_BACKEND` 選 `auto`／`ocs`／`cadcraft`（預設 auto，有 OpenCADStudio 就用它） | 專案出圖型式預設使用 `tools/acad/plot/monochrome.ctb`；後端差異見 `docs/環境需求與自動配置.md` §8.7 |
+| `tools/acad/acc.py` | 封裝 `accoreconsole` 執行 DWT/DWG→DXF（`todxf`）與 DXF→DWG+PDF（`publish`）；Linux 後端由 `CIVIL_AI_CAD_BACKEND` 選 `cadcraft`（**預設**，中文 SHX 出圖正確）／`ocs`（GUI 與 MCP 用，**中文 SHX 出圖會亂碼，勿交件**）／`auto` | 專案出圖型式預設使用 `tools/acad/plot/monochrome.ctb`；後端差異見 `docs/環境需求與自動配置.md` §8.7 |
 | `tools/acad/ctb.py` | CTB 讀取、比對與產生工具（`report`/`verify`/`build`） | `docs/出圖樣式與線粗.md` |
 | `tools/acad/apply_plot_style.py` | 舊圖套用新出圖樣式（換顏色線粗、補寫 `TOMO_PLOTSTYLE`，幾何不動） | 來源為 `drawing_rules.PLAN_LAYER_COLORS` |
 | `tools/cadastral/make_cadastral_map.py` | **地籍套繪圖首選工具**：抓台中開放坵塊/段籍＋建物 SHP 產 A3 地籍套繪圖 | `docs/地籍套繪圖產線.md`（僅供參考，不得作產權鑑界依據） |

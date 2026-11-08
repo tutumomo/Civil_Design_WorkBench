@@ -25,7 +25,7 @@
 | 規範／設計網頁（8765 `/`、`/design`） | `./web.sh` | 未啟動（連線 000） | 未啟動，需要時再起 |
 | ArtCraft 13 支 CLI（CADCraft／GridCraft／WordCraft／PdfCraft…） | `tools/project_paths.py` 應全 OK | ✅ 全 OK | ✅ |
 | CAD 字體 `gbenor.shx`／`CHINA1.SHX` | `CAD_FONTS/` | ✅ | ✅ |
-| DWG 產出 | AutoCAD 或 CADCraft | ✅ CADCraft 0.12.0 | ✅ |
+| DWG 產出 | AutoCAD 或 CADCraft | ✅ CADCraft（版本查 `--versions`） | ✅ |
 | 技能 `civil-site-basemap`、`solidcraft-param` | `.agents/skills/` | ✅ 在技能目錄 | ✅ |
 | `autocad` MCP（ezdxf 後端） | 選用 | ❌ | ❌（本機無此套件；Windows 專用，判定不需要） |
 | `cindy_memory` | 選用 | — | 由 dsh 內建記憶系統取代 |

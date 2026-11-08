@@ -29,8 +29,8 @@
 
 | # | 名稱 | 實際實體（本機路徑） | 版本（實測） | 執行模式 | 幾何核心 | 原生格式 |
 |---|---|---|---|---|---|---|
-| 1 | **CADCraft CLI** | `C:\Program\ArtCraft\CADCraft\cadcraft-cli.exe` | **0.13.0** | **headless CLI**（另有 GUI `cadcraft.exe`），自帶 `mcp` 子命令 | 自研 2D DXF/DWG 引擎 | DXF／DWG／PDF／SVG／PNG |
-| 2 | **SolidCraft** | `C:\Program Files\SolidCraft\solidcraft-cli.exe` | **0.25.1** | **headless CLI** ＋ GUI ＋ `mcp` 子命令 | 參數驅動特徵樹（布林實體） | `.solidcraft`／STEP／STL／3MF |
+| 1 | **CADCraft CLI** | `C:\Program\ArtCraft\CADCraft\cadcraft-cli.exe` | **不固定**（查 `--versions`） | **headless CLI**（另有 GUI `cadcraft.exe`），自帶 `mcp` 子命令 | 自研 2D DXF/DWG 引擎 | DXF／DWG／PDF／SVG／PNG |
+| 2 | **SolidCraft** | `C:\Program Files\SolidCraft\solidcraft-cli.exe` | **不固定**（查 `--versions`） | **headless CLI** ＋ GUI ＋ `mcp` 子命令 | 參數驅動特徵樹（布林實體） | `.solidcraft`／STEP／STL／3MF |
 | 3 | **Blender 技能** | `~\.agents\skills\blender\`（Store 5.2.3，經 `blender-launcher.exe`） | **5.2.3** | headless（`--background`）；另有 MCP 但**必須搭 GUI** | 多邊形網格（非精確實體） | `.blend`／STL／OBJ／PLY／GLB／GLTF |
 | 4 | **AutoCAD MCP** | `~\.mcp\autocad-mcp-pro`（1.6.0，Claude Code 用）／`~\.agents\mcp\autocad-mcp-pro`（1.7.0，Codex 用） | **1.6.0／1.7.0** | MCP stdio（`ezdxf` 純 DXF 後端；`com` 後端已禁用） | `ezdxf`（Python）＋可選 ODA | DXF（DWG 需外部工具） |
 | 5 | **text-to-cad 技能**（`cad`／`dxf`） | `~\.agents\skills\cad`｜引擎 `cadgen==0.7.26`（`uvx` 安裝） | cadgen **0.7.26** | `uvx` 執行的 Python 腳本 ＋ headless viewer | **build123d／OpenCASCADE**（B-rep） | STEP／STL／3MF／GLB／DXF |
@@ -309,15 +309,14 @@ Studio 內的 **CadCraft app 與本機 `cadcraft-cli.exe` 是同一產品家族�
 
 **相容性與交付建議更新**：CADCraft 可相容 >80% 以上 AutoCAD 功能，且具備跨平台直接產出 DWG 格式設計圖能力。在具備原生 AutoCAD 的 Windows 環境下可由 `acc.py` 產出 2018 版 DWG；在未安裝 AutoCAD 或非 Windows 平台（如 Linux、macOS）時，可直接由 CADCraft CLI 產出標準 DWG 格式交付件，完整保留圖紙空間、視口內容與外部圖層配置。
 
-### 5.2 版本漂移（文件與實機不一致，已於本檔更新）
+### 5.2 版本政策：不寫死，改即時查詢
 
-| 工具 | 文件寫的 | 實測 |
-|---|---|---|
-| SolidCraft | 0.24.0 | **0.25.1**（指令 493，非 474） |
-| AutoCAD MCP | 1.6.0（Claude Code）／1.7.0（Codex） | 一致（242／243 tools） |
-| CADCraft CLI | 文件未標 | **0.13.0** |
-| Blender | 5.2.3 | 一致 |
-| IngeTrazo | 0.6.0 | **0.6.0**（GUI 與 `ingetrazo-mcp.exe` 同安裝；建模端到端待實跑） |
+ArtCraft 套裝（以及 SolidCraft／Blender 這類持續更新的外部工具）版本更新頻繁。把版本號寫進常駐文件，只會讓每次檢查都出現「文件與實機不一致」的假警報，卻抓不到真正會壞掉的 API 變更。
+
+- **不做版本比對**：`tools/project_paths.py` 只解析路徑，沒有任何檢核以版本號為條件。
+- **要查目前版本**：`python tools/project_paths.py --versions`（即時查詢，永遠反映現況）。
+- **要固定基準**：只在 [`docs/已驗證環境快照.md`](已驗證環境快照.md) 記「日期＋版本」，並註明僅供追溯。
+- **要判斷相容**：用實際冒煙測試（例：`gridcraft-cli run --script`、`cadcraft-cli convert`、`wordcraft-cli convert`），不要看版本號。
 
 ---
 

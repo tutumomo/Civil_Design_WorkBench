@@ -21,6 +21,7 @@
 命令列檢查環境::
 
     python tools/project_paths.py                    # 印出所有解析結果
+    python tools/project_paths.py --versions         # 即時查詢各 CLI 版本（僅供追溯）
     python tools/project_paths.py --json             # 給安裝腳本吃的 JSON
     python tools/project_paths.py --install          # 自動補齊缺漏的第三方工具（免 root）
     python tools/project_paths.py --install --dry-run # 只看安裝計畫，不下載
@@ -30,6 +31,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -435,6 +437,24 @@ def report() -> dict:
 
 
 
+def cli_version(cmd: str | None, timeout: float = 8.0) -> str:
+    """即時查詢外部 CLI 的版本字串；找不到或執行失敗回空字串（不丟錯）。
+
+    各套 `--version` 形式不一（有的只認 `version`），因此兩種都試。
+    """
+    if not cmd:
+        return ""
+    for argv in ([cmd, "--version"], [cmd, "version"]):
+        try:
+            p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+        except Exception:
+            continue
+        lines = ((p.stdout or "") + (p.stderr or "")).strip().splitlines()
+        if lines:
+            return lines[0].strip()
+    return ""
+
+
 def _auto_installable_missing(info: dict) -> list[str]:
     """回傳目前缺少、但可由 toolchain 自動下載安裝的工具名稱清單。"""
     missing = []
@@ -454,6 +474,8 @@ def main(argv=None) -> int:
     ap.add_argument("--only", metavar="NAME", help="搭配 --install：只處理某一個工具")
     ap.add_argument("--configure", action="store_true",
                     help="只寫入工具設定（如 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾），不下載")
+    ap.add_argument("--versions", action="store_true",
+                    help="即時查詢各 CLI 版本（僅供追溯，不作相容性檢核）")
     a = ap.parse_args(argv)
 
     if a.install:
@@ -466,6 +488,24 @@ def main(argv=None) -> int:
         from toolchain import configure_opencadstudio
         ok = configure_opencadstudio(quiet=False)
         return 0 if ok else 1
+
+    if a.versions:
+        info = report()
+        print("工具版本（即時查詢；僅供追溯，不作相容性檢核）")
+        print("ArtCraft")
+        for name, path in info["artcraft"].items():
+            ver = cli_version(path) or "—"
+            print(f"  {name:<14} {ver:<28} {path or '（未安裝）'}")
+        print("其他")
+        for name, key in (("SolidCraft", "solidcraft"),
+                          ("OpenCADStudio", "opencadstudio"),
+                          ("Blender", "blender")):
+            path = info[key]
+            ver = cli_version(path) or "—"
+            print(f"  {name:<14} {ver:<28} {path or '（未安裝）'}")
+        print("（版本號會隨 app 更新變動；固定基準見 docs/已驗證環境快照.md）")
+        return 0
+
     info = report()
     if a.json:
         print(json.dumps(info, ensure_ascii=False, indent=1))

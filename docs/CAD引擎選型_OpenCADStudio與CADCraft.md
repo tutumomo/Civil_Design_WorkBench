@@ -1,7 +1,7 @@
 # CAD 引擎選型：OpenCADStudio vs ArtCraft CADCraft
 
 > 建立日期：2026-11-08｜量測環境：Linux aarch64 / NVIDIA GB10
-> 版本：OpenCADStudio 2026.44（AppImage, `~/.local/opt/opencadstudio-2026.44/`）｜cadcraft-cli 0.12.0
+> 版本：不寫死（外部工具更新頻繁）；即時查 `python tools/project_paths.py --versions`，歷史基準見 [`docs/已驗證環境快照.md`](已驗證環境快照.md)
 
 ## 1. 結論（先講該用哪一套）
 

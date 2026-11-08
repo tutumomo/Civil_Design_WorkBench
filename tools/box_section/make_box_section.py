@@ -441,58 +441,184 @@ def _corner_reinforcement(doc, g, scale, cells):
 
 
 def _draw_rebar(doc, g, elements, cover_m, scale):
-    """逐面畫主筋（圓點＝斷面切到的鋼筋）＋編號圓標（1~8）。"""
+    """逐面畫主筋實線（LWPOLYLINE / LINE）＋副筋圓點（CIRCLE 貼於主筋內側）＋編號圓標（1~8、9~12）。"""
     msp = doc.modelspace()
-    W, Htot, tb = g["W"], g["Htot"], g["tb"]
+    W, Htot, tb, tt, H = g["W"], g["Htot"], g["tb"], g["tt"], g["H"]
+    tw, ti, cells, iw = g["tw"], g["ti"], g["cells"], g["int_walls"]
+    c = g["c"]
     off = model_h(5.0, scale)          # 圓標離鋼筋線的距離（紙面 5 mm）
+
+    elem_map = {(e["key"], e["face"]): e for e in elements}
+
+    dia_main = 0.016
+    cd = cover_m + dia_main / 2.0
+    r_offset = 0.015
+    r_dist = 0.013 / 2.0
+
+    hook_top = min(tt + c, 0.45)
+    hook_bot = min(tb + c, 0.45)
+
+    # 1. 主筋（受力筋）：頂板、底板、側壁繪製出連續受力主筋線條（LWPOLYLINE / LINE on '40_鋼筋'）
+    # (a) 頂板外側主筋（連續 U 型向下彎折進入外側壁）
+    msp.add_lwpolyline([
+        (cd, Htot - cd - hook_top),
+        (cd, Htot - cd),
+        (W - cd, Htot - cd),
+        (W - cd, Htot - cd - hook_top),
+    ], dxfattribs={"layer": L_REBAR})
+
+    # (b) 頂板內側主筋（橫向下層筋＋兩端向下彎折錨定）
+    msp.add_lwpolyline([
+        (tw - cd, tb + H + cd - hook_top),
+        (tw - cd, tb + H + cd),
+        (W - tw + cd, tb + H + cd),
+        (W - tw + cd, tb + H + cd - hook_top),
+    ], dxfattribs={"layer": L_REBAR})
+
+    # (c) 底板外側主筋（連續 U 型向上彎折進入外側壁）
+    msp.add_lwpolyline([
+        (cd, cd + hook_bot),
+        (cd, cd),
+        (W - cd, cd),
+        (W - cd, cd + hook_bot),
+    ], dxfattribs={"layer": L_REBAR})
+
+    # (d) 底板內側主筋（橫向上層筋＋兩端向上彎折錨定）
+    msp.add_lwpolyline([
+        (tw - cd, tb - cd + hook_bot),
+        (tw - cd, tb - cd),
+        (W - tw + cd, tb - cd),
+        (W - tw + cd, tb - cd + hook_bot),
+    ], dxfattribs={"layer": L_REBAR})
+
+    # (e) 外側壁外側主筋（左、右兩道外側鉛直筋）
+    msp.add_line((cd, cd), (cd, Htot - cd), dxfattribs={"layer": L_REBAR})
+    msp.add_line((W - cd, cd), (W - cd, Htot - cd), dxfattribs={"layer": L_REBAR})
+
+    # (f) 外側壁內側主筋（左、右兩道內側鉛直筋）
+    msp.add_line((tw - cd, tb - cd), (tw - cd, tb + H + cd), dxfattribs={"layer": L_REBAR})
+    msp.add_line((W - tw + cd, tb - cd), (W - tw + cd, tb + H + cd), dxfattribs={"layer": L_REBAR})
+
+    # (g) 中間壁主筋（A 側、B 側兩道鉛直筋）
+    for w in iw:
+        msp.add_line((w[0] + cd, tb - cd), (w[0] + cd, tb + H + cd), dxfattribs={"layer": L_REBAR})
+        msp.add_line((w[1] - cd, tb - cd), (w[1] - cd, tb + H + cd), dxfattribs={"layer": L_REBAR})
+
+    # 2. 副筋（縱向分佈筋 CIRCLE）：在頂板、底板、側壁主筋線條的『內側』繪製圓點，代表沿水流方向延伸的分佈筋
+    def add_dots_h(y, x0, x1, sp_mm):
+        sp = max(float(sp_mm) / 1000.0, 0.05)
+        x = x0
+        while x <= x1 + 1e-6:
+            msp.add_circle((x, y), r_dist, dxfattribs={"layer": L_REBAR})
+            x += sp
+
+    def add_dots_v(x, y0, y1, sp_mm):
+        sp = max(float(sp_mm) / 1000.0, 0.05)
+        y = y0
+        while y <= y1 + 1e-6:
+            msp.add_circle((x, y), r_dist, dxfattribs={"layer": L_REBAR})
+            y += sp
+
+    sp_top_out = ((elem_map.get(("top_slab", "outer")) or {}).get("flexure") or {}).get("spacing_mm", 170)
+    sp_top_in = ((elem_map.get(("top_slab", "inner")) or {}).get("flexure") or {}).get("spacing_mm", 170)
+    sp_bot_out = ((elem_map.get(("bottom_slab", "outer")) or {}).get("flexure") or {}).get("spacing_mm", 150)
+    sp_bot_in = ((elem_map.get(("bottom_slab", "inner")) or {}).get("flexure") or {}).get("spacing_mm", 150)
+    sp_ext_out = ((elem_map.get(("exterior_wall", "outer")) or {}).get("flexure") or {}).get("spacing_mm", 200)
+    sp_ext_in = ((elem_map.get(("exterior_wall", "inner")) or {}).get("flexure") or {}).get("spacing_mm", 200)
+    sp_int_A = ((elem_map.get(("interior_wall", "A")) or {}).get("flexure") or {}).get("spacing_mm", 240)
+    sp_int_B = ((elem_map.get(("interior_wall", "B")) or {}).get("flexure") or {}).get("spacing_mm", 240)
+
+    # 頂板分佈筋：貼於頂板主筋內側
+    add_dots_h(Htot - cd - r_offset, cd + r_offset, W - cd - r_offset, sp_top_out)
+    add_dots_h(tb + H + cd + r_offset, tw - cd + r_offset, W - tw + cd - r_offset, sp_top_in)
+
+    # 底板分佈筋：貼於底板主筋內側
+    add_dots_h(cd + r_offset, cd + r_offset, W - cd - r_offset, sp_bot_out)
+    add_dots_h(tb - cd - r_offset, tw - cd + r_offset, W - tw + cd - r_offset, sp_bot_in)
+
+    # 外側壁分佈筋：貼於外壁主筋內側
+    add_dots_v(cd + r_offset, cd + r_offset, Htot - cd - r_offset, sp_ext_out)
+    add_dots_v(W - cd - r_offset, cd + r_offset, Htot - cd - r_offset, sp_ext_out)
+    add_dots_v(tw - cd - r_offset, tb - cd + r_offset, tb + H + cd - r_offset, sp_ext_in)
+    add_dots_v(W - tw + cd + r_offset, tb - cd + r_offset, tb + H + cd - r_offset, sp_ext_in)
+
+    # 中間壁分佈筋：貼於中壁主筋內側
+    for w in iw:
+        add_dots_v(w[0] + cd + r_offset, tb - cd + r_offset, tb + H + cd - r_offset, sp_int_A)
+        add_dots_v(w[1] - cd - r_offset, tb - cd + r_offset, tb + H + cd - r_offset, sp_int_B)
+
+    # 3. 編號圓標與引線（分別指向對應的主筋實線與副筋圓點）
     out = []
-    no = 0
-    for e in elements:
-        flex = e.get("flexure") or {}
-        bar = flex.get("bar")
-        spacing = flex.get("spacing_mm")
-        if not bar or not spacing:
-            continue
-        no += 1
-        dia = BAR_DIA.get(bar, 0.016)
-        cd = cover_m + dia / 2.0
+    # (1~8) 主筋標註（指到對應主筋實線）
+    for no, e in enumerate(elements, 1):
         key, face = e["key"], e["face"]
-        sp = float(spacing) / 1000.0
-        if key in ("top_slab", "bottom_slab"):
-            if key == "top_slab":
-                y = Htot - cd if face == "outer" else tb + g["H"] + cd
-            else:
-                y = cd if face == "outer" else tb - cd
-            x = cd
-            while x <= W - cd + 1e-9:
-                msp.add_circle((x, y), dia / 2.0, dxfattribs={"layer": L_REBAR})
-                x += sp
-            up = (key == "top_slab" and face == "outer") or \
-                 (key == "bottom_slab" and face == "inner")
-            dy = off if up else -off
+        flex = e.get("flexure") or {}
+        bar = flex.get("bar", "D16")
+        sp_int = int(flex.get("spacing_mm", 200))
+        if key == "top_slab":
+            y_line = (Htot - cd) if face == "outer" else (tb + H + cd)
+            dy = off if face == "outer" else -off
+            x_m = cells[0][0] + 0.45
             out.append({"no": no, "label": e.get("label") or e.get("face_label"),
-                        "bar": bar, "spacing_mm": int(spacing),
-                        "kind": "h", "y": y, "x": cd,
-                        "mark": (cd + off, y + dy), "anchor": (cd, y)})
-        else:
-            xs = face_sites(g, key, face, cd)
-            y = cd
-            while y <= Htot - cd + 1e-9:
-                for x in xs:
-                    msp.add_circle((x, y), dia / 2.0, dxfattribs={"layer": L_REBAR})
-                y += sp
-            # 外牆有左右兩道，外側圓標放在**右外牆外側**（左側留給淨高與底板厚尺寸）
-            ax = (xs[-1] if (key == "exterior_wall" and face == "outer" and xs)
-                  else (xs[0] if xs else 0.0))
-            if key == "exterior_wall":
-                dxm = off
-            else:
-                dxm = -off if face == "A" else off
+                        "bar": bar, "spacing_mm": sp_int,
+                        "kind": "h", "y": y_line, "x": x_m,
+                        "mark": (x_m, y_line + dy), "anchor": (x_m, y_line)})
+        elif key == "bottom_slab":
+            y_line = cd if face == "outer" else (tb - cd)
+            dy = -off if face == "outer" else off
+            x_m = cells[0][0] + 0.45
             out.append({"no": no, "label": e.get("label") or e.get("face_label"),
-                        "bar": bar, "spacing_mm": int(spacing),
-                        "kind": "v", "x": ax, "y": cd,
-                        "mark": (ax + dxm, Htot / 2.0), "anchor": (ax, Htot / 2.0)})
-    # ---- 編號圓標（半徑 0.055 m，配筋量測時會被 radius>0.02 濾掉）----
+                        "bar": bar, "spacing_mm": sp_int,
+                        "kind": "h", "y": y_line, "x": x_m,
+                        "mark": (x_m, y_line + dy), "anchor": (x_m, y_line)})
+        elif key == "exterior_wall":
+            if face == "outer":
+                out.append({"no": no, "label": e.get("label") or e.get("face_label"),
+                            "bar": bar, "spacing_mm": sp_int,
+                            "kind": "v", "x": W - cd, "y": Htot / 2.0,
+                            "mark": (W - cd + off, Htot / 2.0), "anchor": (W - cd, Htot / 2.0)})
+            else:
+                out.append({"no": no, "label": e.get("label") or e.get("face_label"),
+                            "bar": bar, "spacing_mm": sp_int,
+                            "kind": "v", "x": tw - cd, "y": Htot / 2.0,
+                            "mark": (tw - cd + off, Htot / 2.0), "anchor": (tw - cd, Htot / 2.0)})
+        elif key == "interior_wall" and iw:
+            if face == "A":
+                ax = iw[0][0] + cd
+                out.append({"no": no, "label": e.get("label") or e.get("face_label"),
+                            "bar": bar, "spacing_mm": sp_int,
+                            "kind": "v", "x": ax, "y": Htot / 2.0,
+                            "mark": (ax - off, Htot / 2.0), "anchor": (ax, Htot / 2.0)})
+            else:
+                ax = iw[0][1] - cd
+                out.append({"no": no, "label": e.get("label") or e.get("face_label"),
+                            "bar": bar, "spacing_mm": sp_int,
+                            "kind": "v", "x": ax, "y": Htot / 2.0,
+                            "mark": (ax + off, Htot / 2.0), "anchor": (ax, Htot / 2.0)})
+
+    # (9~12) 副筋標註（指到對應副筋圓點）
+    dist_specs = [
+        (len(elements) + 1, "頂版縱向分佈筋",
+         (cells[0][0] + 1.5, tb + H + cd + r_offset),
+         (cells[0][0] + 1.5, tb + H + cd - off)),
+        (len(elements) + 2, "底版縱向分佈筋",
+         (cells[0][0] + 1.5, tb - cd - r_offset),
+         (cells[0][0] + 1.5, tb - cd + off)),
+        (len(elements) + 3, "外側牆縱向分佈筋",
+         (tw - cd - r_offset, min(tb + H * 0.80, tb + H - 0.25)),
+         (tw - cd + off, min(tb + H * 0.80, tb + H - 0.25))),
+    ]
+    if iw:
+        dist_specs.append((
+            len(elements) + 4, "中間牆縱向分佈筋",
+            (iw[0][0] + cd + r_offset, min(tb + H * 0.80, tb + H - 0.25)),
+            (iw[0][0] + cd - off, min(tb + H * 0.80, tb + H - 0.25))
+        ))
+
+    for dno, dlabel, anchor_pt, mark_pt in dist_specs:
+        out.append({"no": dno, "label": dlabel, "kind": "dist",
+                    "mark": mark_pt, "anchor": anchor_pt})
+
     for b in out:
         _bar_mark(doc, b, scale)
     return out
@@ -958,6 +1084,7 @@ def main():
     g["cover_m"] = cover_m
     g["corner_rebar"] = payload.get("corner_rebar", "D13")
     g["corner_rebar_spacing_mm"] = payload.get("corner_rebar_spacing_mm", 200.0)
+    g["distribution"] = (result.get("reinforcement") or {}).get("distribution") or []
     draw_box_section(doc, g, a.scale, ds, cover_m, elements, rebar=True)
 
     proj = a.project or (case.get("project") or {}).get("full_name") or "箱涵工程"

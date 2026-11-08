@@ -191,8 +191,48 @@ def measure_rebar_chain(dxf_path, max_radius=0.02):
     return {"n": len(pts), "spacing_m": round(sp, 3), "per_m": round(1.0 / sp, 1)}
 
 
+def measure_rebar_lines(dxf_path, min_len=0.15):
+    """量配筋圖上 40_鋼筋 圖層的主筋實線（LWPOLYLINE / LINE）。
+
+    確保圖面上確實畫出受力主筋連續實線（而非只有圓點）。
+    回傳 {"count": int, "total_len_m": float, "polylines": int, "lines": int}
+    """
+    import ezdxf as _ez
+    doc = _ez.readfile(dxf_path)
+    msp = doc.modelspace()
+    polys = [e for e in msp.query("LWPOLYLINE") if e.dxf.layer == REBAR_LAYER]
+    lines = [e for e in msp.query("LINE") if e.dxf.layer == REBAR_LAYER]
+
+    total_len = 0.0
+    valid_polys = 0
+    for p in polys:
+        pts = list(p.get_points())
+        if len(pts) < 2:
+            continue
+        plen = sum(((pts[i + 1][0] - pts[i][0]) ** 2 + (pts[i + 1][1] - pts[i][1]) ** 2) ** 0.5
+                   for i in range(len(pts) - 1))
+        if plen >= min_len:
+            total_len += plen
+            valid_polys += 1
+
+    valid_lines = 0
+    for ln in lines:
+        s, e = ln.dxf.start, ln.dxf.end
+        llen = ((e.x - s.x) ** 2 + (e.y - s.y) ** 2) ** 0.5
+        if llen >= min_len:
+            total_len += llen
+            valid_lines += 1
+
+    return {
+        "count": valid_polys + valid_lines,
+        "polylines": valid_polys,
+        "lines": valid_lines,
+        "total_len_m": round(total_len, 3)
+    }
+
+
 def check_rebar(dxf_path, case_path):
-    """把配筋圖量到的間距與案件（= 配筋表）的設計間距對帳。"""
+    """把配筋圖量到的間距與案件（= 配筋表）的設計間距對帳，並檢核受力主筋實線。"""
     import sys
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     "..", "case_package"))
@@ -201,6 +241,9 @@ def check_rebar(dxf_path, case_path):
     model, q, _ = CC.quantity_context(case)
     cols = measure_rebar(dxf_path)
     rows_ = measure_rebar_rows(dxf_path)
+    main_lines = measure_rebar_lines(dxf_path)
+    lines_ok = True
+    lines_err = None
     # 設計間距：直接從配筋設計算（case 的 section 段只有比例與檔名，沒有間距）
     want = set()
     sec = case.get("section") or {}
@@ -240,6 +283,12 @@ def check_rebar(dxf_path, case_path):
                         want.add(int(_sp))
         except Exception:
             pass
+
+    if want:
+        if main_lines["count"] == 0 or main_lines["total_len_m"] < 0.3:
+            lines_ok = False
+            lines_err = "圖面 40_鋼筋 圖層未畫出受力主筋實線（LWPOLYLINE/LINE），僅有圓點或實線總長不足！"
+
     # 水平列若只有 2 點（重力式牆面有坡度，同一高度的前後兩根筋距離會逐層變化），
     # 那不是「間距」而是兩面層的淨距，必須排除，否則會產生大量假間距。
     got = sorted({int(round(m["spacing_m"] * 1000))
@@ -255,7 +304,8 @@ def check_rebar(dxf_path, case_path):
         if chain:
             got = sorted(set(got) | {int(round(chain["spacing_m"] * 1000))})
     return {"cols": cols, "design_mm": sorted(want), "found_mm": got,
-            "ok": None if not want else all(any(abs(g - w) <= 10 for g in got) for w in want)}
+            "main_lines": main_lines, "lines_ok": lines_ok, "lines_err": lines_err,
+            "ok": None if not want else (all(any(abs(g - w) <= 10 for g in got) for w in want) and lines_ok)}
 
 
 PAVING_LAYER = "15_刨鋪範圍"
@@ -394,6 +444,12 @@ if __name__ == "__main__":
                      r["spacing_m"], r["per_m"]))
         if a.case:
             r = check_rebar(a.dxf, a.case)
+            if r.get("main_lines"):
+                ml = r["main_lines"]
+                print("  受力主筋實線（40_鋼筋 圖層）：%d 條（折線 %d、直線 %d），總長 %.2f m"
+                      % (ml["count"], ml["polylines"], ml["lines"], ml["total_len_m"]))
+                if not r.get("lines_ok"):
+                    print("  [錯誤] %s" % r.get("lines_err"))
             print("\n  配筋表設計間距 %s mm；圖面量到 %s mm → %s"
                   % (r["design_mm"], r["found_mm"],
                      "相符" if r["ok"] else ("無法比對" if r["ok"] is None else "**不符**")))

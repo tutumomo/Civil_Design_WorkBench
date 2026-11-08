@@ -149,19 +149,83 @@ def draw_channel_section(doc, q, scale, dimstyle, rebar=None):
     _dia = {"D10": 0.010, "D13": 0.013, "D16": 0.016, "D19": 0.019,
             "D22": 0.022, "D25": 0.025}
     cover = 0.05
-    _bar = (rebar or {}).get("stem_bar", "D13")
-    _sp = (rebar or {}).get("stem_spacing_mm", 200) / 1000.0
-    d13 = _dia.get(_bar, 0.013)
-    for yy in (tb + cover, tb + H - cover):
-        xx = t + cover
-        while xx <= t + B - cover:
-            msp.add_circle((xx, yy), d13 / 2, dxfattribs={"layer": L_REBAR})
-            xx += _sp
-    for xx in (cover, W - cover):
-        yy = cover + 0.02
-        while yy <= tb + H - cover:
-            msp.add_circle((xx, yy), d13 / 2, dxfattribs={"layer": L_REBAR})
-            yy += _sp
+    main_bar = (rebar or {}).get("stem_bar", "D16")
+    main_sp = int((rebar or {}).get("stem_spacing_mm", 200))
+    dist_bar = (rebar or {}).get("dist_bar", "D13")
+    dist_sp = int((rebar or {}).get("dist_spacing_mm", 200))
+
+    d_main = _dia.get(main_bar, 0.016)
+    d_dist = _dia.get(dist_bar, 0.013)
+    r_dist = d_dist / 2.0
+
+    # 1. 主筋（連續受力筋 LWPOLYLINE）：依保護層 5cm 走線，包覆兩側壁與溝底，頂端向內做 90° 彎折（約 10~15cm）
+    hook_len = min(0.12, max(0.08, t - cover))
+    y_top = tb + H - cover
+    main_pts = [
+        (cover + hook_len, y_top),
+        (cover, y_top),
+        (cover, cover),
+        (W - cover, cover),
+        (W - cover, y_top),
+        (W - cover - hook_len, y_top),
+    ]
+    msp.add_lwpolyline(main_pts, dxfattribs={"layer": L_REBAR})
+
+    # 2. 副筋（縱向分佈筋 CIRCLE）：貼於 U 型主筋線的『內側』，依分佈筋間距排列在溝底及兩側壁
+    r_offset = d_main / 2.0 + r_dist  # 貼於主筋內側的中心偏移量
+    sp_m = dist_sp / 1000.0
+
+    # (a) 溝底分佈筋（水平排）：沿底板內側放置
+    x_start = cover + r_offset
+    x_end = W - cover - r_offset
+    bottom_xs = []
+    xx = x_start
+    while xx <= x_end + 1e-6:
+        bottom_xs.append(xx)
+        xx += sp_m
+    if bottom_xs and (x_end - bottom_xs[-1]) > 0.05:
+        bottom_xs.append(x_end)
+    for bx in bottom_xs:
+        msp.add_circle((bx, cover + r_offset), r_dist, dxfattribs={"layer": L_REBAR})
+
+    # (b) 兩側壁分佈筋（鉛直排）：貼於兩側壁主筋內側
+    y_start = cover + r_offset + sp_m  # 避免與底板角隅點重疊
+    y_end = y_top - r_offset
+    wall_ys = []
+    yy = y_start
+    while yy <= y_end + 1e-6:
+        wall_ys.append(yy)
+        yy += sp_m
+    if wall_ys and (y_end - wall_ys[-1]) > 0.05:
+        wall_ys.append(y_end)
+
+    for wy in wall_ys:
+        # 左側壁內側：x = cover + r_offset
+        msp.add_circle((cover + r_offset, wy), r_dist, dxfattribs={"layer": L_REBAR})
+        # 右側壁內側：x = W - cover - r_offset
+        msp.add_circle((W - cover - r_offset, wy), r_dist, dxfattribs={"layer": L_REBAR})
+
+    # 3. D-02 模式：拉出編號圓標與引線（① 主筋、② 分佈筋）
+    if rebar:
+        r_tag = model_h(2.8, scale)
+        ht_tag = model_h(3.0, scale)
+        # ① 主筋引線：指到右側壁 U 型主筋線 (W - cover, y_lead1)
+        y_lead1 = min(y_top - 0.10, tb + H * 0.78)
+        anchor1 = (W - cover, y_lead1)
+        tag1 = (W - t - r_tag * 2.5, y_lead1)
+        msp.add_circle(tag1, r_tag, dxfattribs={"layer": L_REBAR})
+        t1 = msp.add_text("1", height=ht_tag, dxfattribs={"layer": L_REBAR, "style": "TOMO"})
+        t1.set_placement(tag1, align=TextEntityAlignment.MIDDLE_CENTER)
+        msp.add_line((tag1[0] + r_tag, tag1[1]), anchor1, dxfattribs={"layer": L_REBAR})
+
+        # ② 分佈筋引線：指到右側壁分佈筋圓點
+        target_y2 = wall_ys[0] if len(wall_ys) >= 2 else (wall_ys[-1] if wall_ys else (cover + r_offset))
+        anchor2 = (W - cover - r_offset, target_y2)
+        tag2 = (W - t - r_tag * 2.5, target_y2)
+        msp.add_circle(tag2, r_tag, dxfattribs={"layer": L_REBAR})
+        t2 = msp.add_text("2", height=ht_tag, dxfattribs={"layer": L_REBAR, "style": "TOMO"})
+        t2.set_placement(tag2, align=TextEntityAlignment.MIDDLE_CENTER)
+        msp.add_line((tag2[0] + r_tag, tag2[1]), anchor2, dxfattribs={"layer": L_REBAR})
 
     return dict(H=H, B=B, T=t, BT=tb, W=W, wall_type="channel",
                 title_note="排水溝標準斷面圖", drawing_no="D-01")
@@ -571,10 +635,16 @@ def _draw_advanced_wall_section(doc, q, scale, dimstyle, rebar=None):
         dim((back_lo, 0.0), (BL, 0.0), (back_lo, -BT - 0.70))
         sp_stem = int((rebar or {}).get("stem_spacing_mm", 260))
         sp_base = int((rebar or {}).get("base_spacing_mm", 110))
-        dots_v(Lt + 0.075, 0.0, H, sp_stem, (rebar or {}).get("stem_bar", "D16"))
-        dots_v(back_lo - 0.075, 0.0, H, sp_stem, (rebar or {}).get("stem_bar", "D16"))
-        dots_h(-BT + 0.075, 0.0, BL, sp_base, (rebar or {}).get("base_bar", "D16"))
-        dots_h(-0.075, 0.0, BL, sp_base, (rebar or {}).get("base_bar", "D16"))
+        # 扶壁式主筋實線（LWPOLYLINE / LINE）
+        msp.add_line((Lt + 0.075, -BT + 0.075), (Lt + 0.075, H - 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((back_lo - 0.075, -BT + 0.075), (back_lo - 0.075, H - 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((Lt + 0.075, H - 0.075), (back_lo - 0.075, H - 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((0.075, -BT + 0.075), (BL - 0.075, -BT + 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((0.075, -0.075), (BL - 0.075, -0.075), dxfattribs={"layer": L_REBAR})
+        dots_v(Lt + 0.075 + 0.015, 0.0, H, sp_stem, (rebar or {}).get("stem_bar", "D16"))
+        dots_v(back_lo - 0.075 - 0.015, 0.0, H, sp_stem, (rebar or {}).get("stem_bar", "D16"))
+        dots_h(-BT + 0.075 + 0.015, 0.0, BL, sp_base, (rebar or {}).get("base_bar", "D16"))
+        dots_h(-0.075 - 0.015, 0.0, BL, sp_base, (rebar or {}).get("base_bar", "D16"))
         # 6 必須落在扶壁虛線內，7 才是基礎開挖線；先前 6 誤指開挖線，
         # 與右欄「部位圖例」對不上。
         cf_tag = (back_lo + (BL - back_lo) * 0.45, H * 0.28)
@@ -644,10 +714,16 @@ def _draw_advanced_wall_section(doc, q, scale, dimstyle, rebar=None):
         sp_wall = int((rebar or {}).get("stem_spacing_mm", 180))
         sp_base = int((rebar or {}).get("base_spacing_mm", 200))
         base_bar = (rebar or {}).get("base_bar", "D16")
-        dots_v(0.075, 0.0, hw, sp_wall, (rebar or {}).get("stem_bar", "D16"))
-        dots_v(t - 0.075, 0.0, hw, sp_wall, (rebar or {}).get("stem_bar", "D16"))
-        dots_h(-BT + 0.075, 0.0, BL, sp_base, base_bar)
-        dots_h(-0.075, 0.0, BL, sp_base, base_bar)
+        # 錨定式主筋實線（LWPOLYLINE / LINE）
+        msp.add_line((0.075, -BT + 0.075), (0.075, hw - 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((t - 0.075, -BT + 0.075), (t - 0.075, hw - 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((0.075, hw - 0.075), (t - 0.075, hw - 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((0.075, -BT + 0.075), (BL - 0.075, -BT + 0.075), dxfattribs={"layer": L_REBAR})
+        msp.add_line((0.075, -0.075), (BL - 0.075, -0.075), dxfattribs={"layer": L_REBAR})
+        dots_v(0.075 + 0.015, 0.0, hw, sp_wall, (rebar or {}).get("stem_bar", "D16"))
+        dots_v(t - 0.075 - 0.015, 0.0, hw, sp_wall, (rebar or {}).get("stem_bar", "D16"))
+        dots_h(-BT + 0.075 + 0.015, 0.0, BL, sp_base, base_bar)
+        dots_h(-0.075 - 0.015, 0.0, BL, sp_base, base_bar)
         # 6 放在第一排地錨前段，7 才是基礎開挖線。
         _depths = [float(v) for v in (q.get("anchor_depths_m") or [])]
         _z = min(_depths) if _depths else H * 0.15
@@ -696,6 +772,9 @@ def _draw_advanced_wall_section(doc, q, scale, dimstyle, rebar=None):
         msp.add_circle((0.0, yy), WD / 2, dxfattribs={"layer": L_WEEP})
     if not block:
         sp = int((rebar or {}).get("stem_spacing_mm", 260))
+        # 面版垂直鋼筋實線
+        msp.add_line((0.065, 0.05), (0.065, H - 0.05), dxfattribs={"layer": L_REBAR})
+        msp.add_line((t - 0.065, 0.05), (t - 0.065, H - 0.05), dxfattribs={"layer": L_REBAR})
         dots_v(0.065, 0.0, H, sp, (rebar or {}).get("stem_bar", "D13"))
         dots_v(t - 0.065, 0.0, H, sp, (rebar or {}).get("stem_bar", "D13"))
     dim((0.0, 0.0), (0.0, H), (-0.55, 0.0))
@@ -828,25 +907,73 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
     cover = 0.075
     # 示意預設也要跟牆型一致：重力式／半重力式是名目構造筋 D13@250＋D16@200。
     if wall_type in ("gravity", "semigravity"):
-        _RB = {"stem": ("D13", 250), "base": ("D16", 200)}
+        _RB = {"stem": ("D13", 250), "base": ("D16", 200), "dist": ("D13", 250)}
     else:
-        _RB = {"stem": ("D16", 200), "base": ("D16", 210)}
+        _RB = {"stem": ("D16", 200), "base": ("D16", 210), "dist": ("D13", 250)}
     if rebar:
         _RB["stem"] = (rebar.get("stem_bar", "D16"), int(rebar.get("stem_spacing_mm", 200)))
         _RB["base"] = (rebar.get("base_bar", "D16"), int(rebar.get("base_spacing_mm", 210)))
+        if rebar.get("dist_bar") and rebar.get("dist_spacing_mm"):
+            _RB["dist"] = (rebar.get("dist_bar"), int(rebar.get("dist_spacing_mm")))
     _dia = {"D10": 0.010, "D13": 0.013, "D16": 0.016, "D19": 0.019,
             "D22": 0.022, "D25": 0.025}
     d16 = _dia.get(_RB["stem"][0], 0.016)
     dbase = _dia.get(_RB["base"][0], 0.016)
+    ddist = _dia.get(_RB["dist"][0], 0.013)
     sp_stem = _RB["stem"][1] / 1000.0
     sp_base = _RB["base"][1] / 1000.0
-    # 豎向筋：沿實際面層配置（重力式的牆面是有坡度的，不能固定在 x=T）。
-    # 間距 250 mm 是「沿著面層量」，斜面在鉛直方向的投影會小於 250
-    # （先前的寫法用 y += 250，斜面實際間距變成 285 mm）。
-    # 重力式／半重力式只配露出側單面（與 design_mass_wall_steel 一致）；
-    # 懸臂式才是牆面＋牆背雙面。
     _mass_wall = wall_type in ("gravity", "semigravity")
 
+    # 1. 主筋連續實線（LWPOLYLINE / LINE on 40_鋼筋）
+    if wall_type == "cantilever":
+        hook = max(0.10, min(BT - 2.0 * cover, 0.20))
+        # 牆背受拉主筋（L型：沿背面向下彎入基底踵端，帶向上 90° 彎鉤）
+        bar_back = [
+            (back_top[0] - cover, top_y - cover),
+            (back_bot[0] - cover, base_y + cover),
+            (BL - cover, base_y + cover),
+            (BL - cover, base_y + cover + hook),
+        ]
+        msp.add_lwpolyline(bar_back, dxfattribs={"layer": L_REBAR})
+        # 牆面前側構造筋（沿前側向下彎入趾板底層，帶向上 90° 彎鉤）
+        bar_front = [
+            (front_top[0] + cover, top_y - cover),
+            (front_bot[0] + cover, base_y + cover),
+            (cover, base_y + cover),
+            (cover, base_y + cover + hook),
+        ]
+        msp.add_lwpolyline(bar_front, dxfattribs={"layer": L_REBAR})
+        # 牆頂閉合筋
+        msp.add_line((front_top[0] + cover, top_y - cover),
+                     (back_top[0] - cover, top_y - cover),
+                     dxfattribs={"layer": L_REBAR})
+        # 底板頂層筋（水平線 + 兩端向下 90° 彎鉤）
+        bar_base_top = [
+            (cover, -cover - hook),
+            (cover, -cover),
+            (BL - cover, -cover),
+            (BL - cover, -cover - hook),
+        ]
+        msp.add_lwpolyline(bar_base_top, dxfattribs={"layer": L_REBAR})
+        # 底板底層筋（兩端向上 90° 彎鉤）
+        bar_base_bot = [
+            (cover, base_y + cover + hook),
+            (cover, base_y + cover),
+            (BL - cover, base_y + cover),
+            (BL - cover, base_y + cover + hook),
+        ]
+        msp.add_lwpolyline(bar_base_bot, dxfattribs={"layer": L_REBAR})
+    elif _mass_wall:
+        # 重力式／半重力式：前側構造筋實線 + 底部水平筋實線
+        msp.add_line((_x_at(front_bot, front_top, cover) + cover, cover),
+                     (_x_at(front_bot, front_top, top_y - cover) + cover, top_y - cover),
+                     dxfattribs={"layer": L_REBAR})
+        by = base_y + cover if base_y < -1e-9 else cover
+        msp.add_line((cover, by), (BL - cover, by), dxfattribs={"layer": L_REBAR})
+        if base_y < -1e-9:
+            msp.add_line((cover, -cover), (BL - cover, -cover), dxfattribs={"layer": L_REBAR})
+
+    # 2. 分佈筋圓點（CIRCLE on 40_鋼筋，貼於主筋線內側）
     def _face_levels(p_bot, p_top, spacing):
         dx_, dy_ = p_top[0] - p_bot[0], p_top[1] - p_bot[1]
         L = math.hypot(dx_, dy_)
@@ -858,34 +985,27 @@ def draw_section(doc, q, scale, dimstyle, rebar=None):
             s_ += spacing
         return out_
 
+    r_dot_offset = 0.015  # 貼在主筋內側
     for y in _face_levels(front_bot, front_top, sp_stem):
-        msp.add_circle((_x_at(front_bot, front_top, y) + cover, y),
+        msp.add_circle((_x_at(front_bot, front_top, y) + cover + r_dot_offset, y),
                        d16 / 2, dxfattribs={"layer": L_REBAR})
     if not _mass_wall:
         for y in _face_levels(back_bot, back_top, sp_stem):
-            msp.add_circle((_x_at(back_bot, back_top, y) - cover, y),
+            msp.add_circle((_x_at(back_bot, back_top, y) - cover - r_dot_offset, y),
                            d16 / 2, dxfattribs={"layer": L_REBAR})
     if base_y < -1e-9:
-        # 懸臂式／半重力式：底板上下兩層縱向筋
-        for yy in (base_y + cover, -cover):
-            x = cover
-            while x <= BL - cover:
-                msp.add_circle((x, yy), dbase / 2, dxfattribs={"layer": L_REBAR})
+        # 懸臂式／半重力式：底板上下兩層縱向分佈筋（貼在主筋內側）
+        for yy, y_off in ((base_y + cover, r_dot_offset), (-cover, -r_dot_offset)):
+            x = cover + 0.10
+            while x <= BL - cover - 0.05:
+                msp.add_circle((x, yy + y_off), dbase / 2, dxfattribs={"layer": L_REBAR})
                 x += sp_base
     else:
         # 重力式：底部縱向構造筋一層
-        x = cover
-        while x <= BL - cover:
-            msp.add_circle((x, cover), dbase / 2, dxfattribs={"layer": L_REBAR})
+        x = cover + 0.10
+        while x <= BL - cover - 0.05:
+            msp.add_circle((x, cover + r_dot_offset), dbase / 2, dxfattribs={"layer": L_REBAR})
             x += sp_base
-    # 水平分布筋（沿牆長方向）在此斷面是「圓點」、不是長線；
-    # 重力式／半重力式的 D13@250 雙向鋼筋網在斷面上就是同一排 dots，不再另畫線。
-    # 懸臂式牆身的分布筋只在受壓面，畫一條線標示其位置。
-    if not _mass_wall:
-        for yy in (cover, top_y - cover):
-            msp.add_line((_x_at(front_bot, front_top, yy) + cover, yy),
-                         (_x_at(back_bot, back_top, yy) - cover, yy),
-                         dxfattribs={"layer": L_REBAR})
 
     # ---- 尺寸標註 ----
     def dim(p1, p2, base, angle=None):
@@ -1128,7 +1248,9 @@ def _rebar_geometry(wt, design, q, result):
         return {"stem_bar": mass["face_bar"],
                 "stem_spacing_mm": mass["face_spacing_mm"],
                 "base_bar": mass["base_bar"],
-                "base_spacing_mm": mass["base_spacing_mm"]}
+                "base_spacing_mm": mass["base_spacing_mm"],
+                "dist_bar": mass.get("face_bar", "D13"),
+                "dist_spacing_mm": mass.get("face_spacing_mm", 250)}
     if wt == "cantilever":
         stem = (design.get("structural") or {}).get("stem") or {}
         main = stem.get("main") or {}
@@ -1136,6 +1258,8 @@ def _rebar_geometry(wt, design, q, result):
         base = _member_flex(members[0]) if members else {}
         return {"stem_bar": main.get("bar", "D16"),
                 "stem_spacing_mm": main.get("spacing_mm", 200),
+                "dist_bar": stem.get("dist_bar", "D13"),
+                "dist_spacing_mm": stem.get("dist_spacing_mm", 250),
                 "base_bar": base.get("bar", "D16"),
                 "base_spacing_mm": base.get("spacing_mm", 210)}
     if wt == "counterfort":
@@ -1387,9 +1511,13 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
         if is_slope:
             rows = []
         elif is_chan:
-            rows = [("A  D13@200 溝壁內側筋（雙層）", "13 mm"),
-                    ("B  D13@200 溝壁外側筋（雙層）", "13 mm"),
-                    ("C  D13@200 溝底筋", "13 mm"),
+            _rg = geom.get("rebar_geom") or {}
+            _mb = str(_rg.get("stem_bar", "D16"))
+            _ms = int(round(float(_rg.get("stem_spacing_mm", 200))))
+            _db = str(_rg.get("dist_bar", "D13"))
+            _ds = int(round(float(_rg.get("dist_spacing_mm", 200))))
+            rows = [("1  %s@%d U型主筋" % (_mb, _ms), "%s mm" % _mb[1:]),
+                    ("2  %s@%d 縱向分佈筋" % (_db, _ds), "%s mm" % _db[1:]),
                     ("   保護層", "50 mm")]
         elif is_grav:
             # 重力式／半重力式靠自重穩定，僅需名目構造筋（非撓曲主筋）
@@ -1723,6 +1851,27 @@ def main():
                 _rd0.get("wall_type"), _rd0, q, _wr0)
         except Exception as ex:
             print("警告：S-01 無法取得配筋設計，圖例改用示意值：%s" % ex)
+    elif not a.rebar and model == "channel":
+        try:
+            import sys as _sys
+            _dd = os.path.join(ROOT, "tools", "design")
+            if _dd not in _sys.path:
+                _sys.path.insert(0, _dd)
+            import rc_design as _RC
+            import channel_hydraulics as _CH
+            _hy = case.get("hydraulics") or {}
+            _hr = _CH.analyse(float(_hy.get("design_flow_m3s") or 0.5),
+                              float(q["inner_width_m"]), float(q["depth_m"]),
+                              float(_hy.get("slope") or 0.005),
+                              {"manning_n": float(_hy.get("manning_n") or 0.014)})
+            _cw = _RC.design_channel_wall(q, _hr)
+            _cm = _cw["main"]
+            _rb_geom = {"stem_bar": _cm.get("bar", "D16"),
+                        "stem_spacing_mm": _cm.get("spacing_mm", 200),
+                        "dist_bar": _cw.get("dist_bar", "D13"),
+                        "dist_spacing_mm": _cw.get("dist_spacing_mm", 200)}
+        except Exception as ex:
+            print("警告：D-01 無法取得配筋設計，圖例改用示意值：%s" % ex)
     if a.rebar:
         import sys as _sys
         _dd = os.path.join(ROOT, "tools", "design")
@@ -1755,16 +1904,17 @@ def main():
             rb_design = {"channel": _cw}
             _cm = _cw["main"]
             rb_schedule = [
-                {"no": "A", "pos": "溝壁主筋(內側)", "bar": _cm.get("bar", "D16"),
+                {"no": "1", "pos": "主筋", "bar": _cm.get("bar", "D16"),
                  "spacing": int(_cm.get("spacing_mm", 200)),
                  "per_m": 1000.0 / max(_cm.get("spacing_mm", 200), 1)},
-                {"no": "B", "pos": "溝壁分布筋(外側)", "bar": _cw.get("dist_bar", "D13"),
+                {"no": "2", "pos": "分佈筋", "bar": _cw.get("dist_bar", "D13"),
                  "spacing": int(_cw.get("dist_spacing_mm", 200)),
                  "per_m": 1000.0 / max(_cw.get("dist_spacing_mm", 200), 1)},
-                {"no": "C", "pos": "溝底構造筋", "bar": "D13", "spacing": 200, "per_m": 5.0},
             ]
             _rb_geom = {"stem_bar": _cm.get("bar", "D16"),
-                        "stem_spacing_mm": _cm.get("spacing_mm", 200)}
+                        "stem_spacing_mm": _cm.get("spacing_mm", 200),
+                        "dist_bar": _cw.get("dist_bar", "D13"),
+                        "dist_spacing_mm": _cw.get("dist_spacing_mm", 200)}
     proj = a.project or (case.get("project") or {}).get("full_name") or "擋土牆工程"
 
     doc = ezdxf.readfile(a.template)

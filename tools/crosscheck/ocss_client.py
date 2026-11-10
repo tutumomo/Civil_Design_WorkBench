@@ -136,8 +136,9 @@ class OcssClient:
         except OcssError as e:
             if e.status == 401:
                 raise OcssUnavailable(
-                    "token 不正確（401）。請在 OCSS 設定 › API 與 AI 助理 重新複製，"
-                    "或設環境變數 OCSS_API_TOKEN。") from None
+                    "token 不正確（401）。本專案讀的是 TW 版（tw.opencalcsheet.studio）的 token；"
+                    "若上游版 Open CalcSheet Studio 也開著，它可能先佔了埠 3879——請關掉上游版。"
+                    "否則請在 TW 版設定 › API 與 AI 助理 重新產生，或設環境變數 OCSS_API_TOKEN。") from None
             raise
         if info.get("paused"):
             raise OcssUnavailable("OCSS 已暫停（設定 › API 與 AI 助理 › 暫停）。")

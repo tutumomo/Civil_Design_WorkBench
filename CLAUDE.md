@@ -16,8 +16,9 @@ python tools/project_paths.py
 
 # Install missing third-party tools after `git clone` (REQUIRED; plain project_paths.py only reports)
 # Mandatory tools auto-installed from the user's forks on GitHub Releases:
-#   OpenCADStudio       (tutumomo/OpenCADStudio, Big5 SHX fix)  -> headless CAD, font folders, CTB styles
-#   Open CalcSheet Studio (tutumomo/Open-CalcSheet-Studio)      -> open calc environment (key: OpenCalcSheet)
+#   OpenCADStudio       (tutumomo/OpenCADStudio, Big5 SHX fix)  -> "Open CAD Studio.TW" (headless CAD, fonts, CTB)
+#   Open CalcSheet Studio (tutumomo/Open-CalcSheet-Studio)      -> "Open CalcSheet Studio TW" (key: OpenCalcSheet)
+#   Only the localized TW builds are bound; upstream installs side by side are ignored.
 python tools/project_paths.py --install
 python tools/project_paths.py --install --dry-run
 python tools/project_paths.py --install --only OpenCalcSheet   # single tool
@@ -119,7 +120,7 @@ Civil_Design_WorkBench/
   - Plot Style: `monochrome.ctb` (colors 1~8 map to standard lineweights).
   - RC Design: Uniform 6% lap and loss allowance across project (`rc_design.LAP_ALLOWANCE = 0.06`).
   - Retaining Wall Rebar: Strict wall-type dispatch (`gravity`/`semigravity` nominal rebar; `cantilever` flexural; `counterfort`/`anchored`/`mse` structural components).
-- **Mandatory tools (auto-installed by `--install`, from the user's forks)**: `tutumomo/OpenCADStudio`（Big5 SHX 修正版，不得改回上游）與 `tutumomo/Open-CalcSheet-Studio`。clone 後必須跑 `python tools/project_paths.py --install`，且退出碼為 0 才算環境備妥；OCSS 另需開程式一次並跑 `register-mcp --apply`。
+- **Mandatory tools (auto-installed by `--install`, from the user's forks)**: `tutumomo/OpenCADStudio`（Big5 SHX 修正版，不得改回上游）與 `tutumomo/Open-CalcSheet-Studio`。**只綁本地化 TW 版應用程式**（「Open CAD Studio.TW」／`OpenCADStudio.TW.exe`；「Open CalcSheet Studio TW」／識別碼 `tw.opencalcsheet.studio`），本機並存的上游版一律不採用；路徑只經 `project_paths` 解析。clone 後必須跑 `python tools/project_paths.py --install`，且退出碼為 0 才算環境備妥；OCSS 另需開程式一次並跑 `register-mcp --apply`。
 - **Open CalcSheet Studio (OCSS)**: 必備工具；開放計算環境，用於逐式可稽核的計算書與第二套獨立算法（`tools/crosscheck/`）。
   - 必須桌面程式開著才有 API（`127.0.0.1:3879`），無 headless 模式；勿執行它的 `--version`／`--help`（會卡住）。
   - API 產不出 PDF：`export_pdf` 在一般安裝版回 501；PDF 只能 App 內按「Rapport」。

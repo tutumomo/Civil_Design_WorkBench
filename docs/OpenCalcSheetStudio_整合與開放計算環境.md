@@ -17,7 +17,7 @@ OCSS 的台灣版另有 **17 個 `tw-*` 現成模板**，但那只是它的示�
 
 ## 2. 實測環境（2026-11-10，Windows 11）
 
-* 桌面程式：`C:\Program Files\Open CalcSheet Studio\open-calcsheet-studio.exe`（路徑**不寫死**，見第 6 節）
+* 桌面程式：**TW 版**（fork 本地化版，資料夾「Open CalcSheet Studio TW」、識別碼 `tw.opencalcsheet.studio`）。本機同時裝有上游版（「Open CalcSheet Studio」、`studio.openstructuralcalculation.app`），**本專案只綁 TW 版**；路徑**不寫死**，見第 6.4 節
 * 橋接器：`http://127.0.0.1:3879`，MCP 在 `/mcp`、REST 在 `/api/v1`，同一支 Rust 橋接器、同一份工具 registry（43 個工具）
 * 模組 22 個：台灣 17 個（全部 `gereed`）＋上游 5 個（`ligger`、`doorsnede-spanningen`、`balklaag`、`tweepaalspoer`、`rekentaal-demo`）
 * 版本查詢：`python tools/crosscheck/ocss_crosscheck.py probe`（**不要把版本號當規格寫進程式或檢核條件**，見 AGENTS.md §3）
@@ -118,7 +118,7 @@ python tools/project_paths.py --install --only OpenCalcSheet    # 只補它
 
 | 平台 | 行為 |
 |---|---|
-| Windows | 取 release 的 `*_x64-setup.exe` → 以同 release 的 `SHA256SUMS.txt` 校驗（不符即刪檔並中止）→ `setup.exe /S` 靜默安裝（可能跳 UAC，請使用者核准）→ 以 `opencalcsheet_exe()` 確認。失敗時安裝檔保留在系統暫存夾，印出手動執行指令 |
+| Windows | 取 release 中檔名含 `.TW_` 的 `*_x64-setup.exe`（安裝到「Open CalcSheet Studio TW」，與上游並存）→ 以同 release 的 `SHA256SUMS.txt` 校驗（不符即刪檔並中止）→ `setup.exe /S` 靜默安裝（可能跳 UAC，請使用者核准）→ 以 `opencalcsheet_exe()` 確認。失敗時安裝檔保留在系統暫存夾，印出手動執行指令 |
 | Linux | `.deb` 需 root，**只下載並印出 `sudo apt install …`**，由使用者自行執行 |
 | macOS | 掛載 dmg → 複製 `.app`（沿用 OpenCADStudio 的流程，**尚未實測**） |
 
@@ -156,8 +156,10 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp    # 預覽 .mcp.json �
 依序取用，**一律不寫死**：
 
 1. 環境變數 `OCSS_API_TOKEN`、`OCSS_PORT`
-2. `preferences.json` 的 `mcpToken`、`mcpPoort`（路徑由 `project_paths.ocss_settings_dir()` 跨平台解析）
+2. **TW 版** `preferences.json` 的 `mcpToken`、`mcpPoort`（路徑由 `project_paths.ocss_settings_dir()` 跨平台解析，指向 `tw.opencalcsheet.studio`；可用 `OCSS_SETTINGS_DIR` 覆寫）
 3. 埠預設 3879
+
+**上游版與 TW 版的 token 不同、預設埠相同**：兩版同時開啟時由先開者佔用 3879。`probe` 回 401「token 不正確」通常代表連到了上游版——關掉上游版，或把 TW 版改用其他埠並設 `OCSS_PORT`。
 
 Token 只在使用時讀入記憶體，不寫入檔案、不印出、不進版控。`.mcp.json` 已列在 `.gitignore`，MCP 註冊所需的 token 只存在該本機檔。
 
@@ -176,9 +178,9 @@ claude mcp add --transport http --scope user open-calcsheet-studio \
 
 ### 6.4 執行檔路徑
 
-`project_paths.opencalcsheet_exe()`：環境變數 `OCSS_EXE` → Windows 安裝根目錄（忽略空格與大小寫比對資料夾名）→ `~/.local/bin` → PATH。**不要在程式或文件寫死安裝路徑**（與 OpenCADStudio 同一原則，見 EXP-B15）。
+`project_paths.opencalcsheet_exe()`（**只認 TW 版，不退回上游**）：環境變數 `OCSS_EXE` → Windows 安裝根目錄下「去空格／點／連字號、不分大小寫」後**完全等於** `opencalcsheetstudiotw` 的資料夾 → macOS 同名 `.app` → Linux 同名 `.desktop` 的 Exec、`~/.local/bin/open-calcsheet-studio-tw`、PATH 的 `open-calcsheet-studio-tw`。兩版執行檔都叫 `open-calcsheet-studio`，因此**不能**再用執行檔名或 `startswith` 比對。**不要在程式或文件寫死安裝路徑**（與 OpenCADStudio 同一原則，見 EXP-B15）。
 
-**Linux（aarch64，2026-11-10 實測）**：官方只給 `.deb`（需 root）。無 root 時可 `dpkg-deb -x <deb> <目錄>` 解壓，把 `usr/bin/open-calcsheet-studio` 連結到 `~/.local/bin/`；解壓不會建選單項目，需自寫 `~/.local/share/applications/open-calcsheet-studio.desktop`。設定檔在 `~/.local/share/studio.openstructuralcalculation.app/`（`ocss_settings_dir()` 已修正，原先誤指 `~/.config`）。視窗全黑時以 `WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_COMPOSITING_MODE=1` 啟動（見 EXP-J4）。
+**Linux（aarch64，2026-11-10 以上游版實測；TW 版尚未實測）**：官方只給 `.deb`（需 root）。無 root 時可 `dpkg-deb -x <deb> <目錄>` 解壓，把 `usr/bin/open-calcsheet-studio` 連結成 **`~/.local/bin/open-calcsheet-studio-tw`**（與上游區隔，解析器認這個名字）；解壓不會建選單項目，需自寫 `~/.local/share/applications/Open CalcSheet Studio TW.desktop`。TW 版設定檔在 `~/.local/share/tw.opencalcsheet.studio/`（上游為 `studio.openstructuralcalculation.app`）。視窗全黑時以 `WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_COMPOSITING_MODE=1` 啟動（見 EXP-J4）。
 
 ## 7. 已知限制與風險
 

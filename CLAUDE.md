@@ -14,9 +14,13 @@ python tools/git/sync_check.py      # macOS/Linux: .venv/bin/python tools/git/sy
 # Resolve paths & inspect environment tools
 python tools/project_paths.py
 
-# Install missing third-party tools (headless CAD, font folders, CTB styles)
+# Install missing third-party tools after `git clone` (REQUIRED; plain project_paths.py only reports)
+# Mandatory tools auto-installed from the user's forks on GitHub Releases:
+#   OpenCADStudio       (tutumomo/OpenCADStudio, Big5 SHX fix)  -> headless CAD, font folders, CTB styles
+#   Open CalcSheet Studio (tutumomo/Open-CalcSheet-Studio)      -> open calc environment (key: OpenCalcSheet)
 python tools/project_paths.py --install
 python tools/project_paths.py --install --dry-run
+python tools/project_paths.py --install --only OpenCalcSheet   # single tool
 python tools/project_paths.py --configure  # Re-configure CADCraft/OpenCADStudio font & plot folders
 ```
 
@@ -40,6 +44,21 @@ python tools/project_paths.py --configure  # Re-configure CADCraft/OpenCADStudio
 # Quantity Takeoff & Rebar Spacing Verification
 .venv/bin/python tools/takeoff/dxf_takeoff.py <drawing.dxf> --case cases/<case>/case.json
 .venv/bin/python tools/takeoff/dxf_takeoff.py <drawing.dxf> --rebar --case cases/<case>/case.json
+```
+
+### Open CalcSheet Studio 交叉驗算（需桌面程式開啟）
+```bash
+# 連線檢查、版本、22 個模組（台灣 17 個 tw-*）
+python tools/crosscheck/ocss_crosscheck.py probe
+
+# 無狀態試算一段計算書（不碰專案），並自動檢查單位陷阱
+python tools/crosscheck/ocss_crosscheck.py eval --expr "M = 20 kN*m\nW = 500 mm^3\nsigma = M/W to MPa"
+
+# 跑內建對照案例（本專案引擎 vs OCSS 開放計算環境）
+python tools/crosscheck/ocss_crosscheck.py checks
+
+# 安裝後一次性設定：先開啟程式並啟用 MCP/API，再把 MCP 連線寫入本機 .mcp.json（預設僅預覽；token 不印出）
+python tools/crosscheck/ocss_crosscheck.py register-mcp --apply
 ```
 
 ### Three-Axis Case Delivery Pipeline
@@ -78,6 +97,7 @@ Civil_Design_WorkBench/
     ├── boq/                # Budget sheet generator (boq_build.py) & price audit (price_audit.py)
     ├── box_section/        # Box culvert cross section & rebar generator (make_box_section.py)
     ├── case_package/       # Unified case model (case_core.py, qty_models.py, case_package.py)
+    ├── crosscheck/         # OCSS cross-check (ocss_client.py REST client, ocss_crosscheck.py CLI, checks/)
     ├── design/             # 22+ civil/structural calculation engines & design workbench
     ├── report/             # 14-chapter design report generator (make_report.py)
     ├── selftest/           # Regression test suite (regression.py, baseline.json)
@@ -99,6 +119,12 @@ Civil_Design_WorkBench/
   - Plot Style: `monochrome.ctb` (colors 1~8 map to standard lineweights).
   - RC Design: Uniform 6% lap and loss allowance across project (`rc_design.LAP_ALLOWANCE = 0.06`).
   - Retaining Wall Rebar: Strict wall-type dispatch (`gravity`/`semigravity` nominal rebar; `cantilever` flexural; `counterfort`/`anchored`/`mse` structural components).
+- **Mandatory tools (auto-installed by `--install`, from the user's forks)**: `tutumomo/OpenCADStudio`（Big5 SHX 修正版，不得改回上游）與 `tutumomo/Open-CalcSheet-Studio`。clone 後必須跑 `python tools/project_paths.py --install`，且退出碼為 0 才算環境備妥；OCSS 另需開程式一次並跑 `register-mcp --apply`。
+- **Open CalcSheet Studio (OCSS)**: 必備工具；開放計算環境，用於逐式可稽核的計算書與第二套獨立算法（`tools/crosscheck/`）。
+  - 必須桌面程式開著才有 API（`127.0.0.1:3879`），無 headless 模式；勿執行它的 `--version`／`--help`（會卡住）。
+  - API 產不出 PDF：`export_pdf` 在一般安裝版回 501；PDF 只能 App 內按「Rapport」。
+  - 開放環境的結果一律要交叉驗算才可進交付；模板有檢查腳本把關，自由書寫沒有。
+  - 兩個不報錯的單位陷阱必查：分數次方污染單位（`R^(2/3)` → `m^0.667`，須先無因次化）、單位不自動收斂（`kN/mm²` ≠ `MPa`，須顯式 `to MPa`）。`ocss_client.unit_warnings()` 已自動偵測。
 - **Headless CAD Execution**:
   - Background CAD tasks (DWG publishing, conversion) go through `tools/acad/acc.py`; default backend is OpenCADStudio (`--http` on demand; exe resolved by `project_paths.opencadstudio_exe()`, never hardcode its path), fallback `accoreconsole`/`CADCraft CLI` via `CIVIL_AI_CAD_BACKEND=cadcraft`. Always eyeball the PDF's Chinese text after publishing.
   - Do NOT automate or script CadCraft Studio GUI.

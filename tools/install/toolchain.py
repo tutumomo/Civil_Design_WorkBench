@@ -40,6 +40,9 @@ import sys
 import tempfile
 import urllib.error
 import urllib.request
+import hashlib
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -167,6 +170,11 @@ class Tool:
     manual_hint: str = ""         # 無法自動安裝時的指引
     verify_argv: list[str] = field(default_factory=list)  # 驗證用參數，如 ["--version"]
     verify_must_contain: str = ""                          # 輸出須包含的字串
+    # 自訂偵測函式：回傳執行檔路徑或 None。給「安裝版路徑帶空格、不在 PATH」的工具用，
+    # 例如 OCSS 由 project_paths.opencalcsheet_exe() 解析（嚴禁在此寫死安裝路徑）。
+    detect: Callable[[], str | None] | None = None
+    # 同一 release 內的校驗檔名（內容為 `<sha256>  <檔名>` 逐行）；有設就下載後比對，不符即中止。
+    checksum_asset: str = ""
 
 
 #: OpenCADStudio 資產命名（實測 v2026.44）：
@@ -180,10 +188,48 @@ class Tool:
 #:   - 取 MSI 時產出的 `~/.local/bin/opencadstudio.cmd` 只會變成「執行那個 .msi」，
 #:     而 `acc.py` 的 `--http` 服務模式根本不會起來；
 #:   - portable exe 是單檔可直接執行，`taskkill /T` 也殺得到本體（MSI 走殼層會留孤兒）。
+def _detect_opencalcsheet() -> str | None:
+    """OCSS 偵測：交給 project_paths.opencalcsheet_exe()（不跑 --version，會卡住）。"""
+    tools_dir = Path(__file__).resolve().parent.parent
+    if str(tools_dir) not in sys.path:
+        sys.path.insert(0, str(tools_dir))
+    from project_paths import opencalcsheet_exe
+    return opencalcsheet_exe()
+
+
+#: Open CalcSheet Studio（台灣版）資產命名（實測 v2026.45.2-tw.3）：
+#:   Open.CalcSheet.Studio_2026.45.2_x64-setup.exe      Windows NSIS 安裝程式
+#:   Open.CalcSheet.Studio_2026.45.2_aarch64.dmg        macOS（Apple Silicon）
+#:   Open.CalcSheet.Studio_2026.45.2_amd64.deb／_arm64.deb  Linux
+#:   SHA256SUMS.txt                                     校驗檔（檔名以空格表示，資產名以點表示）
+#:
+#: 安裝策略（依資產副檔名分流，tool.kind="installer"）：
+#:   · Windows：下載 → SHA256 校驗 → `setup.exe /S` 靜默安裝 → 以 opencalcsheet_exe() 驗證。
+#:     不執行 `--version`／`--help`（實測會卡住）。若安裝程式要求 UAC，請使用者核准。
+#:   · macOS：沿用 dmg 流程（掛載 → 複製 .app → symlink）。**尚未在 macOS 實測**。
+#:   · Linux：.deb 需 root，只下載並印出 `sudo apt install` 指令，不代裝。
+#: 已安裝則略過，不自動升級。
 TOOLS: list[Tool] = [
     Tool(
+        key="OpenCalcSheet",
+        repo="tutumomo/Open-CalcSheet-Studio",
+        asset_patterns={
+            ("windows", "x86_64"): [r"x64-setup\.exe$"],
+            ("macos", "aarch64"): [r"aarch64\.dmg$"],
+            ("linux", "x86_64"): [r"amd64\.deb$"],
+            ("linux", "aarch64"): [r"arm64\.deb$"],
+        },
+        kind="installer",
+        bin_stem="open-calcsheet-studio",
+        note="開放計算環境／台灣版結構計算書；第二套獨立算法，供交叉驗算（tools/crosscheck/）",
+        manual_hint="請至 https://github.com/tutumomo/Open-CalcSheet-Studio/releases 下載對應平台安裝檔，"
+                    "裝好後可用環境變數 OCSS_EXE 指定執行檔",
+        detect=_detect_opencalcsheet,
+        checksum_asset="SHA256SUMS.txt",
+    ),
+    Tool(
         key="OpenCADStudio",
-        repo="HakanSeven12/OpenCADStudio",
+        repo="tutumomo/OpenCADStudio",   # 2026-11-10 起改用 fork（Big5 SHX 大字體修正，中文才不亂碼）；上游 HakanSeven12/OpenCADStudio
         asset_patterns={
             ("linux", "aarch64"): [r"linux-aarch64\.AppImage$"],
             ("linux", "x86_64"): [r"linux-x86_64\.AppImage$"],
@@ -245,6 +291,11 @@ def _verify(path: str, tool: Tool) -> bool:
 
 def _tool_installed(tool: Tool) -> str | None:
     """回傳已安裝（且通過版本驗證）的執行檔路徑；未安裝回傳 None。"""
+    if tool.detect is not None:
+        try:
+            return tool.detect()
+        except Exception:
+            return None
     stem = tool.bin_stem or tool.key.lower()
     # 1. PATH
     for name in ([f"{stem}.cmd", f"{stem}.exe"] if IS_WIN else [stem]):
@@ -591,6 +642,101 @@ def _install_macos_dmg(tool: Tool, dmg: Path, dest_dir: Path, asset_name: str,
                            capture_output=True, timeout=120)
 
 
+def _verify_checksum(tool: Tool, tag: str, asset_name: str, path: Path,
+                     quiet: bool = False) -> bool | None:
+    """用 release 內的校驗檔核對下載檔。True＝相符；False＝不符；None＝查不到校驗值。
+
+    校驗檔的檔名欄以空格書寫（`Open CalcSheet Studio_…`），GitHub 資產名則把空格換成點，
+    因此兩邊都先正規化再比對。
+    """
+    sums = next(((n, u) for n, u in _asset_urls(tool, tag) if n == tool.checksum_asset), None)
+    if not sums:
+        return None
+    try:
+        req = urllib.request.Request(sums[1], headers={"User-Agent": "CivilDesignWorkBench-Toolchain/1.0"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            text = r.read().decode("utf-8", errors="replace")
+    except Exception:
+        return None
+
+    def norm(n: str) -> str:
+        return re.sub(r"^[./*]+", "", n.strip()).replace(" ", ".")
+
+    want = None
+    for line in text.splitlines():
+        m = re.match(r"([0-9a-fA-F]{64})\s+\*?(.+)$", line.strip())
+        if m and norm(m.group(2)) == norm(asset_name):
+            want = m.group(1).lower()
+            break
+    if want is None:
+        return None
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    got = h.hexdigest()
+    if not quiet:
+        print(f"    SHA256 {'相符' if got == want else '不符！'}  {got[:16]}…")
+    return got == want
+
+
+def _run_installer(tool: Tool, tmp: Path, asset_name: str, ver: str, res: dict,
+                   quiet: bool = False) -> dict:
+    """處理「安裝程式型」資產（tool.kind == "installer" 且非 dmg）。
+
+    Windows .exe：NSIS 靜默安裝（/S），完成後以 detect 驗證；失敗保留安裝檔供手動執行。
+    Linux .deb：需 root，只把檔案放到 ~/.local/opt 並印出 sudo apt install 指令，不代裝。
+    """
+    low = asset_name.lower()
+    if low.endswith(".exe") and IS_WIN:
+        if not quiet:
+            print("    執行靜默安裝（/S）；若跳出 UAC 請核准……")
+        try:
+            subprocess.run([str(tmp), "/S"], timeout=900)
+        except Exception as e:
+            res.update(action="fail", detail=f"執行安裝程式失敗：{e}（安裝檔保留在 {tmp}）")
+            if not quiet:
+                print(f"    ✗ 執行安裝程式失敗：{e}\n    可手動執行：\"{tmp}\"")
+            return res
+        # NSIS 靜默安裝偶爾在主行程結束後仍有收尾，輪詢最多 60 秒
+        exe = None
+        for _ in range(30):
+            exe = _tool_installed(tool)
+            if exe:
+                break
+            time.sleep(2)
+        if not exe:
+            res.update(action="fail",
+                       detail=f"安裝程式已執行但找不到執行檔（安裝檔保留在 {tmp}，可手動執行）")
+            if not quiet:
+                print(f"    ✗ 安裝後仍偵測不到；可手動執行：\"{tmp}\"")
+            return res
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+        res.update(ok=True, action="installed", detail=exe)
+        if not quiet:
+            print(f"    ✓ 已安裝 {exe}")
+        return res
+
+    if low.endswith(".deb"):
+        dest_dir = local_opt_dir() / f"{tool.bin_stem or tool.key.lower()}-{ver}"
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        target = dest_dir / asset_name
+        shutil.move(str(tmp), target)
+        hint = f'sudo apt install "{target}"'
+        res.update(action="downloaded",
+                   detail=f"已下載到 {target}（.deb 需 root，不代裝），請執行：{hint}")
+        if not quiet:
+            print(f"    ✓ 已下載 {target}")
+            print(f"    .deb 需 root，請你自行執行：{hint}")
+        return res
+
+    res.update(action="fail", detail=f"不支援的安裝檔型態：{asset_name}")
+    return res
+
+
 def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
     """安裝單一工具。回傳 {ok, action, detail, pending}。"""
     res = {"key": tool.key, "ok": False, "action": "", "detail": "", "pending": []}
@@ -635,7 +781,13 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
         if not quiet:
             print(f"    （dry-run）來源 {tool.repo}／平台 "
                   f"{'windows' if IS_WIN else ('macos' if IS_MAC else 'linux')}/{ARCH}")
-            print(f"    （dry-run）目標 {local_opt_dir()}/{(tool.bin_stem or tool.key.lower())}-<ver>")
+            if tool.kind == "installer":
+                how = ("下載後以 SHA256SUMS 校驗，再執行 setup.exe /S 靜默安裝" if IS_WIN
+                       else "macOS：掛載 dmg 複製 .app" if IS_MAC
+                       else "Linux：只下載 .deb 並印出 sudo apt install 指令（需 root，不代裝）")
+                print(f"    （dry-run）{how}")
+            else:
+                print(f"    （dry-run）目標 {local_opt_dir()}/{(tool.bin_stem or tool.key.lower())}-<ver>")
         return res
 
     tag = latest_release_tag(tool.repo)
@@ -650,13 +802,17 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
     picked = _pick_asset(tool, tag, quiet)
     if not picked:
         res.update(action="fail", detail=f"{tag} 找不到本平台資產")
+        if tool.manual_hint and not quiet:
+            print(f"    {tool.manual_hint}")
         return res
     asset_name, url = picked
 
     ver = tag.lstrip("vV")
     stem = tool.bin_stem or tool.key.lower()
     dest_dir = local_opt_dir() / f"{stem}-{ver}"
-    dest_dir.mkdir(parents=True, exist_ok=True)
+    # 安裝程式型資產（setup.exe／.deb）不需要預建目錄，避免留下空資料夾
+    if tool.kind != "installer" or asset_name.lower().endswith(".dmg"):
+        dest_dir.mkdir(parents=True, exist_ok=True)
     tmp = _temp_install_dir() / asset_name
 
     try:
@@ -669,8 +825,21 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
             print(f"    ✗ 下載失敗：{e}")
         return res
 
+    if tool.checksum_asset:
+        ck = _verify_checksum(tool, tag, asset_name, tmp, quiet=quiet)
+        if ck is False:
+            tmp.unlink(missing_ok=True)
+            res.update(action="fail", detail="SHA256 校驗不符，已刪除下載檔並中止安裝")
+            if not quiet:
+                print("    ✗ SHA256 校驗不符，已刪除下載檔並中止安裝")
+            return res
+        if ck is None and not quiet:
+            print("    ! 查不到校驗值，略過 SHA256 校驗")
+
     target: Path | None = None
     try:
+        if tool.kind == "installer" and not asset_name.lower().endswith(".dmg"):
+            return _run_installer(tool, tmp, asset_name, ver, res, quiet=quiet)
         if asset_name.lower().endswith(".dmg"):
             # macOS DMG：掛載 → 取出 .app → 複製到 /Applications → 卸載。
             # （不可直接把 .dmg 當執行檔 symlink 出去，那會得到壞掉的命令。）

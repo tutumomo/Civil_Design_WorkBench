@@ -90,7 +90,7 @@
 
 ---
 
-## 6. 工具能力邊界與選型（2026-10-28 六套實測；2026-11-03 追加 IngeTrazo）
+## 6. 工具能力邊界與選型（2026-10-28 六套實測；2026-11-03 追加 IngeTrazo；2026-11-10 追加 Open CalcSheet Studio）
 
 > 完整評估（含重疊度矩陣、決策表、紅線）見 [`docs\七套CAD工具能力邊界與重疊度.md`](七套CAD工具能力邊界與重疊度.md)。
 
@@ -111,6 +111,9 @@
 | **EXP-I1** | `ingetrazo` MCP 的 `tools/list` 正常，但 `run_python`／`query_model` 一直失敗或說「請先啟動 AI Bridge」 | **`tools/list` 只證明 exe 活著**。橋是 GUI 的附屬：開 IngeTrazo → **開文件** → Extensões ▸ **AI Bridge (MCP)** → 再啟動客戶端；一次只接受一個客戶端。用 `python tools\ingetrazo\ingetrazo_check.py --call` 驗證（會實際呼叫 `query_model`）；只跑 `mcp_probe.py` 會給假安全感。 | `tools\ingetrazo\ingetrazo_check.py`、`docs\IngeTrazo操作指引.md` §3 | 2026-11-03 原始碼＋官方手冊 |
 | **EXP-I2** | 把 IngeTrazo 的地形／GPS 座標帶進本專案圖面，位置整體偏移；或想把它的 PDF／DXF 直接交件 | IngeTrazo 走 **UTM WGS84**，本專案是 **TWD97 TM2 `EPSG:3826`** → 必須用 `pyproj` 轉換並記錄參數。它的 PDF／DXF 沒有 TOMO、`數字_中文` 圖層、`A3圖框.dwt`、DWG 2018，**只能當參考圖／中間幾何**；交件回 `make_sheet.py`→`acc.py`→`check_delivery.py`。 | `docs\七套CAD工具能力邊界與重疊度.md` §2.7、§4.1 紅線 8–9 | 本專案契約 |
 | **EXP-I3** | `run_python` 回 `ROLLED BACK — the document is unchanged` | 這是**交易保護**，不是壞掉：每次呼叫＝一個 undo 步驟，腳本丟錯就整批回滾。讀 `error`／`stderr` 修腳本後重跑即可，**不要用補丁式多次呼叫硬疊**（會多出 undo 步驟、也難對帳）。 | `_internal\scripts\ingetrazo_mcp.py`（`run_python` 回傳格式） | 2026-11-03 原始碼 |
+| **EXP-J1** | 連不上 Open CalcSheet Studio 的 MCP／REST（`127.0.0.1:3879` 拒絕連線），或想用 `--version`／`--help` 查版本 | 橋接器**隨 GUI 啟動**、關掉就沒有埠，沒有 headless 模式；`--version`／`--help` 實測會卡住（曾逾時 90 秒）。查版本改用 `python tools/crosscheck/ocss_crosscheck.py probe`。Token 在 `preferences.json` 的 `mcpToken`（機密，只放本機 `.mcp.json`）。 | `tools/crosscheck/ocss_client.py`、`docs/OpenCalcSheetStudio_整合與開放計算環境.md` | 實測 2026-11-10 |
+| **EXP-J2** | OCSS 開放計算環境算出的數值對、但單位荒唐（`m^2.666…`、`kN/mm²`），而且 `errorLines` 是 0 不報錯 | 兩個陷阱：①**分數次方污染單位**——`R^(2/3)` 讓單位變 `m^0.667`，Manning 必踩，須先無因次化 `R_m = R/(1 m)`，算完再掛回 `m^3/s`；②**單位不自動收斂**——`M/W` 得 `kN/mm²`（=1000 MPa），須顯式 `to MPa`。`ocss_client.unit_warnings()` 會自動掃這兩類；**每個結果都要顯式指定目標單位**。 | `tools/crosscheck/ocss_crosscheck.py eval`、`checks/water_depth_manning.json` | 實測 2026-11-10 |
+| **EXP-J3** | 想用 OCSS API 直接產出含圖的計算書 PDF | `export_pdf` 在一般安裝版回 **501 NOT_AVAILABLE**（無 `rapportengine` feature），`print` 會開系統對話框。含圖 PDF 只能 App 內按「Rapport」。`export_ifc`（ifcx／ifc）正常。另外任何 `sheet_add`／`sheet_remove` 都讓專案變「未儲存」，刪回原狀也不復原——批次操作用無狀態 `calc_evaluate`。 | `docs/OpenCalcSheetStudio_整合與開放計算環境.md` §7 | 實測 2026-11-10 |
 
 
 ---

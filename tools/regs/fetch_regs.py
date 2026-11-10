@@ -28,6 +28,8 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Sa
 MOTC = "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&preview=&aplistdn="
 LAWMOJ = "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode="
 GLRS = "https://glrs.moi.gov.tw/LawContent.aspx?id="
+# glrs 頁面掛多個附件時，挑標題含此關鍵字者（規範本文標「(108年7月1日生效)」，對照表沒有）
+GLRS_PICK = {"barrier108": "生效"}
 
 # id, file stem (名稱_版次), kind, url, authority, version note
 SOURCES = [
@@ -80,6 +82,8 @@ SOURCES = [
     ("btr_design", "建築技術規則建築設計施工編", "lawmoj", LAWMOJ + "D0070115", "內政部", ""),
     ("btr_struct", "建築技術規則建築構造編", "lawmoj", LAWMOJ + "D0070116", "內政部", ""),
     ("btr_equip", "建築技術規則建築設備編", "lawmoj", LAWMOJ + "D0070117", "內政部", ""),
+    ("barrier108", "建築物無障礙設施設計規範_1080104", "glrs_pick", GLRS + "GL000734",
+     "內政部", "108.01.04 台內營字第1070820550號令修正，108.07.01 施行"),
     ("swc_act", "水土保持法", "lawmoj", LAWMOJ + "M0110001", "農業部", ""),
     ("swc_rule", "水土保持法施行細則", "lawmoj", LAWMOJ + "M0110002", "農業部", ""),
     ("swc_review", "水土保持計畫審核監督辦法", "lawmoj", LAWMOJ + "M0110012", "農業部", ""),
@@ -109,15 +113,32 @@ def curl(url, dest, referer=None):
         raise RuntimeError(f"curl exit {r.returncode}: {r.stderr.decode('utf-8', 'replace')[:200]}")
 
 
-def glrs_file_url(page_url, tmp):
-    """Resolve the full-text attachment (Download.ashx) on a glrs.moi.gov.tw law page."""
+def glrs_file_url(page_url, tmp, pick=None):
+    """Resolve the full-text attachment (Download.ashx) on a glrs.moi.gov.tw law page.
+
+    `pick` 給關鍵字時，只接受附件標題含該字樣者：有些頁面同時掛「修正總說明及對照表」
+    與規範本文，兩者檔名都含規範全名，只取第一個會抓到對照表。
+    """
     curl(page_url, tmp)
     t = tmp.read_bytes().decode("utf-8", "replace")
-    m = re.search(r'href="(Download\.ashx\?FileID=\d+[^"]*type=LAW[^"]*)"', t)
-    if not m:
-        raise RuntimeError("no Download.ashx attachment on glrs page")
+    href = None
+    if pick:
+        for h, label in re.findall(
+                r'href="(Download\.ashx\?FileID=\d+[^"]*type=LAW[^"]*)"[^>]*>(.*?)</a>', t, re.S):
+            label = html.unescape(re.sub(r"<[^>]+>", "", label)).strip()
+            if pick in label:
+                href = h
+                break
+    if pick and href is None:
+        raise RuntimeError(f"glrs page has no attachment matching {pick!r}")
+    if href is None:
+        m = re.search(r'href="(Download\.ashx\?FileID=\d+[^"]*type=LAW[^"]*)"', t)
+        if not m:
+            raise RuntimeError("no Download.ashx attachment on glrs page"
+                               + (f" matching {pick!r}" if pick else ""))
+        href = m.group(1)
     d = re.search(r"日期：.*?民國\s*(\d+)\s*年\s*(\d+)\s*月\s*(\d+)\s*日", re.sub(r"<[^>]+>", " ", t), re.S)
-    return "https://glrs.moi.gov.tw/" + html.unescape(m.group(1)), \
+    return "https://glrs.moi.gov.tw/" + html.unescape(href), \
         (f"{int(d.group(1))}.{d.group(2)}.{d.group(3)}" if d else "")
 
 
@@ -487,6 +508,12 @@ def main():
                     rec["page"] = url
                     url, rec["amended"] = glrs_file_url(url, stage / (sid + "_page.html"))
                     rec["url"] = url
+                elif kind == "glrs_pick":
+                    rec["page"] = url
+                    url, rec["amended"] = glrs_file_url(
+                        url, stage / (sid + "_page.html"), pick=GLRS_PICK.get(sid))
+                    rec["url"] = url
+                    rec["attachment"] = url
                 curl(url, raw)
                 hdr = Path(str(raw) + ".hdr").read_text(encoding="latin-1")
                 rec.update(bytes=raw.stat().st_size, sha256=hashlib.sha256(raw.read_bytes()).hexdigest(),

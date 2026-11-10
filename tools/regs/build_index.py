@@ -271,6 +271,125 @@ def code_units(text):
     return chunk([u for u in units if u["lines"] or u["clause"] != "0"])
 
 
+BARRIER_HEAD = re.compile(r"^(A?)(\d{3,4})((?:\.\d{1,3})*)[\s　]*(.*)$")
+BARRIER_CHAPTER = re.compile(r"^第([" + CN_NUM + r"]+)章[\s　]*(.*)$")
+BARRIER_APPENDIX = re.compile(r"^附錄\s*(\d+)[\s　]*(.*)$")
+BARRIER_PUNCT = re.compile(r"^[）)。，、；：﹚)」』】.,;:]")
+# 目錄點線：這部規範用 ⋯（U+22EF），通用 TOC 樣式沒有它，必須另立
+BARRIER_TOC = re.compile(r"⋯|…{2,}|\.{4,}|‧{3,}|·{3,}")
+
+
+def barrier_units(text):
+    """Split 《建築物無障礙設施設計規範》 on 3–4 位數字條號（101、203.2.2、1005.2、A102.2.1）。
+
+    `code_units()` 只適用「章.節.小節」點號式代碼（如 3.4.5），這部規範的條號是
+    章＋流水號（第 2 章為 201～207）、章內重新起算，故另立切分器（manifest 記
+    `splitter: "barrier"`）。三種 PDF 斷行陷阱與解法：
+
+    1. 跨條參照被拆行（「但適用本規範」／次行「202.4者，其地面坡度…」）：條號用最長
+       嚴格遞增子序列（`lis()`）挑，不遞增者落選，內容留在原條。
+    2. 圖號引用與真條文同號（真條文「206.4.2」＋後文「206.4.2）。」）：編號後只接
+       標點者不視為標題。
+    3. 目錄頁同號（p.2～p.7，點線為 ⋯ U+22EF）：含點線的行整段丟棄（連目錄頁本身）。
+    4. `BARRIER_HEAD` 必須是 `\\d{3,4}`，`\\d{3}` 會把 1005.2 截成 100。
+
+    條號前綴 `A` 為附錄（`附錄1 基本尺寸` 之後的 A101…），與正文分組各自跑 LIS。
+    """
+    lines = [ln.strip() for ln in text.splitlines()]
+    toc_end = max([i for i, s in enumerate(lines) if BARRIER_TOC.search(s)] or [-1])
+    if any(s.startswith("目錄") for s in lines[:toc_end + 1]):
+        lines[:toc_end + 1] = [""] * (toc_end + 1)  # 目錄頁整段作廢
+
+    raw, page = [], None
+    for s in lines:
+        m = re.fullmatch(r"=== p\.(\d+) ===", s)
+        if m:
+            page = int(m.group(1))
+            continue
+        if not s or BARRIER_TOC.search(s) or re.fullmatch(r"\d{1,3}", s):
+            continue
+        raw.append((page, s))
+
+    def head_at(i, chap):
+        """Candidate heading at raw[i], or None. `chap` is the current chapter number."""
+        s = raw[i][1]
+        m = BARRIER_HEAD.fullmatch(s)
+        if not m:
+            return None
+        prefix, num, dots, rest = m.group(1), m.group(2), m.group(3), m.group(4).strip()
+        n = int(num)
+        if dots:
+            if not rest or BARRIER_PUNCT.match(rest):
+                return None
+            key = tuple(int(x) for x in (num + dots).split("."))
+            if prefix:
+                if not 1 <= key[0] % 100 <= 99:
+                    return None
+            elif key[0] // 100 != chap:
+                return None
+        else:
+            # 章級條號（101、1005、A101）後面接空格；內文換行後殘留的「120公分…」不可誤判
+            if not rest or s[len(prefix) + len(num):len(prefix) + len(num) + 1] not in (" ", "　"):
+                return None
+            if not 1 <= n % 100 <= 99 or (not prefix and n // 100 != chap):
+                return None
+            key = (n,)
+        return {"group": None, "key": key, "code": prefix + num + dots, "rest": rest}
+
+    cand, chap, group = [], None, 0
+    for i in range(len(raw)):
+        s = raw[i][1]
+        m = BARRIER_CHAPTER.fullmatch(s)
+        if m:
+            chap, group = cn_int(m.group(1)), group + 1
+            continue
+        m = BARRIER_APPENDIX.fullmatch(s)
+        if m and m.group(2).strip() and STARTS_TEXT.match(m.group(2).strip()):
+            chap, group = None, group + 1
+            continue
+        h = head_at(i, chap)
+        if h:
+            h["group"] = group
+            h["i"] = i
+            cand.append(h)
+
+    heads = {}
+    for g in {c["group"] for c in cand}:
+        cs = [c for c in cand if c["group"] == g]
+        for k in lis([c["key"] for c in cs]):
+            heads[cs[k]["i"]] = cs[k]
+
+    units, cur, chap, chap_title, group = [], None, None, "", 0
+    for i, (pg, s) in enumerate(raw):
+        m = BARRIER_CHAPTER.fullmatch(s)
+        if m:
+            chap, group = cn_int(m.group(1)), group + 1
+            title = chap_title = m.group(2).strip()
+            cur = {"clause": f"第{chap}章", "title": title, "path": f"第{chap}章 {title}",
+                   "page": pg, "part": "", "lines": []}
+            units.append(cur)
+            continue
+        m = BARRIER_APPENDIX.fullmatch(s)
+        if m and m.group(2).strip() and STARTS_TEXT.match(m.group(2).strip()):
+            chap, group = None, group + 1
+            title = chap_title = m.group(2).strip()
+            cur = {"clause": f"附錄{m.group(1)}", "title": title, "path": f"附錄{m.group(1)} {title}",
+                   "page": pg, "part": "", "lines": []}
+            units.append(cur)
+            continue
+        h = heads.get(i)
+        if h:
+            title = re.split(r"[：，。：；;,:]", h["rest"])[0][:40].strip()
+            cur = {"clause": h["code"], "title": title,
+                   "path": f"第{chap}章 {chap_title}" if chap else chap_title,
+                   "page": pg, "part": "", "lines": [(pg, h["rest"])]}
+            units.append(cur)
+            continue
+        if cur is not None:
+            cur["lines"].append((pg, s))
+    return chunk([u for u in units if u["lines"]])
+
+
 def chunk(units, limit=6000):
     """Split oversized units (appendices, unnumbered tables) at page breaks so hits keep a page."""
     out = []
@@ -324,7 +443,10 @@ def main():
         source_kind = r.get("kind") or ("law" if r.get("type") == "html" or sid == "swc_tech" else "code")
         splitter = r.get("splitter") or ("point" if sid == "farmroad108" else "law")
         is_law = source_kind in ("law", "law_point")
-        if source_kind == "law_point" or splitter == "point":
+        if splitter == "barrier":
+            units = barrier_units(text)
+            source_kind = "code"
+        elif source_kind == "law_point" or splitter == "point":
             units = point_units(text)
             source_kind = "law_point"
         elif is_law:

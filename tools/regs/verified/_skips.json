@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "src": "barrier108",
+   "clause": "406.6",
+   "status": "qualitative",
+   "reason": "表 406.6 點字標示：PDF p.50 該處僅有標題與圖形示意，無文字層數值可轉錄",
+   "date": "2026-11-11",
+   "by": "agent"
+  },
+  {
+   "src": "barrier108",
+   "clause": "A404.9",
+   "status": "qualitative",
+   "reason": "表 A404.9 點字標示：PDF p.101 該處僅有標題與圖形示意，無文字層數值可轉錄",
+   "date": "2026-11-11",
+   "by": "agent"
+  },
+  {
    "src": "btr_design",
    "clause": "116-3",
    "status": "out_of_scope",

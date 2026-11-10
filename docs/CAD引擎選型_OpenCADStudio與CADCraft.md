@@ -28,7 +28,7 @@
 
 | 項目 | OpenCADStudio | ArtCraft CADCraft |
 |---|---|---|
-| 來源 | GitHub 開源（GPL-3.0），HakanSeven12 | ArtCraft Launcher 套件（16 個 App） |
+| 來源 | GitHub 開源（GPL-3.0），上游 HakanSeven12；**本專案 `--install` 一律取 fork `tutumomo/OpenCADStudio`**（Big5 SHX 大字體修正，2026-11-10 起） | ArtCraft Launcher 套件（16 個 App） |
 | 語言 | Rust（73%）＋ Fluent | 原生 C++/Rust |
 | 桌面 GUI | 有（wgpu GPU 加速，Vulkan 可用） | `cadcraft.exe` |
 | 無介面 CLI | `--export / --serve / --batch / --mcp` | `cadcraft-cli {info,convert,run,commands,mcp}` |

@@ -76,6 +76,10 @@
   **只跑 `python tools/project_paths.py` 是唯讀回報，不會安裝任何東西**——它印出 OK／— 清單後就結束，缺的工具仍然缺。要宣稱「環境已備妥」之前，必須先跑過 `--install` 且其退出碼為 0，並在回報中貼出該指令的總結段。
   **`--install` 會一併寫好 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾**（`settings.fonts_folder` → `CAD_FONTS/`、`settings.plot_styles_folder` → `tools/acad/plot/`）；已安裝的機器也會補寫。只想重寫設定、不下載時用 `python tools/project_paths.py --configure`。驗證方式是開一張 TOMO 圖後看 REST 回應的 `state.missing_fonts` 是否為 `[]`，不要只憑「沒有警告」判斷。詳見 `docs/環境需求與自動配置.md` §8.8。
   安裝規範：免 root、成品落 `~/.local/opt/<name>-<ver>/`、`~/.local/bin/` 建 symlink、來源為官方 GitHub Releases；symlink 衝突時改建 `<name>-new` 並印出 `mv` 指令交使用者確認，不直接覆蓋。
+  **兩個必備工具都由 `--install` 自動安裝，來源是使用者自己的 fork（2026-11-10 定案，不得改回上游）**：
+  - **OpenCADStudio**（[`tutumomo/OpenCADStudio`](https://github.com/tutumomo/OpenCADStudio)）：fork 版含 Big5 SHX 大字體修正，中文才不會亂碼；Windows 取 portable exe。
+  - **Open CalcSheet Studio**（[`tutumomo/Open-CalcSheet-Studio`](https://github.com/tutumomo/Open-CalcSheet-Studio)，鍵名 `OpenCalcSheet`）：開放計算環境／第二套獨立算法。Windows 下載 `x64-setup.exe`、**先以 `SHA256SUMS.txt` 校驗**再 `/S` 靜默安裝（可能跳 UAC，請使用者核准）；Linux 只下載 `.deb` 並印出 `sudo apt install` 指令（需 root，不代裝）；macOS 走 dmg 流程（尚未實測）。已安裝則略過，不自動升級。單獨補裝：`python tools/project_paths.py --install --only OpenCalcSheet`。
+  **OCSS 裝好後還有兩件事，`--install` 不會代做**：① 開啟程式一次並在設定啟用 MCP／API（token 才會產生）；② 跑 `python tools/crosscheck/ocss_crosscheck.py register-mcp --apply` 把 MCP 連線寫進本機 `.mcp.json`（token 不印出、不進版控），最後用 `ocss_crosscheck.py probe` 驗證。**嚴禁對 OCSS 執行檔跑 `--version`／`--help`（會卡死）**，偵測一律走 `project_paths.opencalcsheet_exe()`。
 - **工具不得住在 `_temp/`**：`_temp/` 依 §1.1 可整批刪除，凡會長期引用的工具一律放 `tools/`。
 - **優先呼叫確定性腳本**：嚴禁略過 `tools/` 現成工具而重寫一次性腳本。
 - **跨平台 Python 執行鐵則**：
@@ -114,6 +118,7 @@
 | `tools/takeoff/dxf_takeoff.py` | **圖／數對帳首選工具**：回讀 DXF 實測面積/長度，對帳斷面面積（扣內腔）與鋼筋間距 | 接進 `case_package.py` 為第三與第四道交付閘門 |
 | `tools/takeoff/paving_extent.py` | 道路刨鋪範圍計算：由邊線沿設計中心線裁到樁號圍成多邊形，產 15 圖層對帳面積 | 避免超出樁號範圍多算面積 |
 | `tools/design/design_api.py` / `design_cli.py` | **設計計算統一 JSON 入口（`civil-design-run/1`）**：涵蓋 22+ 項土木結構計算器 | 網頁工作台 `tools/design/workbench_web.html`；`docs/設計工作台.md` |
+| `tools/crosscheck/ocss_crosscheck.py` | **OCSS 交叉驗算**：同一題目分別用本專案引擎與 Open CalcSheet Studio 開放計算環境各算一次，比對數值與單位（`probe`／`eval`／`checks`／`register-mcp`） | 需 OCSS 桌面程式開啟，因此**不進**回歸預設流程；`docs/OpenCalcSheetStudio_整合與開放計算環境.md` |
 | `tools/design/hydrology.py` | 集水區水文分析（水保第 16~19 條）：降雨強度、合理化公式 Qp、逕流係數、集流時間 | 排水溝設計流量計算首選；`docs/設計計算產線.md` |
 | `tools/design/channel_hydraulics.py` | 排水溝水力計算（曼寧公式、容量、出水高、流速上下限、福祿數、斷面反推） | 水保第 78、83~86 條；`docs/設計計算產線.md` |
 | `tools/design/channel_profile.py` | 明渠水面線（迴水）計算：標準步法由下游往上游演算水深與剖面型態 | 檢核沿線出水高；`docs/設計計算產線.md` |
@@ -161,6 +166,7 @@
 ### 5.1 MCP 工具鏈接線（細節見 [`docs/AI工具鏈_MCP整合_2026-11-03.md`](docs/AI工具鏈_MCP整合_2026-11-03.md)）
 
 - **六條 MCP 通道配置**：`regs`（規範查詢台）、`blender`（3D 景觀/模型）、`autocad`（CAD 讀圖）、`artcraft`（Office/CAD 工具鏈）、`ingetrazo`（道路橋樑專案）、`cadgen`（text-to-cad 遙測）。設定由 `tools/mcp/register_all.py` 管理；修改後跑 dry-run → `--apply` → `mcp_probe.py`。
+- **第七條通道 `open-calcsheet-studio`（2026-11-10 新增）**：OCSS 的 MCP（`http://127.0.0.1:3879/mcp`）與 REST 是同一個橋接器、同一份 43 工具 registry，但**必須 OCSS 桌面程式開著**才存在，且 token 為機密（只存本機 `.mcp.json`，不進版控、不寫文件）。腳本端一律走 REST（`tools/crosscheck/ocss_client.py`），不必處理 JSON-RPC 握手。**它是必備工具**：clone 後 `--install` 會自動安裝，`.mcp.json` 條目用 `ocss_crosscheck.py register-mcp --apply` 產生（見 §3 硬性安裝規定）。細節見 [`docs/OpenCalcSheetStudio_整合與開放計算環境.md`](docs/OpenCalcSheetStudio_整合與開放計算環境.md)。
 - **IngeTrazo 為 GUI+橋接型**：需桌面 App 開啟並啟動 AI Bridge；輸出為 IFC4/CSV/DXF，座標為 UTM WGS84，**不得直接視為 TWD97 `EPSG:3826`**。詳見 [`docs/IngeTrazo操作指引.md`](docs/IngeTrazo操作指引.md)。
 - **IngeTrazo 在 macOS arm64 已有官方 DMG**（`IngeTrazo-0.6.0-macos-arm64.dmg`），裝在 `/Applications/IngeTrazo.app`；`project_paths` 已內建該路徑，**不必設 `INGETRAZO_HOME`／`INGETRAZO_MCP`**。
 - **橋已改為自動開啟**（2026-11-08）：使用者外掛 `~/.local/share/ingetrazo/plugins/auto_ai_bridge.py` 在 app 啟動時自動拉起橋（停用＝檔名加 `.disabled`）。**橋只收一個客戶端**——第二個 MCP 客戶端會「逾時」而非拒絕；用 `lsof -nP -iTCP:4763` 找出佔用者並 `kill` 才能釋放名額。

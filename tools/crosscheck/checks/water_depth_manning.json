@@ -1,0 +1,20 @@
+{
+  "_note": "交叉驗算對照案例。reference＝本專案確定性引擎（tools/design 下的函式）；ocss＝同一題目在 Open CalcSheet Studio 開放計算環境手寫的計算書。兩者算法獨立，數值應在容差內吻合。",
+  "checks": [
+    {
+      "name": "矩形渠道正常水深（Manning，二分法求根）",
+      "reference": {
+        "module": "tools/design/channel_hydraulics.py",
+        "func": "normal_depth",
+        "args": {"Q": 1.0, "b": 1.0, "n": 0.015, "S": 0.001},
+        "unit": "m"
+      },
+      "ocss": {
+        "source": "\"矩形渠道正常水深（二分法）\nQ = 1.0 m^3/s\nb = 1.0 m\nn = 0.015\nS_0 = 0.001\n#hide\ny_lo = 0.001 m\ny_hi = 5 m\n#repeat 80\n  y_m = (y_lo + y_hi)/2\n  Q_m = (1/n)*(b*y_m/(1 m^2))*((b*y_m/(b + 2*y_m))/(1 m))^(2/3)*S_0^(1/2)\n  #if Q_m > Q/(1 m^3/s)\n    y_hi = y_m\n  #else\n    y_lo = y_m\n  #end if\n#end repeat\n#show\ny_n = (y_lo + y_hi)/2\n",
+        "result": "y_n",
+        "expect_unit": "m"
+      },
+      "tolerance": {"rel": 1e-5}
+    }
+  ]
+}

@@ -386,6 +386,87 @@ def opencadstudio_exe() -> str | None:
     return None
 
 
+def opencalcsheet_exe() -> str | None:
+    """Open CalcSheet Studio（台灣版結構計算書／開放計算環境）執行檔。
+
+    解析順序：`OCSS_EXE` 環境變數 → Windows 安裝根目錄（名稱比對）→
+    macOS `/Applications` 的 .app → `~/.local/bin` → PATH。未安裝回傳 None。
+
+    與 `opencadstudio_exe()` 同一個原則：**不寫死路徑**。Windows 安裝版資料夾名
+    帶空格（實測為「Open CalcSheet Studio」）且不寫登錄 InstallLocation，
+    因此只依 `ProgramFiles` 等環境變數指到的根目錄，用「忽略空格與大小寫」
+    的名稱比對找資料夾，再找其中的執行檔。
+    """
+    p = _env_path("OCSS_EXE")
+    if p and p.is_file():
+        return str(p)
+
+    def _norm(s: str) -> str:
+        return s.replace(" ", "").replace("-", "").replace("_", "").lower()
+
+    if os.name == "nt":
+        roots = [os.environ.get(k) for k in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)")]
+        local = os.environ.get("LOCALAPPDATA")
+        if local:
+            roots += [local, str(Path(local) / "Programs")]
+        seen = set()
+        for root in roots:
+            if not root or root in seen or not Path(root).is_dir():
+                continue
+            seen.add(root)
+            for d in sorted(Path(root).iterdir()):
+                if not d.is_dir() or not _norm(d.name).startswith("opencalcsheet"):
+                    continue
+                for c in d.glob("*.exe"):
+                    # 排除 uninstall.exe；主程式名為 open-calcsheet-studio.exe
+                    if _norm(c.stem).startswith("opencalcsheetstudio"):
+                        return str(c)
+
+    if sys.platform == "darwin":
+        # macOS：/Applications 與 ~/Applications 下的 .app，取 Contents/MacOS 內的主程式
+        for root in (Path("/Applications"), Path.home() / "Applications"):
+            if not root.is_dir():
+                continue
+            for d in sorted(root.glob("*.app")):
+                if not _norm(d.stem).startswith("opencalcsheet"):
+                    continue
+                for c in sorted((d / "Contents" / "MacOS").glob("*")):
+                    if c.is_file():
+                        return str(c)
+
+    home = Path.home()
+    for n in ("open-calcsheet-studio", "opencalcsheet"):
+        c = home / ".local" / "bin" / (n + ".exe")
+        if c.is_file():
+            return str(c)
+        c = home / ".local" / "bin" / n
+        if c.is_file():
+            return str(c)
+
+    for n in ("open-calcsheet-studio", "opencalcsheet"):
+        w = shutil.which(n)
+        if w:
+            return str(w)
+    return None
+
+
+def ocss_settings_dir() -> Path:
+    """Open CalcSheet Studio 的使用者資料夾（preferences.json 所在）。
+
+    Tauri app id 固定為 `studio.openstructuralcalculation.app`，各平台慣例路徑：
+    Windows `%APPDATA%`、macOS `~/Library/Application Support`、Linux `~/.config`。
+    資料夾不存在時仍回傳路徑（呼叫端自行判斷）。
+    """
+    app_id = "studio.openstructuralcalculation.app"
+    if os.name == "nt":
+        base = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
+    elif sys.platform == "darwin":
+        base = str(Path.home() / "Library" / "Application Support")
+    else:
+        base = os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
+    return Path(base) / app_id
+
+
 def cad_fonts_dir() -> Path | None:
     """CAD 字體庫（TOMO 樣式用 gbenor.shx + CHINESE.SHX）。
 
@@ -446,6 +527,8 @@ def report() -> dict:
         "accoreconsole": accoreconsole(),
         "solidcraft": solidcraft_cli(),
         "opencadstudio": opencadstudio_exe(),
+        "opencalcsheet": opencalcsheet_exe(),
+        "ocss_settings": str(ocss_settings_dir()),
         "ingetrazo_home": str(ingetrazo_home()) if ingetrazo_home() else None,
         "ingetrazo_mcp": ingetrazo_mcp(),
         "blender": blender_exe(),
@@ -480,6 +563,9 @@ def _auto_installable_missing(info: dict) -> list[str]:
     # OpenCADStudio
     if not info.get("opencadstudio"):
         missing.append("OpenCADStudio")
+    # Open CalcSheet Studio（2026-11-10 起列為必備工具）
+    if not info.get("opencalcsheet"):
+        missing.append("OpenCalcSheet")
     return missing
 
 def main(argv=None) -> int:
@@ -557,6 +643,10 @@ def main(argv=None) -> int:
         print(f"OpenCADStudio: {info['opencadstudio']}  [OK]（開源 CAD 平替；DWG/DXF、CTB 出圖、MCP）")
     else:
         print("OpenCADStudio: —（未安裝；跑 python tools/project_paths.py --install 自動補齊）")
+    if info.get("opencalcsheet"):
+        print(f"OpenCalcSheet: {info['opencalcsheet']}  [OK]（開放計算環境；須開啟程式才有 API 3879）")
+    else:
+        print("OpenCalcSheet: —（必備；未安裝。跑 python tools/project_paths.py --install 自動補齊，或設定 OCSS_EXE）")
     print(f"SolidCraft   : {info['solidcraft'] or '—（選用）'}")
     iz = info["ingetrazo_mcp"]
     print(f"IngeTrazo    : {info['ingetrazo_home'] or '—（選用；未安裝或設定 INGETRAZO_HOME）'}")

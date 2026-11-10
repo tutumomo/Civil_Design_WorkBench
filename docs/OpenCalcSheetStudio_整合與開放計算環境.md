@@ -180,7 +180,7 @@ claude mcp add --transport http --scope user open-calcsheet-studio \
 
 `project_paths.opencalcsheet_exe()`（**只認 TW 版，不退回上游**）：環境變數 `OCSS_EXE` → Windows 安裝根目錄下「去空格／點／連字號、不分大小寫」後**完全等於** `opencalcsheetstudiotw` 的資料夾 → macOS 同名 `.app` → Linux 同名 `.desktop` 的 Exec、`~/.local/bin/open-calcsheet-studio-tw`、PATH 的 `open-calcsheet-studio-tw`。兩版執行檔都叫 `open-calcsheet-studio`，因此**不能**再用執行檔名或 `startswith` 比對。**不要在程式或文件寫死安裝路徑**（與 OpenCADStudio 同一原則，見 EXP-B15）。
 
-**Linux（aarch64，2026-11-10 以上游版實測；TW 版尚未實測）**：官方只給 `.deb`（需 root）。無 root 時可 `dpkg-deb -x <deb> <目錄>` 解壓，把 `usr/bin/open-calcsheet-studio` 連結成 **`~/.local/bin/open-calcsheet-studio-tw`**（與上游區隔，解析器認這個名字）；解壓不會建選單項目，需自寫 `~/.local/share/applications/Open CalcSheet Studio TW.desktop`。TW 版設定檔在 `~/.local/share/tw.opencalcsheet.studio/`（上游為 `studio.openstructuralcalculation.app`）。視窗全黑時以 `WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_COMPOSITING_MODE=1` 啟動（見 EXP-J4）。
+**Linux（aarch64，2026-11-10 以 TW 版 v2026.45.2-tw.4 實測）**：官方只給 `.deb`，正式安裝用 `sudo apt install <deb>`（套件 `open-calc-sheet-studio-tw`，執行檔 `/usr/bin/open-calcsheet-studio`，選單 `/usr/share/applications/Open CalcSheet Studio TW.desktop`，解析器靠這個 desktop 檔認出 TW 版）。裝好後再跑一次 `--install`，會寫防黑屏啟動腳本 `~/.local/bin/open-calcsheet-studio-tw`，並在 `~/.local/share/applications/` 放同名 desktop 檔蓋過系統那份（Exec 指向啟動腳本）。無 root 時的備案： `dpkg-deb -x <deb> <目錄>` 解壓，把 `usr/bin/open-calcsheet-studio` 連結成 **`~/.local/bin/open-calcsheet-studio-tw`**（與上游區隔，解析器認這個名字）；解壓不會建選單項目，需自寫 `~/.local/share/applications/Open CalcSheet Studio TW.desktop`。TW 版設定檔在 `~/.local/share/tw.opencalcsheet.studio/`（上游為 `studio.openstructuralcalculation.app`）。視窗全黑時以 `WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_COMPOSITING_MODE=1` 啟動（見 EXP-J4）。
 
 ## 7. 已知限制與風險
 

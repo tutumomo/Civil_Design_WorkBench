@@ -2,7 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Always-On Core**: Complete project operational rules, boundaries, and engineering invariants are unified in [`AGENTS.md`](AGENTS.md). This file provides operational guidance, commands, and architectural context for Claude Code.
+> **Always-On Core**: Complete project operational rules, boundaries, and engineering invariants are unified in [`AGENTS.md`](AGENTS.md) (imported below, so it is loaded every session). This file adds commands and architectural context for Claude Code; where the two differ, `AGENTS.md` wins.
+
+@AGENTS.md
 
 ## 1. Common Commands
 
@@ -31,13 +33,24 @@ python tools/project_paths.py --configure  # Re-configure CADCraft/OpenCADStudio
 ### Testing & Verification
 ```bash
 # Full regression test suite across all case types (compares numbers against tools/selftest/baseline.json)
+# NOTE: no argparse — ANY invocation (even `--help`) runs the full suite. Only flags: --update, --ignore-new.
+# `--update` rewrites the baseline: ask-first, only for an intentional design change.
 .venv/bin/python tools/selftest/regression.py
 
 # Single-module self-tests
-.venv/bin/python tools/design/design_core_selftest.py       # Civil/structural design engines
-.venv/bin/python tools/design/design_workbench_selftest.py  # Design workbench API
-.venv/bin/python tools/regs/regq_selftest.py                # Regulations query engine
-.venv/bin/python tools/selftest/design_launch_check.py <id> # Launch check for specific calculator (G1~G8)
+.venv/bin/python tools/selftest/design_core_selftest.py       # Design engines, hand-calc comparisons
+.venv/bin/python tools/selftest/design_workbench_selftest.py  # Design workbench API / catalog rules
+.venv/bin/python tools/regs/regq_selftest.py                  # Regulations query engine
+
+# Single test class / single test: the script's __main__ ignores argv and always runs everything,
+# so go through `-m unittest` from inside tools/selftest/ (design_core_selftest only; the workbench
+# selftest is a custom check runner with no per-test filter)
+(cd tools/selftest && ../../.venv/bin/python -m unittest design_core_selftest.WallRebarTests)
+(cd tools/selftest && ../../.venv/bin/python -m unittest design_core_selftest.WallRebarTests.<test_name>)
+
+# Calculator launch check G0~G8 (one calculator, or all)
+.venv/bin/python tools/selftest/design_launch_check.py <id>
+.venv/bin/python tools/selftest/design_launch_check.py --all
 
 # Mandatory Delivery Quality Control Gate E1~E18 (must exit with code 0)
 .venv/bin/python tools/a3_sheet/check_delivery.py <drawing.dxf> \
@@ -82,6 +95,18 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp --apply
 .venv/bin/python tools/report/make_report.py cases/<case>/case.json --out out/<case>/<case>_設計報告.docx
 ```
 
+### Design Calculators & Local Web Workbench
+```bash
+# Unified calculator entry (same registry the web workbench and the `regs` MCP design_* tools use)
+.venv/bin/python tools/design/design_cli.py list
+.venv/bin/python tools/design/design_cli.py show <id>     # input example + limitations
+.venv/bin/python tools/design/design_cli.py run ...       # see `run --help`
+
+# Regulations query (CLI) and the web UI (one server, default port 8765: regs at /, workbench at /design)
+.venv/bin/python tools/regs/regq.py <question>            # --search / --clause ID CLAUSE / --topics / --json
+./web.sh regs|design|status|stop|restart [--port PORT] [--host HOST]
+```
+
 ## 2. High-Level Architecture & Structure
 
 ```
@@ -110,35 +135,22 @@ Civil_Design_WorkBench/
     └── wall_section/       # Retaining wall, channel & slope drawing generator (make_wall_section.py)
 ```
 
-## 3. Core Invariants & Boundaries
+### How the pieces connect
 
-- **File System Guardrails**:
-  - Deliverables: Must land in `out/<案名>/` exclusively. Never output deliverables to root or tool directories.
-  - Temporary files: Must land in `_temp/<主題>/`. `_temp/` can be unconditionally deleted anytime.
-  - Read-Only Directories: `完整案例(參考用)/`, `標準圖圖庫/`, `data/`, and external drives/NAS are read-only.
-- **Domain Constants**:
-  - Unit: Metric meter (`$INSUNITS=6`, `$MEASUREMENT=1`).
-  - Coordinates: Real TWD97 TM2 (`EPSG:3826`), never arbitrary origin.
-  - CAD Text Style: `TOMO` style with `gbenor.shx` + `CHINA1.SHX`.
-  - Plot Style: `monochrome.ctb` (colors 1~8 map to standard lineweights).
-  - RC Design: Uniform 6% lap and loss allowance across project (`rc_design.LAP_ALLOWANCE = 0.06`).
-  - Retaining Wall Rebar: Strict wall-type dispatch (`gravity`/`semigravity` nominal rebar; `cantilever` flexural; `counterfort`/`anchored`/`mse` structural components).
-- **Mandatory tools (auto-installed by `--install`, from the user's forks)**: `tutumomo/OpenCADStudio`（Big5 SHX 修正版，不得改回上游）與 `tutumomo/Open-CalcSheet-Studio`。**只綁本地化 TW 版應用程式**（「Open CAD Studio.TW」／`OpenCADStudio.TW.exe`；「Open CalcSheet Studio TW」／識別碼 `tw.opencalcsheet.studio`），本機並存的上游版一律不採用；路徑只經 `project_paths` 解析。clone 後必須跑 `python tools/project_paths.py --install`，且退出碼為 0 才算環境備妥；OCSS 另需開程式一次並跑 `register-mcp --apply`。**必備工具共四項**：另兩項 **ArtCraft Launcher**（`storytold/craft-launcher`，十幾套開源軟體可平替 Adobe／Office／CAD）與 **Blender** 為手動安裝，`--install` 只偵測、缺少時印指引並以非 0 退出；Launcher 內要裝好 GridCraft、WordCraft。
+- **`cases/<案名>/case.json` (`civil-case/1`) drives everything.** `case_core.py` loads it, calls the category model in `qty_models.py` (`road`/`wall`/`channel`/`slope`) and the matching `tools/design/` engines to build `quantity_context()`, then *derives* the downstream inputs: `derive_boq()` for the budget and `derive_report()` (including the injected design sections) for the report. Quantities are never typed twice; `consistency()` fails the case when a derived number and a model formula disagree.
+- **`case_package.py` only orchestrates.** It writes the derived inputs to `out/<案名>/_case/`, runs each axis tool as a subprocess (`boq_build.py`, `make_report.py`, section drawing + `check_delivery.py` + `dxf_takeoff.py`), collects exit codes into `<案名>_案件交付清單.md` / `_交付狀態.json`, and leaves per-axis `_log_<軸>.txt`. When an axis fails, read that log first. `--only boq,report,drawing` reruns a subset.
+- **Design calculators have one registry.** `tools/design/design_api.py` holds `CATALOG` (metadata, example, field rules) and `RUNNERS` (id → engine function); `run_calculation()` returns the `civil-design-run/1` envelope. `design_cli.py`, the web workbench (`tools/regs/regs_server.py` serving `/design`) and the `regs` MCP `design_*` tools are all thin fronts over it. Adding a calculator means engine file + `CATALOG` entry + `RUNNERS` entry + tests, enforced by `design_launch_check.py`.
+- **Retaining walls dispatch by type** through `tools/design/wall_system.py` (`analyse()` / `rebar_design()`); `case_core` and the drawing tools go through it rather than calling a specific wall engine. An unknown `wall_type` is an error, never a fallback to cantilever.
+- **Drawing tools share `tools/drawing_rules.py`** (layer colours, lineweights, standard scales, `add_plot_layer()`) and hand DXF to `tools/acad/acc.py` for DWG/PDF. `check_delivery.py` re-reads the DXF as the gate.
+- **Regression is number-based.** `regression.py` reruns every case under `cases/` and compares tracked numbers with `tools/selftest/baseline.json`. Cases already failing in the baseline are reported as known-bad and do not fail the run (currently `擋土牆3m重力式_北屯民政里`, which lacks case data).
+- **No package install.** There is no `pyproject.toml`; each script inserts `tools/` (and sibling tool folders) into `sys.path` and imports modules by bare name (`import case_core`, `import rc_design`). Run scripts by path from the repo root, and resolve every external path through `tools/project_paths.py`.
+
+## 3. Claude-Specific Notes (rules themselves live in AGENTS.md)
+
 - **Open CalcSheet Studio (OCSS)**: 必備工具；開放計算環境，用於逐式可稽核的計算書與第二套獨立算法（`tools/crosscheck/`）。
   - 必須桌面程式開著才有 API（`127.0.0.1:3879`），無 headless 模式；勿執行它的 `--version`／`--help`（會卡住）。
   - API 產不出 PDF：`export_pdf` 在一般安裝版回 501；PDF 只能 App 內按「Rapport」。
   - 開放環境的結果一律要交叉驗算才可進交付；模板有檢查腳本把關，自由書寫沒有。
   - 兩個不報錯的單位陷阱必查：分數次方污染單位（`R^(2/3)` → `m^0.667`，須先無因次化）、單位不自動收斂（`kN/mm²` ≠ `MPa`，須顯式 `to MPa`）。`ocss_client.unit_warnings()` 已自動偵測。
-- **Headless CAD Execution**:
-  - Background CAD tasks (DWG publishing, conversion) go through `tools/acad/acc.py`; default backend is OpenCADStudio (`--http` on demand; exe resolved by `project_paths.opencadstudio_exe()`, never hardcode its path), fallback `accoreconsole`/`CADCraft CLI` via `CIVIL_AI_CAD_BACKEND=cadcraft`. Always eyeball the PDF's Chinese text after publishing.
-  - Do NOT automate or script CadCraft Studio GUI.
-- **Import Priority**:
-  - In scripts combining geometry and imagery, follow import order:
-    1. `import matplotlib; matplotlib.use('Agg')`
-    2. `import shapely`
-    3. `import pyproj`
-    4. `import cv2`, `import ezdxf`
-- **Reopen & Check Verification**:
-  - Always re-read output DXF/DWG, convert rendered PDF to PNG, and verify visually. All A3 sheets must pass `check_delivery.py` (exit code 0).
-- **Troubleshooting**:
-  - Consult `docs/經驗索引_INDEX.md` first; open only the matching section in `docs/踩坑紀錄.md` (never read the entire file).
+- **Docs still show Windows-style commands** (`C:\Python312\python.exe -E -P -X utf8 tools\selftest\...`). On this Linux/macOS checkout use `.venv/bin/python` with forward slashes.
+- **Troubleshooting**: consult `docs/經驗索引_INDEX.md` first; open only the matching section in `docs/踩坑紀錄.md` (never read the entire file).

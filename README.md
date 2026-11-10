@@ -100,7 +100,7 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
       然後替我的 AI 智能體選 `our-free-model` 下的模型。操作細節以該外掛的 README 為準。
 1. 跑 `python tools/project_paths.py`，看目前缺什麼（它會列出 Python 依賴、規範索引、
    OpenCADStudio TW、Open CalcSheet Studio TW、CAD 字體庫、SolidCraft、Blender，
-   以及建議安裝的 13 套 ArtCraft、僅備援用的 AutoCAD）。
+   以及建議安裝的 15 套 ArtCraft、僅備援用的 AutoCAD）。
 2. 缺 Python 套件：在虛擬環境內 `python -m pip install -r requirements.txt`（已含 `mcp`，MCP 註冊與 Blender 橋需要）。
 2.5 **要真的安裝**：`python tools/project_paths.py --install`（退出碼 0 才算備妥）。它會從我的 fork
    安裝 OpenCADStudio TW（tutumomo/OpenCADStudio）與 Open CalcSheet Studio TW（tutumomo/Open-CalcSheet-Studio），
@@ -139,6 +139,9 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 |---|---|---|---|
 | 規範查詢 | 關鍵字或條號 → 主題卡、條文全文、**已驗證公式**、**表格** | `tools/regs/regq.py`、MCP `regs`（`regs_ask`／`regs_clause`／`regs_formula`／`regs_table`） | 現成 |
 | 依需求彙整設計規範 | 一句設計需求（例：「公路邊的護欄有什麼設計規範？」、「交叉路口改成圓環要考慮哪些？」）→ 適用規範清單、關鍵條文、設計檢核項目與引用出處 | `regs_ask` 依據卡 → `regs_clause` 讀全文確認；34 份規範、1,011 條已驗證公式表格 | 現成（查詢）＋ AI 協作（彙整成清單） |
+| 設計規範維護（新增／改版更新） | 一句話（例：「把 114 年版建築物無障礙設施設計規範加進來」、「水保技術規範改版了，幫我更新」）→ 登錄來源與版次、下載原文、重建條文索引與法規目錄、抽查切條與缺號、驗收查得到且條號頁碼正確 | **直接跟 AI 說，照 SOP 做**：[`docs/規範查詢台.md`](docs/規範查詢台.md) §5B／§6 與 [`docs/規範公式圖表入庫SOP.md`](docs/規範公式圖表入庫SOP.md) §9。流程：`fetch_regs.py`（`SOURCES` 登錄來源）→ `build_index.py`（切條、建 sqlite）→ `index_stats.py`／`regq_selftest.py`（缺號、超長條文、驗收）→ `build_catalog.py`（重建目錄）；公式與表格另走 `verified.py` 入已驗證庫 | AI 協作（SOP 已文件化） |
+| 規範改版影響分析 | 新舊版規範 → 條文差異清單，以及受影響的已驗證公式、設計引擎與案件；再自動跑回歸確認數字有沒有變 | `fetch_regs.py`／`build_index.py` 的條文索引、`verified.py` 條目、`tools/selftest/regression.py`；條文 diff 與影響對照待建 | 規劃中 |
+| 跨規範衝突比對 | 一個設計參數（保護層、載重組合、最小厚度…）→ 各規範數值併排表，標出較嚴者與條文出處 | `verified` 公式／表格庫＋`regs_formula`／`regs_table`＋`regs_clause` 讀全文 | AI 協作（材料現成） |
 
 ### 二、設計計算與交叉驗算
 
@@ -146,6 +149,9 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 |---|---|---|---|
 | 結構與水理設計 | 構造物參數 → 檢核結果與計算書數據（擋土牆、箱涵、渠道、邊坡、基礎、RC 樑柱…） | `tools/design/design_cli.py`（20 個計算器，統一入口 `design_api.py`） | 現成 |
 | 第二套獨立算法交叉驗算 | 同一題目 → 本專案引擎與 Open CalcSheet Studio TW 各算一次並比對數值與單位 | `tools/crosscheck/ocss_crosscheck.py`（需 OCSS 桌面程式開著） | 現成 |
+| 參數掃描與最經濟斷面 | 參數範圍（例：牆高 3～8 m、φ 28～36°）→ 掃描表格、趨勢圖，指出最經濟／最省地的斷面 | `tools/design/design_api.py`＋matplotlib／GridCraft；掃描包裝待建 | 規劃中 |
+| 多方案比較 | 同一案的多種型式（懸臂式／重力式／扶壁式…）→ 數量、經費、占地、施工難度比較表 | `tools/design/`＋`case_package/qty_models.py`＋`tools/boq/`；整合入口待建 | 規劃中 |
+| 改版後批次重算舊案 | 規範或單價更新 → `cases/` 全部重跑，列出數量／經費／檢核結果有變動的案件 | `tools/case_package/case_package.py`＋`tools/selftest/regression.py`；差異報告待建 | 規劃中 |
 
 ### 三、製圖、重繪與轉繪
 
@@ -157,6 +163,7 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 | A3 出圖 | DXF → DXF／**DWG**／PDF／PNG（圖框、視口、比例尺、monochrome.ctb） | `tools/a3_sheet/make_sheet.py` → `tools/acad/acc.py`（OpenCADStudio TW） | 現成 |
 | 依圖面按實尺重繪 | 一張圖面（PDF／影像／他人 DWG）→ 模型空間以**公尺**為單位、真實尺寸的 DXF／DWG，再套本專案圖層、TOMO 字型與圖框 | ezdxf ＋ OpenCADStudio TW MCP（`ocs_measure`／`ocs_audit`）；`tools/drawing_rules.py`；出圖後過 E1~E18 | AI 協作 |
 | 他人設計圖收編進標準圖庫 | 他人圖面 → 本專案格式 DWG，分類登錄進元件目錄 | `_ref/build_inventory.py`、`_ref/components_catalog.json`、`docs/常用元件標準圖盤點.md`。`標準圖圖庫/` 為唯讀，實際寫入須你核可 | AI 協作 |
+| 既有圖逆向成 `case.json` | 他人設計圖（PDF／DWG）→ 量測與辨識後產生 `case.json`，之後改參數就能重出標準圖、預算與報告 | OpenCADStudio TW MCP（`ocs_measure`／`ocs_query`）＋`tools/case_package/case_core.py`；尺寸與構造判定需人工複核 | AI 協作 |
 | 參數化可變尺寸結構體 | 構造物型式與可變參數 → 改尺寸即自動更新的圖塊／模型 | 2D：OpenCADStudio 動態圖塊（block editor 參數與動作）；3D：SolidCraft 參數化（skill `solidcraft-param`） | 2D 規劃中；3D 現成 |
 
 ### 四、圖面與預算審查、除錯
@@ -167,8 +174,10 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 | 修改 DWG 元件規格／尺寸並同步檢核 | DWG ＋ 要改的元件與新規格 → 修改後 DWG（`ocs_save_verified`）＋ 改後合規檢核 | OpenCADStudio TW MCP（`ocs_query`／`ocs_run`／`ocs_save_verified`）＋ 設計引擎 ＋ `regs` | AI 協作 |
 | 預算書除錯 | 預算書 `.xlsx`／`.xlsm` → 錯誤清單：公式斷鏈、數量與單價分析不符、單價無來源、費率與合計錯誤 | `tools/boq/price_audit.py`（單價來源稽核）＋ 逐表解析重算；前例：`docs/審查_崙背羅厝路面改善.md`（路工表 40 段逐段重算） | 現成（單價稽核）＋ AI 協作（全表除錯） |
 | 圖／數對帳 | DXF ＋ `case.json` → 圖面量回數量與預算數量比對、配筋間距對帳 | `tools/takeoff/dxf_takeoff.py`（`--rebar`） | 現成 |
+| 圖說一致性三方對帳 | 平面圖＋斷面圖＋預算書 → 尺寸與數量對不起來的清單（同一工項三邊核對） | `tools/takeoff/dxf_takeoff.py`（單圖對帳已現成）；跨圖比對待擴充 | 規劃中 |
+| 交付前自我審查一頁表 | 一個案件 → 一頁「可以交了嗎」：六道閘門、規範符合性、圖數對帳、單價稽核逐項結果 | `check_delivery.py`＋`price_audit.py`＋`dxf_takeoff.py`＋`design_conformance.py`；彙整入口待建 | 規劃中 |
 
-### 五、文件產製（預算書、報告書、監造計畫）
+### 五、文件產製（預算書、報告書、施工／監造計畫）
 
 | 功能 | 你給什麼 → 得到什麼 | 工具／依據 | 狀態 |
 |---|---|---|---|
@@ -176,7 +185,7 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 | 設計報告書 | `case.json` → 14 章 `.docx` ＋ PDF（R1~R16 回讀驗證） | `tools/report/make_report.py`、`docs/設計報告產線.md` | 現成 |
 | 三軸一鍵交付 | `case.json` → 設計圖＋預算書＋報告書＋交付清單 | `tools/case_package/case_package.py` | 現成 |
 | 優質報告書格式內化為範本 | 一份參考報告書 → 章節架構、版面、用語整理成本專案報告範本，之後 `make_report.py` 套用 | `tools/report/`（`chapters.py`／`report_model.py`／`docx_build.py`）、`templates/report/` | AI 協作 |
-| 依預算書改寫監造計畫 | 預算書 ＋ 監造計畫範例 → 依主辦機關、經費、施作工項、檢查停留點、施工中檢核改寫的監造計畫 `.docx` | 預算書逐表解析 ＋ docx 編輯；尚無專用產線 | 規劃中 |
+| 施工計畫／監造計畫草擬 | 預算書＋圖說＋規範（可附既有範例）→ 依主辦機關、經費、施作工項、施工順序、檢查停留點與抽查頻率改寫的施工計畫或監造計畫 `.docx` | 預算書逐表解析＋`regs` 查條文＋docx 編輯；尚無專用產線 | 規劃中 |
 
 ### 六、3D 與景觀模擬
 
@@ -184,6 +193,8 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 |---|---|---|---|
 | 景觀平面圖轉 3D 景觀模擬 | 景觀平面圖或手繪示意 → 3D 意象模擬圖（**意象，不是施工圖**）＋正交俯視補圖 | `tools/landscape3d/`（`bay_scene.py`、`park_scene.py`、`plan_view.py`）、Blender；`docs/3D景觀模擬_作業經驗與踩坑.md` | AI 協作（有參考實作） |
 | 參數化 3D 構造物 | 口述需求 → 參數化模型、STEP／STL／3MF、成果圖與數量表 | SolidCraft（`tools/solidcraft/`、skill `solidcraft-param`） | 現成 |
+| 3D 現況建模與 BIM（**SketchUp 開源平替**） | 基地或構造物 3D 模型 → 推拉式編輯、量測、IFC4／數量 CSV、地形剖面 | **IngeTrazo**（<https://ingetrazo.com/en/>）＋ MCP 橋（`run_python`／`query_model`／`screenshot`）；見 [`docs/IngeTrazo操作指引.md`](docs/IngeTrazo操作指引.md) | 現成（選用，意象與溝通用，**不進交件**） |
+| 土方平衡與整地 | 現況地形（DEM／測量點）＋設計高程 → 挖填方數量、最佳整地高程、土方運距初估 | `tools/site_basemap/`＋IngeTrazo／Blender 地形；土方計算模組待建 | 規劃中 |
 | 改一個數字重出圖 | 「路寬改 6 m、再出一次」 → 只重建重出，不必重做（參考實測：載入既有 .blend 補 1 張約 40 秒） | `blender` MCP：`blender_run_python`＋`blender_render` | 現成 |
 | 程式量測（不靠目視） | 「這個坡面實際多長、車道淨寬夠不夠」 → 從模型讀尺寸、座標，回傳數字與設計值對帳 | `blender_run_python`（腳本設 `RESULT`） | 現成 |
 | 3D 模型格式轉換與對帳 | SolidCraft／CAD 的 STL、OBJ、FBX → glb、usd 等，並回報物件數與三角面數 | `blender_convert` | 現成 |
@@ -251,7 +262,7 @@ python tools/project_paths.py
 ```
 
 它會印出：專案根目錄、Python 版本與平台、規範索引在不在、**OpenCADStudio TW**、**Open CalcSheet Studio TW**、
-CAD 字體庫、SolidCraft、Blender，以及選用／備援的 13 套 ArtCraft（建議安裝）與 AutoCAD `accoreconsole`（備援）。
+CAD 字體庫、SolidCraft、Blender，以及選用／備援的 15 套 ArtCraft（建議安裝）與 AutoCAD `accoreconsole`（備援）。
 加 `--json` 可給安裝腳本吃。**這一步只回報，不安裝。**
 
 ### 步驟 3.1：自動安裝必備外部工具（clone 後必做）
@@ -426,7 +437,7 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 
 **必備外部工具（共四項，見步驟 3.1，`python tools/project_paths.py --install` 檢查）**：
 **OpenCADStudio TW**（CAD 主力、預設出圖後端，TOMO 字型自動複製進它的字型夾、CTB 樣式夾自動設定）與 **Open CalcSheet Studio TW**（交叉驗算／開放計算環境）由它自動安裝，只綁 TW 版、上游版不採用；
-**ArtCraft Launcher**（Craft App Suite 啟動器，十幾套開源軟體，可平替 Adobe／Office／CAD）與 **Blender**（3D）為手動安裝，`--install` 只偵測並印取得指引。
+**ArtCraft Launcher**（[`storytold/craft-launcher`](https://github.com/storytold/craft-launcher/releases/latest)，Craft App Suite 啟動器，十幾套開源軟體，可平替 Adobe／Office／CAD）與 **Blender**（[blender.org](https://www.blender.org/download/)，3D）為手動安裝，`--install` 只偵測並印取得指引。
 
 ### 選用但影響交付品質
 
@@ -436,6 +447,18 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 | **CAD 字體**（`gbenor.shx`、`CHINA1.SHX`，推薦組合） | TOMO 中文文字樣式 | 圖面中文變替代字體 | **已隨 repo 附於 `CAD_FONTS/`**，`--install`／`--configure` 自動複製進 OpenCADStudio TW 的字型夾；AutoCAD 備援另需手動，見步驟 3.5 |
 | **ArtCraft 各 App**（經必備的 ArtCraft Launcher 安裝；GridCraft／WordCraft 為交付必要，其餘選用。內含的 CADCraft 僅備援） | 預算書 xlsx、報告 docx、轉檔 | 對應產出需改用其他方式 | 依該套是否有該平台版本 |
 | SolidCraft | 3D 參數化建模 | 對應功能停用 | 依平台而定 |
+
+### 開源平替軟體（選用；不裝也能交付，裝了少訂一堆軟體）
+
+本專案的主力工具都是開源或免費版；下面這幾套是「商業軟體的開源平替」，用得到再裝：
+
+| 平替對象 | 開源軟體 | 取得方式 | 在本專案的角色 |
+|---|---|---|---|
+| **SketchUp**（推拉式 3D 建模） | **IngeTrazo** | 官網 <https://ingetrazo.com/en/>；原始碼／Releases <https://github.com/ingelibre/ingetrazo> | 選用。3D 構造建模、匯入 DWG／SketchUp（OpenSKP）、輸出 IFC4 與數量 CSV、地形剖面；GUI＋MCP 橋，AI 可直接建模。**只補能力、不進交件**，見 [`docs/IngeTrazo操作指引.md`](docs/IngeTrazo操作指引.md) |
+| **Adobe 套裝** | ArtCraft 的 **PhotoCraft**（≈Photoshop）、**VectorCraft**（≈Illustrator）、**PdfCraft**（≈Acrobat）、**DesignCraft**（≈InDesign）、**FigCraft**、**LightCraft**、**EffectCraft**、**FilmCraft**、**SoundCraft** | 先裝 **ArtCraft Launcher**（必備）<https://github.com/storytold/craft-launcher/releases/latest>，再從它的視窗安裝各 App | 現場／竣工照片整理、向量圖與標準圖、PDF 合併抽頁 OCR、成果簡報與影片 |
+| **Microsoft Office 套裝** | ArtCraft 的 **WordCraft**（≈Word）、**GridCraft**（≈Excel）、**DeckCraft**（≈PowerPoint） | 同上（經 ArtCraft Launcher 安裝） | **GridCraft、WordCraft 是交付必要**：工程預算書 `.xlsx`、設計報告 `.docx` 都由 `tools/boq/boq_build.py`、`tools/report/make_report.py` 產出後用它們開啟／轉 PDF；DeckCraft 用於成果簡報 |
+
+> ArtCraft 不必整套安裝，但 **GridCraft 與 WordCraft 缺了會影響交付**；CADCraft 僅在 OpenCADStudio TW 異常時當備援。完整 15 套對照見 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)。
 
 ### 跨平台差異
 
@@ -493,7 +516,7 @@ macOS／Linux：寫進 `~/.bashrc` 或 `~/.zshrc` 的 `export ARTCRAFT_HOME=...`
 | 出圖回 400「Drawing edit lock is held」 | 你在 OpenCADStudio 視窗開著同一張 DXF，持有編輯鎖。先在 GUI 存檔並關圖再重跑 |
 | 想要 Claude Code 跨 session 記住專案脈絡 | 裝 claude-mem：`powershell -ExecutionPolicy Bypass -File ".agents\setup\claude-mem-install.ps1"`（需 Node 20+）。它只影響 Claude Code 的記憶，**不改本專案任何產線行為**，見 [`docs/claude-mem安裝與使用.md`](docs/claude-mem安裝與使用.md) |
 
-完整清單（13 套 ArtCraft 對照、MCP 伺服器、Skills、資料取得方式、給智能體的自動配置指令範本）見
+完整清單（15 套 ArtCraft 對照、MCP 伺服器、Skills、資料取得方式、給智能體的自動配置指令範本）見
 **[`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)**；
 Open CalcSheet Studio 的整合、單位陷阱與能力邊界見 **[`docs/OpenCalcSheetStudio_整合與開放計算環境.md`](docs/OpenCalcSheetStudio_整合與開放計算環境.md)**；
 IngeTrazo（3D／BIM、GUI＋MCP 橋）見 **[`docs/IngeTrazo操作指引.md`](docs/IngeTrazo操作指引.md)**；
@@ -538,7 +561,7 @@ Claude Code 的跨 session 持久記憶見 **[`docs/claude-mem安裝與使用.md
 | 規範 | `tools/regs/` | 下載、索引、查詢、**已驗證公式／表格庫** |
 | 品管 | `tools/a3_sheet/check_delivery.py`、`tools/selftest/` | E1~E18 出圖品管、圖數對帳、全案回歸 |
 | 交叉驗算 | `tools/crosscheck/` | 同一題用本專案引擎與 Open CalcSheet Studio TW 各算一次比對（`ocss_crosscheck.py probe／eval／checks`）；需桌面程式開著，**不進**回歸預設流程。開放環境的結果須交叉驗算才可進交付 |
-| 外部 3D／BIM（選用） | IngeTrazo 0.6.0＋MCP 橋 | 3D 構造、IFC4／數量 CSV、地形剖面；**只補能力、不進交件**，見 `docs/IngeTrazo操作指引.md` |
+| 外部 3D／BIM（選用；**SketchUp 開源平替**） | IngeTrazo（<https://ingetrazo.com/en/>）＋ MCP 橋 | 3D 構造、IFC4／數量 CSV、地形剖面；**只補能力、不進交件**，見 `docs/IngeTrazo操作指引.md` |
 
 ## 規範公式圖表庫
 

@@ -155,7 +155,7 @@
 - **When doing terrain / cut-fill / LandXML work (CivilCraft) or quantity takeoff (TakeoffCraft)**: Read [`docs/CadCraft_Studio操作指引.md`](docs/CadCraft_Studio操作指引.md) first（需使用者開啟視窗並提供 token，token 不落地）。
 - **When choosing between CADCraft CLI and CadCraft Studio (分工邊界)**: Read [`docs/CadCraft與CadCraft_Studio分工規範.md`](docs/CadCraft與CadCraft_Studio分工規範.md)（後台代工一律用 CLI，Studio 僅為人類視覺化看板）。
 - **Before producing or modifying any drawing (basemap, A3 sheet, detail)**: Read [`本項目的出圖規定(不定期新增).md`](<本項目的出圖規定(不定期新增).md>) 並遵守；出圖樣式與線粗見 `docs/出圖樣式與線粗.md`，舊圖改樣式用 `tools/acad/apply_plot_style.py`。
-- **After changing any tool under `tools/` (改過工具後)**: 必跑 `tools/selftest/regression.py`；若改到 `tools/design/` 另跑 `design_core_selftest.py` 與 `design_workbench_selftest.py`；改查詢台跑 `regq_selftest.py`。詳見 [`docs/回歸測試.md`](docs/回歸測試.md)。
+- **After changing any tool under `tools/` (改過工具後)**: 必跑 `tools/selftest/regression.py`（可加 `--only <案名>` 只跑相關案件）；若改到 `tools/design/` 另跑 `tools/selftest/design_core_selftest.py` 與 `tools/selftest/design_workbench_selftest.py`；改查詢台跑 `tools/regs/regq_selftest.py`。詳見 [`docs/回歸測試.md`](docs/回歸測試.md)。
 - **Before producing or modifying a budget (預算書與單價稽核)**: Read [`docs/預算書產線.md`](docs/預算書產線.md)（費率公式、可微調項與方向、單價庫）並跑 `tools/boq/price_audit.py`；產出使用 `tools/boq/boq_build.py`。
 - **Before producing or modifying a design report (設計報告)**: Read [`docs/設計報告產線.md`](docs/設計報告產線.md)（14 章骨架、章節派生防錯）並用 `tools/report/make_report.py`。
 - **Before estimating design flow, sizing channel, profile, slope, or basin (水文/水力/邊坡/沉砂池計算)**: Read [`docs/設計計算產線.md`](docs/設計計算產線.md) 並呼叫對應確定性腳本，嚴禁在對話中口算或臆測。

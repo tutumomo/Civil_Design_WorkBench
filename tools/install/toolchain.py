@@ -253,7 +253,7 @@ def _detect_opencadstudio() -> str | None:
 #:   · Windows：下載 → SHA256 校驗 → `setup.exe /S` 靜默安裝 → 以 opencalcsheet_exe() 驗證。
 #:     不執行 `--version`／`--help`（實測會卡住）。若安裝程式要求 UAC，請使用者核准。
 #:   · macOS：沿用 dmg 流程（掛載 → 複製 .app → symlink）。**尚未在 macOS 實測**。
-#:   · Linux：.deb 需 root，只下載並印出 `sudo apt install` 指令，不代裝。
+#:   · Linux：.deb 試 `sudo -n apt-get install`（免密碼 sudo 才成功），否則印指令；裝好後補防黑屏啟動腳本與選單項目。
 #: 已安裝則略過，不自動升級。
 TOOLS: list[Tool] = [
     Tool(
@@ -767,13 +767,141 @@ def _verify_checksum(tool: Tool, tag: str, asset_name: str, path: Path,
     return got == want
 
 
+#: Linux 啟動包裝腳本的識別字串：只覆寫自己產生的包裝腳本或 symlink，不動使用者手寫的檔案
+_WRAPPER_MARK = "# civil-toolchain wrapper"
+
+#: WebKitGTK（Tauri）在部分 Linux GPU（實測 NVIDIA GB10／aarch64）建 DMA-BUF 緩衝區無權限，
+#: 視窗全黑、日誌一直 `KMS: DRM_IOCTL_MODE_CREATE_DUMB failed`；強制軟體渲染即可（EXP-J4）。
+_OCSS_WEBKIT_ENV = {"WEBKIT_DISABLE_DMABUF_RENDERER": "1", "WEBKIT_DISABLE_COMPOSITING_MODE": "1"}
+
+
+def _write_if_changed(path: Path, text: str) -> bool:
+    try:
+        if path.is_file() and path.read_text(encoding="utf-8") == text:
+            return False
+    except OSError:
+        pass
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return True
+
+
+def _linux_desktop_integration(tool: Tool, exe: str, quiet: bool = False) -> None:
+    """Linux：補「選單看得到、開了不黑屏」兩件事（2026-11-10 aarch64 實測）。
+
+    * OpenCalcSheet（.deb 裝到 /usr/bin/open-calcsheet-studio）：
+      寫包裝腳本 `~/.local/bin/open-calcsheet-studio-tw`（帶 WebKit 軟體渲染環境變數），
+      並在 `~/.local/share/applications/` 放**同名** `Open CalcSheet Studio TW.desktop`
+      蓋過系統那份（XDG 規則：使用者目錄同 desktop ID 優先），Exec 指向包裝腳本。
+    * OpenCADStudio（AppImage）：AppImage 不會自建選單項目，補 `Open CAD Studio TW.desktop`，
+      圖示用 `--appimage-extract` 取出。檔名比對鍵＝`opencadstudiotw`，與上游
+      `io.github.HakanSeven12.OpenCadStudio.desktop` 區隔。
+    失敗只印警告，不影響安裝結果。
+    """
+    if IS_WIN or IS_MAC:
+        return
+    apps = Path.home() / ".local" / "share" / "applications"
+    changed = False
+    try:
+        if tool.key == "OpenCalcSheet":
+            real = Path(exe).resolve()
+            wrapper = local_bin_dir() / (tool.bin_stem or "open-calcsheet-studio-tw")
+            if real == wrapper.resolve() and wrapper.is_file():
+                # 偵測已回傳包裝腳本本身：取出它包裝的真正執行檔
+                for line in wrapper.read_text(encoding="utf-8", errors="replace").splitlines():
+                    if line.startswith("exec "):
+                        real = Path(line.split('"')[1]) if '"' in line else real
+            ours = (not wrapper.exists() or wrapper.is_symlink()
+                    or _WRAPPER_MARK in wrapper.read_text(encoding="utf-8", errors="replace"))
+            if ours and real.is_file() and real != wrapper:
+                env = " ".join(f"{k}={v}" for k, v in _OCSS_WEBKIT_ENV.items())
+                text = ("#!/bin/sh\n"
+                        f"{_WRAPPER_MARK}（tools/install/toolchain.py 產生；EXP-J4）\n"
+                        "# Open CalcSheet Studio TW：WebKitGTK GPU 緩衝區無權限會全黑 → 強制軟體渲染\n"
+                        f"export {env}\n"
+                        f'exec "{real}" "$@"\n')
+                if wrapper.is_symlink():
+                    wrapper.unlink()
+                if _write_if_changed(wrapper, text):
+                    wrapper.chmod(0o755)
+                    changed = True
+                    if not quiet:
+                        print(f"    ✓ 啟動腳本 {wrapper}（WebKit 軟體渲染，避免黑屏）")
+            sys_desk = Path("/usr/share/applications/Open CalcSheet Studio TW.desktop")
+            if sys_desk.is_file() and wrapper.is_file():
+                lines = [(f"Exec={wrapper}" if ln.startswith("Exec=") else ln)
+                         for ln in sys_desk.read_text(encoding="utf-8", errors="replace").splitlines()]
+                if _write_if_changed(apps / sys_desk.name, "\n".join(lines) + "\n"):
+                    changed = True
+                    if not quiet:
+                        print(f"    ✓ 選單項目 {apps / sys_desk.name}（Exec → 啟動腳本）")
+
+        elif tool.key == "OpenCADStudio":
+            appimage = Path(exe).resolve()
+            if not (appimage.is_file() and appimage.suffix.lower() == ".appimage"):
+                return
+            icon = next(iter(sorted((appimage.parent / "squashfs-root").glob("*.png"))), None)
+            if icon is None:
+                subprocess.run([str(appimage), "--appimage-extract", "*.png"], cwd=appimage.parent,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
+                icon = next(iter(sorted((appimage.parent / "squashfs-root").glob("*.png"))), None)
+            text = "\n".join([
+                "[Desktop Entry]",
+                "Name=Open CAD Studio TW",
+                "Name[zh_TW]=Open CAD Studio TW（Big5 SHX 修正版）",
+                "Comment=OpenCADStudio TW fork - DWG/DXF 2D/3D CAD",
+                f"Exec={local_bin_dir() / (tool.bin_stem or 'opencadstudio-tw')} %F",
+                f"Icon={icon}" if icon else "Icon=io.github.HakanSeven12.OpenCadStudio",
+                "Terminal=false",
+                "Type=Application",
+                "Categories=Graphics;Engineering;",
+                "MimeType=image/vnd.dwg;image/vnd.dxf;",
+                "StartupWMClass=OpenCADStudio",
+            ]) + "\n"
+            if _write_if_changed(apps / "Open CAD Studio TW.desktop", text):
+                changed = True
+                if not quiet:
+                    print(f"    ✓ 選單項目 {apps / 'Open CAD Studio TW.desktop'}")
+        if changed and shutil.which("update-desktop-database"):
+            subprocess.run(["update-desktop-database", str(apps)],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+    except Exception as e:  # noqa: BLE001 — 選單整合是加值，不該讓安裝失敗
+        if not quiet:
+            print(f"    ! Linux 選單整合失敗（不影響安裝）：{e}")
+
+
+def _install_deb(tool: Tool, target: Path, res: dict, quiet: bool = False) -> dict:
+    """Linux .deb：先試 `sudo -n apt-get install`（免密碼 sudo／已快取憑證才會成功，**絕不詢問或代填密碼**）；
+    不行就印出 `sudo apt install` 指令請使用者自行執行。"""
+    hint = f'sudo apt install "{target}"'
+    if shutil.which("sudo") and shutil.which("apt-get"):
+        try:
+            p = subprocess.run(["sudo", "-n", "apt-get", "install", "-y", str(target)],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, timeout=900)
+            if p.returncode == 0:
+                exe = _tool_installed(tool)
+                if exe:
+                    res.update(ok=True, action="installed", detail=exe)
+                    if not quiet:
+                        print(f"    ✓ 已以 apt 安裝 {exe}")
+                    return res
+        except Exception:  # noqa: BLE001
+            pass
+    res.update(action="downloaded",
+               detail=f"已下載到 {target}（.deb 需 root；sudo 需密碼，不代裝），請執行：{hint}")
+    if not quiet:
+        print(f"    ✓ 已下載 {target}")
+        print(f"    .deb 需 root，請你自行執行：{hint}，再重跑 --install 補選單與啟動腳本")
+    return res
+
+
 def _run_installer(tool: Tool, tmp: Path, asset_name: str, ver: str, res: dict,
                    quiet: bool = False) -> dict:
     """處理「安裝程式型」資產（tool.kind == "installer" 且非 dmg）。
 
     Windows .exe：NSIS 靜默安裝（/S），完成後以 detect 驗證；失敗保留安裝檔供手動執行。
     Windows .msi：`msiexec /i <msi> /passive /norestart`（基本 UI 才能跳 UAC；`/qn` 非管理員實測回 1603）。
-    Linux .deb：需 root，只把檔案放到 ~/.local/opt 並印出 sudo apt install 指令，不代裝。
+    Linux .deb：放到 ~/.local/opt，試 `sudo -n apt-get install`（不問密碼），不行才印 sudo apt install 指令。
     """
     low = asset_name.lower()
     if low.endswith((".exe", ".msi")) and IS_WIN:
@@ -819,12 +947,9 @@ def _run_installer(tool: Tool, tmp: Path, asset_name: str, ver: str, res: dict,
         dest_dir.mkdir(parents=True, exist_ok=True)
         target = dest_dir / asset_name
         shutil.move(str(tmp), target)
-        hint = f'sudo apt install "{target}"'
-        res.update(action="downloaded",
-                   detail=f"已下載到 {target}（.deb 需 root，不代裝），請執行：{hint}")
-        if not quiet:
-            print(f"    ✓ 已下載 {target}")
-            print(f"    .deb 需 root，請你自行執行：{hint}")
+        res = _install_deb(tool, target, res, quiet=quiet)
+        if res.get("ok"):
+            _linux_desktop_integration(tool, res["detail"], quiet=quiet)
         return res
 
     res.update(action="fail", detail=f"不支援的安裝檔型態：{asset_name}")
@@ -840,6 +965,8 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
         res.update(ok=True, action="skip", detail=f"已安裝：{existing}")
         if not quiet:
             print(f"  {tool.key:<14} 已安裝  {existing}")
+        # Linux：補選單項目與 OCSS 防黑屏啟動腳本（會在 ~/.local/bin/<stem> 放包裝腳本，須先於下方 symlink）
+        _linux_desktop_integration(tool, existing, quiet=quiet)
         # 已安裝也要補命令暴露點：~/.local/bin/<stem> 可能不存在（macOS 走 /Applications）
         if not IS_WIN:
             stem = tool.bin_stem or tool.key.lower()
@@ -990,6 +1117,7 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
 
     res["pending"] = _place_symlink(tool, target, dry=False)
     res.update(ok=True, action="installed", detail=str(target))
+    _linux_desktop_integration(tool, str(target), quiet=quiet)
     if tool.key == "OpenCADStudio":
         configure_opencadstudio(quiet=quiet)
     return res

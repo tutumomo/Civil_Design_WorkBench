@@ -8,8 +8,15 @@
 - 交付格式：原生 **DWG**（AutoCAD 2018）＋ PDF ＋ XLSX ＋ DOCX
 - 只用**相對路徑**，資料夾搬到任何磁碟／作業系統都能跑（見 `tools/project_paths.py`）
 
+> **先看這裡**
+> 1. **本 repo 需要接上 AI 智能體，才能發揮 100% 功能。** 沒有 AI 智能體時，只能使用兩個網頁介面：
+>    **規範查詢台**與**設計工作台**。
+> 2. **這份 README 是給人看的。** 環境與工具由 AI 智能體替你配置，你不必自己照著做完所有步驟；
+>    直接跳到〈[給 AI 智能體：自動配置環境](#給-ai-智能體自動配置環境)〉，把提示詞貼給它就好。
+
 ## 目錄
 
+- [給 AI 智能體：自動配置環境](#給-ai-智能體自動配置環境)
 - [這個專案能做什麼](#這個專案能做什麼)
 - [五分鐘上手](#五分鐘上手)
 - [環境需求](#環境需求)
@@ -18,12 +25,63 @@
 - [規範公式圖表庫](#規範公式圖表庫)
 - [交付前的六道閘門](#交付前的六道閘門)
 - [目錄結構](#目錄結構)
-- [給 AI 智能體：自動配置環境](#給-ai-智能體自動配置環境)
 - [資料來源與授權](#資料來源與授權)
+
+## 給 AI 智能體：自動配置環境
+
+> **這份 README 是給人看的；環境與工具，交給 AI 智能體替你配置。**
+> 後面「五分鐘上手」把每一步都攤開，是為了讓你知道發生了什麼、出問題時查得到，
+> **不是要你自己一步步做完**。環境項目看起來很多，不用怕：把下面的提示詞貼給 AI 智能體，
+> 它會替你裝好、設定好、驗證好，遇到非你不可的事（管理員密碼、開軟體一次、重開客戶端）才會停下來請你處理。
+
+### 為什麼一定要接 AI 智能體
+
+本專案的設計是「**你提需求，AI 智能體呼叫整條工具鏈**」：規範庫、設計計算器、OpenCADStudio TW（CAD）、
+Open CalcSheet Studio TW（交叉驗算）、品管閘門，都是透過 MCP 與指令讓 AI 串起來用。
+
+| | 有接 AI 智能體 | 沒有 AI 智能體 |
+|---|---|---|
+| 可用範圍 | **100%**：[下一節](#這個專案能做什麼)列的全部功能 | 只剩兩個網頁介面：**規範查詢台**、**設計工作台**（見步驟 6） |
+| 環境配置 | AI 代做、代驗證 | 要自己照「五分鐘上手」逐項做 |
+
+> 指令列工具（斷面圖、預算書、報告書…）不靠 AI 也能手動跑，但需要自己組 `case.json`、串 CAD 工具、過六道閘門，
+> 不建議初學者這樣用。
+
+### 怎麼開始
+
+1. 安裝任一個支援 shell 與 MCP 的 AI 智能體（Claude Code、Codex、Gemini CLI、OpenCode、Antigravity…）。
+2. 用它開啟本 repo 的資料夾。
+3. 把下面整段貼給它。
+4. 它會請你做的事通常只有：確認安裝清單、需要管理員權限的指令、開 Open CalcSheet Studio TW 一次並啟用 MCP／API、最後**重開 AI 客戶端**載入新工具。
+
+```
+這個 repo 是土木小型工程設計工作區。請幫我把環境配置好：
+1. 跑 `python tools/project_paths.py`，看目前缺什麼（它會列出 Python 依賴、規範索引、
+   OpenCADStudio TW、Open CalcSheet Studio TW、CAD 字體庫、SolidCraft、Blender，
+   以及建議安裝的 13 套 ArtCraft、僅備援用的 AutoCAD）。
+2. 缺 Python 套件：在虛擬環境內 `python -m pip install -r requirements.txt`，另外 `python -m pip install mcp`（MCP 註冊與 Blender 橋需要）。
+2.5 **要真的安裝**：`python tools/project_paths.py --install`（退出碼 0 才算備妥）。它會從我的 fork
+   安裝 OpenCADStudio TW（tutumomo/OpenCADStudio）與 Open CalcSheet Studio TW（tutumomo/Open-CalcSheet-Studio），
+   不要改回上游版；並自動把 TOMO 字型夾（CAD_FONTS/）與 CTB 出圖樣式夾設定進 OpenCADStudio TW。
+   若印出需要我執行的 sudo／mv 指令，列給我確認。
+   裝好 OCSS 後提醒我「開 TW 版一次並在設定啟用 MCP/API」，再跑
+   `python tools/crosscheck/ocss_crosscheck.py register-mcp --apply` 與 `probe`。嚴禁對 OCSS 跑 --version／--help。
+3. 缺規範資料：`python tools/regs/fetch_regs.py` 然後 `python tools/regs/build_index.py`。
+   若 `data/臺中市建物/臺中市建物_114.7z` 尚未解壓，請將其就地解壓縮至 `data/臺中市建物/`（產生 `01-SHP/`）。
+4. 註冊 MCP 通道：`python tools/mcp/register_all.py --dry-run` 看會改哪些檔，我同意後再 `--apply`，然後提醒我重開 AI 客戶端。
+5. ArtCraft／SolidCraft 不在 `--install` 範圍，無法自動安裝：ArtCraft 建議裝（但 CAD 主力是 OpenCADStudio TW，
+   CADCraft 只是備援），AutoCAD 不需要裝。請列出我還缺哪幾套，以及該設哪個環境變數（ARTCRAFT_HOME／SOLIDCRAFT_CLI／CAD_FONTS）。
+6. 完成後跑 `python tools/regs/verified_selftest.py` 與
+   `python tools/selftest/regression.py --ignore-new` 確認可用。
+限制：不要改 tools/ 內的程式；不要上傳 data/、out/、_temp/ 內任何檔案。
+```
+
+環境變數與各平台的差異（例如備援 CAD 後端 AutoCAD／CADCraft 的出圖配置）
+一律記在 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)。
 
 ## 這個專案能做什麼
 
-功能依工作類型分成六類。「狀態」欄的意思：
+功能依工作類型分成六類（絕大多數透過 AI 智能體呼叫，見上一節）。「狀態」欄的意思：
 
 - **現成**：有專用指令，可重跑、有自測或回歸把關。
 - **AI 協作**：沒有單一指令，由 AI 組合現有工具（規範庫、設計引擎、OpenCADStudio MCP、品管閘門）完成，依對應文件的 SOP 操作，成果須人工複核。
@@ -85,8 +143,12 @@
 
 ## 五分鐘上手
 
+> **初學者請注意**：本節把每個步驟攤開，是給想看懂細節、手動操作或除錯的人。
+> 一般使用請直接用上一節的提示詞，讓 AI 智能體代做。
+
 **支援 Windows、macOS、Linux**。核心功能（設計計算、預算書、報告書、規範查詢、公式庫）三個平台都能跑；
-出圖與 DWG 格式設計圖可由 AutoCAD（Windows）或 **CADCraft**（跨平台，相容 >80% 以上 AutoCAD 功能）產出。
+出圖與 DWG 格式設計圖由 **OpenCADStudio TW**（開源、台灣在地化、跨平台）產出，這是 CAD 主力；
+AutoCAD（僅 Windows）與 CADCraft 退居**備援**。
 
 ### 步驟 1：安裝 Python 3.10+（建議 3.12）
 
@@ -133,8 +195,8 @@ python -m pip install -r requirements.txt
 python tools/project_paths.py
 ```
 
-它會印出：專案根目錄、Python 版本與平台、規範索引在不在、**13 套 ArtCraft 找到幾套**、
-OpenCADStudio TW、Open CalcSheet Studio TW、AutoCAD `accoreconsole`、SolidCraft、Blender、CAD 字體庫。
+它會印出：專案根目錄、Python 版本與平台、規範索引在不在、**OpenCADStudio TW**、**Open CalcSheet Studio TW**、
+CAD 字體庫、SolidCraft、Blender，以及選用／備援的 13 套 ArtCraft（建議安裝）與 AutoCAD `accoreconsole`（備援）。
 加 `--json` 可給安裝腳本吃。**這一步只回報，不安裝。**
 
 ### 步驟 3.1：自動安裝必備外部工具（clone 後必做）
@@ -148,10 +210,20 @@ python tools/project_paths.py --install --only OpenCalcSheet   # 只補單一工
 兩個**必備**工具一律從使用者 fork 的 GitHub Releases 取「本地化 TW 版」，**不得改回上游**；
 本機若同時裝著上游版，專案一律不採用（路徑只經 `project_paths` 解析）：
 
-| 工具 | 來源 | 用途 | Windows | macOS | Linux |
-|---|---|---|---|---|---|
-| **OpenCADStudio TW** | [`tutumomo/OpenCADStudio`](https://github.com/tutumomo/OpenCADStudio)（Big5 SHX 修正，中文不亂碼） | 預設 CAD 後端：DXF → DWG／PDF、CTB 出圖、MCP | `*-installer.msi` → 「Open CAD Studio.TW」 | dmg → `Open CAD Studio TW.app` | AppImage → `~/.local/bin/opencadstudio-tw`，自動補選單項目 |
-| **Open CalcSheet Studio TW** | [`tutumomo/Open-CalcSheet-Studio`](https://github.com/tutumomo/Open-CalcSheet-Studio) | 開放計算環境、逐式可稽核計算書、第二套獨立算法（交叉驗算） | 檔名含 `.TW_` 的 `setup.exe`，SHA256 校驗後 `/S` 靜默安裝 | dmg | `.deb`：試 `sudo -n apt-get install`，需密碼時印出 `sudo apt install` 指令請你執行，裝好後再跑一次 `--install` 補防黑屏啟動腳本與選單項目 |
+| 工具 | 用途 |
+|---|---|
+| **OpenCADStudio TW**<br>來源：[`tutumomo/OpenCADStudio`](https://github.com/tutumomo/OpenCADStudio) | **CAD 主力**（開源、台灣在地化，Big5 SHX 修正，中文不亂碼）：DXF → DWG／PDF、CTB 出圖、MCP 控制。安裝後自動設好 TOMO 字型夾與 CTB 樣式夾（見步驟 3.5） |
+| **Open CalcSheet Studio TW**<br>來源：[`tutumomo/Open-CalcSheet-Studio`](https://github.com/tutumomo/Open-CalcSheet-Studio) | 開放計算環境、逐式可稽核計算書、第二套獨立算法（交叉驗算） |
+
+各平台安裝方式（`--install` 自動處理）：
+
+| 平台 | OpenCADStudio TW | Open CalcSheet Studio TW |
+|---|---|---|
+| **Windows** | <sub>`*-installer.msi` → 「Open CAD Studio.TW」</sub> | <sub>檔名含 `.TW_` 的 `setup.exe`，SHA256 校驗後 `/S` 靜默安裝</sub> |
+| **macOS** | <sub>dmg → `Open CAD Studio TW.app`</sub> | <sub>dmg</sub> |
+| **Linux** | <sub>AppImage → `~/.local/bin/opencadstudio-tw`，自動補選單項目</sub> | <sub>`.deb`：先試 `sudo -n apt-get install`；需密碼時印出 `sudo apt install` 指令請你執行，裝好後再跑一次 `--install` 補防黑屏啟動腳本與選單項目</sub> |
+
+> ArtCraft 套件（13 套）**建議安裝**，但不在 `--install` 範圍；其中 CADCraft 已退居備援，CAD 工作不依賴它。
 
 ### 步驟 3.2：Open CalcSheet Studio 一次性設定（裝好後做一次）
 
@@ -176,7 +248,8 @@ python tools/crosscheck/ocss_crosscheck.py checks                 # 本專案引
 
 ```bash
 cp .mcp.json.example .mcp.json                                     # Windows：copy
-python tools/mcp/register_all.py --apply                           # regs／blender／autocad／artcraft／ingetrazo／opencadstudio-tw
+python -m pip install mcp                                          # register_all.py 要在裝有 mcp 的 Python 上跑
+python tools/mcp/register_all.py --apply                           # regs／blender／ingetrazo／opencadstudio-tw（autocad／artcraft 為備援，路徑寫死 Windows，僅 Windows 適用）
 python tools/crosscheck/ocss_crosscheck.py register-mcp --apply    # open-calcsheet-studio（讀 TW 版 token）
 ```
 
@@ -186,24 +259,34 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp --apply    # open-calcsh
   `register_all.py` 會寫入本機所有 AI 客戶端（Claude Code、Gemini CLI、Codex、OpenCode…），寫檔前先備份。
 - 改完重開 AI 客戶端才會載入新工具。
 
-### 步驟 3.5：安裝 CAD 字型（有 AutoCAD 才需要）
+### 步驟 3.5：CAD 字型（自動設定，通常不用動手）
 
-TOMO 文字樣式用 `gbenor.shx`（英數）＋ `CHINA1.SHX`（中文）。**這兩個字型已隨 repo 附在 `CAD_FONTS/`**，
-但 DXF 裡只記字型**檔名**，AutoCAD 開圖時是到自己的字型目錄找檔，所以仍要裝一次：
+TOMO 文字樣式用 `gbenor.shx`（英數）＋ `CHINESE.SHX`（中文）。**字型已隨 repo 附在 `CAD_FONTS/`**，
+但 DXF 裡只記字型**檔名**，開圖的 CAD 軟體要自己找得到檔案，中文才不會變問號或方框。
+
+本專案的 CAD 主力是 **OpenCADStudio TW**，所以字型**一律先配給它**，與有沒有 AutoCAD 無關、三個平台都一樣：
 
 ```bash
-# 先看會裝到哪（不改動）
-python tools/install_cad_fonts.py
-
-# 實際安裝（Program Files 受保護，需以系統管理員身分執行）
-python tools/install_cad_fonts.py --apply
+python tools/project_paths.py --install     # 裝 OpenCADStudio TW 時會自動做
+python tools/project_paths.py --configure   # 只想重做這一步（不下載）：把 CAD_FONTS/ 與 CTB 樣式夾寫進 OpenCADStudio 的 settings.json
 ```
 
-不想用系統管理員權限也可以：AutoCAD → OPTIONS → 檔案 → 字型檔名，把專案的 `CAD_FONTS` 資料夾
-加入字型搜尋路徑即可（**不影響 DXF 產生**，只影響 AutoCAD 開圖與列印時的字型呈現）。
+- 寫入的是 OpenCADStudio 設定檔的 `fonts_folder`（TOMO 字型夾）與 `plot_styles_folder`（`monochrome.ctb` 出圖樣式夾），
+  其餘設定原樣保留，原檔先備份成 `settings.json.bak`。
+- 設定檔位置：Linux `~/.config/OpenCADStudio/`、Windows `%APPDATA%\OpenCADStudio\`、macOS `~/Library/Application Support/OpenCADStudio/`。
+- 驗證：用 OpenCADStudio 開 TOMO 圖面不再出現 `Missing fonts: CHINESE.SHX, gbenor.shx` 警告；
+  `python tools/project_paths.py` 的「CAD 字體庫」一欄有路徑。出圖後仍要目視 PDF 中文。
 
-> 沒有 AutoCAD（macOS／Linux）時這段可略過：DXF 仍會帶正確的字型名稱，
-> 只是用其他軟體開圖時字型由該軟體自行取代。
+**備援：AutoCAD 才需要的手動步驟**（只有改用 AutoCAD 當備援後端時才做）：AutoCAD 開圖是到自己的字型目錄找檔，
+需另外安裝一次：
+
+```bash
+python tools/install_cad_fonts.py           # 先看會裝到哪（不改動）
+python tools/install_cad_fonts.py --apply   # 實際安裝（Program Files 受保護，需以系統管理員身分執行）
+```
+
+不想用系統管理員權限：AutoCAD → OPTIONS → 檔案 → 字型檔名，把專案的 `CAD_FONTS` 資料夾加入字型搜尋路徑即可
+（不影響 DXF 產生，只影響 AutoCAD 開圖與列印時的字型呈現）。
 
 ### 步驟 3.6：解壓縮臺中市建物圖資（隨 repo 附壓縮檔，需自行解壓）
 
@@ -272,15 +355,15 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 一行裝完：`python -m pip install -r requirements.txt`。
 **不需要**編譯器、GDAL 或任何系統級服務（`pyshp` 取代 GDAL 讀 SHP）。
 
-**必備外部工具**（`python tools/project_paths.py --install` 自動安裝，見步驟 3.1）：**OpenCADStudio TW**（預設出圖後端）、**Open CalcSheet Studio TW**（交叉驗算／開放計算環境）。只綁 TW 版，上游版不採用。
+**必備外部工具**（`python tools/project_paths.py --install` 自動安裝，見步驟 3.1）：**OpenCADStudio TW**（CAD 主力、預設出圖後端，TOMO 字型夾與 CTB 樣式夾自動設定）、**Open CalcSheet Studio TW**（交叉驗算／開放計算環境）。只綁 TW 版，上游版不採用。
 
 ### 選用但影響交付品質
 
 | 項目 | 用途 | 沒有會怎樣 | 平台 |
 |---|---|---|---|
-| **AutoCAD 2020+** 或 **CADCraft**（備援） | 預設出圖後端是必備的 OpenCADStudio TW；設 `CIVIL_AI_CAD_BACKEND=cadcraft` 才改走 accoreconsole／CADCraft | 不影響（OpenCADStudio TW 已可出 DWG／PDF） | AutoCAD 僅 Windows；CADCraft 支援跨平台 |
-| **CAD 字體**（`gbenor.shx`、`CHINA1.SHX`） | TOMO 中文文字樣式 | 圖面中文變替代字體 | **已隨 repo 附於 `CAD_FONTS/`**；安裝見步驟 3.5 |
-| **ArtCraft**（CADCraft／GridCraft／WordCraft 為交付必要，其餘選用） | 預算書 xlsx、報告 docx、轉檔 | 對應產出需改用其他方式 | 依該套是否有該平台版本 |
+| **AutoCAD 2020+**、**CADCraft**（皆為備援） | CAD 主力已是必備的 OpenCADStudio TW；只有 OpenCADStudio 異常或要跨後端比對時，設 `CIVIL_AI_CAD_BACKEND=cadcraft` 才改走 accoreconsole／CADCraft | 不影響（OpenCADStudio TW 已可出 DWG／PDF） | AutoCAD 僅 Windows；CADCraft 支援跨平台 |
+| **CAD 字體**（`gbenor.shx`、`CHINESE.SHX`） | TOMO 中文文字樣式 | 圖面中文變替代字體 | **已隨 repo 附於 `CAD_FONTS/`**，`--install`／`--configure` 自動設給 OpenCADStudio TW；AutoCAD 備援另需手動，見步驟 3.5 |
+| **ArtCraft**（建議安裝；GridCraft／WordCraft 為交付必要，其餘選用。內含的 CADCraft 僅備援） | 預算書 xlsx、報告 docx、轉檔 | 對應產出需改用其他方式 | 依該套是否有該平台版本 |
 | SolidCraft／Blender | 3D 模型與渲染 | 3D 軸停用 | Blender 有 macOS／Linux 版 |
 
 ### 跨平台差異
@@ -301,8 +384,8 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 ```bash
 CIVIL_AI_ROOT      # 專案根目錄（預設＝repo 位置）
 CIVIL_AI_REGS_DB   # 規範索引 sqlite（預設 data/法規/_regs_index.sqlite）
-ARTCRAFT_HOME      # ArtCraft 安裝根目錄（Windows 預設 C:\Program\ArtCraft）
-AUTOCAD_HOME       # AutoCAD 安裝目錄（含 accoreconsole.exe）
+ARTCRAFT_HOME      # ArtCraft 安裝根目錄（建議安裝；Windows 預設 C:\Program\ArtCraft）
+AUTOCAD_HOME       # AutoCAD 安裝目錄（含 accoreconsole.exe；僅備援後端用）
 SOLIDCRAFT_CLI     # SolidCraft CLI 完整路徑
 INGETRAZO_HOME     # IngeTrazo 安裝根目錄（預設 C:\Program Files\IngeTrazo）
 INGETRAZO_MCP      # IngeTrazo MCP 橋完整路徑（預設 <HOME>\ingetrazo-mcp.exe）
@@ -311,7 +394,7 @@ OPENCADSTUDIO_EXE  # OpenCADStudio TW 執行檔（只在解析不到時才設；
 OCSS_EXE           # Open CalcSheet Studio TW 執行檔
 OCSS_API_TOKEN     # OCSS token 臨時覆寫（預設讀 TW 版 preferences.json 的 mcpToken；機密，勿寫入檔案）
 OCSS_PORT          # OCSS 埠臨時覆寫（預設 3879）
-CIVIL_AI_CAD_BACKEND # 出圖後端；預設 OpenCADStudio，設 cadcraft 改走 accoreconsole／CADCraft
+CIVIL_AI_CAD_BACKEND # 出圖後端；預設 OpenCADStudio TW，設 cadcraft 才退回備援的 accoreconsole／CADCraft
 CAD_FONTS          # CAD 字體庫目錄（預設＝專案內 CAD_FONTS/，已隨 repo 附）
 CIVIL_AI_STD_BLOCKS # 公司標準元件 DWG 資料夾（_ref 重建腳本用）
 ```
@@ -325,10 +408,10 @@ macOS／Linux：寫進 `~/.bashrc` 或 `~/.zshrc` 的 `export ARTCRAFT_HOME=...`
 |---|---|
 | `python: command not found` | Windows 只裝了 py launcher → 用 `py -3`；macOS/Linux 用 `python3` |
 | `pip install` 被拒（externally-managed-environment） | 先建 venv（步驟 2），或加 `--break-system-packages` |
-| 中文變問號／方框 | AutoCAD 找不到 SHX 字型。字型已隨 repo 附於 `CAD_FONTS/`，執行 `python tools/install_cad_fonts.py --apply`（需系統管理員權限），或在 AutoCAD 的 OPTIONS → 字型檔名把該資料夾加入搜尋路徑 |
+| 中文變問號／方框 | CAD 軟體找不到 SHX 字型。OpenCADStudio TW：執行 `python tools/project_paths.py --configure` 把 `CAD_FONTS/` 設給它（`--install` 已自動做過），重開圖並目視 PDF。備援用 AutoCAD 才需 `python tools/install_cad_fonts.py --apply`（需系統管理員權限），或在 OPTIONS → 字型檔名加入該資料夾 |
 | `規範索引 missing` | 還沒跑 `python tools/regs/build_index.py`（需先 `fetch_regs.py`） |
-| `找不到 ArtCraft` | 未安裝或路徑非預設，設 `ARTCRAFT_HOME` |
-| 產不出 DWG | 平台未安裝 AutoCAD 或 CADCraft，或 `accoreconsole` 不在預設路徑。可設 `AUTOCAD_HOME` 或安裝/指定 `CADCraft` |
+| `找不到 ArtCraft` | ArtCraft 為建議安裝（非 CAD 必備）。未安裝或路徑非預設時，設 `ARTCRAFT_HOME` |
+| 產不出 DWG | 先確認 OpenCADStudio TW 已裝好（`python tools/project_paths.py --install`）；它是預設後端。只有改用備援後端（`CIVIL_AI_CAD_BACKEND=cadcraft`）時，才檢查 AutoCAD／CADCraft 與 `AUTOCAD_HOME` |
 | IngeTrazo MCP 工具呼叫失敗 | 它只是 GUI 的橋：先開 IngeTrazo → 開文件 → Extensões ▸ AI Bridge (MCP)，再跑 `python tools\ingetrazo\ingetrazo_check.py --call`；`tools/list` 過關不代表能用 |
 | `project_paths.py` 顯示「偵測到上游版…本專案不採用」 | 只裝了上游版。跑 `python tools/project_paths.py --install` 裝 TW 版（見步驟 3.1） |
 | OCSS `probe` 回 401「token 不正確」 | 連到了上游版（兩版搶埠 3879，先開者佔），或換版／換 token 後沒重跑 `register-mcp --apply`。關掉上游版、開 TW 版並啟用 API 後重跑 |
@@ -437,7 +520,7 @@ python tools/regs/design_conformance.py        # 引擎 ↔ 已驗證庫 雙向�
 ├── README.md
 ├── requirements.txt
 ├── .mcp.json.example         MCP 設定範本（本機 .mcp.json 不入版控）
-├── CAD_FONTS/               TOMO 用 SHX 字型（gbenor.shx、CHINA1.SHX）
+├── CAD_FONTS/               TOMO 用 SHX 字型（gbenor.shx、CHINESE.SHX），自動設給 OpenCADStudio TW
 ├── 怎麼用.md                 給人看的入口（三步驟、四類案件、六道閘門）
 ├── tools/
 │   ├── project_paths.py      ★ 路徑與外部程式的唯一解析入口（跨平台、無絕對路徑）
@@ -470,32 +553,6 @@ python tools/regs/design_conformance.py        # 引擎 ↔ 已驗證庫 雙向�
 ├── 標準圖圖庫/                公司標準圖（自有資料，不入版控）
 └── out/                      交付物唯一落點（不入版控）
 ```
-
-## 給 AI 智能體：自動配置環境
-
-把下面這段貼給任何支援 shell 的智能體（Claude Code／Codex／Cindy／Gemini CLI…）：
-
-```
-這個 repo 是土木小型工程設計工作區。請幫我把環境配置好：
-1. 跑 `python tools/project_paths.py`，看目前缺什麼（它會列出 Python 依賴、規範索引、
-   13 套 ArtCraft、OpenCADStudio TW、Open CalcSheet Studio TW、AutoCAD、SolidCraft、Blender、CAD 字體）。
-2. 缺 Python 套件：在虛擬環境內 `python -m pip install -r requirements.txt`。
-2.5 **要真的安裝**：`python tools/project_paths.py --install`（退出碼 0 才算備妥）。它會從我的 fork
-   安裝 OpenCADStudio TW（tutumomo/OpenCADStudio）與 Open CalcSheet Studio TW（tutumomo/Open-CalcSheet-Studio），
-   不要改回上游版。若印出需要我執行的 sudo／mv 指令，列給我確認。
-   裝好 OCSS 後提醒我「開 TW 版一次並在設定啟用 MCP/API」，再跑
-   `python tools/crosscheck/ocss_crosscheck.py register-mcp --apply` 與 `probe`。嚴禁對 OCSS 跑 --version／--help。
-3. 缺規範資料：`python tools/regs/fetch_regs.py` 然後 `python tools/regs/build_index.py`。
-   若 `data/臺中市建物/臺中市建物_114.7z` 尚未解壓，請將其就地解壓縮至 `data/臺中市建物/`（產生 `01-SHP/`）。
-4. ArtCraft／AutoCAD／SolidCraft 不在 `--install` 範圍，無法自動安裝。請列出我還缺哪幾套，
-   以及該設哪個環境變數（ARTCRAFT_HOME／AUTOCAD_HOME／SOLIDCRAFT_CLI／CAD_FONTS）。
-5. 完成後跑 `python tools/regs/verified_selftest.py` 與
-   `python tools/selftest/regression.py --ignore-new` 確認可用。
-限制：不要改 tools/ 內的程式；不要上傳 data/、out/、_temp/ 內任何檔案。
-```
-
-環境變數與各平台的差異（例如 AutoCAD 與 CADCraft 的出圖配置）
-一律記在 [`docs/環境需求與自動配置.md`](docs/環境需求與自動配置.md)。
 
 ## 資料來源與授權
 

@@ -3,7 +3,9 @@
 自 `design_api.py` 原樣搬出，內容未改。
 """
 
-from typing import Any
+import json
+from typing import Any, Mapping
+
 
 
 _PASSIVE_RATIO_HINT = "1＝全 Rankine；牆身位移不足以發揮全被動時取小於 1"
@@ -627,3 +629,340 @@ def _anchored_field_rules() -> dict[str, Any]:
         "surcharge_kpa": {"type": "number", "step": 1, "label": "上載 q (kPa)"},
         "backfill_slope_deg": {"type": "number", "step": 1, "label": "背填土坡角 β (°)"},
     }
+
+
+_WALL_REBAR_KEYS = (
+    "stem_bar",
+    "base_bar",
+    "mass_wall_face_bar",
+    "mass_wall_face_spacing_mm",
+    "mass_wall_base_bar",
+    "mass_wall_base_spacing_mm",
+)
+
+
+def _wall_concrete(payload: Mapping[str, Any]) -> dict[str, Any]:
+    """把 UI 的混凝土／鋼筋設定轉成 rc_design 的 cc 覆寫值。"""
+    cc: dict[str, Any] = {}
+    nested = payload.get("concrete")
+    if isinstance(nested, Mapping):
+        for key in ("fc_mpa", "fy_mpa", "cover_mm"):
+            if nested.get(key) not in (None, ""):
+                cc[key] = float(nested[key])
+    for key in ("fc_mpa", "fy_mpa", "cover_mm"):
+        if payload.get(key) not in (None, ""):
+            cc[key] = float(payload[key])
+    return cc
+
+
+def _rebar_check(item, value, limit, unit, ok, *, relation="ge", decimals=3):
+    return {
+        "item": item,
+        "value": round(float(value), decimals),
+        "limit": round(float(limit), decimals),
+        "unit": unit,
+        "ok": bool(ok),
+        "relation": relation,
+    }
+
+
+def _wall_rebar_checks(design: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """把配筋設計轉成工作台檢核列（item/value/limit/unit/ok）。"""
+    wt = str(design.get("wall_type") or "")
+    if wt in ("gravity", "semigravity"):
+        mass = design.get("mass") or {}
+        rho = float(mass.get("temperature_ratio") or 0.0)
+        lim = float(mass.get("temperature_min") or 0.002)
+        return [_rebar_check("牆面構造鋼筋比（ρ ≥ 0.002）", rho, lim, "-",
+                             rho >= lim - 1e-9, decimals=4)]
+
+    checks: list[dict[str, Any]] = []
+
+    def add(prefix, member):
+        main = member.get("main") or {}
+        shear = member.get("shear") or {}
+        crack = member.get("crack") or {}
+        if main.get("phiMn_kNm") is not None:
+            checks.append(_rebar_check(
+                prefix + " 撓曲（φMn ≥ Mu）",
+                main["phiMn_kNm"], main.get("Mu_kNm") or 0.0,
+                "kN·m/m", main.get("ok")))
+        if shear.get("phiVc_kN") is not None:
+            checks.append(_rebar_check(
+                prefix + " 剪力（φVc ≥ Vu）",
+                shear["phiVc_kN"], shear.get("Vu_kN") or 0.0,
+                "kN/m", shear.get("ok")))
+        if crack.get("w_mm") is not None:
+            checks.append(_rebar_check(
+                prefix + " 裂縫寬度 ≤ 0.3 mm",
+                crack["w_mm"], crack.get("limit_mm") or 0.3,
+                "mm", crack.get("ok"), relation="le"))
+
+    structural = design.get("structural") or {}
+    stem = structural.get("stem") or {}
+    if stem:
+        add("牆身", stem)
+    base = structural.get("base") or {}
+    for member in base.get("members") or []:
+        add(member.get("member") or "底板", member)
+    return checks
+
+
+def _wall_rebar_lines(design: Mapping[str, Any]) -> list[str]:
+    """配筋設計的人看文字（接在穩定分析 summary 後）。"""
+    def sp(value):
+        try:
+            return "%g" % float(value)
+        except (TypeError, ValueError):
+            return str(value or "-")
+
+    wt = str(design.get("wall_type") or "")
+    total = float(design.get("total_kg_per_m") or 0.0)
+    rate = float(design.get("lap_allowance") or 0.0)
+    if rate <= 0:
+        import rc_design as RC
+        rate = RC.LAP_ALLOWANCE
+    lines = ["", "配筋設計（含 %.0f%% 搭接、錨定與損耗）：%.2f kg/m"
+              % (rate * 100.0, total)]
+    if wt in ("gravity", "semigravity"):
+        mass = design.get("mass") or {}
+        lines.append(
+            "  牆面 %s@%s 雙向＋底部縱筋 %s@%s；構造鋼筋比 %.4f（≥ %.4f）" % (
+                mass.get("face_bar", "-"), sp(mass.get("face_spacing_mm")),
+                mass.get("base_bar", "-"), sp(mass.get("base_spacing_mm")),
+                float(mass.get("temperature_ratio") or 0.0),
+                float(mass.get("temperature_min") or 0.002)))
+        lines.append("  重力式／半重力式以自重穩定，牆身不設撓曲主筋")
+        return lines
+
+    structural = design.get("structural") or {}
+    for label, member in (("牆身", structural.get("stem") or {}),):
+        main = member.get("main") or {}
+        if main.get("bar"):
+            lines.append(
+                "  [%s] %s撓曲：%s@%s mm（As=%.0f mm²/m）；φMn=%.1f ≥ Mu=%.1f kN·m/m" % (
+                    "OK" if main.get("ok") else "NG", label,
+                    main.get("bar"), sp(main.get("spacing_mm")),
+                    main.get("As_prov_mm2") or 0.0,
+                    main.get("phiMn_kNm") or 0.0, main.get("Mu_kNm") or 0.0))
+        shear = member.get("shear") or {}
+        if shear.get("phiVc_kN") is not None:
+            lines.append(
+                "  [%s] 牆身剪力：φVc=%.1f ≥ Vu=%.1f kN/m" % (
+                    "OK" if shear.get("ok") else "NG",
+                    shear["phiVc_kN"], shear.get("Vu_kN") or 0.0))
+        crack = member.get("crack") or {}
+        if crack.get("w_mm") is not None:
+            lines.append(
+                "  [%s] 牆身裂縫：w=%.3f mm（限 %.1f mm）" % (
+                    "OK" if crack.get("ok") else "NG",
+                    crack["w_mm"], crack.get("limit_mm") or 0.3))
+    base = structural.get("base") or {}
+    for member in base.get("members") or []:
+        main = member.get("main") or {}
+        if not main.get("bar"):
+            continue
+        lines.append(
+            "  [%s] %s：%s@%s mm；φMn=%.1f ≥ Mu=%.1f kN·m/m" % (
+                "OK" if member.get("ok") else "NG", member.get("member", "底板"),
+                main.get("bar"), sp(main.get("spacing_mm")),
+                main.get("phiMn_kNm") or 0.0, main.get("Mu_kNm") or 0.0))
+    rows = (design.get("kg") or {}).get("rows") or []
+    if rows:
+        detail = "、".join("%s %.2f" % (r.get("item", ""), r.get("kg_per_m") or 0.0)
+                          for r in rows)
+        lines.append("  鋼筋量明細（kg/m）：" + detail)
+    return lines
+
+
+def _attach_wall_rebar(q, res, payload):
+    """在穩定分析結果上附加配筋設計（重力／半重力／懸臂）。"""
+    import rc_design as RC
+
+    q2 = dict(q)
+    for key in _WALL_REBAR_KEYS:
+        if payload.get(key) not in (None, ""):
+            q2[key] = payload[key]
+    design = RC.design_wall_rebar(q2, res, _wall_concrete(payload))
+    res["rebar"] = design
+    res["rebar_summary"] = _wall_rebar_lines(design)
+    res["checks"] = list(res.get("checks") or []) + _wall_rebar_checks(design)
+    res["pass"] = bool(res.get("pass")) and bool(design.get("ok"))
+    return res
+
+
+def _run_wall(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import retaining_wall as RW
+
+    q = payload.get("section") or payload.get("quantities", {}).get("values") or payload
+    soil = payload.get("soil")
+    seismic = payload.get("seismic")
+    if payload.get("kh") is not None:
+        seismic = {"kh": float(payload["kh"])}
+    kh = float((seismic or {}).get("kh") or 0.0)
+    if payload.get("size"):
+        wall_type = str(q.get("wall_type") or "gravity").strip().lower()
+        if wall_type not in ("gravity", "cantilever"):
+            raise DesignAPIError("自動試算斷面目前支援重力式（gravity）或懸臂式（cantilever）；半重力式請手動微調斷面。")
+
+        def _rebar_ok(cand, cand_res):
+            import rc_design as RC
+            q2 = dict(cand)
+            for key in _WALL_REBAR_KEYS:
+                if payload.get(key) not in (None, ""):
+                    q2[key] = payload[key]
+            return bool(RC.design_wall_rebar(q2, cand_res, _wall_concrete(payload)).get("ok"))
+
+        best, tried = RW.size_section(
+            float(q.get("height_m") or 3.0),
+            soil=soil,
+            wall_type=wall_type,
+            kh=kh,
+            toe_passive={
+                k: q[k]
+                for k in ("toe_soil_depth_m", "include_passive", "passive_ratio")
+                if k in q
+            },
+            extra_check=_rebar_ok,
+        )
+        if best is None:
+            raise DesignAPIError("搜尋 %d 組斷面仍無法全部通過，請檢查土壤承載力／摩擦角或降低牆高" % tried)
+        res = dict(best["res"])
+        res["sized_section"] = dict(best["q"])
+        res["warnings"] = [
+            "已依牆高自動反推合格最小斷面（搜尋 %d 組）：%s"
+            % (tried, json.dumps(best["q"], ensure_ascii=False))
+        ] + list(res.get("warnings") or [])
+        return _attach_wall_rebar(best["q"], res, payload)
+    res = RW.analyse(q, soil=soil, seismic=seismic)
+    return _attach_wall_rebar(q, res, payload)
+
+
+def _run_block_wall(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import block_wall as BW
+
+    q = payload.get("section") or {
+        k: v for k, v in payload.items() if k not in {"soil", "seismic", "kh"}
+    }
+    seismic = payload.get("seismic")
+    if payload.get("kh") is not None:
+        seismic = {"kh": float(payload["kh"])}
+    return BW.analyse(q, soil=payload.get("soil"), seismic=seismic)
+
+
+def _run_counterfort(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import counterfort_wall as CW
+
+    q = payload.get("section") or {
+        k: v for k, v in payload.items() if k not in {"soil", "seismic", "kh", "concrete", "size"}
+    }
+    kh = float(payload.get("kh") or (payload.get("seismic") or {}).get("kh") or 0.0)
+    if payload.get("size"):
+        out = CW.size_section(
+            float(q["height_m"]), payload.get("soil"), kh, payload.get("concrete"),
+            front_soil_depth_m=float(q.get("front_soil_depth_m") or 0.0),
+            counterfort_spacing_m=q.get("counterfort_spacing_m"),
+            include_passive=q.get("include_passive"),
+            passive_ratio=q.get("passive_ratio"),
+        )
+        if not out["found"]:
+            raise DesignAPIError("搜尋 %d 組斷面仍無法全部通過，請檢查土壤參數或改用其他牆型" % out["tried"])
+        res = dict(out["result"])
+        res["sized_section"] = out["section"]
+        res["warnings"] = ["已依牆高自動反推斷面（搜尋 %d 組）：%s"
+                           % (out["tried"], json.dumps(out["section"], ensure_ascii=False))] + list(res["warnings"])
+        return res
+    return CW.analyse(q, soil=payload.get("soil"), seismic={"kh": kh}, concrete=payload.get("concrete"))
+
+
+def _run_mse(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import mse_wall as MW
+
+    q = payload.get("section") or {
+        k: v for k, v in payload.items() if k not in {"soil", "seismic", "kh"}
+    }
+    kh = float(payload.get("kh") or (payload.get("seismic") or {}).get("kh") or 0.0)
+    return MW.analyse(q, soil=payload.get("soil"), seismic={"kh": kh})
+
+
+def _run_anchored(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import anchored_wall as AW
+
+    q = payload.get("section") or {
+        k: v for k, v in payload.items() if k not in {"soil", "seismic", "kh", "concrete"}
+    }
+    kh = float(payload.get("kh") or (payload.get("seismic") or {}).get("kh") or 0.0)
+    return AW.analyse(q, soil=payload.get("soil"), seismic={"kh": kh}, concrete=payload.get("concrete"))
+
+
+ENTRIES = [
+    {
+        "id": "wall_stability",
+        "group": "擋土牆",
+        "title": "擋土牆穩定與配筋（重力／半重力／懸臂）",
+        "oral": ["擋土牆", "重力式", "懸臂式", "半重力式", "滑動", "傾倒", "配筋", "鋼筋"],
+        "description": "重力式、懸臂式、半重力式的常時／地震穩定、合力位置與承載檢核；並依牆型分流完成配筋設計（懸臂式莖板＋底板撓曲、重力／半重力式名目構造鋼筋），輸出每延米鋼筋量。",
+        "engine": "retaining_wall.py",
+        "codes": ["水土保持技術規範 §119～121", "建築物基礎構造設計規範"],
+        "limitations": "蛇籠、格籠、砌石、三明治式請用「疊式／砌石擋土牆」，扶壁式、加勁、錨定各有專用計算器；配筋為初步設計（未含施工詳圖、搭接位置與錨定長度詳算），土層參數須用鑽探值替換預設值。",
+        "field_rules": _wall_field_rules(),
+        "example": _example_retaining_wall(),
+    },
+    {
+        "id": "block_wall",
+        "group": "擋土牆",
+        "title": "疊式／砌石擋土牆",
+        "oral": ["蛇籠", "箱籠", "格籠", "砌石", "漿砌", "乾砌", "卵石牆", "疊式擋土牆"],
+        "description": "蛇籠（箱籠）、格籠、漿砌／乾砌石擋土牆；逐層界面與基底的滑動、傾倒、合力位置，基底承載，以及 §118 有效高、每層高、牆面坡度與石材長徑限制。",
+        "engine": "block_wall.py",
+        "codes": ["水土保持技術規範 §118～121"],
+        "limitations": "牆趾抵抗力是否計入依「計入牆趾被動土壓力」設定，只計入抗滑；背填黏著力未計；視為透水牆不計靜水壓；網線、格籠構件強度未檢核；整體傾斜蛇籠與牆背懸於填土上的幾何尚未支援。",
+        "field_rules": _block_wall_field_rules(),
+        "example": _example_block_wall(),
+    },
+    {
+        "id": "counterfort_wall",
+        "group": "擋土牆",
+        "title": "扶壁式擋土牆",
+        "oral": ["扶壁", "扶壁式", "高擋土牆", "counterfort"],
+        "description": "扶壁式擋土牆常時／地震穩定、合力位置與承載；牆板與踵板以扶壁為支承之連續版、趾板懸臂、扶壁 T 梁拉力筋與箍筋、牆板／踵板繫筋；可依牆高反推斷面。",
+        "engine": "counterfort_wall.py",
+        "codes": ["水土保持技術規範 §118 五、§119～121", "混凝土結構設計規範（100.06.09 版）"],
+        "limitations": "牆板／踵板採連續版係數與 Huntington 簡化，非雙向版精算；牆趾抵抗力是否計入依「計入牆趾被動土壓力」設定，只計入抗滑；黏著力與地下水未計；載重組合採 100 年版慣例。",
+        "field_rules": _counterfort_field_rules(),
+        "example": _example_counterfort_wall(),
+    },
+    {
+        "id": "mse_wall",
+        "group": "擋土牆",
+        "title": "加勁擋土牆",
+        "oral": ["加勁", "加勁擋土牆", "加勁土壤", "土工格網", "格網", "MSE", "鋼條帶"],
+        "description": "加勁土壤構造物外部穩定（滑動、傾倒、偏心、Meyerhof 承載，含地震）與逐層內部穩定（拉斷、拉出、錨定長度，含地震）；FHWA 簡化法。",
+        "engine": "mse_wall.py",
+        "codes": ["水土保持技術規範 §118 六(三)、§119～120", "FHWA-NHI-10-024"],
+        "limitations": "RC 面版僅做單向版初步配筋；面版－加勁材連接與局部承壓須輸入產品容量才檢核；吊裝、複合滑動與整體圓弧滑動未檢核；F*、α 為保守預設值；未計靜水壓。",
+        "field_rules": _mse_field_rules(),
+        "example": _example_mse_wall(),
+    },
+    {
+        "id": "anchored_wall",
+        "group": "擋土牆",
+        "title": "錨定擋土牆",
+        "oral": ["錨定", "錨定擋土牆", "地錨", "背拉", "地錨擋土牆", "岩錨", "anchor"],
+        "description": "地錨背拉 RC 牆面：視土壓包絡或三角形土壓、牆面連續梁支點反力；每排地錨抗張材、錨碇段長、自由段長、鎖定荷重、承壓鈑壓應力與沖剪；基底滑動與承載；牆面雙向配筋。",
+        "engine": "anchored_wall.py",
+        "codes": ["水土保持技術規範 §118 八、§119～120", "公路邊坡工程設計規範（104.12）第六章",
+                  "混凝土結構設計規範（100.06.09 版）", "FHWA GEC-4"],
+        "limitations": "整體（深層）穩定未檢核，須另做邊坡穩定分析；握裹強度須證明試驗確認；牆面為連續梁＋p·sh²/10 近似；黏土包絡、地下水與黏著力未計。",
+        "field_rules": _anchored_field_rules(),
+        "example": _example_anchored_wall(),
+    }
+]
+
+RUNNERS = {
+    'wall_stability': _run_wall,
+    'block_wall': _run_block_wall,
+    'counterfort_wall': _run_counterfort,
+    'mse_wall': _run_mse,
+    'anchored_wall': _run_anchored,
+}

@@ -3,7 +3,9 @@
 自 `design_api.py` 原樣搬出，內容未改。
 """
 
-from typing import Any
+from typing import Any, Mapping
+
+from catalog._shared import _num
 
 
 def _example_box_culvert() -> dict[str, Any]:
@@ -211,3 +213,81 @@ def _box_culvert_field_rules() -> dict[str, Any]:
             "hint": "版採 0.0018·b·h、牆採 0.0020·b·h，分置內外兩面。",
         },
     }
+
+
+def _run_box(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import box_culvert as BC
+
+    section = payload.get("section") or payload
+    params = payload.get("analysis") or {}
+    section_params = section if isinstance(section, Mapping) else {}
+    traffic_type = payload.get("traffic_type") or section_params.get("traffic_type")
+    traffic_load_kpa = float(
+        payload.get("traffic_load_kpa", section_params.get("traffic_load_kpa", 0.0))
+        or 0.0
+    )
+    traffic_lanes = int(
+        payload.get("traffic_lanes", section_params.get("traffic_lanes", 4)) or 4
+    )
+    impact_raw = payload.get(
+        "traffic_impact_factor", section_params.get("traffic_impact_factor")
+    )
+    impact = (
+        float(impact_raw)
+        if impact_raw not in (None, "")
+        else None
+    )
+    loss_raw = payload.get(
+        "rebar_loss_rate", section_params.get("rebar_loss_rate")
+    )
+    rebar_loss_rate = float(loss_raw) if loss_raw not in (None, "") else BC.REBAR_LOSS_RATE
+    return BC.analyse(
+        section,
+        design_flow_m3s=float(payload.get("design_flow_m3s", params.get("design_flow_m3s", 0.0)) or 0.0),
+        slope=float(payload.get("slope", params.get("slope", 0.005)) or 0.005),
+        manning_n=float(payload.get("manning_n", params.get("manning_n", 0.014)) or 0.014),
+        soil_unit_weight_kn_m3=float(payload.get("soil_unit_weight_kn_m3", 18.0)),
+        soil_phi_deg=float(payload.get("soil_phi_deg", 30.0)),
+        surcharge_kpa=float(payload.get("surcharge_kpa", 0.0)),
+        traffic_load_kpa=traffic_load_kpa,
+        traffic_type=traffic_type,
+        traffic_lanes=traffic_lanes,
+        traffic_impact_factor=impact,
+        groundwater_depth_m=payload.get("groundwater_depth_m"),
+        internal_water_depth_m=float(payload.get("internal_water_depth_m", 0.0)),
+        load_factor=float(payload.get("load_factor", 1.7)),
+        seismic_kh=float(payload.get("seismic_kh", 0.0)),
+        freeboard_min_m=float(payload.get("freeboard_min_m", 0.20)),
+        allowable_bearing_kpa=payload.get("allowable_bearing_kpa"),
+        inlet_type=payload.get("inlet_type") or None,
+        tailwater_depth_m=float(payload.get("tailwater_depth_m", 0.0) or 0.0),
+        allowable_headwater_m=payload.get("allowable_headwater_m"),
+        entrance_loss_ke=payload.get("entrance_loss_ke"),
+        hw_d_limit=float(payload.get("hw_d_limit", 1.5) or 1.5),
+        outlet_velocity_limit_m_s=payload.get("outlet_velocity_limit_m_s"),
+        cover_mm=payload.get("cover_mm"),
+        crack_limit_mm=float(payload.get("crack_limit_mm", 0.3) or 0.3),
+        bar_preference=str(payload.get("bar_preference", "auto") or "auto"),
+        distribution_bar=str(payload.get("distribution_bar", "D13") or "D13"),
+        rebar_loss_rate=rebar_loss_rate,
+    )
+
+
+ENTRIES = [
+    {
+        "id": "box_culvert",
+        "group": "箱涵",
+        "title": "單孔／雙孔／三孔箱涵",
+        "oral": ["箱涵", "單孔", "雙孔", "三孔", "涵洞", "覆土", "出水高", "進口控制", "出口控制", "頭水"],
+        "description": "參數化箱涵平面剛架、土水壓與 H-20／H-20 S-16／40T 拖車車載、內外側逐面配筋（正負彎矩包絡）、縱向分佈筋、裂縫與鋼筋量概估、撓曲／剪力／軸彎互制、浮力，以及附錄 N／O 進口／出口控制水理。",
+        "engine": "box_culvert.py",
+        "codes": ["公路排水設計規範", "公路橋梁設計規範", "水土保持技術規範 §87", "建築物混凝土結構設計規範"],
+        "limitations": "翼牆與端牆只檢核有輸入的幾何值（§6.5），不檢核沖刷深度；低水頭出口控制未做迴水曲線；配筋已做內外側分層、縱向分佈筋與內角加腋處之角隅補強筋（X 形交叉斜筋，構造筋），但仍未計施工階段、開口補強、錨定／搭接長度細節與正式配筋詳圖；車載與其他載重共用 load_factor，未拆分靜載／活載因數。",
+        "field_rules": _box_culvert_field_rules(),
+        "example": _example_box_culvert(),
+    }
+]
+
+RUNNERS = {
+    'box_culvert': _run_box,
+}

@@ -76,7 +76,8 @@
   **只跑 `python tools/project_paths.py` 是唯讀回報，不會安裝任何東西**——它印出 OK／— 清單後就結束，缺的工具仍然缺。要宣稱「環境已備妥」之前，必須先跑過 `--install` 且其退出碼為 0，並在回報中貼出該指令的總結段。
   **`--install` 會一併寫好 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾**（字型：複製 `CAD_FONTS/*.shx` 進 OCS 設定夾的 `fonts/` 並設 `settings.fonts_folder`；`settings.plot_styles_folder` → `tools/acad/plot/`，只指向不複製）；已安裝的機器也會補寫。只想重寫設定、不下載時用 `python tools/project_paths.py --configure`。驗證方式是開一張 TOMO 圖後看 REST 回應的 `state.missing_fonts` 是否為 `[]`，不要只憑「沒有警告」判斷。詳見 `docs/環境需求與自動配置.md` §8.8。
   安裝規範：免 root、成品落 `~/.local/opt/<name>-<ver>/`、`~/.local/bin/` 建 symlink、來源為官方 GitHub Releases；symlink 衝突時改建 `<name>-new` 並印出 `mv` 指令交使用者確認，不直接覆蓋。
-  **兩個必備工具都由 `--install` 自動安裝，來源是使用者自己的 fork，且只綁「本地化 TW 版」應用程式（2026-11-10 定案，不得改回上游）**。使用者本機會**同時安裝上游版與 TW 版**（識別碼與安裝資料夾不同），解析器只認 TW 版、**絕不退回上游版**：
+  **必備工具共四項（2026-11-10 起）：OpenCADStudio TW、Open CalcSheet Studio TW、ArtCraft Launcher（`storytold/craft-launcher`，Craft App Suite 啟動器，十幾套開源軟體可平替 Adobe／Office／CAD）、Blender。** 後兩者為 GUI／官方發行版，`--install` 只偵測（`project_paths.artcraft_launcher_exe()`／`blender_exe()`）並在缺少時印取得指引、退出碼非 0；**不得對 Launcher 跑 `--version`／`--help`**（GUI 程式）。Launcher 裝好後，各 App（至少 GridCraft、WordCraft）要在它的視窗內安裝。
+  **前兩個必備工具由 `--install` 自動安裝，來源是使用者自己的 fork，且只綁「本地化 TW 版」應用程式（2026-11-10 定案，不得改回上游）**。使用者本機會**同時安裝上游版與 TW 版**（識別碼與安裝資料夾不同），解析器只認 TW 版、**絕不退回上游版**：
 
   | 工具 | TW 版（本專案綁定） | 上游版（並存，不採用） |
   |---|---|---|

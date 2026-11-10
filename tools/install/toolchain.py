@@ -235,6 +235,13 @@ def _detect_opencalcsheet() -> str | None:
     return opencalcsheet_exe()
 
 
+def _detect_artcraft_launcher() -> str | None:
+    """ArtCraft Launcher 偵測：交給 project_paths.artcraft_launcher_exe()（不跑 --version，GUI 程式）。"""
+    _tools_on_path()
+    from project_paths import artcraft_launcher_exe
+    return artcraft_launcher_exe()
+
+
 def _detect_opencadstudio() -> str | None:
     """OCS 偵測：交給 project_paths.opencadstudio_exe()（只認 TW 版）。"""
     _tools_on_path()
@@ -295,6 +302,24 @@ TOOLS: list[Tool] = [
         detect=_detect_opencadstudio,
         macos_app_name="Open CAD Studio TW.app",
     ),
+    # ArtCraft Launcher：Craft App Suite（約 17 套開源軟體，可平替 Adobe／Office／CAD）的安裝、更新、開啟入口。
+    # 它是 GUI，沒有 headless 安裝子命令，各 App 要在它的視窗裡按「Install」；因此本身也不自動安裝（kind=manual），
+    # 只偵測並印取得指引。偵測交給 project_paths.artcraft_launcher_exe()。
+    Tool(
+        key="ArtCraft Launcher",
+        repo="storytold/craft-launcher",
+        asset_patterns={},
+        kind="manual",
+        bin_stem="artcraft-launcher",
+        required=True,
+        note="Craft App Suite 啟動器：安裝／更新 CADCraft、GridCraft、WordCraft、PdfCraft 等約 17 套開源軟體（必備）",
+        manual_hint="請至 https://github.com/storytold/craft-launcher/releases/latest 下載對應平台版本"
+                    "（Windows 取 *-windows-x64.msi；macOS 取 *-macos-universal.dmg；"
+                    "Linux 取 *-linux-<x86_64|aarch64>.AppImage 或 .deb／.rpm），"
+                    "裝好後開啟，在視窗內安裝各 App（至少 GridCraft、WordCraft）。"
+                    "已裝在非標準位置時以環境變數 ARTCRAFT_LAUNCHER_EXE 指定",
+        detect=lambda: _detect_artcraft_launcher(),
+    ),
     # TextureCraft CLI：版本更新頻繁（0.4→0.5 僅隔三天），所以**不釘版本**：
     # 永遠取 repo 的最新 release（latest_release_tag），資產樣式也不含版號。
     # 呼叫端一律走 `~/.local/bin/texturecraft-cli`（artcraft_cli("TextureCraft")），不寫死任何版本路徑。
@@ -335,10 +360,12 @@ TOOLS: list[Tool] = [
         asset_patterns={},   # Blender 官方 release 不在 GitHub releases，見 manual_hint
         kind="manual",
         bin_stem="blender",
-        required=False,
-        note="3D 景觀模擬與擬真算輪",
+        required=True,
+        note="3D 景觀模擬與擬真算輪（必備）",
         manual_hint="Blender 由 blender.org 發行，GitHub repo 不含 release 資產；"
-                    "請至 https://www.blender.org/download/ 下載，或系統套件管理器安裝",
+                    "請至 https://www.blender.org/download/ 下載（Windows 可用 Microsoft Store／winget，"
+                    "macOS 可用 brew install --cask blender，Linux 可用套件管理器或 snap／flatpak），"
+                    "已裝在非標準位置時以環境變數 BLENDER 指定",
     ),
     Tool(
         key="IngeTrazo",
@@ -998,7 +1025,8 @@ def _run_installer(tool: Tool, tmp: Path, asset_name: str, ver: str, res: dict,
 
 def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
     """安裝單一工具。回傳 {ok, action, detail, pending}。"""
-    res = {"key": tool.key, "ok": False, "action": "", "detail": "", "pending": []}
+    res = {"key": tool.key, "ok": False, "action": "", "detail": "", "pending": [],
+           "required": tool.required}
 
     existing = _tool_installed(tool)
     if existing:
@@ -1192,7 +1220,8 @@ def check_and_install(dry: bool = False, only: str | None = None,
         for r in results:
             mark = "✓" if r["ok"] else ("·" if r["action"] == "manual" else "✗")
             print(f"  {mark} {r['key']:<14} {r['detail'] or r['action']}")
-            if not r["ok"] and r["action"] not in ("manual",):
+            # 手動安裝的「選用」工具缺了不算失敗；「必備」的手動工具（Blender、ArtCraft Launcher）缺了要算
+            if not r["ok"] and (r["action"] != "manual" or r.get("required")):
                 missing.append(r["key"])
             pending.extend(r["pending"])
 

@@ -87,7 +87,7 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 1. 跑 `python tools/project_paths.py`，看目前缺什麼（它會列出 Python 依賴、規範索引、
    OpenCADStudio TW、Open CalcSheet Studio TW、CAD 字體庫、SolidCraft、Blender，
    以及建議安裝的 13 套 ArtCraft、僅備援用的 AutoCAD）。
-2. 缺 Python 套件：在虛擬環境內 `python -m pip install -r requirements.txt`，另外 `python -m pip install mcp`（MCP 註冊與 Blender 橋需要）。
+2. 缺 Python 套件：在虛擬環境內 `python -m pip install -r requirements.txt`（已含 `mcp`，MCP 註冊與 Blender 橋需要）。
 2.5 **要真的安裝**：`python tools/project_paths.py --install`（退出碼 0 才算備妥）。它會從我的 fork
    安裝 OpenCADStudio TW（tutumomo/OpenCADStudio）與 Open CalcSheet Studio TW（tutumomo/Open-CalcSheet-Studio），
    不要改回上游版；並自動把 TOMO 字型（CAD_FONTS/ 的 *.shx，推薦 gbenor.shx＋CHINA1.SHX）複製進 OpenCADStudio TW 的字型夾，並設好 CTB 出圖樣式夾。
@@ -291,7 +291,6 @@ python tools/crosscheck/ocss_crosscheck.py checks                 # 本專案引
 
 ```bash
 cp .mcp.json.example .mcp.json                                     # Windows：copy
-python -m pip install mcp                                          # register_all.py 要在裝有 mcp 的 Python 上跑
 python tools/mcp/register_all.py --apply                           # regs／blender／ingetrazo／opencadstudio-tw（autocad／artcraft 為備援，路徑寫死 Windows，僅 Windows 適用）
 python tools/crosscheck/ocss_crosscheck.py register-mcp --apply    # open-calcsheet-studio（讀 TW 版 token）
 ```

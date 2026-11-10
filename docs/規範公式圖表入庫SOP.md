@@ -373,7 +373,7 @@ C:\Python312\python.exe -E -P -X utf8 tools\regs\merge_shard.py <payload.json> t
 
 ### 8.3 流程
 
-- 改過 `tools\` 任何檔案 → §3 第 6 道（`regression.py`）必跑；改 `tools\design\` 另跑 `design_selftest`／`design_workbench_selftest`。
+- 改過 `tools\` 任何檔案 → §3 第 6 道（`tools/selftest/regression.py`）必跑；改 `tools\design\` 另跑 `tools/selftest/design_core_selftest.py`／`tools/selftest/design_workbench_selftest.py`。
 - `payload_check` 必須在**合併前**跑；合併後再跑 `--library` 是第二道，不能取代第一道。
 - **B 類（每字元一 span 的數學排版）不猜** → 標 `unrecognized`（缺口）；可用文件自己的例題反算驗證。
 

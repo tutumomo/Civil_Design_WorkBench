@@ -137,21 +137,63 @@ def artcraft_home() -> Path | None:
     return None
 
 
+_ARTCRAFT_LAUNCHER_CACHE: dict[str, str | None] = {}
+
+
+def _win_start_menu_target(*names: str) -> str | None:
+    """解析 Windows 開始功能表捷徑（`.lnk`）的目標執行檔。
+
+    有些安裝程式（例如 ArtCraft Launcher 的 MSI）不寫 `InstallLocation`／
+    `DisplayIcon`，也不加 PATH，但一定會建捷徑。用 PowerShell 的
+    `WScript.Shell` 解析捷徑，是唯一不靠猜安裝位置就能拿到實際 exe 的辦法。
+    僅 Windows 執行；找不到或 PowerShell 不可用時回傳 None（不丟錯）。
+    """
+    if sys.platform != "win32":
+        return None
+    dirs = [
+        Path(os.environ.get("APPDATA", "")) / "Microsoft/Windows/Start Menu/Programs",
+        Path(os.environ.get("ProgramData", "")) / "Microsoft/Windows/Start Menu/Programs",
+    ]
+    paths = [str(d / f"{n}.lnk") for d in dirs for n in names]
+    quoted = ",".join("'" + p.replace("'", "''") + "'" for p in paths)
+    cmd = (
+        "$s = New-Object -ComObject WScript.Shell; "
+        f"foreach ($p in @({quoted})) {{ "
+        "if (Test-Path $p) { $t = $s.CreateShortcut($p).TargetPath; "
+        "if ($t -and (Test-Path $t)) { Write-Output $t; break } } }"
+    )
+    try:  # pragma: no cover - 依賴本機 PowerShell
+        r = subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command", cmd],
+            capture_output=True, text=True, timeout=20,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    lines = (r.stdout or "").strip().splitlines()
+    return lines[0].strip() if lines else None
+
+
 def artcraft_launcher_exe() -> str | None:
     """ArtCraft Launcher（Craft App Suite 的安裝／更新／開啟入口，GUI）。
 
-    `ARTCRAFT_LAUNCHER_EXE` → PATH 上的 `artcraft-launcher` → macOS `/Applications/ArtCraft Launcher.app`。
-    Windows 的 MSI 是逐使用者安裝、路徑未實測，因此只認環境變數與 PATH，不猜安裝位置。
+    `ARTCRAFT_LAUNCHER_EXE` → PATH 上的 `artcraft-launcher` →
+    Windows 開始功能表捷徑（「ArtCraft Launcher.lnk」，不猜安裝位置）→
+    macOS `/Applications/ArtCraft Launcher.app`。
     不要對它跑 `--version`／`--help`（GUI 程式，可能直接開視窗）。
     """
+    if "v" in _ARTCRAFT_LAUNCHER_CACHE:
+        return _ARTCRAFT_LAUNCHER_CACHE["v"]
     p = _env_path("ARTCRAFT_LAUNCHER_EXE")
-    if p:
-        return str(p)
-    found = shutil.which("artcraft-launcher")
-    if found:
-        return found
-    app = Path("/Applications/ArtCraft Launcher.app")
-    return str(app) if app.exists() else None
+    found = str(p) if p else None
+    if found is None:
+        found = shutil.which("artcraft-launcher")
+    if found is None:
+        found = _win_start_menu_target("ArtCraft Launcher")
+    if found is None:
+        app = Path("/Applications/ArtCraft Launcher.app")
+        found = str(app) if app.exists() else None
+    _ARTCRAFT_LAUNCHER_CACHE["v"] = found
+    return found
 
 
 def artcraft_cli(app: str) -> str | None:

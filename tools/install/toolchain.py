@@ -242,6 +242,18 @@ def _detect_artcraft_launcher() -> str | None:
     return artcraft_launcher_exe()
 
 
+def _detect_blender() -> str | None:
+    """Blender 偵測：交給 project_paths.blender_exe()。
+
+    MSIX（Microsoft Store）版的 exe 在 `WindowsApps` 底下，只掃
+    `Program Files\\Blender Foundation` 會假陰性，所以必須走這條（含
+    Get-AppxPackage 查詢）。不跑 `--version`，只看檔案是否存在。
+    """
+    _tools_on_path()
+    from project_paths import blender_exe
+    return blender_exe()
+
+
 def _detect_opencadstudio() -> str | None:
     """OCS 偵測：交給 project_paths.opencadstudio_exe()（只認 TW 版）。"""
     _tools_on_path()
@@ -360,6 +372,7 @@ TOOLS: list[Tool] = [
         asset_patterns={},   # Blender 官方 release 不在 GitHub releases，見 manual_hint
         kind="manual",
         bin_stem="blender",
+        detect=lambda: _detect_blender(),
         required=True,
         note="3D 景觀模擬與擬真算輪（必備）",
         manual_hint="Blender 由 blender.org 發行，GitHub repo 不含 release 資產；"

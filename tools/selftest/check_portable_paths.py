@@ -1,7 +1,7 @@
 r"""檢查專案內是否又出現寫死的 Windows 絕對路徑。
 
 `AGENTS.md` §3 規定路徑一律由 `tools/project_paths.py` 解析、文件指令要能在任何平台照抄。
-這支守門腳本掃描版控中的 `.py`／`.md`，發現 `C:\Python312` 這類寫死路徑就失敗。
+這支守門腳本掃描版控中的 `.py`／`.md`，發現 Windows 磁碟絕對 Python 路徑就失敗。
 
 例外：`docs/已驗證環境快照.md` 是「當時那台機器」的追溯紀錄，其中的實際路徑不改。
 
@@ -15,7 +15,8 @@ import argparse
 import subprocess
 import sys
 
-BAD = ["C:\\Python312", "C:/Python312"]
+# 以串接組出樣式，避免本檔自己被判定為違規
+BAD = ["C:" + "\\Python" + "312", "C:" + "/Python312"]
 ALLOW = {"docs/已驗證環境快照.md"}
 
 

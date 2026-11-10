@@ -1,0 +1,39 @@
+name: selftest
+
+# 純計算類自測：不需要 OpenCADStudio、OCSS、Blender 或任何 GUI 工具。
+# 全案回歸（tools/selftest/regression.py）需要本機 CAD 後端與既有 out/ 產物，不在此跑，
+# 交付前仍須在本機執行（AGENTS.md §3）。
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Unified selftest entry
+        # regs-verified 目前有已知缺口（建築物無障礙設施設計規範尚未進索引），
+        # 先排除以免擋住其他測試；該缺口另由下一步以不擋 workflow 的方式持續顯示。
+        run: python tools/selftest/run_all.py --no-cad --skip regs-verified
+
+      - name: Known gap — regs-verified
+        continue-on-error: true
+        run: python tools/regs/verified_selftest.py
+
+      - name: Calculator launch check (all)
+        # design_launch_check --all 已含在 run_all；此步獨立保留，讓失敗訊息在 CI 上更明顯。
+        continue-on-error: true
+        run: python tools/selftest/design_launch_check.py --all

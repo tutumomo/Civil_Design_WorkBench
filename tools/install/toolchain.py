@@ -132,26 +132,51 @@ def latest_release_tag(repo: str) -> str | None:
     return None
 
 
-def download(url: str, dest: Path, quiet: bool = False) -> Path:
-    """下載到 dest；有 Content-Length 就印進度百分比。"""
+def download(url: str, dest: Path, quiet: bool = False, retries: int = 6) -> Path:
+    """下載到 dest；有 Content-Length 就印進度百分比。
+
+    GitHub 的 CDN 偶爾會讓連線停住不回資料（實測卡在 40.9/68.5 MB 不動），
+    所以每次讀取都有 30 秒逾時；逾時或斷線就用 HTTP Range 從已下載處續傳，最多重試 `retries` 次。
+    伺服器不支援 Range（回 200 而非 206）時，該次重新從頭下載。
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
-    req = urllib.request.Request(url, headers={"User-Agent": "CivilDesignWorkBench-Toolchain/1.0"})
-    with urllib.request.urlopen(req, timeout=120) as r, open(dest, "wb") as f:
-        total = int(r.headers.get("Content-Length") or 0)
-        got = 0
-        while True:
-            chunk = r.read(1 << 20)
-            if not chunk:
-                break
-            f.write(chunk)
-            got += len(chunk)
-            if total and not quiet:
-                pct = got * 100 // total
-                print(f"\r    下載 {pct:3d}%  {got/1048576:8.1f} / {total/1048576:.1f} MB",
-                      end="", flush=True)
-    if not quiet:
-        print()
-    return dest
+    dest.unlink(missing_ok=True)          # 只在本次呼叫內續傳，不沿用舊的殘檔
+    got, total, last_err = 0, 0, None
+    for attempt in range(1, retries + 1):
+        headers = {"User-Agent": "CivilDesignWorkBench-Toolchain/1.0"}
+        if got:
+            headers["Range"] = f"bytes={got}-"
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=30) as r:
+                if got and r.status != 206:      # 不支援續傳 → 重來
+                    got = 0
+                length = int(r.headers.get("Content-Length") or 0)
+                if length:
+                    total = got + length
+                with open(dest, "ab" if got else "wb") as f:
+                    while True:
+                        chunk = r.read(1 << 20)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                        got += len(chunk)
+                        if total and not quiet:
+                            print(f"\r    下載 {got * 100 // total:3d}%  "
+                                  f"{got/1048576:8.1f} / {total/1048576:.1f} MB",
+                                  end="", flush=True)
+            if total and got < total:
+                raise OSError(f"連線提前結束（{got}/{total} bytes）")
+            if not quiet:
+                print()
+            return dest
+        except (OSError, urllib.error.URLError, TimeoutError) as e:
+            last_err = e
+            if not quiet:
+                print(f"\n    ! 下載中斷（{type(e).__name__}: {e}），第 {attempt}/{retries} 次，"
+                      f"從 {got/1048576:.1f} MB 續傳…")
+            time.sleep(min(2 * attempt, 10))
+    raise RuntimeError(f"下載失敗（重試 {retries} 次仍中斷）：{last_err}")
 
 
 # ---------------------------------------------------------------- 工具清單
@@ -175,6 +200,10 @@ class Tool:
     detect: Callable[[], str | None] | None = None
     # 同一 release 內的校驗檔名（內容為 `<sha256>  <檔名>` 逐行）；有設就下載後比對，不符即中止。
     checksum_asset: str = ""
+    # macOS 專用：dmg 內 .app 複製到 /Applications 時要用的名稱（例如 "Open CAD Studio TW.app"）。
+    # 為什麼：fork 的 dmg 內 app 仍叫 OpenCADStudio.app，解析器（project_paths）只認名稱含 TW 的 .app，
+    # 不改名就會被當成「未安裝」；改名後也不會覆蓋上游同名 app。空字串＝沿用 dmg 內名稱。
+    macos_app_name: str = ""
 
 
 #: OpenCADStudio 資產命名（實測 v2026.44）：
@@ -189,7 +218,10 @@ class Tool:
 #:   - 舊紀錄：`msiexec /i ... /qn` 非管理員回 1603。因此改用 `/passive`（基本 UI，可跳 UAC 請使用者核准）。
 #:   - 偵測走 project_paths.opencadstudio_exe()（只認 TW 版），直接啟動 exe，`taskkill /T` 殺得到本體。
 #: Linux 仍取 AppImage，裝到 `~/.local/opt/opencadstudio-tw-<ver>/`、命令 `~/.local/bin/opencadstudio-tw`，
-#: 與舊的上游 `opencadstudio-*` 區隔。macOS：fork 目前未發行 dmg → 印手動指引。
+#: 與舊的上游 `opencadstudio-*` 區隔。
+#: macOS：取 fork 的 `*-macos-arm64.dmg`（v2026.45.3 起確認有發行），其內 app 叫 `OpenCADStudio.app`，
+#: 安裝時改名為 `/Applications/Open CAD Studio TW.app`（見 Tool.macos_app_name），解析器才認得；
+#: 命令為 `~/.local/bin/opencadstudio-tw`，指向 app 內可獨立執行的 `OpenCADStudio-App`。
 def _tools_on_path() -> None:
     tools_dir = Path(__file__).resolve().parent.parent
     if str(tools_dir) not in sys.path:
@@ -261,6 +293,41 @@ TOOLS: list[Tool] = [
         verify_argv=["--version"],
         verify_must_contain="OpenCADStudio",
         detect=_detect_opencadstudio,
+        macos_app_name="Open CAD Studio TW.app",
+    ),
+    # TextureCraft CLI：版本更新頻繁（0.4→0.5 僅隔三天），所以**不釘版本**：
+    # 永遠取 repo 的最新 release（latest_release_tag），資產樣式也不含版號。
+    # 呼叫端一律走 `~/.local/bin/texturecraft-cli`（artcraft_cli("TextureCraft")），不寫死任何版本路徑。
+    # 已安裝則略過；要升級請先刪 `~/.local/bin/texturecraft-cli` 再跑 --install --only texturecraft-cli。
+    # 目前只登記 macOS（universal zip）；其他平台資產名未實測，會走「選用工具、略過」。
+    Tool(
+        key="TextureCraft",
+        repo="storytold/texturecraft",
+        asset_patterns={
+            ("macos", "aarch64"): [r"^texturecraft-cli-[\d.]+-macos-universal\.zip$"],
+            ("macos", "x86_64"): [r"^texturecraft-cli-[\d.]+-macos-universal\.zip$"],
+        },
+        kind="zip",
+        bin_stem="texturecraft-cli",
+        required=False,
+        note="3D 模型 PBR 材質貼圖、AO/Normal 烘焙與光追渲染（選用）",
+        manual_hint="請至 https://github.com/storytold/texturecraft/releases 下載對應平台版本",
+        checksum_asset="SHA256SUMS.txt",
+    ),
+    # Craft Anything CLI：同 TextureCraft，不釘版本、取最新 release；呼叫端走 `~/.local/bin/craft-anything-cli`。
+    Tool(
+        key="Craft Anything",
+        repo="storytold/craft-anything",
+        asset_patterns={
+            ("macos", "aarch64"): [r"^craft-anything-cli-[\d.]+-macos-universal\.zip$"],
+            ("macos", "x86_64"): [r"^craft-anything-cli-[\d.]+-macos-universal\.zip$"],
+        },
+        kind="zip",
+        bin_stem="craft-anything-cli",
+        required=False,
+        note="ArtCraft 套裝的通用創作工具（選用）",
+        manual_hint="請至 https://github.com/storytold/craft-anything/releases 下載對應平台版本",
+        checksum_asset="SHA256SUMS.txt",
     ),
     Tool(
         key="Blender",
@@ -641,12 +708,12 @@ def _install_macos_dmg(tool: Tool, dmg: Path, dest_dir: Path, asset_name: str,
                 print("    ✗ DMG 內找不到 .app")
             return None
 
-        dest = Path("/Applications") / app.name
+        dest = Path("/Applications") / (tool.macos_app_name or app.name)
         if dest.exists():
             if not quiet:
                 print(f"    · {dest} 已存在，改用 ~/.local/opt 內的獨立副本")
-            dest = dest_dir / app.name
-        shutil.copytree(app, dest, dirs_exist_ok=True)
+            dest = dest_dir / (tool.macos_app_name or app.name)
+        shutil.copytree(app, dest, symlinks=True, dirs_exist_ok=True)
         if not quiet:
             print(f"    ✓ 已安裝 {dest}")
 
@@ -799,6 +866,15 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
             print(f"    {tool.manual_hint}")
         return res
 
+    # 選用工具若本平台沒登記資產樣式：不算失敗（否則會讓整個 --install 退出碼變 1），改印手動指引
+    plat = ("windows" if IS_WIN else ("macos" if IS_MAC else "linux"), ARCH)
+    if not tool.required and not tool.asset_patterns.get(plat):
+        res.update(ok=False, action="manual", detail=tool.manual_hint)
+        if not quiet:
+            print(f"  {tool.key:<14} 選用，本平台（{plat[0]}/{plat[1]}）尚無自動安裝")
+            print(f"    {tool.manual_hint}")
+        return res
+
     if not quiet:
         print(f"  {tool.key:<14} 未安裝 → 開始取得")
 
@@ -882,12 +958,12 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
             target = dest_dir / asset_name
             shutil.move(str(tmp), target)
             target.chmod(target.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        elif tool.kind == "zip":
+        elif tool.kind in ("zip", "tar"):
             shutil.unpack_archive(str(tmp), str(dest_dir))
             target = next((p for p in dest_dir.rglob(stem) if p.is_file()), None)
-        elif tool.kind == "tar":
-            shutil.unpack_archive(str(tmp), str(dest_dir))
-            target = next((p for p in dest_dir.rglob(stem) if p.is_file()), None)
+            if target is not None and not IS_WIN:
+                # shutil.unpack_archive 解 zip 不保留執行權限，不補的話 symlink 出去是「Permission denied」
+                target.chmod(target.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         elif tool.kind in ("msi", "dmg"):
             # Windows MSI／macOS DMG 需使用者互動安裝，只下載不代裝
             target = dest_dir / asset_name

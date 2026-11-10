@@ -8,7 +8,7 @@
 但**刻意沿用同一套圖框、字型、尺寸樣式與品管閘門**（不重造輪子）：
 
 * 圖框：`tools\\a3_sheet\\A3圖框_template.dxf`（與平面圖同一張，標題欄一致）
-* 字型：TOMO（gbenor.shx＋CHINESE.SHX）、字高 本文 3／附註 4／標題 5 mm
+* 字型：TOMO（gbenor.shx＋CHINA1.SHX）、字高 本文 3／附註 4／標題 5 mm
 * 尺寸樣式：`make_wall_section.ensure_dimstyle`（同一支、同一組參數）
 * 品管：`tools\\a3_sheet\\check_delivery.py` E1~E18 全套沿用
 * 圖／數對帳：`tools\\takeoff\\dxf_takeoff.py`（外框面積－孔洞＝精確斷面積）

@@ -95,7 +95,7 @@ def build(args):
     # TOMO 已存在（樣板），保險起見補一次
     if "TOMO" not in doc.styles:
         st = doc.styles.add("TOMO", font="gbenor.shx")
-        st.dxf.bigfont = "CHINESE.SHX"
+        st.dxf.bigfont = "CHINA1.SHX"
     ST = {"style": "TOMO"}
 
     # ------------------------------------------------------------ 繪圖小工具

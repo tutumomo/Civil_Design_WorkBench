@@ -13,13 +13,13 @@ CADCraft 確實有兩支字型環境變數，但**沒有任何變數可以把「
 
 | 你要做的事 | 正確做法 | 指令 |
 |---|---|---|
-| 出正式 A3 圖（DWG＋PDF），`TOMO` 樣式中文字要對 | 讓 `gbenor.shx`／`CHINESE.SHX` 進 AutoCAD 自己的字型夾 | `python tools/install_cad_fonts.py --apply`（需系統管理員） |
+| 出正式 A3 圖（DWG＋PDF），`TOMO` 樣式中文字要對 | 讓 `gbenor.shx`／`CHINA1.SHX` 進 AutoCAD 自己的字型夾 | `python tools/install_cad_fonts.py --apply`（需系統管理員） |
 | 用 CADCraft 開我們產的 DXF 校對（`TOMO` 是 SHX 樣式） | 設 `CADCRAFT_FONTALT` 把 SHX 樣式字換成已安裝的 TTF | `$env:CADCRAFT_FONTALT = "msjh.ttc"` |
 | 想用 `C:\Fonts\` 或 `CAD_FONTS\` 裡的 `.ttf/.ttc` | **先安裝到系統字型夾**，再重新啟動 CADCraft | 雙擊安裝，或複製到 `C:\Windows\Fonts`（需管理員） |
 
 ## 2. 機制：為什麼「設環境變數指向字型夾」行不通
 
-DXF 只存**檔名字串**（`font="gbenor.shx"`、`bigfont="CHINESE.SHX"`），**不內嵌字型**。所以「字型在哪」完全由開圖的程式自己決定，兩套程式的答案不同：
+DXF 只存**檔名字串**（`font="gbenor.shx"`、`bigfont="CHINA1.SHX"`），**不內嵌字型**。所以「字型在哪」完全由開圖的程式自己決定，兩套程式的答案不同：
 
 | | AutoCAD／`accoreconsole` | CADCraft |
 |---|---|---|
@@ -32,7 +32,7 @@ DXF 只存**檔名字串**（`font="gbenor.shx"`、`bigfont="CHINESE.SHX"`），
 
 ## 3. 實測證據
 
-測試圖：一張 `TOMO`（`gbenor.shx` ＋ `bigfont=CHINESE.SHX`）與一行 TTF（`msjh.ttc`）的兩行中英文字，換不同變數各輸出一次 PNG 比對雜湊。
+測試圖：一張 `TOMO`（`gbenor.shx` ＋ `bigfont=CHINA1.SHX`）與一行 TTF（`msjh.ttc`）的兩行中英文字，換不同變數各輸出一次 PNG 比對雜湊。
 **雜湊相同＝該變數沒生效；不同＝生效。**
 
 | # | 設定 | PNG 大小 | 雜湊前 16 碼 | 判讀 |
@@ -46,7 +46,7 @@ DXF 只存**檔名字串**（`font="gbenor.shx"`、`bigfont="CHINESE.SHX"`），
 | G | `FONTFALLBACK=PMingLiU`（家族名稱） | 54,655 | `3CF7154D95140818` | **家族名稱無效**，只認**檔名** |
 | H | `FONTFALLBACK=C:\Fonts\古印體.ttc`（完整路徑） | 54,655 | `3CF7154D95140818` | **完整路徑無效** |
 | I | `FONTALT=C:\Fonts\古印體.ttc`（完整路徑） | 54,655 | `3CF7154D95140818` | **完整路徑無效** |
-| J | `FONTALT=C:\CadFont[S]\CHINESE.SHX` | 54,655 | `3CF7154D95140818` | **SHX 靜默忽略** |
+| J | `FONTALT=C:\CadFont[S]\CHINA1.SHX` | 54,655 | `3CF7154D95140818` | **SHX 靜默忽略** |
 
 真實案件圖再驗一次（`out\擋土牆3m重力式_北屯民政里\…_斷面圖_S-01.dxf`，`TOMO` 樣式）：
 
@@ -79,7 +79,7 @@ $env:CADCRAFT_FONTFALLBACK = "msjh.ttc"     # 想換字形就改 mingliu.ttc（�
 |---|---|
 | 設環境變數指向一個「字型資料夾」 | 不存在這種變數，CADCraft 沒有字型搜尋路徑設定 |
 | `CADCRAFT_FONTALT=C:\Fonts\xxx.ttc` 用完整路徑 | 無效（H／I） |
-| 指 `.shx` 檔（含 `C:\CadFont[S]\CHINESE.SHX`） | 靜默忽略（J） |
+| 指 `.shx` 檔（含 `C:\CadFont[S]\CHINA1.SHX`） | 靜默忽略（J） |
 | 讓 CADCraft 用到 `C:\CadFont[S]` 的 140 個 SHX | 不可能，SHX 未實作 |
 | 用 `C:\Fonts\` 的 20＋個中文藝術字 | 未安裝＝看不到；**先安裝**才可能 |
 | 用家族名稱（`PMingLiU`、`Microsoft JhengHei`） | 實測無效（G），改檔名 |
@@ -90,16 +90,16 @@ $env:CADCRAFT_FONTFALLBACK = "msjh.ttc"     # 想換字形就改 mingliu.ttc（�
 
 | 位置 | 內容 | AutoCAD 看得到 | CADCraft 看得到 |
 |---|---|---|---|
-| `D:\Civil_Design_WorkBench\CAD_FONTS\` | **2 檔**：`gbenor.shx` 5,186 B、`CHINESE.SHX` 927,309 B | 否（要複製到 AutoCAD Fonts） | 否 |
+| `D:\Civil_Design_WorkBench\CAD_FONTS\` | **2 檔**：`gbenor.shx` 5,186 B、`CHINA1.SHX` 927,309 B | 否（要複製到 AutoCAD Fonts） | 否 |
 | `C:\CadFont[S]\` | **299 檔，其中 140 個 `.SHX`**（`CHINA1/2/…`、`chineset.shx`、`gbcbig.shx`、`bigfont.shx`、`gbeitc.shx`…）＋1 個 `.TTC` | 否（除非加進支援路徑） | 否 |
 | `C:\Fonts\` | 20＋個中文 TTF/TTC（古印體、勘亭流、揮灑體…） | 否（未安裝） | 否（未安裝） |
 | `C:\Windows\Fonts\` | `msjh.ttc`（微軟正黑）、`msyh.ttc`、`simsun.ttc`、`mingliu.ttc`、`kaiu.ttf` 等 | 是 | 是 |
-| `…\AutoCAD 2022\Fonts\` | **74 個 SHX**；`gbenor.shx` **有**、`chineset.shx`／`gbcbig.shx` **有**、**`CHINESE.SHX` 缺** | 是 | 否 |
+| `…\AutoCAD 2022\Fonts\` | **74 個 SHX**；`gbenor.shx` **有**、`chineset.shx`／`gbcbig.shx` **有**、**`CHINA1.SHX` 缺** | 是 | 否 |
 
-### ⚠ `CHINESE.SHX` 沒裝進 AutoCAD，但出圖中文仍正常（實測）
+### ⚠ `CHINA1.SHX` 沒裝進 AutoCAD，但出圖中文仍正常（實測）
 
 `out\擋土牆3m重力式_北屯民政里\…_斷面圖_S-01.pdf` 的 `TOMO` 中文**顯示正常** → AutoCAD 有自動替換成功，**不是壞圖**。
-但替換是**靜默的**（不警告），且替換字型的字寬未必等於 `CHINESE.SHX`（本專案按 1.2h 估算中文字寬，見 `check_delivery.py` 的 E3 說明）。
+但替換是**靜默的**（不警告），且替換字型的字寬未必等於 `CHINA1.SHX`（本專案按 1.2h 估算中文字寬，見 `check_delivery.py` 的 E3 說明）。
 **建議**：跑 `python tools/install_cad_fonts.py --apply`（會寫入 `C:\Program Files\Autodesk\AutoCAD 2022\Fonts`，需系統管理員權限 → 動前先取得使用者同意），讓實際字型與規範一致。
 
 ## 7. 驗收方法：雜湊比對法
@@ -143,5 +143,5 @@ Get-FileHash base.png, alt.png -Algorithm SHA256 | Select-Object Hash
 
 - CADCraft 官方 README「Fonts」章節（`CADCRAFT_FONTALT`／`CADCRAFT_FONTFALLBACK`、SHX 尚未支援）：<https://github.com/storytold/cadcraft>
 - `tools\project_paths.py`：`cad_fonts_dir()`／`cad_font()` —— 解析順序 `CAD_FONTS` 環境變數 → 專案 `CAD_FONTS/` → AutoCAD Fonts → `C:\CadFont[S]`
-- `tools\install_cad_fonts.py`：把 `gbenor.shx`／`CHINESE.SHX` 複製到 AutoCAD 字型目錄（`--apply` 才實際寫入）
+- `tools\install_cad_fonts.py`：把 `gbenor.shx`／`CHINA1.SHX` 複製到 AutoCAD 字型目錄（`--apply` 才實際寫入）
 - `tools\a3_sheet\check_delivery.py` E3：`TOMO` 樣式與中文字寬 1.2h 的估算基礎

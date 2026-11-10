@@ -10,7 +10,7 @@
 檢查項目（E=錯誤，W=警告）
   E1  doc.audit() 錯誤數須為 0
   E2  $INSUNITS=6、$MEASUREMENT=1
-  E3  TOMO 樣式存在且 font=gbenor.shx、bigfont=CHINESE.SHX
+  E3  TOMO 樣式存在且 font=gbenor.shx、bigfont=CHINA1.SHX
   E4  所有 TEXT/MTEXT 一律使用 TOMO（含圖框）
   E5  出圖視口只能有 1 個（id=1 的紙面視口不算）
   E6  視口實測比例 = 指定比例
@@ -59,7 +59,7 @@ MPU = 1000.0     # 每模型單位多少 mm；--units cm 時於 main() 改 10
 
 
 def est_width(s, h):
-    """CHINESE.SHX 中文字實測約 1.2h 寬、gbenor 英數約 0.8h；ezdxf 對 SHX 中文寬度低估約 2 成"""
+    """CHINA1.SHX 中文字實測約 1.2h 寬、gbenor 英數約 0.8h；ezdxf 對 SHX 中文寬度低估約 2 成"""
     return sum(1.2 * h if ord(c) >= 0x2E80 else 0.8 * h for c in s)
 
 
@@ -144,7 +144,7 @@ def main():
     else:
         f, bf = tomo.dxf.font, tomo.dxf.get("bigfont", "")
         info["TOMO"] = {"font": f, "bigfont": bf}
-        if f.lower() != "gbenor.shx" or bf.lower() != "chinese.shx":
+        if f.lower() != "gbenor.shx" or bf.lower() != "china1.shx":
             errs.append("E3 TOMO 字型不對：font=%s bigfont=%s" % (f, bf))
     style_use = Counter()
     for lay in doc.layouts:

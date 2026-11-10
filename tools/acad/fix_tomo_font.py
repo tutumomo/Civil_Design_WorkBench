@@ -1,4 +1,4 @@
-"""把 DXF／DWG 的 TOMO 文字樣式統一改為 gbenor.shx + bigfont=CHINESE.SHX（繁體中文相容）。
+"""把 DXF／DWG 的 TOMO 文字樣式統一改為 gbenor.shx + bigfont=CHINA1.SHX（本專案 TOMO 標準；OpenCADStudio TW 裝好後中文不亂碼）。
 
 用法::
 
@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import acc  # noqa: E402  後端（OpenCADStudio／accoreconsole／cadcraft-cli）由 CIVIL_AI_CAD_BACKEND 決定
 
 TARGET_FONT = "gbenor.shx"
-TARGET_BIGFONT = "CHINESE.SHX"
+TARGET_BIGFONT = "CHINA1.SHX"
 TARGET_STYLES = ("TOMO",)
 
 
@@ -52,7 +52,7 @@ def patch_dxf(dxf: Path, apply: bool) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
-        description="把 TOMO 文字樣式由 CHINA1.SHX 改成 CHINESE.SHX")
+        description="把 TOMO 文字樣式統一為 gbenor.shx + CHINA1.SHX（舊圖若用 CHINESE.SHX 一併改回）")
     ap.add_argument("path", help="要處理的 .dxf 或 .dwg")
     ap.add_argument("--apply", action="store_true", help="實際寫入（預設只預演）")
     a = ap.parse_args(argv)
@@ -107,7 +107,7 @@ def main(argv=None) -> int:
                 pass
 
     if a.apply:
-        print("\n完成。已將 TOMO 樣式更新為 gbenor.shx + CHINESE.SHX。")
+        print("\n完成。已將 TOMO 樣式更新為 gbenor.shx + CHINA1.SHX。")
     return 0
 
 

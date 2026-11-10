@@ -32,6 +32,12 @@ python tools/project_paths.py --configure  # Re-configure CADCraft/OpenCADStudio
 
 ### Testing & Verification
 ```bash
+# Unified entry: runs every selftest and summarizes (CI uses `--no-cad --skip regs-verified`)
+.venv/bin/python tools/selftest/run_all.py
+.venv/bin/python tools/selftest/run_all.py --changed        # only tests tied to git changes
+.venv/bin/python tools/selftest/run_all.py --no-cad         # skip regression (no CAD backend)
+.venv/bin/python tools/selftest/run_all.py --list
+
 # Full regression test suite across all case types (compares numbers against tools/selftest/baseline.json).
 # `--update` rewrites the baseline: ask-first, only for an intentional design change; with --only it
 # rewrites just those cases. `--only` accepts repeats or comma lists; `--list` prints scanned cases.

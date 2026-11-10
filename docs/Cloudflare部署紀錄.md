@@ -11,7 +11,7 @@
 $env:PYTHONIOENCODING='utf-8'
 cd <專案根目錄>
 # 1) 重建 bundle（22 計算器 + 規範庫 + 前端；輸出到全新目錄避免舊檔殘留）
-C:\Python312\python.exe -E -P -X utf8 tools\design\build_cloudflare.py --out _temp\cf_deploy_<日期>
+python -E -P -X utf8 tools/design/build_cloudflare.py --out _temp/cf_deploy_<日期>
 # 2) 部署（wrangler.toml 已內含 account_id；**不可加 --temporary**，否則網域會過期）
 cd _temp\cf_deploy_<日期>
 npx wrangler deploy

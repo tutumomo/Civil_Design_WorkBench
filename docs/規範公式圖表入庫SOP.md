@@ -25,9 +25,9 @@
 
 ```bat
 set PYTHONIOENCODING=utf-8
-C:\Python312\python.exe -E -P -X utf8 tools\regs\ctx_budget.py
-C:\Python312\python.exe -E -P -X utf8 tools\regs\regs_vtool.py next -n 5
-C:\Python312\python.exe -E -P -X utf8 tools\regs\regs_vtool.py coverage --current-only --out _temp\regs_backlog.md
+python -E -P -X utf8 tools/regs/ctx_budget.py
+python -E -P -X utf8 tools/regs/regs_vtool.py next -n 5
+python -E -P -X utf8 tools/regs/regs_vtool.py coverage --current-only --out _temp/regs_backlog.md
 ```
 
 ### 1.1 開工前的三項體檢（不做會做白工）
@@ -60,9 +60,9 @@ C:\Python312\python.exe -E -P -X utf8 tools\regs\regs_vtool.py coverage --curren
    靠猜頁碼會反覆抓錯（2026-11-02 第二輪 27 條待核中有 14 條就是「目標在下一頁」）。
    先建索引再查：
    ```bat
-   C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py build <src>
-   C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py find  <src> <印刷頁碼>
-   C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py show  <src>
+   python -E -P -X utf8 tools/regs/page_index.py build <src>
+   python -E -P -X utf8 tools/regs/page_index.py find  <src> <印刷頁碼>
+   python -E -P -X utf8 tools/regs/page_index.py show  <src>
    ```
    定位後再渲染該 PDF 頁（`regs_vtool.py page <src> --page <PDF頁> [--part P]`），
    渲染後**立刻改名加篇號**（§8.1 坑：不同篇同頁碼會撞檔名）。
@@ -132,10 +132,10 @@ C:\Python312\python.exe -E -P -X utf8 tools\regs\regs_vtool.py coverage --curren
 **工具**：`tools/regs/page_index.py`（34 份現行規範中 **19 份有 PDF、可建索引**；其餘 15 份為純文字來源，本工具不適用）
 
 ```bat
-C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py build <src>              :: 建索引（快取至 _temp\regs_pages\_page_index\<src>.json）
-C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py find  <src> <印刷頁碼>   :: 查單頁
-C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py show  <src>              :: 列全部
-C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py all                       :: 批次列出
+python -E -P -X utf8 tools/regs/page_index.py build <src>              :: 建索引（快取至 _temp/regs_pages/_page_index/<src>.json）
+python -E -P -X utf8 tools/regs/page_index.py find  <src> <印刷頁碼>   :: 查單頁
+python -E -P -X utf8 tools/regs/page_index.py show  <src>              :: 列全部
+python -E -P -X utf8 tools/regs/page_index.py all                       :: 批次列出
 ```
 
 **識別原理與兩個必要條件**（這兩點是本工具能用的關鍵，改動時勿退化）：
@@ -221,7 +221,7 @@ ex = tabs.tables[0].extract()      # 二維陣列，含表頭
 **規則：目標分片已存在時，一律 `merge_shard`，不得用 `write`。**
 
 ```bat
-C:\Python312\python.exe -E -P -X utf8 tools\regs\merge_shard.py <payload.json> tools\regs\verified\<src>_<n>.json
+python -E -P -X utf8 tools/regs/merge_shard.py <payload.json> tools/regs/verified/<src>_<n>.json
 ```
 
 工具行為（三重保險）：
@@ -414,7 +414,7 @@ C:\Python312\python.exe -E -P -X utf8 tools\regs\merge_shard.py <payload.json> t
 **`docs\規範入庫_待補缺口清單.md`** 由 `tools\regs\gap_report.py` 自動產生：
 
 ```bat
-C:\Python312\python.exe -E -P -X utf8 tools\regs\gap_report.py --out docs\規範入庫_待補缺口清單.md
+python -E -P -X utf8 tools/regs/gap_report.py --out docs/規範入庫_待補缺口清單.md
 ```
 
 - 內容＝`_skips.json` 中 `status="unrecognized"` 的條文（**有表／式但尚未轉錄＝真缺口**），**不含** `qualitative`（定性、無算式）、`out_of_scope`（判斷用不到，原文未轉換）、`covered`（已由他條涵蓋）。

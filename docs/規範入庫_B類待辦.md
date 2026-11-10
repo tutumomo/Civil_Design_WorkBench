@@ -95,8 +95,8 @@
 
 ```bat
 :: 1. 定位頁碼（不要猜）
-C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py build <src>
-C:\Python312\python.exe -E -P -X utf8 tools\regs\page_index.py find  <src> <印刷頁碼>
+python -E -P -X utf8 tools/regs/page_index.py build <src>
+python -E -P -X utf8 tools/regs/page_index.py find  <src> <印刷頁碼>
 :: 2. 高解析局部裁圖（260~420 dpi）
 python tools/regs/page_crop.py "<pdf>" <頁> --clip <x0> <y0> <x1> <y1> --dpi 400 -o out.png
 :: 3. 合併格表格用 find_tables()

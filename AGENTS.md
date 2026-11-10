@@ -138,6 +138,7 @@
 | `tools/wall_section/make_wall_section.py` | 擋土牆（S-01/S-02）與排水溝（D-01/D-02）標準斷面圖與配筋圖產出 | 1:20 出圖＋自動接 `check_delivery.py`；`docs/擋土牆斷面圖產線.md` |
 | `tools/box_section/make_box_section.py` | 箱涵標準斷面圖與配筋圖（S-01/S-02）：含 45° 倒角加腋與角隅補強斜筋 | 自動接 `check_delivery.py` 與 `dxf_takeoff.py` |
 | `tools/selftest/regression.py` | **全案回歸測試**：一鍵驗證全案件預算、斷面積、通水容量、FS、配筋間距 | 比對 `tools/selftest/baseline.json`；`docs/回歸測試.md` |
+| `tools/selftest/check_portable_paths.py` | **寫死路徑守門**：掃描版控中的 `.py`／`.md`，出現 Windows 磁碟絕對路徑（如 Python 安裝目錄下的 python.exe）即失敗 | 例外僅 `docs/已驗證環境快照.md`；已納入 `run_all.py` |
 | `tools/selftest/run_all.py` | **統一測試入口**：跑專案全部自測並彙總（`--changed` 依 git 改動挑選、`--no-cad` 跳過回歸、`--skip` 排除已知缺口） | CI 唯一入口（`.github/workflows/selftest.yml`）；對照表與 `AGENTS.md` §5 同步；`docs/回歸測試.md` |
 
 - **交付六道閘門**（總表見 [`docs/交付閘門總表.md`](docs/交付閘門總表.md)）：

@@ -160,5 +160,5 @@ Civil_Design_WorkBench/
   - API 產不出 PDF：`export_pdf` 在一般安裝版回 501；PDF 只能 App 內按「Rapport」。
   - 開放環境的結果一律要交叉驗算才可進交付；模板有檢查腳本把關，自由書寫沒有。
   - 兩個不報錯的單位陷阱必查：分數次方污染單位（`R^(2/3)` → `m^0.667`，須先無因次化）、單位不自動收斂（`kN/mm²` ≠ `MPa`，須顯式 `to MPa`）。`ocss_client.unit_warnings()` 已自動偵測。
-- **Docs still show Windows-style commands** (`C:\Python312\python.exe -E -P -X utf8 tools\selftest\...`). On this Linux/macOS checkout use `.venv/bin/python` with forward slashes.
+- **Docs still show Windows-style commands** (`python -E -P -X utf8 tools/selftest/...`). On this Linux/macOS checkout use `.venv/bin/python` with forward slashes.
 - **Troubleshooting**: consult `docs/經驗索引_INDEX.md` first; open only the matching section in `docs/踩坑紀錄.md` (never read the entire file).

@@ -75,7 +75,7 @@ git diff --stat
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
-C:\Python312\python.exe tools\selftest\regression.py
+python tools/selftest/regression.py
 ```
 
 - **基準相符**才算過。
@@ -98,7 +98,7 @@ C:\Python312\python.exe tools\selftest\regression.py
 git worktree add --detach _temp\cleancheck HEAD
 cd _temp\cleancheck
 $env:PYTHONIOENCODING='utf-8'
-C:\Python312\python.exe tools\selftest\regression.py
+python tools/selftest/regression.py
 cd ..\..
 git worktree remove --force _temp\cleancheck
 ```
@@ -133,7 +133,7 @@ git worktree remove --force _temp\cleancheck
 Get-Process python | Where-Object { $_.Path -like '*Python312*' }
 
 # 重啟（背景、隱藏視窗）
-Start-Process -FilePath 'C:\Python312\python.exe' `
+Start-Process -FilePath 'python' `
   -ArgumentList 'tools\regs\regs_server.py','--web' `
   -WorkingDirectory 'D:\Civil_Design_WorkBench' -WindowStyle Hidden
 

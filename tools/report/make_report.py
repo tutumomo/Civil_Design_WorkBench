@@ -253,7 +253,7 @@ def build(args) -> int:
         for w in warnings:
             log(f"  ⚠ {w}")
     log("")
-    _verify_cmd = (f"C:\\Python312\\python.exe tools\\report\\verify_report.py \"{docx_path}\""
+    _verify_cmd = (f"{sys.executable} tools/report/verify_report.py \"{docx_path}\""
                    + (f" --pdf \"{pdf_path}\"" if pdf_ok else ""))
     if builder.figure_no == 0:
         _verify_cmd += " --allow-no-figures"
@@ -276,7 +276,7 @@ def parse_args(argv: list[str] | None = None):
         description="設計報告產線：案件 JSON → .docx ＋ .pdf（A4、14 章、表號圖號自動編）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="範例：\n"
-               "  C:\\Python312\\python.exe tools\\report\\make_report.py "
+               "  python tools/report/make_report.py "
                "--case tools\\report\\examples\\AC刨鋪5cm工程.json --out-dir _report_test\n",
     )
     ap.add_argument("--case", required=True, help="案件資料 JSON 路徑")

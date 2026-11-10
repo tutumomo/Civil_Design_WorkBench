@@ -12,8 +12,8 @@ r"""上架檢核：確認一個設計計算器真的「上架」了，而不只�
   G8 工作台欄位標籤、文件提及、引擎自帶 --selftest（WARN）
 
 Run:
-    C:\Python312\python.exe -E -P -X utf8 tools\selftest\design_launch_check.py steel_column
-    C:\Python312\python.exe -E -P -X utf8 tools\selftest\design_launch_check.py --all
+    python -E -P -X utf8 tools/selftest/design_launch_check.py steel_column
+    python -E -P -X utf8 tools/selftest/design_launch_check.py --all
     ... --json
 """
 

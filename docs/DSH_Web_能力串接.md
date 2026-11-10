@@ -90,5 +90,5 @@ dsh web 的 MCP 連線存在它的連接器倉庫，**不在本 repo 內**，重
 | `autocad` MCP | 未接 | 需 `autocad-mcp-pro`（Windows／AutoCAD COM）；本機 Linux 無此套件，DWG 由 `cadcraft-cli` 產出。真要接時照 `.mcp.json.example` |
 | `cindy_memory` | 不接 | dsh web 自帶跨會話記憶（`memory_*`），再接一套會分裂記憶來源 |
 | 規範查詢台／設計工作台（8765） | 未啟動 | `./web.sh regs`／`./web.sh design` 隨開隨用；不影響 MCP 與 CLI |
-| Windows 路徑文件 | 文件仍寫 `C:\Python312\python.exe` | 本機為 Linux，一律用 `.venv/bin/python`；`tools/project_paths.py` 已處理跨平台 |
+| Windows 路徑文件 | 文件仍寫 `python` | 本機為 Linux，一律用 `.venv/bin/python`；`tools/project_paths.py` 已處理跨平台 |
 | `mcp__cad__cad_show` 版本提示 | text-to-cad 0.7.26 → 0.8.4 有新版 | 非本專案元件，升級與否不影響 DXF 預覽 |

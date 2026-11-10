@@ -93,7 +93,7 @@
 | 工具 | 狀態 | 怎麼叫 |
 |---|---|---|
 | **SolidCraft** | ✔ 實測：box 2000×500×1500 mm → STEP＋STL，體積 1.5×10⁹ mm³ 正確（版本查 `--versions`） | `C:\Program Files\SolidCraft\solidcraft-cli.exe run script.json --out x.step --out x.stl`；細節 `docs\SolidCraft操作指引.md` |
-| **Blender 5.2.3**（Store 版） | ✔ 實測：上述 STL → 渲染 PNG | `C:\Python312\python.exe %USERPROFILE%\.agents\skills\blender\scripts\blender_run.py <recipe> ... --result x.json`（stdout 拿不到，結果看 `--result`） |
+| **Blender 5.2.3**（Store 版） | ✔ 實測：上述 STL → 渲染 PNG | `python %USERPROFILE%/.agents/skills/blender/scripts/blender_run.py <recipe> ... --result x.json`（stdout 拿不到，結果看 `--result`） |
 | **text-to-cad（cadgen）** | ⚠ 版本不一致：PATH 上是 **0.6.5**（pip --user），技能要求 `cadgen +0.8.2` 啟動器（`~\.local\bin\cadgen` 不存在），舊文件記 0.7.26（uvx）。`step snapshot` 可用 | 建模前先 `cadgen doctor`；需新版時另議安裝 |
 | **AutoCAD MCP Pro** | ⚠ **目前接的是 GUI AutoCAD（`com` 後端）**：`~\.codex\config.toml` 的 `AUTOCAD_MCP_BACKEND="com"`，與 `docs\AutoCAD_MCP操作指引.md` 記載「已改 ezdxf」不符。實測 `drawing_new` 會在使用者的 AutoCAD 開新圖；AutoCAD 忙碌時畫線回「接收者已拒絕這個呼叫」 | 改回 `ezdxf` 屬「修改 MCP 設定檔」，**須使用者點名同意**。未改前：除非使用者明說要操作他開著的 AutoCAD，否則不用此 MCP，改用 CADCraft／ezdxf |
 | **CadCraft Studio**（8 apps） | 未重測（需使用者開視窗並給 token） | 見 `docs\CadCraft_Studio操作指引.md` |

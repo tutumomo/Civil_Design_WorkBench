@@ -34,7 +34,7 @@ cases\<案名>\
 set PYTHONIOENCODING=utf-8
 
 :: 1) 只驗一致性（不產檔，秒級）
-C:\Python312\python.exe tools\case_package\case_core.py check cases\<案名>\case.json
+python tools/case_package/case_core.py check cases/<案名>/case.json
 
 :: 2) 只看摘要
 ... case_core.py show cases\<案名>\case.json
@@ -43,7 +43,7 @@ C:\Python312\python.exe tools\case_package\case_core.py check cases\<案名>\cas
 ... case_core.py derive cases\<案名>\case.json --out-dir cases\<案名>\_derived
 
 :: 4) 三軸一起跑（正式用法）
-C:\Python312\python.exe tools\case_package\case_package.py cases\<案名>\case.json
+python tools/case_package/case_package.py cases/<案名>/case.json
 ```
 
 退出碼：`0` = 一致性無 error **且**啟用的每一軸都通過自己的驗證。

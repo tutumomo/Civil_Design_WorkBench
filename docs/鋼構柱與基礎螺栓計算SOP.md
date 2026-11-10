@@ -20,11 +20,11 @@
 | 工作台 id | `steel_column`（群組「鋼結構」） |
 | 工作台標題 | 鋼構柱、柱腳基板與基礎螺栓 |
 | 網址 | `http://127.0.0.1:8765/design`（由 `regs_server.py --web` 提供） |
-| CLI 自測 | `C:\Python312\python.exe tools\design\steel_column.py --selftest`（11 項手算對照） |
-| 單次計算 | `C:\Python312\python.exe tools\design\steel_column.py --payload_json payload.json` |
+| CLI 自測 | `python tools/design/steel_column.py --selftest`（11 項手算對照） |
+| 單次計算 | `python tools/design/steel_column.py --payload_json payload.json` |
 | MCP | `design_show("steel_column")` 取輸入範例 → `design_run("steel_column", {...})` |
 | 口語查詢 | `regs_ask`／`design_list`；主題卡「鋼構柱腳」（`tools\regs\topics.json`，11 條 core＋3 條 prereq） |
-| 上架檢核 | `C:\Python312\python.exe tools\selftest\design_launch_check.py steel_column`（G1~G8） |
+| 上架檢核 | `python tools/selftest/design_launch_check.py steel_column`（G1~G8） |
 
 引擎涵蓋 **14 項檢核**：
 

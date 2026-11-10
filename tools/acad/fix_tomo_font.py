@@ -10,12 +10,12 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from project_paths import artcraft_cli
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import acc  # noqa: E402  後端（OpenCADStudio／accoreconsole／cadcraft-cli）由 CIVIL_AI_CAD_BACKEND 決定
 
 TARGET_FONT = "gbenor.shx"
 TARGET_BIGFONT = "CHINESE.SHX"
@@ -23,25 +23,11 @@ TARGET_STYLES = ("TOMO",)
 
 
 def _to_dxf(src: Path, dst: Path) -> Path:
-    cc = artcraft_cli("CADCraft")
-    if not cc:
-        raise SystemExit("找不到 cadcraft-cli，無法轉 DWG→DXF")
-    p = subprocess.run([cc, "convert", str(src), str(dst)],
-                       capture_output=True, text=True)
-    if p.returncode != 0 or not dst.exists():
-        raise SystemExit("cadcraft convert（DWG→DXF）失敗：\n" + (p.stderr or "")[-800:])
-    return dst
+    return Path(acc.to_dxf(str(src), str(dst)))
 
 
 def _to_dwg(src: Path, dst: Path) -> Path:
-    cc = artcraft_cli("CADCraft")
-    if not cc:
-        raise SystemExit("找不到 cadcraft-cli，無法轉 DXF→DWG")
-    p = subprocess.run([cc, "convert", str(src), str(dst)],
-                       capture_output=True, text=True)
-    if p.returncode != 0 or not dst.exists():
-        raise SystemExit("cadcraft convert（DXF→DWG）失敗：\n" + (p.stderr or "")[-800:])
-    return dst
+    return Path(acc.to_dwg(str(src), str(dst)))
 
 
 def patch_dxf(dxf: Path, apply: bool) -> dict:

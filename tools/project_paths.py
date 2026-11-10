@@ -330,6 +330,25 @@ def opencadstudio_exe() -> str | None:
     if p and p.is_file():
         return str(p)
 
+    # Windows：MSI／自行編譯安裝的版本不固定資料夾名（實測為「Open CAD Studio」，有空格），
+    # 且優先於 ~/.local/bin 下舊 portable 的 .cmd 包裝。不寫死路徑：只依環境變數指到的
+    # 安裝根目錄，用「忽略空格與大小寫」的名稱比對找資料夾，再找其中的 OpenCADStudio.exe。
+    if os.name == "nt":
+        roots = [os.environ.get(k) for k in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)")]
+        local = os.environ.get("LOCALAPPDATA")
+        if local:
+            roots += [local, str(Path(local) / "Programs")]
+        seen = set()
+        for root in roots:
+            if not root or root in seen or not Path(root).is_dir():
+                continue
+            seen.add(root)
+            for d in sorted(Path(root).iterdir()):
+                if d.is_dir() and d.name.replace(" ", "").lower().startswith("opencadstudio"):
+                    c = d / "OpenCADStudio.exe"
+                    if c.is_file():
+                        return str(c)
+
     names = ["opencadstudio.exe", "opencadstudio.cmd", "opencadstudio"]
     home = Path.home()
     for n in names:

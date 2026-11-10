@@ -74,7 +74,7 @@ Civil_Design_WorkBench/
 ├── docs/                   # Durable engineering knowledge, SOPs, and pitfall index (docs/經驗索引_INDEX.md)
 └── tools/                  # Deterministic Python scripts & engines
     ├── a3_sheet/           # A3 drawing layout (make_sheet.py) & gate QC (check_delivery.py E1~E18)
-    ├── acad/               # Headless AutoCAD / CADCraft CLI wrappers (acc.py, ctb.py)
+    ├── acad/               # Unified headless CAD entry (acc.py: OpenCADStudio default, accoreconsole/CADCraft fallback) + ctb.py
     ├── boq/                # Budget sheet generator (boq_build.py) & price audit (price_audit.py)
     ├── box_section/        # Box culvert cross section & rebar generator (make_box_section.py)
     ├── case_package/       # Unified case model (case_core.py, qty_models.py, case_package.py)
@@ -100,7 +100,7 @@ Civil_Design_WorkBench/
   - RC Design: Uniform 6% lap and loss allowance across project (`rc_design.LAP_ALLOWANCE = 0.06`).
   - Retaining Wall Rebar: Strict wall-type dispatch (`gravity`/`semigravity` nominal rebar; `cantilever` flexural; `counterfort`/`anchored`/`mse` structural components).
 - **Headless CAD Execution**:
-  - Background CAD tasks (DWG publishing, conversion) strictly use headless CLI (`accoreconsole` or `CADCraft CLI`).
+  - Background CAD tasks (DWG publishing, conversion) go through `tools/acad/acc.py`; default backend is OpenCADStudio (`--http` on demand; exe resolved by `project_paths.opencadstudio_exe()`, never hardcode its path), fallback `accoreconsole`/`CADCraft CLI` via `CIVIL_AI_CAD_BACKEND=cadcraft`. Always eyeball the PDF's Chinese text after publishing.
   - Do NOT automate or script CadCraft Studio GUI.
 - **Import Priority**:
   - In scripts combining geometry and imagery, follow import order:

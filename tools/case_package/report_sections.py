@@ -411,631 +411,645 @@ def _attach_section_figure(out, case):
         out.setdefault("drawings", {})["figures"] = figures
 
 
-def _design_sections(model, q, case):
-    """由設計計算模組自動產生報告第 6／7／11 章的內容。
+def _sections_slope(out, q, case):
+    """報告段落：邊坡（由 _design_sections 分派）。"""
+    sr = SS.analyse(q)
+    checks = []
+    for c in sr["checks"]:
+        checks.append({
+            "item": c["item"],
+            "requirement": ("≥ %.1f" % c["required"]) if c["required"] is not None else "（不適用）",
+            "value": "%.3f" % c["value"],
+            "verdict": _verdict(c["ok"]) if c["required"] is not None else "參考",
+        })
+    out["stability"] = {
+        "checks": checks,
+        "notes": [
+            "檢核依據水土保持技術規範第 73 條：%s、%s → 最小安全係數 %.1f。"
+            % (sr["stage"], sr["condition"], sr["FS_required"]),
+            "分析方法：無限邊坡法（FS=%.3f）＋圓弧滑動 Fellenius 坡趾圓（FS=%.3f）。"
+            % (sr["infinite"]["FS"], sr["circular"]["FS"]),
+            "無限邊坡法適用於滑動面平行坡面、坡長遠大於深度之情況；無凝聚性土壤的"
+            "臨界滑動面即為平行坡面之無限長平面，故 c=0 時本法為理論解。",
+            "綜合判定：%s。" % ("全部符合" if sr["ok"] else "有未符合項，須緩坡、設平台或加勁"),
+            "土工參數 γ=%.1f kN/m³、φ=%.1f°、c=%.1f kPa、地下水位比例 %.2f；均為%s，"
+            "正式設計前須以地質鑽探結果重算。" % (
+                sr["unit_weight_kn_m3"], sr["friction_deg"], sr["cohesion_kpa"],
+                sr["groundwater_ratio"],
+                "設計採用值" if case.get("soil") else "假設值"),
+        ],
+    }
 
-    沒有這一段時，這些章節在報告裡是「需人工補」的佔位符 —— 但 FS、Pa、q_max、
-    Q_cap、h_n 其實都已經算出來了。算得出卻不寫進報告，是整條產線最刺眼的不一致。
-    """
-    out = {}
-    soil = case.get("soil") or {}
+
+
+def _sections_wall(out, q, case):
+    """報告段落：擋土牆（由 _design_sections 分派）。"""
     seism = case.get("seismic") or {}
     kh = float(seism.get("kh", 0.0) or 0.0)
+    res = WS.analyse(q, case)
+    g = res["geometry"]
+    if res["wall_type"] not in ("gravity", "semigravity", "cantilever"):
+        out.update(_advanced_wall_sections(res, q, case))
+        _attach_section_figure(out, case)
+        return out
+    wt = {
+        "gravity": "重力式（梯形斷面）",
+        "semigravity": "半重力式（厚牆＋底板）",
+        "cantilever": "懸臂式（薄牆＋底板）",
+    }.get(res["wall_type"], res["wall_type"])
 
-    # ------------------------------------------------ 邊坡
-    if model == "slope" and SS is not None:
-        sr = SS.analyse(q)
-        checks = []
-        for c in sr["checks"]:
-            checks.append({
-                "item": c["item"],
-                "requirement": ("≥ %.1f" % c["required"]) if c["required"] is not None else "（不適用）",
-                "value": "%.3f" % c["value"],
-                "verdict": _verdict(c["ok"]) if c["required"] is not None else "參考",
-            })
-        out["stability"] = {
-            "checks": checks,
-            "notes": [
-                "檢核依據水土保持技術規範第 73 條：%s、%s → 最小安全係數 %.1f。"
-                % (sr["stage"], sr["condition"], sr["FS_required"]),
-                "分析方法：無限邊坡法（FS=%.3f）＋圓弧滑動 Fellenius 坡趾圓（FS=%.3f）。"
-                % (sr["infinite"]["FS"], sr["circular"]["FS"]),
-                "無限邊坡法適用於滑動面平行坡面、坡長遠大於深度之情況；無凝聚性土壤的"
-                "臨界滑動面即為平行坡面之無限長平面，故 c=0 時本法為理論解。",
-                "綜合判定：%s。" % ("全部符合" if sr["ok"] else "有未符合項，須緩坡、設平台或加勁"),
-                "土工參數 γ=%.1f kN/m³、φ=%.1f°、c=%.1f kPa、地下水位比例 %.2f；均為%s，"
-                "正式設計前須以地質鑽探結果重算。" % (
-                    sr["unit_weight_kn_m3"], sr["friction_deg"], sr["cohesion_kpa"],
-                    sr["groundwater_ratio"],
-                    "設計採用值" if case.get("soil") else "假設值"),
-            ],
-        }
+    out["loads"] = {
+        "items": [_tbl(
+            "載重與土壓力計算表（每公尺牆長）",
+            [("載重項目", 3.6, "left"), ("計算式", 4.6, "left"),
+             ("大小", 2.4, "center"), ("作用點", 3.2, "left")],
+            [["自重 W（混凝土）", "斷面積 %.4f m²/m × 24 kN/m³" % g["area_m2_per_m"],
+              "%.2f kN/m" % res["W_conc_kN_per_m"],
+              "形心 x=%.3f m、y=%.3f m" % (g["centroid"][0], g["centroid"][1])],
+             ["覆土重量 W_s（懸臂式踵板）", "踵板寬 × 牆高 × γs",
+              "%.2f kN/m" % res["W_soil_kN_per_m"],
+              "踵板中央（重力式為 0）"],
+             ["主動土壓力 Pa", "½·Ka·γs·H²（Rankine）",
+              "%.2f kN/m" % res["Pa_kN_per_m"],
+              "牆底以上 %.3f m" % res["y_Pa_m"]],
+             ["地震力 Feq", "W × kh（kh=%.2f，擬靜態法）" % kh,
+              "%.2f kN/m" % res["F_eq_kN_per_m"],
+              "總重形心高度"],
+             ["地下水壓力", "未計（無地下水位資料）", "—", "—"]],
+            note="土壓力採 Rankine 理論、不計牆背摩擦（偏保守）；填土面假設水平、無超載。")]
+        ,
+        "notes": [
+            "牆型：%s；斷面積 %.4f m²/m、自重 %.2f kN/m。" % (
+                wt, g["area_m2_per_m"], res["W_conc_kN_per_m"]),
+            "主動土壓力係數 Ka = (1−sinφ)/(1+sinφ) = %.4f（φ=%.0f°）。" % (
+                res["Ka"], res["soil"]["phi_deg"]),
+            "水土保持技術規範第 119 條明列地震力為必要作用力；本計算採擬靜態法（W×kh），"
+            "kh=%.2f%s。" % (kh, "（未辦地震工況，kh=0）" if kh == 0 else ""),
+        ],
+    }
 
-    # ------------------------------------------------ 擋土牆
-    if model == "wall" and WS is not None:
-        res = WS.analyse(q, case)
-        g = res["geometry"]
-        if res["wall_type"] not in ("gravity", "semigravity", "cantilever"):
-            out.update(_advanced_wall_sections(res, q, case))
-            _attach_section_figure(out, case)
-            return out
-        wt = {
-            "gravity": "重力式（梯形斷面）",
-            "semigravity": "半重力式（厚牆＋底板）",
-            "cantilever": "懸臂式（薄牆＋底板）",
-        }.get(res["wall_type"], res["wall_type"])
+    checks = []
+    for c in res["checks"]:
+        lim = c["limit"]
+        if isinstance(lim, (tuple, list)):
+            req = "%.3f ～ %.3f m" % (lim[0], lim[1])
+            val = "%.3f m" % c["value"]
+        elif isinstance(lim, str):
+            req = lim
+            val = "%.2f" % c["value"]
+        else:
+            # 比較方向不可一律寫「≥」：承載應力是「≤ 容許值」。
+            # 由檢核項目字串判斷（analyse() 的 item 已含「≤」或「≥」語意）。
+            op = "≤" if ("≤" in c["item"] or "最大" in c["item"]) else "≥"
+            req = "%s %.2f" % (op, lim)
+            val = "%.2f" % c["value"]
+        checks.append({"item": c["item"], "requirement": req,
+                       "value": val, "verdict": _verdict(c["ok"])})
+    out["stability"] = {
+        "checks": checks,
+        "notes": [
+            "檢核依據水土保持技術規範第 120 條；工況：%s。" % (
+                "地震（kh=%.2f）" % kh if kh > 0 else "常時"),
+            "綜合判定：%s。" % ("全部符合" if res["pass"] else "有未符合項，須調整斷面"),
+            "土工參數 γ=%.1f kN/m³、φ=%.0f°、c=%.1f kPa、容許承載力 %.0f kPa、"
+            "基底摩擦係數 %.2f；均為%s，正式設計前須以地質鑽探結果重算。" % (
+                res["soil"]["gamma"], res["soil"]["phi_deg"], res["soil"]["c_kpa"],
+                res["soil"]["allowable_bearing_kpa"], res["soil"]["base_friction"],
+                "設計採用值" if case.get("soil") else "假設值"),
+        ],
+    }
 
-        out["loads"] = {
-            "items": [_tbl(
-                "載重與土壓力計算表（每公尺牆長）",
-                [("載重項目", 3.6, "left"), ("計算式", 4.6, "left"),
-                 ("大小", 2.4, "center"), ("作用點", 3.2, "left")],
-                [["自重 W（混凝土）", "斷面積 %.4f m²/m × 24 kN/m³" % g["area_m2_per_m"],
-                  "%.2f kN/m" % res["W_conc_kN_per_m"],
-                  "形心 x=%.3f m、y=%.3f m" % (g["centroid"][0], g["centroid"][1])],
-                 ["覆土重量 W_s（懸臂式踵板）", "踵板寬 × 牆高 × γs",
-                  "%.2f kN/m" % res["W_soil_kN_per_m"],
-                  "踵板中央（重力式為 0）"],
-                 ["主動土壓力 Pa", "½·Ka·γs·H²（Rankine）",
-                  "%.2f kN/m" % res["Pa_kN_per_m"],
-                  "牆底以上 %.3f m" % res["y_Pa_m"]],
-                 ["地震力 Feq", "W × kh（kh=%.2f，擬靜態法）" % kh,
-                  "%.2f kN/m" % res["F_eq_kN_per_m"],
-                  "總重形心高度"],
-                 ["地下水壓力", "未計（無地下水位資料）", "—", "—"]],
-                note="土壓力採 Rankine 理論、不計牆背摩擦（偏保守）；填土面假設水平、無超載。")]
-            ,
-            "notes": [
-                "牆型：%s；斷面積 %.4f m²/m、自重 %.2f kN/m。" % (
-                    wt, g["area_m2_per_m"], res["W_conc_kN_per_m"]),
-                "主動土壓力係數 Ka = (1−sinφ)/(1+sinφ) = %.4f（φ=%.0f°）。" % (
-                    res["Ka"], res["soil"]["phi_deg"]),
-                "水土保持技術規範第 119 條明列地震力為必要作用力；本計算採擬靜態法（W×kh），"
-                "kh=%.2f%s。" % (kh, "（未辦地震工況，kh=0）" if kh == 0 else ""),
-            ],
-        }
-
-        checks = []
-        for c in res["checks"]:
-            lim = c["limit"]
-            if isinstance(lim, (tuple, list)):
-                req = "%.3f ～ %.3f m" % (lim[0], lim[1])
-                val = "%.3f m" % c["value"]
-            elif isinstance(lim, str):
-                req = lim
-                val = "%.2f" % c["value"]
-            else:
-                # 比較方向不可一律寫「≥」：承載應力是「≤ 容許值」。
-                # 由檢核項目字串判斷（analyse() 的 item 已含「≤」或「≥」語意）。
-                op = "≤" if ("≤" in c["item"] or "最大" in c["item"]) else "≥"
-                req = "%s %.2f" % (op, lim)
-                val = "%.2f" % c["value"]
-            checks.append({"item": c["item"], "requirement": req,
-                           "value": val, "verdict": _verdict(c["ok"])})
-        out["stability"] = {
-            "checks": checks,
-            "notes": [
-                "檢核依據水土保持技術規範第 120 條；工況：%s。" % (
-                    "地震（kh=%.2f）" % kh if kh > 0 else "常時"),
-                "綜合判定：%s。" % ("全部符合" if res["pass"] else "有未符合項，須調整斷面"),
-                "土工參數 γ=%.1f kN/m³、φ=%.0f°、c=%.1f kPa、容許承載力 %.0f kPa、"
-                "基底摩擦係數 %.2f；均為%s，正式設計前須以地質鑽探結果重算。" % (
-                    res["soil"]["gamma"], res["soil"]["phi_deg"], res["soil"]["c_kpa"],
-                    res["soil"]["allowable_bearing_kpa"], res["soil"]["base_friction"],
-                    "設計採用值" if case.get("soil") else "假設值"),
-            ],
-        }
-
-        face = float(q.get("face_area_m2", 0) or 0)
-        weep = int(float(q.get("weep_hole_count", 0) or 0))
-        joint = int(float(q.get("expansion_joint_count", 0) or 0))
-        # 第 8 章：構材配筋設計
-        if RC is not None:
-            if res["wall_type"] in ("gravity", "semigravity"):
-                mass = RC.design_mass_wall_steel(q, res)
-                rows = []
-                for item in mass["rows"]:
-                    _is_face = "牆面" in item["item"]
-                    rows.append([
-                        item["item"],
-                        "%s@%d" % (mass["face_bar"] if _is_face else mass["base_bar"],
-                                   int(mass["face_spacing_mm"] if _is_face
-                                       else mass["base_spacing_mm"])),
-                        "%.0f" % item["As_mm2"],
-                        "%.2f" % item["kg_per_m"]])
-                _L = float(q.get("length_m") or 0)
-                out["reinforcement"] = {
-                    "notes": [
-                        "本牆為**%s**擋土牆，靠自重維持穩定，牆身不以撓曲配筋控制；"
-                        "配筋僅供溫度收縮與構造需求。" % (
-                            "重力式" if res["wall_type"] == "gravity" else "半重力式"),
-                        "構造鋼筋：牆面（露出側）%s@%d（垂直向＋水平向，單面雙向），底部縱向 %s@%d，"
-                        "保護層 %.0f mm。" % (
-                            mass["face_bar"], int(mass["face_spacing_mm"]),
-                            mass["base_bar"], int(mass["base_spacing_mm"]),
-                            float((RC.CONCRETE or {}).get("cover_mm", 75.0))),
-                        "溫度鋼筋比 ρ = %.5f（以 %.0f mm 有效表層計），下限 %.3f：%s。" % (
-                            mass["temperature_ratio"], mass["surface_mm"],
-                            mass["temperature_min"], "符合" if mass["ok"] else "不足"),
-                        "鋼筋量 %.2f kg/m（已含 %.0f%% 搭接損耗）× 牆長 %.1f m = %.1f kg。" % (
-                            mass["total_kg_per_m"],
-                            mass["lap_allowance"] * 100.0, _L,
-                            mass["total_kg_per_m"] * _L),
-                        "參考工作簿 `tools.excel\\擋土牆安定分析.mod.xls`：重力式／半重力式牆身不配撓曲鋼筋，"
-                        "僅在設止滑榫（b>0）時設計榫部鋼筋；本計算未設止滑榫。",
-                    ],
-                    "items": [_tbl(
-                        "構造鋼筋配置與鋼筋量表",
-                        [("位置", 5.2, "left"), ("鋼筋", 3.0, "center"),
-                         ("As（mm²/m）", 2.6, "center"), ("kg/m", 2.2, "center")],
-                        rows,
-                        note="重力式／半重力式不設受力主筋；配筋量由溫度收縮與構造需求控制，"
-                             "非由強度計算控制。")],
-                }
-            else:
-                dd = RC.design_cantilever_stem(q, res)
-                mm, ss, ww = dd["main"], dd["shear"], dd["crack"]
-                base = RC.design_base_slab(q, res)          # 底板（趾板／踵板）
-                base_rows = []
-                if base:
-                    for bm in base["members"]:
-                        bf, bs2, bw = bm["main"], bm["shear"], bm["crack"]
-                        base_rows.append([
-                            bm["member"],
-                            "M=%.2f kN·m/m" % bm["M_service_kNm"],
-                            "%s@%d（%.0f）" % (bf.get("bar"), bf.get("spacing_mm"),
-                                             bf.get("As_prov_mm2", 0)),
-                            _verdict(bm["ok"])])
-                _wms = RC.wall_min_steel(1000.0, float(q["stem_thickness_m"]) * 1000.0)
-                out["reinforcement"] = {
-                    "items": [_tbl(
-                        "配筋設計結果表（莖板牆底控制斷面）",
-                        [("項目", 3.8, "left"), ("計算值", 3.2, "center"),
-                         ("要求／採用", 3.8, "center"), ("判定", 2.2, "center")],
-                        [["服務彎矩 M", "%.2f kN·m/m" % dd["M_service_kNm"], "—", "—"],
-                         ["設計彎矩 Mu（×1.7）", "%.2f kN·m/m" % dd["Mu_kNm"], "—", "—"],
-                         ["撓曲鋼筋 As", "需求 %.0f mm²/m" % mm.get("As_req_mm2", 0),
-                          "採 %s@%d（%.0f）" % (mm.get("bar"), mm.get("spacing_mm"),
-                                               mm.get("As_prov_mm2", 0)),
-                          _verdict(mm.get("ok"))],
-                         ["最小鋼筋 As,min", "%.0f mm²/m" % mm.get("As_min_mm2", 0),
-                          "控制於「%s」" % mm.get("governed_by", ""), "—"],
-                         ["斷面類型（§3.4.4）",
-                          "εt = %.4f" % mm.get("epsilon_t", 0),
-                          "φ = %.2f（%s）" % (mm.get("phi", 0.9), mm.get("phi_basis", "")),
-                          _verdict(mm.get("phi", 0.9) >= 0.9)],
-                         ["撓曲強度 φMn", "%.2f kN·m" % mm.get("phiMn_kNm", 0),
-                          "≥ Mu = %.2f" % dd["Mu_kNm"], _verdict(mm.get("ok"))],
-                         ["剪力 φVc", "%.2f kN" % ss.get("phiVc_kN", 0),
-                          "≥ Vu = %.2f" % dd["Vu_kN"], _verdict(ss.get("ok"))],
-                         ["裂縫寬度 w", ("%.3f mm" % ww["w_mm"]) if ww.get("w_mm") is not None else "—",
-                          "≤ %.1f mm" % ww.get("limit_mm", 0.3), _verdict(ww.get("ok"))],
-                         ["分布筋", "%s@%d" % (dd.get("dist_bar"), dd.get("dist_spacing_mm")),
-                          "%.0f mm²/m" % dd.get("dist_As_mm2", 0), "—"]] + base_rows,
-                        note="主筋置於受拉面（牆背側）、分布筋置於受壓面；保護層 75 mm。"
-                             "載重組合採 1.7×（土壓力）簡化放大。"
-                             "底板另列：受壓長度 %.3f m、趾端 q=%.2f、踵端 q=%.2f kPa；"
-                             "控制構材為 %s。" % (
-                                 (base or {}).get("Lp_m", 0),
-                                 (base or {}).get("q_toe_kPa", 0),
-                                 (base or {}).get("q_heel_kPa", 0),
-                                 (base or {}).get("governing", "—")))],
-                    "notes": [
-                        "配筋依據《混凝土結構設計規範》（內政部 100.06.09 發布）："
-                        "撓曲 §3.4.4 φ 依淨拉應變判定、最小鋼筋 §3.6.1、"
-                        "剪力 §4.4.1.1 Vc=0.53√fc′·bw·d（φ=0.75）。",
-                        "**牆之最小鋼筋量依 §7.2.2 指向 §7.4.3**：水平鋼筋比 ρt=0.0025 → "
-                        "t=%.0f mm 時需 %.0f mm²/m，實配 %s@%d（%.0f mm²/m）；"
-                        "垂直鋼筋比 ρl=0.0015 → 需 %.0f mm²/m，實配 %s@%d（%.0f mm²/m）。"
-                        "§7.4.4：牆厚 ≥25 cm 時每一方向鋼筋須分兩層設置（本牆 %.0f mm）。" % (
-                            float(q["stem_thickness_m"]) * 1000.0,
-                            _wms["As_horizontal_min_mm2"],
-                            dd.get("dist_bar"), dd.get("dist_spacing_mm"),
-                            dd.get("dist_As_mm2", 0),
-                            _wms["As_vertical_min_mm2"],
-                            mm.get("bar"), mm.get("spacing_mm"),
-                            mm.get("As_prov_mm2", 0),
-                            float(q["stem_thickness_m"]) * 1000.0),
-                        "⚠ §3.7.2 的最大鋼筋間距規定僅適用**梁與單向版**，不適用於牆；"
-                        "牆適用第 7 章。仍須由合格技師覆核。",
-                        "底板（趾板／踵板）已於本表一併設計：以牆身為固定端之懸臂板考慮，"
-                        "依基底反力 q(x) 與覆土／自重之淨壓力積分求彎矩。實測踵板彎矩 %.1f kN·m/m "
-                        "確實大於莖板的 %.1f kN·m/m，故底板配筋由踵板控制。" % (
-                            max([m["M_service_kNm"] for m in (base or {"members": [{"M_service_kNm": 0}]})["members"]] or [0]),
-                            dd["M_service_kNm"]),
-                        "⚠ 仍待補：錨定長度、搭接長度、剪力筋（目前皆無剪力筋需求）、"
-                        "地震工況之載重組合（目前僅常時）。",
-                        "⚠ 牆身厚 %.2f m 係由裂縫寬度控制選定；若配筋間距調整，須重跑本表。" % float(q["stem_thickness_m"]),
-                    ],
-                }
-
-        # 第 9 章：斷面尺寸採用依據（原本是「需人工補」，其實就是穩定分析的選配理由）
-        out["comparison"] = {
-            "notes": [
-                "斷面尺寸非依慣例值選定，而是以 tools/design/retaining_wall.py 的穩定分析"
-                "（水土保持技術規範第 119~120 條）逐項檢核後決定：",
-                "牆型 %s，H=%.2f m、T=%.2f m、底寬 BL=%.2f m%s，斷面積 %.4f m²/m。" % (
-                    wt, g["H"], g["T"], g["BL"],
-                    "" if res["wall_type"] == "gravity" else "、底板厚 BT=%.2f m" % g["BT"],
-                    g["area_m2_per_m"]),
-                "選配準則：在「b×h／斷面積最小」的前提下，取第一組全部檢核通過之斷面；"
-                "滑動 FS=%.2f、傾倒 FS=%.2f、合力作用點 %.3f m、q_max=%.1f kPa。" % (
-                    next((c["value"] for c in res["checks"] if c["item"].startswith("滑動")), 0),
-                    next((c["value"] for c in res["checks"] if c["item"].startswith("傾倒")), 0),
-                    res["x_R_m"], res["q_max_kPa"]),
-                "若地質鑽探結果與上述假設參數不同，應以實際參數重跑 size_section() 後更新本表。",
-            ],
-        }
-
-        out["drainage"] = {
-            "checks": [
-                {"item": "排水孔直徑", "requirement": "≥ 5 cm（第121條）",
-                 "value": "Ø%.0f cm" % (float(q.get("weep_diameter_m", 0.05)) * 100),
-                 "verdict": _verdict(float(q.get("weep_diameter_m", 0.05)) >= 0.05)},
-                {"item": "排水孔密度", "requirement": "每 2 m² 牆面 ≥ 1 孔（第121條）",
-                 "value": "%d 孔 / %.1f m² 牆面" % (weep, face),
-                 "verdict": _verdict(face > 0 and weep >= face / 2.0 - 1e-9)},
-                {"item": "伸縮縫間距", "requirement": "每 20~40 m 一處（第121條）",
-                 "value": "%d 處 / 牆長 %.1f m" % (joint, float(q.get("length_m", 0))),
-                 "verdict": _verdict(joint >= 1)},
-                {"item": "背填透水性", "requirement": "須為透水性良好材料並設反濾層（第121條）",
-                 "value": "級配碎石 %.2f m ＋ 反濾層 %.2f m" % (
-                     float(q.get("backfill_thickness_m", 0.3)), 0.1),
-                 "verdict": "符合"},
-            ],
-            "items": [_tbl(
-                "排水與伸縮縫配置數量表",
-                [("項目", 5.0, "left"), ("數量", 2.6, "center"),
-                 ("單位", 1.8, "center"), ("說明", 4.6, "left")],
-                [["排水孔 Ø%.0f cm" % (float(q.get("weep_diameter_m", 0.05)) * 100),
-                  "%d" % weep, "孔", "每 2 m² 牆面 1 孔（第121條）"],
-                 ["伸縮縫", "%d" % joint, "處", "每 20~40 m 一處（第121條）"],
-                 ["背填級配碎石", "%.2f" % float(q.get("backfill_gravel_m3", 0) or 0), "m³",
-                  "透水性良好材料，分層夯實"],
-                 ["反濾層", "%.2f" % (face * 0.0), "m²", "厚度 0.10 m（示意）"]]),
-            ],
-            "notes": [
-                "排水路徑：牆後背填水 → 反濾層 → 排水孔（洩水管）→ 牆面排出。",
-                "排水孔須設防止阻塞設施（反濾層＋洩水管），出水口不得直接沖刷牆腳。",
-                "伸縮縫採填縫料及止水帶，位置須避開排水孔。",
-            ],
-        }
-
-    # ------------------------------------------------ 箱涵
-    if model == "box_culvert" and BC is not None:
-        hy = case.get("hydraulics") or {}
-        cv = case.get("culvert") or {}
-        res = BC.analyse(q, **_box_culvert_kwargs(case, q))
-        sec = res["section"]
-        hyd = res["hydraulic"]
-        qty = res["quantities"]
-        _tr = res["loads"].get("traffic") or {}
-        _tr_pressure = float(
-            _tr.get("patch_pressure_kpa") or _tr.get("uniform_pressure_kpa") or 0.0
-        )
-        out["loads"] = {
-            "items": [_tbl(
-                "箱涵載重與構架分析輸入表（每公尺涵長）",
-                [("項目", 4.8, "left"), ("計算式／來源", 6.0, "left"),
-                 ("數值", 2.6, "center"), ("單位", 1.4, "center")],
-                [
-                    ["車輛活載", res["loads"].get("traffic_label", "—"),
-                     "%.3f" % _tr_pressure, "kN/m²"],
-                    ["車輛載重換算均佈", "總輪載／總寬（僅供對照）",
-                     "%.3f" % float(res["loads"].get("traffic_equivalent_kpa") or 0.0),
-                     "kN/m²"],
-                    ["頂版總向下載重", "覆土γH＋超載＋車輛活載",
-                     "%.3f" % res["loads"]["top_load_kn_m2"], "kN/m²"],
-                    ["底板平均向上反力", "整體垂直力平衡",
-                     "%.3f" % res["loads"]["bottom_reaction_kn_m2"], "kN/m²"],
-                    ["混凝土自重", "外框面積減孔洞 × γc",
-                     "%.3f" % qty["self_weight_kn_m"], "kN/m"],
-                    ["地下水浮力", "γw×基礎以上水頭×外寬",
-                     "%.3f" % qty["uplift_kn_m"], "kN/m"],
-                    ["地震係數 kh", "擬靜態 Mononobe-Okabe 側向增量",
-                     "%.3f" % res["loads"]["seismic_kh"], "-"],
+    face = float(q.get("face_area_m2", 0) or 0)
+    weep = int(float(q.get("weep_hole_count", 0) or 0))
+    joint = int(float(q.get("expansion_joint_count", 0) or 0))
+    # 第 8 章：構材配筋設計
+    if RC is not None:
+        if res["wall_type"] in ("gravity", "semigravity"):
+            mass = RC.design_mass_wall_steel(q, res)
+            rows = []
+            for item in mass["rows"]:
+                _is_face = "牆面" in item["item"]
+                rows.append([
+                    item["item"],
+                    "%s@%d" % (mass["face_bar"] if _is_face else mass["base_bar"],
+                               int(mass["face_spacing_mm"] if _is_face
+                                   else mass["base_spacing_mm"])),
+                    "%.0f" % item["As_mm2"],
+                    "%.2f" % item["kg_per_m"]])
+            _L = float(q.get("length_m") or 0)
+            out["reinforcement"] = {
+                "notes": [
+                    "本牆為**%s**擋土牆，靠自重維持穩定，牆身不以撓曲配筋控制；"
+                    "配筋僅供溫度收縮與構造需求。" % (
+                        "重力式" if res["wall_type"] == "gravity" else "半重力式"),
+                    "構造鋼筋：牆面（露出側）%s@%d（垂直向＋水平向，單面雙向），底部縱向 %s@%d，"
+                    "保護層 %.0f mm。" % (
+                        mass["face_bar"], int(mass["face_spacing_mm"]),
+                        mass["base_bar"], int(mass["base_spacing_mm"]),
+                        float((RC.CONCRETE or {}).get("cover_mm", 75.0))),
+                    "溫度鋼筋比 ρ = %.5f（以 %.0f mm 有效表層計），下限 %.3f：%s。" % (
+                        mass["temperature_ratio"], mass["surface_mm"],
+                        mass["temperature_min"], "符合" if mass["ok"] else "不足"),
+                    "鋼筋量 %.2f kg/m（已含 %.0f%% 搭接損耗）× 牆長 %.1f m = %.1f kg。" % (
+                        mass["total_kg_per_m"],
+                        mass["lap_allowance"] * 100.0, _L,
+                        mass["total_kg_per_m"] * _L),
+                    "參考工作簿 `tools.excel\\擋土牆安定分析.mod.xls`：重力式／半重力式牆身不配撓曲鋼筋，"
+                    "僅在設止滑榫（b>0）時設計榫部鋼筋；本計算未設止滑榫。",
                 ],
-                note="構架分析採平面二維剛架、每公尺涵長；土壓力作用於外牆，內水壓力作用於內側。",
-            )],
-            "notes": [
-                "箱涵為 %d 孔 %.2f m × %.2f m，外寬 %.2f m、外高 %.2f m；"
-                "以頂版、底板、外牆及 %d 道內隔牆建立平面剛架。"
-                % (sec["cell_count"], sec["clear_width_m"], sec["clear_height_m"],
-                   sec["outer_width_m"], sec["outer_height_m"],
-                   max(0, sec["cell_count"] - 1)),
-                "混凝土自重以精確斷面積計算；底板反力由整體垂直力平衡求得，"
-                "避免把箱涵當成個別梁板而漏掉軸力。",
-                "土工參數 γ=%.1f kN/m³、φ=%.1f°；%s。"
-                % (float(cv.get("soil_unit_weight_kn_m3") or 18.0),
-                   float(cv.get("soil_phi_deg") or 30.0),
-                   "採案件指定值" if cv else "採模組預設假設值，正式設計前須以鑽探替換"),
-                "車載只作用於頂版；局部輪壓不另加側向土壓。"
-                "車載與其他載重目前共用載重係數 %.2f，尚未拆分靜／活載因數。"
-                % float(cv.get("load_factor") or 1.7),
-            ],
-        }
-
-        checks = []
-        for c in res["checks"]:
-            item = c["item"]
-            lim = c["limit"]
-            if "水力容量" in item:
-                req = "Q_cap ≥ %.3f m³/s" % float(lim)
-            elif "出水高" in item:
-                req = "≤ %.3f m" % float(lim)
-            elif "抗浮" in item:
-                req = "FS ≥ %.2f" % float(lim)
-            elif "承載" in item:
-                req = "≤ %.1f kPa" % float(lim)
-            else:
-                req = "≥ %.2f" % float(lim)
-            checks.append({
-                "item": item,
-                "requirement": req,
-                "value": "%.3f" % float(c["value"]),
-                "verdict": _verdict(c["ok"]),
-            })
-        out["stability"] = {
-            "checks": checks,
-            "notes": [
-                "水力採清水矩形斷面曼寧正常水深；全滿容量僅作上限，"
-                "尚未計入口／出口控制、翼牆與下游尾水。",
-                "結構檢核取各桿件最大絕對彎矩與端部剪力，乘載重係數 %.2f 後做 RC 撓曲、剪力與裂縫檢核。"
-                % float(cv.get("load_factor") or 1.7),
-                "綜合判定：%s。" % ("全部符合" if res["pass"] else "有未符合項，不得交件"),
-            ],
-        }
-
-        reinf_rows = []
-        for e in res["reinforcement"]["elements"]:
-            f = e["flexure"]
-            cr = e["crack"]
-            reinf_rows.append([
-                e["label"],
-                "%s：%.2f kN·m/m" % (e["moment_label"], e["Mu_kNm"]),
-                "%s@%s（%.0f mm²/m）" % (
-                    f.get("bar", "—"), f.get("spacing_mm", "—"),
-                    f.get("As_prov_mm2", 0.0)),
-                "φMn=%.2f；w=%.3f mm；控制=%s" % (
-                    f.get("phiMn_kNm", 0.0),
-                    cr.get("w_mm") if cr.get("w_mm") is not None else 0.0,
-                    f.get("governed_by", "—")),
-                _verdict(e["ok"]),
-            ])
-        dist_rows = []
-        for d in res["reinforcement"].get("distribution") or []:
-            dist_rows.append([
-                d["title"],
-                "%.4f·b·h（總量分兩面）" % float(d["ratio"]),
-                "%s@%s（每面 %.0f mm²/m）" % (
-                    d.get("bar", "—"), d.get("spacing_mm", "—"),
-                    float(d.get("As_prov_mm2") or 0.0)),
-                "需求 %.1f／實配 %.1f mm²/m" % (
-                    float(d.get("As_req_mm2") or 0.0),
-                    float(d.get("As_prov_mm2") or 0.0)),
-                _verdict(d["ok"]),
-            ])
-        _q = res["reinforcement"]["quantity"]
-        out["reinforcement"] = {
-            "items": [
-                _tbl(
-                    "箱涵逐面配筋初步結果表",
-                    [("構材／面", 3.8, "left"), ("控制內力", 4.2, "left"),
-                     ("主筋", 3.6, "center"), ("強度／裂縫", 5.4, "left"),
-                     ("判定", 1.6, "center")],
-                    reinf_rows,
-                    note="保護層 %.0f mm；逐面設計，頂版／底版／外牆／中牆的內外側分開檢核。"
-                    % float(_box_culvert_kwargs(case, q)["cover_mm"]),
-                ),
-                _tbl(
-                    "箱涵縱向分佈筋表",
-                    [("位置", 4.2, "left"), ("鋼筋比", 4.2, "left"),
-                     ("配置", 4.6, "center"), ("As 需求／實配", 4.4, "left"),
-                     ("判定", 1.6, "center")],
-                    dist_rows,
-                    note="版採 0.0018·b·h、牆採 0.0020·b·h；此為總量分置內外兩面，不是每面各一份。",
-                ),
-            ],
-            "notes": [
-                "撓曲、軸彎互制、剪力與裂縫依《混凝土結構設計規範》相關條文計算；"
-                "主筋依實際受拉面定向，不以兩個彎曲方向取較小值。",
-                "鋼筋量依理想化排筋計數：淨 %.2f kg/m，含 %.0f%% 搭接／錨定／損耗後 %.2f kg/m，"
-                "總量 %.1f kg（%.2f t）。"
-                % (float(_q.get("subtotal_kg_per_m") or 0.0),
-                   float(_q.get("loss_rate") or 0.0) * 100.0,
-                   float(_q.get("total_kg_per_m") or 0.0),
-                   float(_q.get("total_kg") or 0.0),
-                   float(_q.get("total_kg") or 0.0) / 1000.0),
-                "目前構架分析只計單一重力＋土水壓載重 case，未建立 D／L／E 分項包絡；"
-                "正式設計須用 tools\\design\\load_combinations.py 擴充多工況。",
-                "牆與厚版的最小鋼筋、裂縫控制及角隅補強仍須由技師依現行規範覆核。",
-            ],
-        }
-
-        out["drainage"] = {
-            "checks": [
-                {"item": "通水容量", "requirement": "Q_cap ≥ %.3f m³/s" % hyd["design_flow_m3s"],
-                 "value": "%.3f m³/s" % hyd["capacity_m3s"],
-                 "verdict": _verdict(hyd["capacity_ok"])},
-                {"item": "正常水深＋出水高", "requirement": "≤ %.2f m" % sec["clear_height_m"],
-                 "value": "%.3f m" % (hyd["normal_depth_m"] + hyd["freeboard_min_m"]),
-                 "verdict": _verdict(hyd["freeboard_ok"])},
-            ],
-            "items": [_tbl(
-                "箱涵水力計算表",
-                [("項目", 5.0, "left"), ("數值", 2.8, "center"),
-                 ("單位", 1.6, "center"), ("說明", 4.8, "left")],
-                [
-                    ["設計流量 Q", "%.3f" % hyd["design_flow_m3s"], "m³/s", "案件指定"],
-                    ["縱坡 S", "%.4f" % float(hy.get("slope") or 0.005), "-", "設計值"],
-                    ["正常水深 h_n", "%.3f" % hyd["normal_depth_m"], "m", "曼寧等速流"],
-                    ["設計流速 V", "%.3f" % hyd["velocity_m_s"], "m/s", "由 Q/A 計算"],
-                    ["福祿數 Fr", "%.3f" % hyd["froude"], "-", "接近 1 表示臨界流"],
-                    ["全滿容量", "%.3f" % hyd["capacity_m3s"], "m³/s", "上限值，非設計容量"],
-                ],
-                note="尚未辦入口／出口控制、涵洞淹沒、尾水與能量損失分析。",
-            )],
-            "notes": [
-                "箱涵水力先以各孔淨空矩形並聯、同一水深之曼寧正常水深計算。",
-                "全滿曼寧容量會高估可接受流量，故本報告不以全滿容量宣稱通過，"
-                "而以設計流量對應之正常水深加最小出水高檢核。",
-                "正式涵洞設計仍須依公路排水設計規範／下水道工程設施標準檢核入口與出口控制。",
-            ],
-        }
-
-        out["comparison"] = {
-            "notes": [
-                "箱涵尺寸依「水力容量與出水高」及「平面構架 RC 內力」兩道檢核共同決定；"
-                "任一項不通過即不得以慣例尺寸出圖。",
-                "採 %d 孔、每孔淨寬 %.2f m、淨高 %.2f m，外寬 %.2f m、外高 %.2f m。"
-                % (sec["cell_count"], sec["clear_width_m"], sec["clear_height_m"],
-                   sec["outer_width_m"], sec["outer_height_m"]),
-                "混凝土淨斷面積 %.3f m²/m、總量 %.2f m³；不含翼牆、保護工與路面。"
-                % (qty["concrete_area_m2_per_m"], qty["concrete_volume_m3"]),
-                "鋼筋設計量：淨 %.2f kg/m、含 %.0f%% 損耗 %.2f kg/m，總量 %.1f kg（%.2f t）。"
-                % (float(qty.get("rebar_kg_per_m_net") or 0.0),
-                   float(qty.get("rebar_loss_rate") or 0.0) * 100.0,
-                   float(qty.get("rebar_kg_per_m") or 0.0),
-                   float(qty.get("rebar_kg_total") or 0.0),
-                   float(qty.get("rebar_ton") or 0.0)),
-                "模板量：每延米 %.2f m²/m，總量 %.2f m²（含兩端端模 %.2f m²）。"
-                % (float(qty.get("formwork_m2_per_m") or 0.0),
-                   float(qty.get("formwork_m2") or 0.0),
-                   float(qty.get("formwork_end_faces_m2") or 0.0)),
-            ],
-        }
-
-    # ------------------------------------------------ 排水溝
-    if model == "channel" and CH is not None:
-        hy = case.get("hydraulics") or {}
-        Q = float(hy.get("design_flow_m3s") or 0.5)
-        S = float(hy.get("slope") or 0.005)
-        n = float(hy.get("manning_n") or CH.DEFAULTS["manning_n"])
-        b = float(q.get("inner_width_m", 0)); h = float(q.get("depth_m", 0))
-        res = CH.analyse(Q, b, h, S, {"manning_n": n})
-
-        out["drainage"] = {
-            "checks": [
-                {"item": c["item"],
-                 "requirement": (c["limit"] if isinstance(c["limit"], str)
-                                 else "≥ %.3f" % c["limit"]),
-                 "value": ("—" if c["value"] is None else
-                           ("%.3f" % c["value"] if isinstance(c["value"], float)
-                            else str(c["value"]))),
-                 "verdict": _verdict(c["ok"])}
-                for c in res["checks"]],
-            "items": [_tbl(
-                "水力計算結果表",
-                [("項目", 5.0, "left"), ("數值", 2.8, "center"),
-                 ("單位", 1.8, "center"), ("說明", 4.4, "left")],
-                [["設計流量 Q", "%.3f" % Q, "m³/s", "設計洪水量（第83條重現期）"],
-                 ["縱坡 S", "%.4f" % S, "—", "%.2f%%" % (S * 100)],
-                 ["曼寧 n", "%.3f" % n, "—", "混凝土粗糙度（第84條僅給公式）"],
-                 ["通水容量 Q_cap", "%.3f" % res["Q_cap_m3s"], "m³/s", "滿水深"],
-                 ["正常水深 h_n", "%.3f" % (res["h_normal_m"] or 0), "m", "設計流量下"],
-                 ["設計流速 V", "%.3f" % (res["V_design_ms"] or 0), "m/s", "第85條 0.8~4.57"],
-                 ["出水高", "%.3f" % res["freeboard_required_m"], "m", "第86條 25% 且 ≥0.20"]]),
-            ],
-            "notes": [
-                "平均流速採曼寧公式 v=(1/n)·R^(2/3)·S^(1/2)（第84條），R=A/P。",
-                "流速上下限依第85條：混凝土／RC 最小 0.8 m/s；混凝土常流水最大 4.57~6.10 m/s。",
-                "出水高依第86條：設計水深 25%，最小值 20 cm。",
-                "綜合判定：%s。" % ("全部符合" if res["pass"] else "有未符合項，須調整斷面或縱坡"),
-                "設計洪水量重現期依第83條：坡地農地 10 年、其他非農業使用 25 年。"
-                "本表流量%s。" % ("已依該條辦理" if hy.get("design_flow_m3s") else "為假設值，尚未辦水文分析"),
-            ],
-        }
-        # 第 11 章加「集水區水文分析」（第 16~19 條）——設計流量的來源
-        catch = case.get("catchment")
-        if catch and HY is not None:
-            try:
-                hr2 = HY.design_flow(
-                    float(catch["P_mm"]), float(catch["T_year"]),
-                    float(catch["area_ha"]), catch.get("condition", "丘陵地或森林"),
-                    bool(catch.get("developed")), bool(catch.get("upper_c")),
-                    float(catch.get("l_m", 100.0)), float(catch.get("v_ms", 0.4)),
-                    float(catch.get("L_km", 0.0)), float(catch.get("H_km", 0.0)))
-                out["drainage"]["items"].insert(0, _tbl(
-                    "集水區水文分析結果表",
-                    [("項目", 4.6, "left"), ("數值", 2.8, "center"),
-                     ("單位", 1.8, "center"), ("依據", 4.8, "left")],
-                    [["年平均降雨量 P", "%.0f" % hr2["P_mm"], "mm", "等雨量線圖／雨量資料（第16條）"],
-                     ["重現期距 T", "%.0f" % hr2["T_year"], "年", "第83條：非農業 25 年"],
-                     ["集水區面積 A", "%.3f" % hr2["area_ha"], "ha", "≤1000 ha 得用合理化公式（第17條）"],
-                     ["集流時間 tc", "%.2f" % hr2["tc_min"], "分", "tc=t1+t2（第19條）"],
-                     ["降雨強度 I", "%.2f" % hr2["I_mm_hr"], "mm/hr", "第16條（推估值為下限）"],
-                     ["逕流係數 C", "%.3f" % hr2["C"], "-",
-                      "%s（第18條）" % hr2["condition"]],
-                     ["洪峰流量 Qp", "%.4f" % hr2["Qp_m3s"], "m³/s", "Qp=(1/360)CIA（第17條）"]],
-                    note="本表為斷面選配的流量來源；第16條明定強度推估值僅為下限。"))
-                out["drainage"]["notes"].insert(0,
-                    "設計流量由合理化公式計算（第17條）：Qp=(1/360)×%.3f×%.2f×%.3f="
-                    "%.4f m³/s。集流時間 %.2f 分（第19條）、降雨強度 %.2f mm/hr（第16條）。"
-                    % (hr2["C"], hr2["I_mm_hr"], hr2["area_ha"], hr2["Qp_m3s"],
-                       hr2["tc_min"], hr2["I_mm_hr"]))
-            except Exception as ex:
-                out["drainage"]["notes"].insert(0,
-                    "集水區水文分析未完成：%s" % ex)
-
-        # 第 8 章：溝壁配筋
-        if RC is not None:
-            dd = RC.design_channel_wall(q, res)
+                "items": [_tbl(
+                    "構造鋼筋配置與鋼筋量表",
+                    [("位置", 5.2, "left"), ("鋼筋", 3.0, "center"),
+                     ("As（mm²/m）", 2.6, "center"), ("kg/m", 2.2, "center")],
+                    rows,
+                    note="重力式／半重力式不設受力主筋；配筋量由溫度收縮與構造需求控制，"
+                         "非由強度計算控制。")],
+            }
+        else:
+            dd = RC.design_cantilever_stem(q, res)
             mm, ss, ww = dd["main"], dd["shear"], dd["crack"]
+            base = RC.design_base_slab(q, res)          # 底板（趾板／踵板）
+            base_rows = []
+            if base:
+                for bm in base["members"]:
+                    bf, bs2, bw = bm["main"], bm["shear"], bm["crack"]
+                    base_rows.append([
+                        bm["member"],
+                        "M=%.2f kN·m/m" % bm["M_service_kNm"],
+                        "%s@%d（%.0f）" % (bf.get("bar"), bf.get("spacing_mm"),
+                                         bf.get("As_prov_mm2", 0)),
+                        _verdict(bm["ok"])])
+            _wms = RC.wall_min_steel(1000.0, float(q["stem_thickness_m"]) * 1000.0)
             out["reinforcement"] = {
                 "items": [_tbl(
-                    "配筋設計結果表（溝壁牆底控制斷面）",
+                    "配筋設計結果表（莖板牆底控制斷面）",
                     [("項目", 3.8, "left"), ("計算值", 3.2, "center"),
                      ("要求／採用", 3.8, "center"), ("判定", 2.2, "center")],
-                    [["服務彎矩 M", "%.3f kN·m/m" % dd["M_service_kNm"], "—", "—"],
-                     ["設計彎矩 Mu（×1.7）", "%.3f kN·m/m" % dd["Mu_kNm"], "—", "—"],
+                    [["服務彎矩 M", "%.2f kN·m/m" % dd["M_service_kNm"], "—", "—"],
+                     ["設計彎矩 Mu（×1.7）", "%.2f kN·m/m" % dd["Mu_kNm"], "—", "—"],
                      ["撓曲鋼筋 As", "需求 %.0f mm²/m" % mm.get("As_req_mm2", 0),
                       "採 %s@%d（%.0f）" % (mm.get("bar"), mm.get("spacing_mm"),
-                                           mm.get("As_prov_mm2", 0)), _verdict(mm.get("ok"))],
+                                           mm.get("As_prov_mm2", 0)),
+                      _verdict(mm.get("ok"))],
+                     ["最小鋼筋 As,min", "%.0f mm²/m" % mm.get("As_min_mm2", 0),
+                      "控制於「%s」" % mm.get("governed_by", ""), "—"],
                      ["斷面類型（§3.4.4）",
                       "εt = %.4f" % mm.get("epsilon_t", 0),
                       "φ = %.2f（%s）" % (mm.get("phi", 0.9), mm.get("phi_basis", "")),
                       _verdict(mm.get("phi", 0.9) >= 0.9)],
                      ["撓曲強度 φMn", "%.2f kN·m" % mm.get("phiMn_kNm", 0),
-                      "≥ Mu = %.3f" % dd["Mu_kNm"], _verdict(mm.get("ok"))],
+                      "≥ Mu = %.2f" % dd["Mu_kNm"], _verdict(mm.get("ok"))],
                      ["剪力 φVc", "%.2f kN" % ss.get("phiVc_kN", 0),
                       "≥ Vu = %.2f" % dd["Vu_kN"], _verdict(ss.get("ok"))],
                      ["裂縫寬度 w", ("%.3f mm" % ww["w_mm"]) if ww.get("w_mm") is not None else "—",
                       "≤ %.1f mm" % ww.get("limit_mm", 0.3), _verdict(ww.get("ok"))],
                      ["分布筋", "%s@%d" % (dd.get("dist_bar"), dd.get("dist_spacing_mm")),
-                      "%.0f mm²/m" % (dd.get("dist_As_mm2") or 0), "—"]],
-                    note="溝壁以懸臂板考慮，控制載重為溝內滿水壓力。")],
+                      "%.0f mm²/m" % dd.get("dist_As_mm2", 0), "—"]] + base_rows,
+                    note="主筋置於受拉面（牆背側）、分布筋置於受壓面；保護層 75 mm。"
+                         "載重組合採 1.7×（土壓力）簡化放大。"
+                         "底板另列：受壓長度 %.3f m、趾端 q=%.2f、踵端 q=%.2f kPa；"
+                         "控制構材為 %s。" % (
+                             (base or {}).get("Lp_m", 0),
+                             (base or {}).get("q_toe_kPa", 0),
+                             (base or {}).get("q_heel_kPa", 0),
+                             (base or {}).get("governing", "—")))],
                 "notes": [
-                    "配筋依據：撓曲 φMn ≥ Mu、剪力 φVc ≥ Vu、最小鋼筋、裂縫寬度 ≤ 0.3 mm。",
-                    "⚠ 公式採 **ACI 318 常用式**；《混凝土結構設計規範》條文尚未取得（版次待核），須技師覆核。",
-                    "⚠ **僅計溝內水壓力**：溝外側土壓力須俟土工參數確定後另計；溝底未做承載檢核。",
+                    "配筋依據《混凝土結構設計規範》（內政部 100.06.09 發布）："
+                    "撓曲 §3.4.4 φ 依淨拉應變判定、最小鋼筋 §3.6.1、"
+                    "剪力 §4.4.1.1 Vc=0.53√fc′·bw·d（φ=0.75）。",
+                    "**牆之最小鋼筋量依 §7.2.2 指向 §7.4.3**：水平鋼筋比 ρt=0.0025 → "
+                    "t=%.0f mm 時需 %.0f mm²/m，實配 %s@%d（%.0f mm²/m）；"
+                    "垂直鋼筋比 ρl=0.0015 → 需 %.0f mm²/m，實配 %s@%d（%.0f mm²/m）。"
+                    "§7.4.4：牆厚 ≥25 cm 時每一方向鋼筋須分兩層設置（本牆 %.0f mm）。" % (
+                        float(q["stem_thickness_m"]) * 1000.0,
+                        _wms["As_horizontal_min_mm2"],
+                        dd.get("dist_bar"), dd.get("dist_spacing_mm"),
+                        dd.get("dist_As_mm2", 0),
+                        _wms["As_vertical_min_mm2"],
+                        mm.get("bar"), mm.get("spacing_mm"),
+                        mm.get("As_prov_mm2", 0),
+                        float(q["stem_thickness_m"]) * 1000.0),
+                    "⚠ §3.7.2 的最大鋼筋間距規定僅適用**梁與單向版**，不適用於牆；"
+                    "牆適用第 7 章。仍須由合格技師覆核。",
+                    "底板（趾板／踵板）已於本表一併設計：以牆身為固定端之懸臂板考慮，"
+                    "依基底反力 q(x) 與覆土／自重之淨壓力積分求彎矩。實測踵板彎矩 %.1f kN·m/m "
+                    "確實大於莖板的 %.1f kN·m/m，故底板配筋由踵板控制。" % (
+                        max([m["M_service_kNm"] for m in (base or {"members": [{"M_service_kNm": 0}]})["members"]] or [0]),
+                        dd["M_service_kNm"]),
+                    "⚠ 仍待補：錨定長度、搭接長度、剪力筋（目前皆無剪力筋需求）、"
+                    "地震工況之載重組合（目前僅常時）。",
+                    "⚠ 牆身厚 %.2f m 係由裂縫寬度控制選定；若配筋間距調整，須重跑本表。" % float(q["stem_thickness_m"]),
                 ],
             }
 
-        # 第 6 章：水壓力（排水溝內水壓）
-        hn = res["h_normal_m"] or 0.0
-        out["loads"] = {
+    # 第 9 章：斷面尺寸採用依據（原本是「需人工補」，其實就是穩定分析的選配理由）
+    out["comparison"] = {
+        "notes": [
+            "斷面尺寸非依慣例值選定，而是以 tools/design/retaining_wall.py 的穩定分析"
+            "（水土保持技術規範第 119~120 條）逐項檢核後決定：",
+            "牆型 %s，H=%.2f m、T=%.2f m、底寬 BL=%.2f m%s，斷面積 %.4f m²/m。" % (
+                wt, g["H"], g["T"], g["BL"],
+                "" if res["wall_type"] == "gravity" else "、底板厚 BT=%.2f m" % g["BT"],
+                g["area_m2_per_m"]),
+            "選配準則：在「b×h／斷面積最小」的前提下，取第一組全部檢核通過之斷面；"
+            "滑動 FS=%.2f、傾倒 FS=%.2f、合力作用點 %.3f m、q_max=%.1f kPa。" % (
+                next((c["value"] for c in res["checks"] if c["item"].startswith("滑動")), 0),
+                next((c["value"] for c in res["checks"] if c["item"].startswith("傾倒")), 0),
+                res["x_R_m"], res["q_max_kPa"]),
+            "若地質鑽探結果與上述假設參數不同，應以實際參數重跑 size_section() 後更新本表。",
+        ],
+    }
+
+    out["drainage"] = {
+        "checks": [
+            {"item": "排水孔直徑", "requirement": "≥ 5 cm（第121條）",
+             "value": "Ø%.0f cm" % (float(q.get("weep_diameter_m", 0.05)) * 100),
+             "verdict": _verdict(float(q.get("weep_diameter_m", 0.05)) >= 0.05)},
+            {"item": "排水孔密度", "requirement": "每 2 m² 牆面 ≥ 1 孔（第121條）",
+             "value": "%d 孔 / %.1f m² 牆面" % (weep, face),
+             "verdict": _verdict(face > 0 and weep >= face / 2.0 - 1e-9)},
+            {"item": "伸縮縫間距", "requirement": "每 20~40 m 一處（第121條）",
+             "value": "%d 處 / 牆長 %.1f m" % (joint, float(q.get("length_m", 0))),
+             "verdict": _verdict(joint >= 1)},
+            {"item": "背填透水性", "requirement": "須為透水性良好材料並設反濾層（第121條）",
+             "value": "級配碎石 %.2f m ＋ 反濾層 %.2f m" % (
+                 float(q.get("backfill_thickness_m", 0.3)), 0.1),
+             "verdict": "符合"},
+        ],
+        "items": [_tbl(
+            "排水與伸縮縫配置數量表",
+            [("項目", 5.0, "left"), ("數量", 2.6, "center"),
+             ("單位", 1.8, "center"), ("說明", 4.6, "left")],
+            [["排水孔 Ø%.0f cm" % (float(q.get("weep_diameter_m", 0.05)) * 100),
+              "%d" % weep, "孔", "每 2 m² 牆面 1 孔（第121條）"],
+             ["伸縮縫", "%d" % joint, "處", "每 20~40 m 一處（第121條）"],
+             ["背填級配碎石", "%.2f" % float(q.get("backfill_gravel_m3", 0) or 0), "m³",
+              "透水性良好材料，分層夯實"],
+             ["反濾層", "%.2f" % (face * 0.0), "m²", "厚度 0.10 m（示意）"]]),
+        ],
+        "notes": [
+            "排水路徑：牆後背填水 → 反濾層 → 排水孔（洩水管）→ 牆面排出。",
+            "排水孔須設防止阻塞設施（反濾層＋洩水管），出水口不得直接沖刷牆腳。",
+            "伸縮縫採填縫料及止水帶，位置須避開排水孔。",
+        ],
+    }
+
+
+
+def _sections_box(out, q, case):
+    """報告段落：箱涵（由 _design_sections 分派）。"""
+    hy = case.get("hydraulics") or {}
+    cv = case.get("culvert") or {}
+    res = BC.analyse(q, **_box_culvert_kwargs(case, q))
+    sec = res["section"]
+    hyd = res["hydraulic"]
+    qty = res["quantities"]
+    _tr = res["loads"].get("traffic") or {}
+    _tr_pressure = float(
+        _tr.get("patch_pressure_kpa") or _tr.get("uniform_pressure_kpa") or 0.0
+    )
+    out["loads"] = {
+        "items": [_tbl(
+            "箱涵載重與構架分析輸入表（每公尺涵長）",
+            [("項目", 4.8, "left"), ("計算式／來源", 6.0, "left"),
+             ("數值", 2.6, "center"), ("單位", 1.4, "center")],
+            [
+                ["車輛活載", res["loads"].get("traffic_label", "—"),
+                 "%.3f" % _tr_pressure, "kN/m²"],
+                ["車輛載重換算均佈", "總輪載／總寬（僅供對照）",
+                 "%.3f" % float(res["loads"].get("traffic_equivalent_kpa") or 0.0),
+                 "kN/m²"],
+                ["頂版總向下載重", "覆土γH＋超載＋車輛活載",
+                 "%.3f" % res["loads"]["top_load_kn_m2"], "kN/m²"],
+                ["底板平均向上反力", "整體垂直力平衡",
+                 "%.3f" % res["loads"]["bottom_reaction_kn_m2"], "kN/m²"],
+                ["混凝土自重", "外框面積減孔洞 × γc",
+                 "%.3f" % qty["self_weight_kn_m"], "kN/m"],
+                ["地下水浮力", "γw×基礎以上水頭×外寬",
+                 "%.3f" % qty["uplift_kn_m"], "kN/m"],
+                ["地震係數 kh", "擬靜態 Mononobe-Okabe 側向增量",
+                 "%.3f" % res["loads"]["seismic_kh"], "-"],
+            ],
+            note="構架分析採平面二維剛架、每公尺涵長；土壓力作用於外牆，內水壓力作用於內側。",
+        )],
+        "notes": [
+            "箱涵為 %d 孔 %.2f m × %.2f m，外寬 %.2f m、外高 %.2f m；"
+            "以頂版、底板、外牆及 %d 道內隔牆建立平面剛架。"
+            % (sec["cell_count"], sec["clear_width_m"], sec["clear_height_m"],
+               sec["outer_width_m"], sec["outer_height_m"],
+               max(0, sec["cell_count"] - 1)),
+            "混凝土自重以精確斷面積計算；底板反力由整體垂直力平衡求得，"
+            "避免把箱涵當成個別梁板而漏掉軸力。",
+            "土工參數 γ=%.1f kN/m³、φ=%.1f°；%s。"
+            % (float(cv.get("soil_unit_weight_kn_m3") or 18.0),
+               float(cv.get("soil_phi_deg") or 30.0),
+               "採案件指定值" if cv else "採模組預設假設值，正式設計前須以鑽探替換"),
+            "車載只作用於頂版；局部輪壓不另加側向土壓。"
+            "車載與其他載重目前共用載重係數 %.2f，尚未拆分靜／活載因數。"
+            % float(cv.get("load_factor") or 1.7),
+        ],
+    }
+
+    checks = []
+    for c in res["checks"]:
+        item = c["item"]
+        lim = c["limit"]
+        if "水力容量" in item:
+            req = "Q_cap ≥ %.3f m³/s" % float(lim)
+        elif "出水高" in item:
+            req = "≤ %.3f m" % float(lim)
+        elif "抗浮" in item:
+            req = "FS ≥ %.2f" % float(lim)
+        elif "承載" in item:
+            req = "≤ %.1f kPa" % float(lim)
+        else:
+            req = "≥ %.2f" % float(lim)
+        checks.append({
+            "item": item,
+            "requirement": req,
+            "value": "%.3f" % float(c["value"]),
+            "verdict": _verdict(c["ok"]),
+        })
+    out["stability"] = {
+        "checks": checks,
+        "notes": [
+            "水力採清水矩形斷面曼寧正常水深；全滿容量僅作上限，"
+            "尚未計入口／出口控制、翼牆與下游尾水。",
+            "結構檢核取各桿件最大絕對彎矩與端部剪力，乘載重係數 %.2f 後做 RC 撓曲、剪力與裂縫檢核。"
+            % float(cv.get("load_factor") or 1.7),
+            "綜合判定：%s。" % ("全部符合" if res["pass"] else "有未符合項，不得交件"),
+        ],
+    }
+
+    reinf_rows = []
+    for e in res["reinforcement"]["elements"]:
+        f = e["flexure"]
+        cr = e["crack"]
+        reinf_rows.append([
+            e["label"],
+            "%s：%.2f kN·m/m" % (e["moment_label"], e["Mu_kNm"]),
+            "%s@%s（%.0f mm²/m）" % (
+                f.get("bar", "—"), f.get("spacing_mm", "—"),
+                f.get("As_prov_mm2", 0.0)),
+            "φMn=%.2f；w=%.3f mm；控制=%s" % (
+                f.get("phiMn_kNm", 0.0),
+                cr.get("w_mm") if cr.get("w_mm") is not None else 0.0,
+                f.get("governed_by", "—")),
+            _verdict(e["ok"]),
+        ])
+    dist_rows = []
+    for d in res["reinforcement"].get("distribution") or []:
+        dist_rows.append([
+            d["title"],
+            "%.4f·b·h（總量分兩面）" % float(d["ratio"]),
+            "%s@%s（每面 %.0f mm²/m）" % (
+                d.get("bar", "—"), d.get("spacing_mm", "—"),
+                float(d.get("As_prov_mm2") or 0.0)),
+            "需求 %.1f／實配 %.1f mm²/m" % (
+                float(d.get("As_req_mm2") or 0.0),
+                float(d.get("As_prov_mm2") or 0.0)),
+            _verdict(d["ok"]),
+        ])
+    _q = res["reinforcement"]["quantity"]
+    out["reinforcement"] = {
+        "items": [
+            _tbl(
+                "箱涵逐面配筋初步結果表",
+                [("構材／面", 3.8, "left"), ("控制內力", 4.2, "left"),
+                 ("主筋", 3.6, "center"), ("強度／裂縫", 5.4, "left"),
+                 ("判定", 1.6, "center")],
+                reinf_rows,
+                note="保護層 %.0f mm；逐面設計，頂版／底版／外牆／中牆的內外側分開檢核。"
+                % float(_box_culvert_kwargs(case, q)["cover_mm"]),
+            ),
+            _tbl(
+                "箱涵縱向分佈筋表",
+                [("位置", 4.2, "left"), ("鋼筋比", 4.2, "left"),
+                 ("配置", 4.6, "center"), ("As 需求／實配", 4.4, "left"),
+                 ("判定", 1.6, "center")],
+                dist_rows,
+                note="版採 0.0018·b·h、牆採 0.0020·b·h；此為總量分置內外兩面，不是每面各一份。",
+            ),
+        ],
+        "notes": [
+            "撓曲、軸彎互制、剪力與裂縫依《混凝土結構設計規範》相關條文計算；"
+            "主筋依實際受拉面定向，不以兩個彎曲方向取較小值。",
+            "鋼筋量依理想化排筋計數：淨 %.2f kg/m，含 %.0f%% 搭接／錨定／損耗後 %.2f kg/m，"
+            "總量 %.1f kg（%.2f t）。"
+            % (float(_q.get("subtotal_kg_per_m") or 0.0),
+               float(_q.get("loss_rate") or 0.0) * 100.0,
+               float(_q.get("total_kg_per_m") or 0.0),
+               float(_q.get("total_kg") or 0.0),
+               float(_q.get("total_kg") or 0.0) / 1000.0),
+            "目前構架分析只計單一重力＋土水壓載重 case，未建立 D／L／E 分項包絡；"
+            "正式設計須用 tools\\design\\load_combinations.py 擴充多工況。",
+            "牆與厚版的最小鋼筋、裂縫控制及角隅補強仍須由技師依現行規範覆核。",
+        ],
+    }
+
+    out["drainage"] = {
+        "checks": [
+            {"item": "通水容量", "requirement": "Q_cap ≥ %.3f m³/s" % hyd["design_flow_m3s"],
+             "value": "%.3f m³/s" % hyd["capacity_m3s"],
+             "verdict": _verdict(hyd["capacity_ok"])},
+            {"item": "正常水深＋出水高", "requirement": "≤ %.2f m" % sec["clear_height_m"],
+             "value": "%.3f m" % (hyd["normal_depth_m"] + hyd["freeboard_min_m"]),
+             "verdict": _verdict(hyd["freeboard_ok"])},
+        ],
+        "items": [_tbl(
+            "箱涵水力計算表",
+            [("項目", 5.0, "left"), ("數值", 2.8, "center"),
+             ("單位", 1.6, "center"), ("說明", 4.8, "left")],
+            [
+                ["設計流量 Q", "%.3f" % hyd["design_flow_m3s"], "m³/s", "案件指定"],
+                ["縱坡 S", "%.4f" % float(hy.get("slope") or 0.005), "-", "設計值"],
+                ["正常水深 h_n", "%.3f" % hyd["normal_depth_m"], "m", "曼寧等速流"],
+                ["設計流速 V", "%.3f" % hyd["velocity_m_s"], "m/s", "由 Q/A 計算"],
+                ["福祿數 Fr", "%.3f" % hyd["froude"], "-", "接近 1 表示臨界流"],
+                ["全滿容量", "%.3f" % hyd["capacity_m3s"], "m³/s", "上限值，非設計容量"],
+            ],
+            note="尚未辦入口／出口控制、涵洞淹沒、尾水與能量損失分析。",
+        )],
+        "notes": [
+            "箱涵水力先以各孔淨空矩形並聯、同一水深之曼寧正常水深計算。",
+            "全滿曼寧容量會高估可接受流量，故本報告不以全滿容量宣稱通過，"
+            "而以設計流量對應之正常水深加最小出水高檢核。",
+            "正式涵洞設計仍須依公路排水設計規範／下水道工程設施標準檢核入口與出口控制。",
+        ],
+    }
+
+    out["comparison"] = {
+        "notes": [
+            "箱涵尺寸依「水力容量與出水高」及「平面構架 RC 內力」兩道檢核共同決定；"
+            "任一項不通過即不得以慣例尺寸出圖。",
+            "採 %d 孔、每孔淨寬 %.2f m、淨高 %.2f m，外寬 %.2f m、外高 %.2f m。"
+            % (sec["cell_count"], sec["clear_width_m"], sec["clear_height_m"],
+               sec["outer_width_m"], sec["outer_height_m"]),
+            "混凝土淨斷面積 %.3f m²/m、總量 %.2f m³；不含翼牆、保護工與路面。"
+            % (qty["concrete_area_m2_per_m"], qty["concrete_volume_m3"]),
+            "鋼筋設計量：淨 %.2f kg/m、含 %.0f%% 損耗 %.2f kg/m，總量 %.1f kg（%.2f t）。"
+            % (float(qty.get("rebar_kg_per_m_net") or 0.0),
+               float(qty.get("rebar_loss_rate") or 0.0) * 100.0,
+               float(qty.get("rebar_kg_per_m") or 0.0),
+               float(qty.get("rebar_kg_total") or 0.0),
+               float(qty.get("rebar_ton") or 0.0)),
+            "模板量：每延米 %.2f m²/m，總量 %.2f m²（含兩端端模 %.2f m²）。"
+            % (float(qty.get("formwork_m2_per_m") or 0.0),
+               float(qty.get("formwork_m2") or 0.0),
+               float(qty.get("formwork_end_faces_m2") or 0.0)),
+        ],
+    }
+
+
+
+def _sections_channel(out, q, case):
+    """報告段落：排水溝（由 _design_sections 分派）。"""
+    hy = case.get("hydraulics") or {}
+    Q = float(hy.get("design_flow_m3s") or 0.5)
+    S = float(hy.get("slope") or 0.005)
+    n = float(hy.get("manning_n") or CH.DEFAULTS["manning_n"])
+    b = float(q.get("inner_width_m", 0)); h = float(q.get("depth_m", 0))
+    res = CH.analyse(Q, b, h, S, {"manning_n": n})
+
+    out["drainage"] = {
+        "checks": [
+            {"item": c["item"],
+             "requirement": (c["limit"] if isinstance(c["limit"], str)
+                             else "≥ %.3f" % c["limit"]),
+             "value": ("—" if c["value"] is None else
+                       ("%.3f" % c["value"] if isinstance(c["value"], float)
+                        else str(c["value"]))),
+             "verdict": _verdict(c["ok"])}
+            for c in res["checks"]],
+        "items": [_tbl(
+            "水力計算結果表",
+            [("項目", 5.0, "left"), ("數值", 2.8, "center"),
+             ("單位", 1.8, "center"), ("說明", 4.4, "left")],
+            [["設計流量 Q", "%.3f" % Q, "m³/s", "設計洪水量（第83條重現期）"],
+             ["縱坡 S", "%.4f" % S, "—", "%.2f%%" % (S * 100)],
+             ["曼寧 n", "%.3f" % n, "—", "混凝土粗糙度（第84條僅給公式）"],
+             ["通水容量 Q_cap", "%.3f" % res["Q_cap_m3s"], "m³/s", "滿水深"],
+             ["正常水深 h_n", "%.3f" % (res["h_normal_m"] or 0), "m", "設計流量下"],
+             ["設計流速 V", "%.3f" % (res["V_design_ms"] or 0), "m/s", "第85條 0.8~4.57"],
+             ["出水高", "%.3f" % res["freeboard_required_m"], "m", "第86條 25% 且 ≥0.20"]]),
+        ],
+        "notes": [
+            "平均流速採曼寧公式 v=(1/n)·R^(2/3)·S^(1/2)（第84條），R=A/P。",
+            "流速上下限依第85條：混凝土／RC 最小 0.8 m/s；混凝土常流水最大 4.57~6.10 m/s。",
+            "出水高依第86條：設計水深 25%，最小值 20 cm。",
+            "綜合判定：%s。" % ("全部符合" if res["pass"] else "有未符合項，須調整斷面或縱坡"),
+            "設計洪水量重現期依第83條：坡地農地 10 年、其他非農業使用 25 年。"
+            "本表流量%s。" % ("已依該條辦理" if hy.get("design_flow_m3s") else "為假設值，尚未辦水文分析"),
+        ],
+    }
+    # 第 11 章加「集水區水文分析」（第 16~19 條）——設計流量的來源
+    catch = case.get("catchment")
+    if catch and HY is not None:
+        try:
+            hr2 = HY.design_flow(
+                float(catch["P_mm"]), float(catch["T_year"]),
+                float(catch["area_ha"]), catch.get("condition", "丘陵地或森林"),
+                bool(catch.get("developed")), bool(catch.get("upper_c")),
+                float(catch.get("l_m", 100.0)), float(catch.get("v_ms", 0.4)),
+                float(catch.get("L_km", 0.0)), float(catch.get("H_km", 0.0)))
+            out["drainage"]["items"].insert(0, _tbl(
+                "集水區水文分析結果表",
+                [("項目", 4.6, "left"), ("數值", 2.8, "center"),
+                 ("單位", 1.8, "center"), ("依據", 4.8, "left")],
+                [["年平均降雨量 P", "%.0f" % hr2["P_mm"], "mm", "等雨量線圖／雨量資料（第16條）"],
+                 ["重現期距 T", "%.0f" % hr2["T_year"], "年", "第83條：非農業 25 年"],
+                 ["集水區面積 A", "%.3f" % hr2["area_ha"], "ha", "≤1000 ha 得用合理化公式（第17條）"],
+                 ["集流時間 tc", "%.2f" % hr2["tc_min"], "分", "tc=t1+t2（第19條）"],
+                 ["降雨強度 I", "%.2f" % hr2["I_mm_hr"], "mm/hr", "第16條（推估值為下限）"],
+                 ["逕流係數 C", "%.3f" % hr2["C"], "-",
+                  "%s（第18條）" % hr2["condition"]],
+                 ["洪峰流量 Qp", "%.4f" % hr2["Qp_m3s"], "m³/s", "Qp=(1/360)CIA（第17條）"]],
+                note="本表為斷面選配的流量來源；第16條明定強度推估值僅為下限。"))
+            out["drainage"]["notes"].insert(0,
+                "設計流量由合理化公式計算（第17條）：Qp=(1/360)×%.3f×%.2f×%.3f="
+                "%.4f m³/s。集流時間 %.2f 分（第19條）、降雨強度 %.2f mm/hr（第16條）。"
+                % (hr2["C"], hr2["I_mm_hr"], hr2["area_ha"], hr2["Qp_m3s"],
+                   hr2["tc_min"], hr2["I_mm_hr"]))
+        except Exception as ex:
+            out["drainage"]["notes"].insert(0,
+                "集水區水文分析未完成：%s" % ex)
+
+    # 第 8 章：溝壁配筋
+    if RC is not None:
+        dd = RC.design_channel_wall(q, res)
+        mm, ss, ww = dd["main"], dd["shear"], dd["crack"]
+        out["reinforcement"] = {
             "items": [_tbl(
-                "作用力計算表（每公尺溝長）",
-                [("作用項目", 3.6, "left"), ("計算式", 4.6, "left"),
-                 ("大小", 2.4, "center"), ("作用點", 3.2, "left")],
-                [["溝壁靜水壓力", "½·γw·h_n²（γw=9.81 kN/m³）",
-                  "%.3f kN/m" % (0.5 * 9.81 * hn ** 2),
-                  "溝底以上 h_n/3 = %.3f m" % (hn / 3)],
-                 ["溝底靜水壓力", "γw·h_n",
-                  "%.3f kPa" % (9.81 * hn), "溝底"],
-                 ["土壓力（溝外側）", "未計（無土工參數）", "—", "—"],
-                 ["地震力", "未計（明溝通常不受控）", "—", "—"]],
-                note="排水溝以水力容量控制；溝壁結構檢核須另依擋土結構觀念辦理。")],
+                "配筋設計結果表（溝壁牆底控制斷面）",
+                [("項目", 3.8, "left"), ("計算值", 3.2, "center"),
+                 ("要求／採用", 3.8, "center"), ("判定", 2.2, "center")],
+                [["服務彎矩 M", "%.3f kN·m/m" % dd["M_service_kNm"], "—", "—"],
+                 ["設計彎矩 Mu（×1.7）", "%.3f kN·m/m" % dd["Mu_kNm"], "—", "—"],
+                 ["撓曲鋼筋 As", "需求 %.0f mm²/m" % mm.get("As_req_mm2", 0),
+                  "採 %s@%d（%.0f）" % (mm.get("bar"), mm.get("spacing_mm"),
+                                       mm.get("As_prov_mm2", 0)), _verdict(mm.get("ok"))],
+                 ["斷面類型（§3.4.4）",
+                  "εt = %.4f" % mm.get("epsilon_t", 0),
+                  "φ = %.2f（%s）" % (mm.get("phi", 0.9), mm.get("phi_basis", "")),
+                  _verdict(mm.get("phi", 0.9) >= 0.9)],
+                 ["撓曲強度 φMn", "%.2f kN·m" % mm.get("phiMn_kNm", 0),
+                  "≥ Mu = %.3f" % dd["Mu_kNm"], _verdict(mm.get("ok"))],
+                 ["剪力 φVc", "%.2f kN" % ss.get("phiVc_kN", 0),
+                  "≥ Vu = %.2f" % dd["Vu_kN"], _verdict(ss.get("ok"))],
+                 ["裂縫寬度 w", ("%.3f mm" % ww["w_mm"]) if ww.get("w_mm") is not None else "—",
+                  "≤ %.1f mm" % ww.get("limit_mm", 0.3), _verdict(ww.get("ok"))],
+                 ["分布筋", "%s@%d" % (dd.get("dist_bar"), dd.get("dist_spacing_mm")),
+                  "%.0f mm²/m" % (dd.get("dist_As_mm2") or 0), "—"]],
+                note="溝壁以懸臂板考慮，控制載重為溝內滿水壓力。")],
             "notes": [
-                "設計流量 %.3f m³/s 下正常水深 %.3f m，據以計算靜水壓力。" % (Q, hn),
-                "溝壁所受側壓於完工後由兩側土壓力與水壓力共同決定；本表僅列常時水壓力，"
-                "土壓力須俟土工參數確定後另計。",
-                "水土保持技術規範第 119 條所列作用力（含地震力）於明溝通常非控制項，"
-                "惟位於重要構造物鄰近時仍應檢核。",
+                "配筋依據：撓曲 φMn ≥ Mu、剪力 φVc ≥ Vu、最小鋼筋、裂縫寬度 ≤ 0.3 mm。",
+                "⚠ 公式採 **ACI 318 常用式**；《混凝土結構設計規範》條文尚未取得（版次待核），須技師覆核。",
+                "⚠ **僅計溝內水壓力**：溝外側土壓力須俟土工參數確定後另計；溝底未做承載檢核。",
             ],
         }
 
-    # 第 12 章：已產出的標準斷面圖（若檔案存在就嵌入，不存在則留給人工）
-    _attach_section_figure(out, case)
+    # 第 6 章：水壓力（排水溝內水壓）
+    hn = res["h_normal_m"] or 0.0
+    out["loads"] = {
+        "items": [_tbl(
+            "作用力計算表（每公尺溝長）",
+            [("作用項目", 3.6, "left"), ("計算式", 4.6, "left"),
+             ("大小", 2.4, "center"), ("作用點", 3.2, "left")],
+            [["溝壁靜水壓力", "½·γw·h_n²（γw=9.81 kN/m³）",
+              "%.3f kN/m" % (0.5 * 9.81 * hn ** 2),
+              "溝底以上 h_n/3 = %.3f m" % (hn / 3)],
+             ["溝底靜水壓力", "γw·h_n",
+              "%.3f kPa" % (9.81 * hn), "溝底"],
+             ["土壓力（溝外側）", "未計（無土工參數）", "—", "—"],
+             ["地震力", "未計（明溝通常不受控）", "—", "—"]],
+            note="排水溝以水力容量控制；溝壁結構檢核須另依擋土結構觀念辦理。")],
+        "notes": [
+            "設計流量 %.3f m³/s 下正常水深 %.3f m，據以計算靜水壓力。" % (Q, hn),
+            "溝壁所受側壓於完工後由兩側土壓力與水壓力共同決定；本表僅列常時水壓力，"
+            "土壓力須俟土工參數確定後另計。",
+            "水土保持技術規範第 119 條所列作用力（含地震力）於明溝通常非控制項，"
+            "惟位於重要構造物鄰近時仍應檢核。",
+        ],
+    }
 
+
+
+def _design_sections(model, q, case):
+    """由設計計算模組自動產生報告第 6／7／11 章的內容。
+
+    沒有這一段時，這些章節在報告裡是「需人工補」的佔位符 —— 但 FS、Pa、q_max、
+    Q_cap、h_n 其實都已經算出來了。算得出卻不寫進報告，是整條產線最刺眼的不一致。
+
+    依案件類別分派到 `_sections_<類別>()`；各函式就地寫入 `out`。
+    """
+    out = {}
+    if model == "slope" and SS is not None:
+        _sections_slope(out, q, case)
+    if model == "wall" and WS is not None:
+        _sections_wall(out, q, case)
+    if model == "box_culvert" and BC is not None:
+        _sections_box(out, q, case)
+    if model == "channel" and CH is not None:
+        _sections_channel(out, q, case)
+    _attach_section_figure(out, case)
     return out

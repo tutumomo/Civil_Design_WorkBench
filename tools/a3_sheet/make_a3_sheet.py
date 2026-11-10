@@ -76,7 +76,7 @@ else:
 # ---- 併入模型空間 ----
 if "TOMO" not in doc.styles:
     st = doc.styles.add("TOMO", font="gbenor.shx")
-    st.dxf.bigfont = "CHINESE.SHX"
+    st.dxf.bigfont = "CHINA1.SHX"
 src = ezdxf.readfile(A.base)
 imp = Importer(src, doc)
 imp.import_modelspace()

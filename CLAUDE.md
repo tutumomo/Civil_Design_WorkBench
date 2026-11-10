@@ -116,7 +116,7 @@ Civil_Design_WorkBench/
 - **Domain Constants**:
   - Unit: Metric meter (`$INSUNITS=6`, `$MEASUREMENT=1`).
   - Coordinates: Real TWD97 TM2 (`EPSG:3826`), never arbitrary origin.
-  - CAD Text Style: `TOMO` style with `gbenor.shx` + `CHINESE.SHX`.
+  - CAD Text Style: `TOMO` style with `gbenor.shx` + `CHINA1.SHX`.
   - Plot Style: `monochrome.ctb` (colors 1~8 map to standard lineweights).
   - RC Design: Uniform 6% lap and loss allowance across project (`rc_design.LAP_ALLOWANCE = 0.06`).
   - Retaining Wall Rebar: Strict wall-type dispatch (`gravity`/`semigravity` nominal rebar; `cantilever` flexural; `counterfort`/`anchored`/`mse` structural components).

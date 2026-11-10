@@ -1,6 +1,6 @@
 """把 TOMO 樣式用的 SHX 字型安裝到 AutoCAD 的字型搜尋路徑。
 
-為什麼需要這個：DXF 內只記字型**檔名**（`font="gbenor.shx"`、`bigfont="CHINESE.SHX"`），
+為什麼需要這個：DXF 內只記字型**檔名**（`font="gbenor.shx"`、`bigfont="CHINA1.SHX"`），
 AutoCAD 開圖時是到自己的字型目錄去找檔案。專案裡的 `CAD_FONTS/` 只是「隨附一份、
 免依賴 AutoCAD 安裝」，要讓 AutoCAD 真的找得到，仍得複製過去。
 
@@ -27,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from project_paths import cad_font, cad_fonts_dir  # noqa: E402
 
-FONTS = ["gbenor.shx", "CHINESE.SHX"]
+FONTS = ["gbenor.shx", "CHINA1.SHX"]
 
 
 def candidate_dirs() -> list[Path]:

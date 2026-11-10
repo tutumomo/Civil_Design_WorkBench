@@ -183,25 +183,39 @@ class Tool:
 #:   OpenCADStudio-v2026.44-macos-arm64.dmg
 #:   OpenCADStudio-v2026.44-windows-x86_64-portable.exe（另有 -installer.msi，不用它）
 #:
-#: Windows 一律取 **portable exe**，不取 MSI：
-#:   - MSI 靜默安裝要管理員，實測 `msiexec /i ... /qn` 回 1603，等於什麼都沒裝成；
-#:   - 取 MSI 時產出的 `~/.local/bin/opencadstudio.cmd` 只會變成「執行那個 .msi」，
-#:     而 `acc.py` 的 `--http` 服務模式根本不會起來；
-#:   - portable exe 是單檔可直接執行，`taskkill /T` 也殺得到本體（MSI 走殼層會留孤兒）。
-def _detect_opencalcsheet() -> str | None:
-    """OCSS 偵測：交給 project_paths.opencalcsheet_exe()（不跑 --version，會卡住）。"""
+#: **2026-11-10 起 Windows 改取 fork 的 MSI**（不再取 portable exe）：
+#:   - fork 自 v2026.45.2 起 MSI 安裝為「Open CAD Studio.TW」（`OpenCADStudio.TW.exe`，獨立 UpgradeCode），
+#:     與上游並行共存；本專案只綁這個本地化版，portable exe 檔名與上游無從分辨，故不用。
+#:   - 舊紀錄：`msiexec /i ... /qn` 非管理員回 1603。因此改用 `/passive`（基本 UI，可跳 UAC 請使用者核准）。
+#:   - 偵測走 project_paths.opencadstudio_exe()（只認 TW 版），直接啟動 exe，`taskkill /T` 殺得到本體。
+#: Linux 仍取 AppImage，裝到 `~/.local/opt/opencadstudio-tw-<ver>/`、命令 `~/.local/bin/opencadstudio-tw`，
+#: 與舊的上游 `opencadstudio-*` 區隔。macOS：fork 目前未發行 dmg → 印手動指引。
+def _tools_on_path() -> None:
     tools_dir = Path(__file__).resolve().parent.parent
     if str(tools_dir) not in sys.path:
         sys.path.insert(0, str(tools_dir))
+
+
+def _detect_opencalcsheet() -> str | None:
+    """OCSS 偵測：交給 project_paths.opencalcsheet_exe()（只認 TW 版；不跑 --version，會卡住）。"""
+    _tools_on_path()
     from project_paths import opencalcsheet_exe
     return opencalcsheet_exe()
 
 
-#: Open CalcSheet Studio（台灣版）資產命名（實測 v2026.45.2-tw.3）：
-#:   Open.CalcSheet.Studio_2026.45.2_x64-setup.exe      Windows NSIS 安裝程式
-#:   Open.CalcSheet.Studio_2026.45.2_aarch64.dmg        macOS（Apple Silicon）
-#:   Open.CalcSheet.Studio_2026.45.2_amd64.deb／_arm64.deb  Linux
+def _detect_opencadstudio() -> str | None:
+    """OCS 偵測：交給 project_paths.opencadstudio_exe()（只認 TW 版）。"""
+    _tools_on_path()
+    from project_paths import opencadstudio_exe
+    return opencadstudio_exe()
+
+
+#: Open CalcSheet Studio TW 資產命名（實測 v2026.45.2-tw.4）：
+#:   Open.CalcSheet.Studio.TW_2026.45.2_x64-setup.exe   Windows NSIS 安裝程式 → 「Open CalcSheet Studio TW」
+#:   Open.CalcSheet.Studio.TW_2026.45.2_aarch64.dmg     macOS（Apple Silicon）
+#:   Open.CalcSheet.Studio.TW_2026.45.2_amd64.deb／_arm64.deb  Linux
 #:   SHA256SUMS.txt                                     校驗檔（檔名以空格表示，資產名以點表示）
+#: 樣式刻意要求檔名含 `.TW_`，舊版（未改識別碼、會覆蓋上游）的 release 一律不取。
 #:
 #: 安裝策略（依資產副檔名分流，tool.kind="installer"）：
 #:   · Windows：下載 → SHA256 校驗 → `setup.exe /S` 靜默安裝 → 以 opencalcsheet_exe() 驗證。
@@ -214,13 +228,13 @@ TOOLS: list[Tool] = [
         key="OpenCalcSheet",
         repo="tutumomo/Open-CalcSheet-Studio",
         asset_patterns={
-            ("windows", "x86_64"): [r"x64-setup\.exe$"],
-            ("macos", "aarch64"): [r"aarch64\.dmg$"],
-            ("linux", "x86_64"): [r"amd64\.deb$"],
-            ("linux", "aarch64"): [r"arm64\.deb$"],
+            ("windows", "x86_64"): [r"\.TW_.*x64-setup\.exe$"],
+            ("macos", "aarch64"): [r"\.TW_.*aarch64\.dmg$"],
+            ("linux", "x86_64"): [r"\.TW_.*amd64\.deb$"],
+            ("linux", "aarch64"): [r"\.TW_.*arm64\.deb$"],
         },
         kind="installer",
-        bin_stem="open-calcsheet-studio",
+        bin_stem="open-calcsheet-studio-tw",
         note="開放計算環境／台灣版結構計算書；第二套獨立算法，供交叉驗算（tools/crosscheck/）",
         manual_hint="請至 https://github.com/tutumomo/Open-CalcSheet-Studio/releases 下載對應平台安裝檔，"
                     "裝好後可用環境變數 OCSS_EXE 指定執行檔",
@@ -235,14 +249,18 @@ TOOLS: list[Tool] = [
             ("linux", "x86_64"): [r"linux-x86_64\.AppImage$"],
             ("macos", "aarch64"): [r"macos-arm64\.dmg$"],
             ("macos", "x86_64"): [r"macos-x86_64\.dmg$"],
-            ("windows", "x86_64"): [r"windows-x86_64-portable\.exe$"],
-            ("windows", "aarch64"): [r"windows-arm64-portable\.exe$"],
+            ("windows", "x86_64"): [r"windows-x86_64-installer\.msi$"],
+            ("windows", "aarch64"): [r"windows-arm64-installer\.msi$"],
         },
         kind="appimage",
-        bin_stem="opencadstudio",
-        note="AutoCAD 開源平替；DWG/DXF 原生讀寫、CTB 出圖、MCP 介面",
+        bin_stem="opencadstudio-tw",
+        note="AutoCAD 開源平替（TW 版，Big5 SHX 修正）；DWG/DXF 原生讀寫、CTB 出圖、MCP 介面",
+        manual_hint="請至 https://github.com/tutumomo/OpenCADStudio/releases 下載 fork 版"
+                    "（Windows 取 *-installer.msi，裝到「Open CAD Studio.TW」），"
+                    "或以環境變數 OPENCADSTUDIO_EXE 指定 TW 版執行檔",
         verify_argv=["--version"],
         verify_must_contain="OpenCADStudio",
+        detect=_detect_opencadstudio,
     ),
     Tool(
         key="Blender",
@@ -292,10 +310,12 @@ def _verify(path: str, tool: Tool) -> bool:
 def _tool_installed(tool: Tool) -> str | None:
     """回傳已安裝（且通過版本驗證）的執行檔路徑；未安裝回傳 None。"""
     if tool.detect is not None:
+        # 自訂偵測（路徑嚴格比對，只認 TW 版）＋ 有設 verify_argv 時再做版本驗證
         try:
-            return tool.detect()
+            p = tool.detect()
         except Exception:
             return None
+        return p if p and _verify(p, tool) else None
     stem = tool.bin_stem or tool.key.lower()
     # 1. PATH
     for name in ([f"{stem}.cmd", f"{stem}.exe"] if IS_WIN else [stem]):
@@ -685,14 +705,21 @@ def _run_installer(tool: Tool, tmp: Path, asset_name: str, ver: str, res: dict,
     """處理「安裝程式型」資產（tool.kind == "installer" 且非 dmg）。
 
     Windows .exe：NSIS 靜默安裝（/S），完成後以 detect 驗證；失敗保留安裝檔供手動執行。
+    Windows .msi：`msiexec /i <msi> /passive /norestart`（基本 UI 才能跳 UAC；`/qn` 非管理員實測回 1603）。
     Linux .deb：需 root，只把檔案放到 ~/.local/opt 並印出 sudo apt install 指令，不代裝。
     """
     low = asset_name.lower()
-    if low.endswith(".exe") and IS_WIN:
+    if low.endswith((".exe", ".msi")) and IS_WIN:
+        is_msi = low.endswith(".msi")
+        argv = (["msiexec", "/i", str(tmp), "/passive", "/norestart"] if is_msi
+                else [str(tmp), "/S"])
         if not quiet:
-            print("    執行靜默安裝（/S）；若跳出 UAC 請核准……")
+            print(f"    執行安裝（{'msiexec /passive' if is_msi else '/S'}）；若跳出 UAC 請核准……")
         try:
-            subprocess.run([str(tmp), "/S"], timeout=900)
+            p = subprocess.run(argv, timeout=900)
+            # msiexec：0＝成功、3010＝成功但需重開機；其他（如 1602 使用者取消、1603 權限）視為失敗
+            if is_msi and p.returncode not in (0, 3010):
+                raise RuntimeError(f"msiexec 回傳 {p.returncode}")
         except Exception as e:
             res.update(action="fail", detail=f"執行安裝程式失敗：{e}（安裝檔保留在 {tmp}）")
             if not quiet:
@@ -761,7 +788,7 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
                     if not quiet:
                         print(f"    ! 建立命令連結失敗：{e}")
         # 已安裝也要補設定：老機器先前裝過，settings.json 仍是 null
-        if (tool.bin_stem or "") == "opencadstudio":
+        if tool.key == "OpenCADStudio":
             configure_opencadstudio(quiet=quiet)
         return res
 
@@ -781,7 +808,9 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
         if not quiet:
             print(f"    （dry-run）來源 {tool.repo}／平台 "
                   f"{'windows' if IS_WIN else ('macos' if IS_MAC else 'linux')}/{ARCH}")
-            if tool.kind == "installer":
+            if tool.key == "OpenCADStudio" and IS_WIN:
+                print("    （dry-run）下載 fork 的 *-installer.msi，以 msiexec /passive 安裝到「Open CAD Studio.TW」（可能跳 UAC）")
+            elif tool.kind == "installer":
                 how = ("下載後以 SHA256SUMS 校驗，再執行 setup.exe /S 靜默安裝" if IS_WIN
                        else "macOS：掛載 dmg 複製 .app" if IS_MAC
                        else "Linux：只下載 .deb 並印出 sudo apt install 指令（需 root，不代裝）")
@@ -810,8 +839,10 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
     ver = tag.lstrip("vV")
     stem = tool.bin_stem or tool.key.lower()
     dest_dir = local_opt_dir() / f"{stem}-{ver}"
-    # 安裝程式型資產（setup.exe／.deb）不需要預建目錄，避免留下空資料夾
-    if tool.kind != "installer" or asset_name.lower().endswith(".dmg"):
+    # 安裝程式型資產（setup.exe／.msi／.deb）交給系統安裝程式，不預建目錄，避免留下空資料夾
+    is_pkg = (asset_name.lower().endswith((".msi", ".deb"))
+              or (tool.kind == "installer" and not asset_name.lower().endswith(".dmg")))
+    if not is_pkg:
         dest_dir.mkdir(parents=True, exist_ok=True)
     tmp = _temp_install_dir() / asset_name
 
@@ -838,8 +869,11 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
 
     target: Path | None = None
     try:
-        if tool.kind == "installer" and not asset_name.lower().endswith(".dmg"):
-            return _run_installer(tool, tmp, asset_name, ver, res, quiet=quiet)
+        if is_pkg:
+            res = _run_installer(tool, tmp, asset_name, ver, res, quiet=quiet)
+            if res.get("ok") and tool.key == "OpenCADStudio":
+                configure_opencadstudio(quiet=quiet)
+            return res
         if asset_name.lower().endswith(".dmg"):
             # macOS DMG：掛載 → 取出 .app → 複製到 /Applications → 卸載。
             # （不可直接把 .dmg 當執行檔 symlink 出去，那會得到壞掉的命令。）
@@ -880,7 +914,7 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
 
     res["pending"] = _place_symlink(tool, target, dry=False)
     res.update(ok=True, action="installed", detail=str(target))
-    if (tool.bin_stem or "") == "opencadstudio":
+    if tool.key == "OpenCADStudio":
         configure_opencadstudio(quiet=quiet)
     return res
 

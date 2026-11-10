@@ -76,9 +76,16 @@
   **只跑 `python tools/project_paths.py` 是唯讀回報，不會安裝任何東西**——它印出 OK／— 清單後就結束，缺的工具仍然缺。要宣稱「環境已備妥」之前，必須先跑過 `--install` 且其退出碼為 0，並在回報中貼出該指令的總結段。
   **`--install` 會一併寫好 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾**（`settings.fonts_folder` → `CAD_FONTS/`、`settings.plot_styles_folder` → `tools/acad/plot/`）；已安裝的機器也會補寫。只想重寫設定、不下載時用 `python tools/project_paths.py --configure`。驗證方式是開一張 TOMO 圖後看 REST 回應的 `state.missing_fonts` 是否為 `[]`，不要只憑「沒有警告」判斷。詳見 `docs/環境需求與自動配置.md` §8.8。
   安裝規範：免 root、成品落 `~/.local/opt/<name>-<ver>/`、`~/.local/bin/` 建 symlink、來源為官方 GitHub Releases；symlink 衝突時改建 `<name>-new` 並印出 `mv` 指令交使用者確認，不直接覆蓋。
-  **兩個必備工具都由 `--install` 自動安裝，來源是使用者自己的 fork（2026-11-10 定案，不得改回上游）**：
-  - **OpenCADStudio**（[`tutumomo/OpenCADStudio`](https://github.com/tutumomo/OpenCADStudio)）：fork 版含 Big5 SHX 大字體修正，中文才不會亂碼；Windows 取 portable exe。
-  - **Open CalcSheet Studio**（[`tutumomo/Open-CalcSheet-Studio`](https://github.com/tutumomo/Open-CalcSheet-Studio)，鍵名 `OpenCalcSheet`）：開放計算環境／第二套獨立算法。Windows 下載 `x64-setup.exe`、**先以 `SHA256SUMS.txt` 校驗**再 `/S` 靜默安裝（可能跳 UAC，請使用者核准）；Linux 只下載 `.deb` 並印出 `sudo apt install` 指令（需 root，不代裝）；macOS 走 dmg 流程（尚未實測）。已安裝則略過，不自動升級。單獨補裝：`python tools/project_paths.py --install --only OpenCalcSheet`。
+  **兩個必備工具都由 `--install` 自動安裝，來源是使用者自己的 fork，且只綁「本地化 TW 版」應用程式（2026-11-10 定案，不得改回上游）**。使用者本機會**同時安裝上游版與 TW 版**（識別碼與安裝資料夾不同），解析器只認 TW 版、**絕不退回上游版**：
+
+  | 工具 | TW 版（本專案綁定） | 上游版（並存，不採用） |
+  |---|---|---|
+  | OpenCADStudio | 資料夾「Open CAD Studio.TW」、`OpenCADStudio.TW.exe`；設定檔夾與上游共用 `%APPDATA%/OpenCADStudio` | 「Open CAD Studio」、`OpenCADStudio.exe` |
+  | Open CalcSheet Studio | 資料夾「Open CalcSheet Studio TW」、識別碼 `tw.opencalcsheet.studio`（token 在其 `preferences.json`） | 「Open CalcSheet Studio」、`studio.openstructuralcalculation.app` |
+
+  兩版執行檔可能同名，**只能靠資料夾／.app／desktop 檔名分辨**；路徑一律由 `project_paths.opencadstudio_exe()`／`opencalcsheet_exe()`／`ocss_settings_dir()` 解析，不得寫死。兩版 OCSS 預設都用埠 3879，同時開啟時以先開者佔埠；`probe` 回 401 多半是連到了上游版，請關掉上游版。
+  - **OpenCADStudio**（[`tutumomo/OpenCADStudio`](https://github.com/tutumomo/OpenCADStudio)）：fork 版含 Big5 SHX 大字體修正，中文才不會亂碼。Windows 取 `*-installer.msi`，以 `msiexec /passive` 安裝到「Open CAD Studio.TW」（可能跳 UAC）；Linux 取 AppImage，命令為 `~/.local/bin/opencadstudio-tw`；macOS fork 目前未發行 dmg，印手動指引。
+  - **Open CalcSheet Studio**（[`tutumomo/Open-CalcSheet-Studio`](https://github.com/tutumomo/Open-CalcSheet-Studio)，鍵名 `OpenCalcSheet`）：開放計算環境／第二套獨立算法。Windows 下載檔名含 `.TW_` 的 `x64-setup.exe`、**先以 `SHA256SUMS.txt` 校驗**再 `/S` 靜默安裝（可能跳 UAC，請使用者核准）；Linux 只下載 `.deb` 並印出 `sudo apt install` 指令（需 root，不代裝）；macOS 走 dmg 流程（尚未實測）。已安裝則略過，不自動升級。單獨補裝：`python tools/project_paths.py --install --only OpenCalcSheet`。
   **OCSS 裝好後還有兩件事，`--install` 不會代做**：① 開啟程式一次並在設定啟用 MCP／API（token 才會產生）；② 跑 `python tools/crosscheck/ocss_crosscheck.py register-mcp --apply` 把 MCP 連線寫進本機 `.mcp.json`（token 不印出、不進版控），最後用 `ocss_crosscheck.py probe` 驗證。**嚴禁對 OCSS 執行檔跑 `--version`／`--help`（會卡死）**，偵測一律走 `project_paths.opencalcsheet_exe()`。
 - **工具不得住在 `_temp/`**：`_temp/` 依 §1.1 可整批刪除，凡會長期引用的工具一律放 `tools/`。
 - **優先呼叫確定性腳本**：嚴禁略過 `tools/` 現成工具而重寫一次性腳本。

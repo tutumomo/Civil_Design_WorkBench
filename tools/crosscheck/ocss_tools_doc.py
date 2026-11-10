@@ -152,7 +152,7 @@ def render(tools: list[dict], version: str) -> str:
     A("- **同一份 registry、三種進入點**：MCP `http://127.0.0.1:3879/mcp`、REST 通用 `POST /api/v1/tools/<name>`、"
       "以及部分工具的語意化 REST 路由（下表『REST 路由』）。三者行為一致，token 相同。")
     A("- **認證**：`Authorization: Bearer <token>`；token 在 `preferences.json` 的 `mcpToken`（機密，不入文件／版控）。")
-    A("- **Linux 設定檔位置**：`~/.local/share/studio.openstructuralcalculation.app/preferences.json`"
+    A("- **Linux 設定檔位置**：`~/.local/share/tw.opencalcsheet.studio/preferences.json`（TW 版；上游為 `studio.openstructuralcalculation.app`）"
       "（Tauri `app_data_dir`；非 `~/.config`）。")
     A("")
     A("## 本專案使用建議")

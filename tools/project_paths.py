@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -318,146 +319,205 @@ def blender_exe() -> str | None:
     return exe
 
 
-def opencadstudio_exe() -> str | None:
-    """OpenCADStudio（AutoCAD 開源平替）執行檔。
+def _norm_app(s: str) -> str:
+    """應用程式資料夾／檔名的比對鍵：去空格、點、連字號、底線並轉小寫。
 
-    解析順序：`OPENCADSTUDIO_EXE` → `~/.local/bin/opencadstudio`
-    → macOS `/Applications/OpenCADStudio.app/Contents/MacOS/OpenCADStudio`
-    → `~/.local/opt/opencadstudio-*/` 內的 AppImage／AppRun → PATH。
+    「Open CAD Studio.TW」→ `opencadstudiotw`；「Open CalcSheet Studio TW」→ `opencalcsheetstudiotw`。
+    """
+    return re.sub(r"[ ._\-]", "", s).lower()
+
+
+def _win_program_roots() -> list[Path]:
+    """Windows 安裝根目錄（只取環境變數所指，不寫死磁碟代號）。"""
+    roots = [os.environ.get(k) for k in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)")]
+    local = os.environ.get("LOCALAPPDATA")
+    if local:
+        roots += [local, str(Path(local) / "Programs")]
+    out, seen = [], set()
+    for r in roots:
+        if r and r not in seen and Path(r).is_dir():
+            seen.add(r)
+            out.append(Path(r))
+    return out
+
+
+def _win_app_dirs(key: str) -> list[Path]:
+    """Windows 下比對鍵**完全等於** key 的安裝資料夾（不用 startswith，避免上游／TW 互相誤認）。"""
+    hits = []
+    for root in _win_program_roots():
+        try:
+            for d in sorted(root.iterdir()):
+                if d.is_dir() and _norm_app(d.name) == key:
+                    hits.append(d)
+        except OSError:
+            continue
+    return hits
+
+
+def _linux_desktop_exec(key: str) -> str | None:
+    """Linux：從 .desktop 檔（檔名比對鍵＝key）取 Exec 指向的執行檔。
+
+    Tauri／deb 以 productName 命名 desktop 檔（如 `Open CalcSheet Studio TW.desktop`），
+    但二進位檔名沿用 Cargo 套件名，與上游**同名**；只能靠 desktop 檔分辨是哪一版。
+    """
+    for base in (Path("/usr/share/applications"), Path.home() / ".local" / "share" / "applications"):
+        if not base.is_dir():
+            continue
+        for f in sorted(base.glob("*.desktop")):
+            if _norm_app(f.stem) != key:
+                continue
+            try:
+                for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+                    if line.startswith("Exec="):
+                        exe = line[5:].strip().split()[0].strip('"')
+                        w = exe if Path(exe).is_file() else shutil.which(exe)
+                        if w:
+                            return str(w)
+            except OSError:
+                continue
+    return None
+
+
+#: 本專案只綁定使用者 fork 的「本地化版」應用程式（2026-11-10 定案）。
+#: 上游版與 TW 版在本機並行安裝，差別是安裝資料夾／識別碼，**一律不得退回上游版**。
+OCS_TW_KEY = "opencadstudiotw"            # 資料夾「Open CAD Studio.TW」、執行檔 OpenCADStudio.TW.exe
+OCS_UPSTREAM_KEY = "opencadstudio"        # 上游「Open CAD Studio」（只用來提示，不採用）
+OCSS_TW_KEY = "opencalcsheetstudiotw"     # 資料夾「Open CalcSheet Studio TW」
+OCSS_UPSTREAM_KEY = "opencalcsheetstudio"
+OCSS_TW_APP_ID = "tw.opencalcsheet.studio"            # TW 版 Tauri identifier
+OCSS_UPSTREAM_APP_ID = "studio.openstructuralcalculation.app"
+
+
+def opencadstudio_exe() -> str | None:
+    """OpenCADStudio **TW 版**（fork `tutumomo/OpenCADStudio`，Big5 SHX 修正）執行檔。
+
+    只認本地化版，不退回上游版：
+      1. `OPENCADSTUDIO_EXE`（明確指定時照用，責任在設定者）
+      2. Windows：`ProgramFiles` 等根目錄下比對鍵＝`opencadstudiotw` 的資料夾
+         （實際為「Open CAD Studio.TW」）內的 `OpenCADStudio.TW.exe`
+      3. macOS：`/Applications`、`~/Applications` 下比對鍵＝`opencadstudiotw` 的 .app
+      4. Linux／其他：`--install` 產的 `~/.local/bin/opencadstudio-tw`、
+         `~/.local/opt/opencadstudio-tw-*/` 內的 AppImage，再找 PATH 的 `opencadstudio-tw`
     未安裝回傳 None；補裝用 `python tools/project_paths.py --install`。
+    設定檔夾與上游共用 `%APPDATA%/OpenCADStudio`（fork 未改 `config_dir()`）。
     """
     p = _env_path("OPENCADSTUDIO_EXE")
     if p and p.is_file():
         return str(p)
 
-    # Windows：MSI／自行編譯安裝的版本不固定資料夾名（實測為「Open CAD Studio」，有空格），
-    # 且優先於 ~/.local/bin 下舊 portable 的 .cmd 包裝。不寫死路徑：只依環境變數指到的
-    # 安裝根目錄，用「忽略空格與大小寫」的名稱比對找資料夾，再找其中的 OpenCADStudio.exe。
     if os.name == "nt":
-        roots = [os.environ.get(k) for k in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)")]
-        local = os.environ.get("LOCALAPPDATA")
-        if local:
-            roots += [local, str(Path(local) / "Programs")]
-        seen = set()
-        for root in roots:
-            if not root or root in seen or not Path(root).is_dir():
-                continue
-            seen.add(root)
-            for d in sorted(Path(root).iterdir()):
-                if d.is_dir() and d.name.replace(" ", "").lower().startswith("opencadstudio"):
-                    c = d / "OpenCADStudio.exe"
-                    if c.is_file():
-                        return str(c)
+        for d in _win_app_dirs(OCS_TW_KEY):
+            for c in sorted(d.glob("*.exe")):
+                if _norm_app(c.stem) == OCS_TW_KEY:
+                    return str(c)
 
-    names = ["opencadstudio.exe", "opencadstudio.cmd", "opencadstudio"]
-    home = Path.home()
-    for n in names:
-        c = home / ".local" / "bin" / n
-        if c.is_file():
-            return str(c)
-
-    # macOS：安裝程式會把 .app 放進 /Applications。
-    # 注意：`Contents/MacOS/OpenCADStudio` 只是 launcher stub，被 symlink 到別處
-    # 執行會噴 "failed to execute the application"；真正可獨立執行的是
-    # 同目錄下的 `OpenCADStudio-App`（主程式）。優先挑它。
+    # macOS：`Contents/MacOS/<App>` 可能只是 launcher stub，被 symlink 到別處執行會噴
+    # "failed to execute the application"；優先挑名字帶 -App 的主程式，否則取最大檔。
     if sys.platform == "darwin":
-        app = Path("/Applications") / "OpenCADStudio.app"
-        macos_dir = app / "Contents" / "MacOS"
-        if macos_dir.is_dir():
-            cands = [c for c in macos_dir.glob("*") if c.is_file()]
-            app_bin = [c for c in cands if c.stem.lower() == "opencadstudio-app"]
-            if app_bin:
-                return str(max(app_bin, key=lambda p: p.stat().st_size))
-            if cands:
-                return str(max(cands, key=lambda p: p.stat().st_size))
+        for root in (Path("/Applications"), Path.home() / "Applications"):
+            if not root.is_dir():
+                continue
+            for app in sorted(root.glob("*.app")):
+                if _norm_app(app.stem) != OCS_TW_KEY:
+                    continue
+                cands = [c for c in (app / "Contents" / "MacOS").glob("*") if c.is_file()]
+                app_bin = [c for c in cands if c.stem.lower().endswith("-app")]
+                if app_bin or cands:
+                    return str(max(app_bin or cands, key=lambda q: q.stat().st_size))
 
-    opt = home / ".local" / "opt"
-    if opt.is_dir():
-        for d in sorted(opt.glob("opencadstudio-*"), reverse=True):
-            for pat in ("**/AppRun", "**/*.AppImage", "**/opencadstudio"):
-                for c in sorted(d.glob(pat)):
-                    if c.is_file():
-                        return str(c)
-
-    for n in names:
-        w = shutil.which(n)
+    home = Path.home()
+    if os.name != "nt":
+        c = home / ".local" / "bin" / "opencadstudio-tw"
+        if c.exists():
+            return str(c)
+        opt = home / ".local" / "opt"
+        if opt.is_dir():
+            for d in sorted(opt.glob("opencadstudio-tw-*"), reverse=True):
+                for pat in ("**/AppRun", "**/*.AppImage"):
+                    for c in sorted(d.glob(pat)):
+                        if c.is_file():
+                            return str(c)
+        w = shutil.which("opencadstudio-tw")
         if w:
             return str(w)
     return None
 
 
+def upstream_only_hint(tool: str) -> str | None:
+    """若本機只有上游版（沒有 TW 版），回傳一句提示；否則 None。只用於回報，不影響解析。"""
+    if os.name != "nt":
+        return None
+    if (opencadstudio_exe() if tool == "opencadstudio" else opencalcsheet_exe()):
+        return None
+    if tool == "opencadstudio":
+        up =[d for d in _win_app_dirs(OCS_UPSTREAM_KEY) if (d / "OpenCADStudio.exe").is_file()]
+    else:
+        up = [d for d in _win_app_dirs(OCSS_UPSTREAM_KEY) if (d / "open-calcsheet-studio.exe").is_file()]
+    if up:
+        return f"偵測到上游版 {up[0]}，本專案不採用（只綁 TW 版）"
+    return None
+
+
 def opencalcsheet_exe() -> str | None:
-    """Open CalcSheet Studio（台灣版結構計算書／開放計算環境）執行檔。
+    """Open CalcSheet Studio **TW 版**（fork `tutumomo/Open-CalcSheet-Studio`）執行檔。
 
-    解析順序：`OCSS_EXE` 環境變數 → Windows 安裝根目錄（名稱比對）→
-    macOS `/Applications` 的 .app → `~/.local/bin` → PATH。未安裝回傳 None。
-
-    與 `opencadstudio_exe()` 同一個原則：**不寫死路徑**。Windows 安裝版資料夾名
-    帶空格（實測為「Open CalcSheet Studio」）且不寫登錄 InstallLocation，
-    因此只依 `ProgramFiles` 等環境變數指到的根目錄，用「忽略空格與大小寫」
-    的名稱比對找資料夾，再找其中的執行檔。
+    只認本地化版，不退回上游版（兩者執行檔同名 `open-calcsheet-studio`，只能靠
+    安裝資料夾／.app／desktop 檔名分辨）：
+      1. `OCSS_EXE`（明確指定時照用）
+      2. Windows：比對鍵＝`opencalcsheetstudiotw` 的資料夾（實際為「Open CalcSheet Studio TW」）
+         內的 `open-calcsheet-studio.exe`（排除 uninstall.exe）
+      3. macOS：比對鍵相同的 .app（「Open CalcSheet Studio TW.app」，尚未實測）
+      4. Linux：比對鍵相同的 .desktop 檔的 Exec → `~/.local/bin/open-calcsheet-studio-tw`
+         → PATH 的 `open-calcsheet-studio-tw`（尚未以 TW 版實測）
+    未安裝回傳 None。**不得執行它的 `--version`／`--help`（會卡住）。**
     """
     p = _env_path("OCSS_EXE")
     if p and p.is_file():
         return str(p)
 
-    def _norm(s: str) -> str:
-        return s.replace(" ", "").replace("-", "").replace("_", "").lower()
-
     if os.name == "nt":
-        roots = [os.environ.get(k) for k in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)")]
-        local = os.environ.get("LOCALAPPDATA")
-        if local:
-            roots += [local, str(Path(local) / "Programs")]
-        seen = set()
-        for root in roots:
-            if not root or root in seen or not Path(root).is_dir():
-                continue
-            seen.add(root)
-            for d in sorted(Path(root).iterdir()):
-                if not d.is_dir() or not _norm(d.name).startswith("opencalcsheet"):
-                    continue
-                for c in d.glob("*.exe"):
-                    # 排除 uninstall.exe；主程式名為 open-calcsheet-studio.exe
-                    if _norm(c.stem).startswith("opencalcsheetstudio"):
-                        return str(c)
+        for d in _win_app_dirs(OCSS_TW_KEY):
+            for c in sorted(d.glob("*.exe")):
+                if _norm_app(c.stem) == "opencalcsheetstudio":
+                    return str(c)
 
     if sys.platform == "darwin":
-        # macOS：/Applications 與 ~/Applications 下的 .app，取 Contents/MacOS 內的主程式
         for root in (Path("/Applications"), Path.home() / "Applications"):
             if not root.is_dir():
                 continue
             for d in sorted(root.glob("*.app")):
-                if not _norm(d.stem).startswith("opencalcsheet"):
+                if _norm_app(d.stem) != OCSS_TW_KEY:
                     continue
                 for c in sorted((d / "Contents" / "MacOS").glob("*")):
                     if c.is_file():
                         return str(c)
 
-    home = Path.home()
-    for n in ("open-calcsheet-studio", "opencalcsheet"):
-        c = home / ".local" / "bin" / (n + ".exe")
-        if c.is_file():
+    if sys.platform.startswith("linux"):
+        exe = _linux_desktop_exec(OCSS_TW_KEY)
+        if exe:
+            return exe
+        # 無 root 用 `dpkg-deb -x` 解壓時，請把執行檔連結成 `open-calcsheet-studio-tw`（與上游區隔）
+        c = Path.home() / ".local" / "bin" / "open-calcsheet-studio-tw"
+        if c.exists():
             return str(c)
-        c = home / ".local" / "bin" / n
-        if c.is_file():
-            return str(c)
-
-    for n in ("open-calcsheet-studio", "opencalcsheet"):
-        w = shutil.which(n)
+        w = shutil.which("open-calcsheet-studio-tw")
         if w:
             return str(w)
     return None
 
 
 def ocss_settings_dir() -> Path:
-    """Open CalcSheet Studio 的使用者資料夾（preferences.json 所在）。
+    """Open CalcSheet Studio **TW 版**的使用者資料夾（preferences.json 所在）。
 
-    Tauri app id 固定為 `studio.openstructuralcalculation.app`，各平台慣例路徑：
-    Windows `%APPDATA%`、macOS `~/Library/Application Support`、Linux `~/.local/share`（Tauri app_data_dir，實測）。
-    資料夾不存在時仍回傳路徑（呼叫端自行判斷）。
+    TW 版 Tauri identifier 為 `tw.opencalcsheet.studio`（上游為
+    `studio.openstructuralcalculation.app`，兩版 token 不同，不可混用）。各平台慣例路徑：
+    Windows `%APPDATA%`、macOS `~/Library/Application Support`、Linux `~/.local/share`（Tauri app_data_dir）。
+    可用 `OCSS_SETTINGS_DIR` 覆寫。資料夾不存在時仍回傳路徑（呼叫端自行判斷）。
     """
-    app_id = "studio.openstructuralcalculation.app"
+    p = _env_path("OCSS_SETTINGS_DIR")
+    if p:
+        return p
+    app_id = OCSS_TW_APP_ID
     if os.name == "nt":
         base = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
     elif sys.platform == "darwin":
@@ -640,13 +700,19 @@ def main(argv=None) -> int:
             acc_desc = "—（未安裝 AutoCAD；沒有也能產 DXF，但缺少 DWG 轉檔工具）"
     print(f"accoreconsole: {acc_desc}")
     if info.get("opencadstudio"):
-        print(f"OpenCADStudio: {info['opencadstudio']}  [OK]（開源 CAD 平替；DWG/DXF、CTB 出圖、MCP）")
+        print(f"OpenCADStudio: {info['opencadstudio']}  [OK]（TW 版；DWG/DXF、CTB 出圖、MCP）")
     else:
-        print("OpenCADStudio: —（未安裝；跑 python tools/project_paths.py --install 自動補齊）")
+        print("OpenCADStudio: —（必備；TW 版未安裝。跑 python tools/project_paths.py --install 自動補齊）")
+    h = upstream_only_hint("opencadstudio")
+    if h:
+        print(f"  · {h}")
     if info.get("opencalcsheet"):
-        print(f"OpenCalcSheet: {info['opencalcsheet']}  [OK]（開放計算環境；須開啟程式才有 API 3879）")
+        print(f"OpenCalcSheet: {info['opencalcsheet']}  [OK]（TW 版；須開啟程式才有 API 3879）")
     else:
-        print("OpenCalcSheet: —（必備；未安裝。跑 python tools/project_paths.py --install 自動補齊，或設定 OCSS_EXE）")
+        print("OpenCalcSheet: —（必備；TW 版未安裝。跑 python tools/project_paths.py --install 自動補齊，或設定 OCSS_EXE）")
+    h = upstream_only_hint("opencalcsheet")
+    if h:
+        print(f"  · {h}")
     print(f"SolidCraft   : {info['solidcraft'] or '—（選用）'}")
     iz = info["ingetrazo_mcp"]
     print(f"IngeTrazo    : {info['ingetrazo_home'] or '—（選用；未安裝或設定 INGETRAZO_HOME）'}")

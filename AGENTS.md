@@ -179,6 +179,7 @@
 - **IngeTrazo 為 GUI+橋接型**：需桌面 App 開啟並啟動 AI Bridge；輸出為 IFC4/CSV/DXF，座標為 UTM WGS84，**不得直接視為 TWD97 `EPSG:3826`**。詳見 [`docs/IngeTrazo操作指引.md`](docs/IngeTrazo操作指引.md)。
 - **IngeTrazo 在 macOS arm64 已有官方 DMG**（`IngeTrazo-0.6.0-macos-arm64.dmg`），裝在 `/Applications/IngeTrazo.app`；`project_paths` 已內建該路徑，**不必設 `INGETRAZO_HOME`／`INGETRAZO_MCP`**。
 - **橋已改為自動開啟**（2026-11-08）：使用者外掛 `~/.local/share/ingetrazo/plugins/auto_ai_bridge.py` 在 app 啟動時自動拉起橋（停用＝檔名加 `.disabled`）。**橋只收一個客戶端**——第二個 MCP 客戶端會「逾時」而非拒絕；用 `lsof -nP -iTCP:4763` 找出佔用者並 `kill` 才能釋放名額。
+- **Blender MCP 能力與使用情境**：五個工具（`blender_info`／`blender_run_python`／`blender_render`／`blender_convert`／`blender_selftest`）、情境、路徑與限制見 [`docs/Blender_MCP_能力與使用情境.md`](docs/Blender_MCP_能力與使用情境.md)。腳本內的輸出路徑一律用絕對路徑（相對路徑會落在 `_temp/blender/<job>/`）。
 - **Blender 執行環境**：MSIX 版路徑由 `project_paths.blender_exe()` 解析；腳本一律經 `tools/blender/blender_runner.py` 啟動。
 - **MCP 相對路徑約束**：ArtCraft 相對路徑落於 `out/`；AutoCAD MCP 限制於本專案根目錄。
 - **`regs_server.py` 啟動旗標**：提供 MCP 時必須帶 `--mcp` 參數。

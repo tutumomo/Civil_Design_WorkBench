@@ -134,6 +134,9 @@ finally:
 
 # ------------------------------------------------------------------ PowerShell
 def _ps(command: str, timeout: int = 60) -> dict:
+    # 非 Windows 沒有 Get-AppxPackage／MSIX，也常沒有 PowerShell：直接回空結果，讓呼叫端走 PATH／環境變數。
+    if sys.platform != "win32":
+        return {"exit_code": 127, "stdout": "", "stderr": "PowerShell 僅 Windows 使用"}
     proc = subprocess.run(
         [POWERSHELL, "-NoProfile", "-NonInteractive", "-Command", command],
         capture_output=True,
@@ -151,9 +154,9 @@ def find_blender(refresh: bool = False) -> dict:
     info: dict = {"mode": "missing", "exe": None, "package_family": None, "app_id": APP_ID,
                   "version": None, "notes": []}
 
-    explicit = os.environ.get("CIVIL_AI_BLENDER")
+    explicit = os.environ.get("CIVIL_AI_BLENDER") or os.environ.get("BLENDER")
     if explicit and Path(explicit).exists():
-        info.update(mode="direct", exe=str(Path(explicit)), notes=["來源：環境變數 CIVIL_AI_BLENDER"])
+        info.update(mode="direct", exe=str(Path(explicit)), notes=["來源：環境變數 CIVIL_AI_BLENDER／BLENDER"])
     else:
         res = _ps(
             "$p = Get-AppxPackage -Name '" + PACKAGE_MATCH + "' | Select-Object -First 1; "
@@ -238,6 +241,9 @@ def _blender_argv(blender: dict, job_dir: Path, blend_file: str | None,
 
 
 def _kill_job_processes(job_dir: Path) -> dict:
+    if sys.platform != "win32":  # 只終止命令列含本工作目錄的 blender
+        r = subprocess.run(["pkill", "-f", str(job_dir)], capture_output=True, text=True)
+        return {"killed_pids": [], "note": f"pkill exit={r.returncode}"}
     cmd = (
         "Get-CimInstance Win32_Process -Filter \"Name='blender.exe'\" | "
         "Where-Object { $_.CommandLine -and $_.CommandLine -like "
@@ -259,16 +265,19 @@ def _launch(blender: dict, job_dir: Path, blend_file: str | None,
     t0 = time.time()
 
     if blender["mode"] == "direct":
-        proc = subprocess.run(
-            [blender["exe"], *argv],
-            capture_output=True,
-            timeout=timeout_s + 30,
-            cwd=str(job_dir),
-        )
-        (job_dir / "stdout.txt").write_bytes(proc.stdout or b"")
-        (job_dir / "stderr.txt").write_bytes(proc.stderr or b"")
-        exit_code = proc.returncode
         launch = "direct"
+        try:
+            proc = subprocess.run(
+                [blender["exe"], *argv],
+                capture_output=True,
+                timeout=timeout_s + 30,
+                cwd=str(job_dir),
+            )
+            (job_dir / "stdout.txt").write_bytes(proc.stdout or b"")
+            (job_dir / "stderr.txt").write_bytes(proc.stderr or b"")
+            exit_code = proc.returncode
+        except subprocess.TimeoutExpired:  # 交給下方逾時流程回報，不要讓例外直接炸掉 MCP 呼叫
+            exit_code = None
     elif blender["mode"] == "msix":
         args_str = " ".join(
             [a if a.startswith("-") else f'"{a}"' for a in argv]

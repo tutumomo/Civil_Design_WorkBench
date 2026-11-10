@@ -184,6 +184,15 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
 |---|---|---|---|
 | 景觀平面圖轉 3D 景觀模擬 | 景觀平面圖或手繪示意 → 3D 意象模擬圖（**意象，不是施工圖**）＋正交俯視補圖 | `tools/landscape3d/`（`bay_scene.py`、`park_scene.py`、`plan_view.py`）、Blender；`docs/3D景觀模擬_作業經驗與踩坑.md` | AI 協作（有參考實作） |
 | 參數化 3D 構造物 | 口述需求 → 參數化模型、STEP／STL／3MF、成果圖與數量表 | SolidCraft（`tools/solidcraft/`、skill `solidcraft-param`） | 現成 |
+| 改一個數字重出圖 | 「路寬改 6 m、再出一次」 → 只重建重出，不必重做（參考實測：載入既有 .blend 補 1 張約 40 秒） | `blender` MCP：`blender_run_python`＋`blender_render` | 現成 |
+| 程式量測（不靠目視） | 「這個坡面實際多長、車道淨寬夠不夠」 → 從模型讀尺寸、座標，回傳數字與設計值對帳 | `blender_run_python`（腳本設 `RESULT`） | 現成 |
+| 3D 模型格式轉換與對帳 | SolidCraft／CAD 的 STL、OBJ、FBX → glb、usd 等，並回報物件數與三角面數 | `blender_convert` | 現成 |
+| 簡報、報告用擬真示意圖 | 「這個擋土牆做一張帶光影的示意圖」 → PNG（可去背），放進 GridCraft／WordCraft／DeckCraft 文件 | `blender_render` | 現成 |
+
+> **Blender MCP 很好用**：AI 在背景寫 `bpy` 腳本就能建模、量測、匯出、渲染，不開視窗、不干擾你開著的 Blender。
+> 五個工具（`blender_info`／`blender_run_python`／`blender_render`／`blender_convert`／`blender_selftest`）、
+> 使用情境、路徑與限制見 [`docs/Blender_MCP_能力與使用情境.md`](docs/Blender_MCP_能力與使用情境.md)。
+> 與 SolidCraft 分工：SolidCraft 做精確的參數化構造物，Blender 做場景、光影與意象圖，兩者可接力。
 
 所有交付物一律落在 `out/<案名>/`，並須通過[交付前的六道閘門](#交付前的六道閘門)。
 
@@ -262,7 +271,7 @@ ArtCraft Launcher 與 Blender 是 GUI／官方發行版，`--install` **只偵�
 | **OpenCADStudio TW**<br>來源：[`tutumomo/OpenCADStudio`](https://github.com/tutumomo/OpenCADStudio) | **CAD 主力**（開源、台灣在地化，Big5 SHX 修正，中文不亂碼）：DXF → DWG／PDF、CTB 出圖、MCP 控制。安裝後自動設好 TOMO 字型夾與 CTB 樣式夾（見步驟 3.5） |
 | **Open CalcSheet Studio TW**<br>來源：[`tutumomo/Open-CalcSheet-Studio`](https://github.com/tutumomo/Open-CalcSheet-Studio) | 開放計算環境、逐式可稽核計算書、第二套獨立算法（交叉驗算） |
 | **ArtCraft Launcher**<br>來源：[`storytold/craft-launcher`](https://github.com/storytold/craft-launcher) | Craft App Suite 的安裝／更新／開啟入口。內含十幾套開源軟體，可平替 Adobe、Office、CAD（PhotoCraft、VectorCraft、PdfCraft、WordCraft、GridCraft、DeckCraft、CADCraft 等）；交付流程必要的 GridCraft（預算書 xlsx）、WordCraft（報告 docx）由它安裝 |
-| **Blender**<br>來源：[blender.org](https://www.blender.org/download/) | 3D 景觀模擬與擬真算輪（`blender` MCP 與 3D 軸） |
+| **Blender**<br>來源：[blender.org](https://www.blender.org/download/) | 3D 景觀模擬、量測、格式轉換與擬真渲染（`blender` MCP 五個工具，見〈[3D 與景觀模擬](#六3d-與景觀模擬)〉） |
 
 各平台安裝方式（`--install` 自動處理）：
 

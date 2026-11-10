@@ -29,7 +29,7 @@
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
-$PY = 'C:\Python312\python.exe'
+$PY = 'python'
 
 & $PY -E -P -X utf8 tools\selftest\design_launch_check.py <calculator_id>
 & $PY -E -P -X utf8 tools\selftest\design_launch_check.py --all      # 全套 22 支

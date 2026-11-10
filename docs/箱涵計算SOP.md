@@ -26,8 +26,8 @@
 | 出圖 | `tools\box_section\make_box_section.py`（S-01 標準斷面圖／S-02 配筋圖）；流程見 `docs\箱涵斷面圖產線.md` |
 | 工作台 id | `box_culvert`（群組「箱涵」） |
 | 工作台網址 | `http://127.0.0.1:8765/design`（`regs_server.py --web`） |
-| CLI 自測 | `C:\Python312\python.exe tools\design\box_culvert.py --selftest`（20 項） |
-| 上架檢核 | `C:\Python312\python.exe tools\selftest\design_launch_check.py box_culvert` |
+| CLI 自測 | `python tools/design/box_culvert.py --selftest`（20 項） |
+| 上架檢核 | `python tools/selftest/design_launch_check.py box_culvert` |
 | MCP | `design_show("box_culvert")` → `design_run("box_culvert", {...})` |
 | 主題卡 | `tools\regs\topics.json`「箱涵」 |
 
@@ -439,7 +439,7 @@ y_n + freeboard_min_m ≤ clear_height_m
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
-$PY = 'C:\Python312\python.exe'
+$PY = 'python'
 
 & $PY tools\design\box_culvert.py --selftest                      # 20/20
 & $PY tools\selftest\design_core_selftest.py                      # 158 tests OK
@@ -529,13 +529,13 @@ $PY = 'C:\Python312\python.exe'
 
 ```powershell
 # 1. 取輸入範例
-C:\Python312\python.exe tools\design\design_cli.py show box_culvert
+python tools/design/design_cli.py show box_culvert
 
 # 2. 單次計算（JSON）
-C:\Python312\python.exe tools\design\design_cli.py run box_culvert payload.json --format text
+python tools/design/design_cli.py run box_culvert payload.json --format text
 
 # 3. 案件三軸（設計圖＋預算書＋報告）
-C:\Python312\python.exe tools\case_package\case_package.py cases\箱涵三孔測試\case.json
+python tools/case_package/case_package.py cases/箱涵三孔測試/case.json
 ```
 
 案件主檔的 `culvert` 段可放 `traffic_type`、`traffic_lanes`、

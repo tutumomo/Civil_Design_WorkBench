@@ -160,7 +160,7 @@ kg_per_m = design["total_kg_per_m"]
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
-C:\Python312\python.exe tools\case_package\case_package.py `
+python tools/case_package/case_package.py `
     "cases\擋土牆8m扶壁式\case.json" --allow-placeholder
 ```
 
@@ -173,11 +173,11 @@ C:\Python312\python.exe tools\case_package\case_package.py `
 
 ```powershell
 # S-01 標準斷面圖
-C:\Python312\python.exe tools\wall_section\make_wall_section.py `
+python tools/wall_section/make_wall_section.py `
     "cases\<案名>\case.json" --scale auto --out "out\<案名>\S-01_擋土牆標準斷面圖.dxf" --publish
 
 # S-02 配筋圖（同一份配筋設計）
-C:\Python312\python.exe tools\wall_section\make_wall_section.py `
+python tools/wall_section/make_wall_section.py `
     "cases\<案名>\case.json" --scale auto --rebar `
     --out "out\<案名>\S-02_擋土牆配筋圖.dxf" --publish
 ```
@@ -241,7 +241,7 @@ C:\Python312\python.exe tools\wall_section\make_wall_section.py `
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
-$py = "C:\Python312\python.exe"
+$py = "python"
 
 # 1. 看某牆型的輸入範例
 & $py tools\design\design_cli.py show counterfort_wall

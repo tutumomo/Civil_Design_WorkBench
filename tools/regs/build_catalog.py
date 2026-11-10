@@ -107,7 +107,7 @@ def main():
         "# 法規庫總目錄（台灣土木／水保／建築設計規範）",
         "",
         f"> 由 `tools\\regs\\build_catalog.py` 依 `data\\法規\\_regs_manifest.json` 產生（{now}）。",
-        "> 下載／更新：`C:\\Python312\\python.exe -E -P -X utf8 tools\\regs\\fetch_regs.py [--only ID ...]`；"
+        "> 下載／更新：`python -E -P -X utf8 tools/regs/fetch_regs.py [--only ID ...]`；"
         "改完再跑本腳本重建目錄。",
         "",
         "## 使用規則",

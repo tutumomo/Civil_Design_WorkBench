@@ -1,7 +1,7 @@
 r"""Closed-form regression tests for the shared design-core modules.
 
 Run:
-    C:\Python312\python.exe -E -P -X utf8 tools\selftest\design_core_selftest.py
+    python -E -P -X utf8 tools/selftest/design_core_selftest.py
 """
 
 from __future__ import annotations

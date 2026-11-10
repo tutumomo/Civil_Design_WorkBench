@@ -16,7 +16,7 @@
 2. 使用者於 Studio Hub「Assistants」卡片複製 **Token** 給 AI。**token 不得寫入任何檔案**，只放環境變數：
    ```bash
    export PYTHONIOENCODING=utf-8 CCS_TOKEN='<token>'
-   C:/Python312/python.exe tools/cadcraft_studio/ccs.py call windows_list
+   python tools/cadcraft_studio/ccs.py call windows_list
    ```
 3. 端點 `http://127.0.0.1:<埠>/mcp`（Bearer token；埠號 `ccs.py` 自動偵測 Studio 監聽埠）。
 4. 每個工具都帶 `"window": "civilcraft"` 或 `"takeoffcraft"` 指定視窗；`tools/list` 只列「最後使用視窗」的工具。

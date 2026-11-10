@@ -511,7 +511,7 @@ water = earth_pressure.hydrostatic(...)
 完成 `tools\design\*`、`qty_models.py`、`case_core.py`、圖面模組後，必須跑：
 
 ```bat
-C:\Python312\python.exe tools\selftest\regression.py
+python tools/selftest/regression.py
 ```
 
 在半重力式新案例尚未正式加入 baseline 前，不可用 `--update` 覆蓋既有回歸基準。

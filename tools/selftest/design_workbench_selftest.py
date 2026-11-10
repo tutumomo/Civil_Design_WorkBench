@@ -1,7 +1,7 @@
 r"""Integration tests for the civil-design JSON API and web workbench.
 
 Run:
-    C:\Python312\python.exe -E -P -X utf8 tools\selftest\design_workbench_selftest.py
+    python -E -P -X utf8 tools/selftest/design_workbench_selftest.py
 """
 
 from __future__ import annotations

@@ -24,13 +24,13 @@ from pathlib import Path
 try:
     import fitz  # PyMuPDF
 except ImportError:  # pragma: no cover
-    print("✗ 需要 PyMuPDF（fitz）：C:\\Python312\\python.exe -m pip install pymupdf")
+    print(f"✗ 需要 PyMuPDF（fitz）：{sys.executable} -m pip install pymupdf")
     raise SystemExit(2)
 
 try:
     from docx import Document
 except ImportError:  # pragma: no cover
-    print("✗ 需要 python-docx：C:\\Python312\\python.exe -m pip install python-docx")
+    print(f"✗ 需要 python-docx：{sys.executable} -m pip install python-docx")
     raise SystemExit(2)
 
 CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")

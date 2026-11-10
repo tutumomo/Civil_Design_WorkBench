@@ -1,0 +1,629 @@
+"""擋土牆類計算器（懸臂／重力、疊砌、扶壁、加勁、錨定）的範例與欄位規則。
+
+自 `design_api.py` 原樣搬出，內容未改。
+"""
+
+from typing import Any
+
+
+_PASSIVE_RATIO_HINT = "1＝全 Rankine；牆身位移不足以發揮全被動時取小於 1"
+
+
+_BLOCK_WALL_SECTION_KEYS = [
+    "course_count",
+    "course_height_m",
+    "base_width_m",
+    "width_decrement_m",
+    "step_side",
+    "height_m",
+    "top_width_m",
+    "front_batter_ratio",
+    "back_batter_ratio",
+    "stone_length_m",
+    "stone_courses",
+    "layers",
+    "unit_weight_kn_m3",
+    "interface_friction",
+    "site_condition",
+]
+
+
+def _example_retaining_wall() -> dict[str, Any]:
+    return {
+        "wall_type": "cantilever",
+        "height_m": 3.0,
+        "stem_thickness_m": 0.35,
+        "base_width_m": 1.95,
+        "base_thickness_m": 0.36,
+        "toe_soil_depth_m": 0.60,
+        "include_passive": True,
+        "passive_ratio": 1.0,
+        "soil": {
+            "gamma": 18.0,
+            "phi_deg": 30.0,
+            "c_kpa": 0.0,
+            "allowable_bearing_kpa": 200.0,
+        },
+        "fc_mpa": 21.0,
+        "fy_mpa": 420,
+        "cover_mm": 75,
+        "stem_bar": "auto",
+        "base_bar": "auto",
+        "mass_wall_face_bar": "D13",
+        "mass_wall_face_spacing_mm": 250,
+        "mass_wall_base_bar": "D16",
+        "mass_wall_base_spacing_mm": 200,
+    }
+
+
+def _wall_bar_choices(*, include_auto: bool = False, default: str = "D16"):
+    """擋土牆配筋筋號下拉選單。"""
+    out = []
+    if include_auto:
+        out.append({"value": "auto", "label": "自動選擇（依需求）"})
+    for name in ("D10", "D13", "D16", "D19", "D22", "D25", "D29", "D32"):
+        out.append({"value": name, "label": name + ("（預設）" if name == default else "")})
+    return out
+
+
+def _passive_field_rules(ratio_hint: str = _PASSIVE_RATIO_HINT) -> dict[str, Any]:
+    """Shared labels for the toe passive-pressure switches of the five wall calculators."""
+
+    return {
+        "include_passive": {"label": "計入牆趾被動土壓力（只計入抗滑）"},
+        "passive_ratio": {
+            "type": "number",
+            "step": 0.05,
+            "label": "被動土壓折減比 (0～1)",
+            "hint": ratio_hint,
+        },
+    }
+
+
+def _wall_field_rules() -> dict[str, Any]:
+    import retaining_wall as RW
+
+    section_defaults = {
+        "gravity": {
+            "stem_thickness_m": 0.45,
+            "base_width_m": 1.80,
+            "base_thickness_m": 0.0,
+            "toe_soil_depth_m": 0.60,
+        },
+        "semigravity": {
+            "top_width_m": 0.30,
+            "base_width_m": 2.50,
+            "base_thickness_m": 0.80,
+            "front_batter_ratio": 0.30,
+            "toe_projection_m": 0.50,
+            "toe_soil_depth_m": 1.50,
+        },
+        "cantilever": {
+            "stem_thickness_m": 0.35,
+            "base_width_m": 1.95,
+            "base_thickness_m": 0.36,
+            "toe_soil_depth_m": 0.60,
+        },
+    }
+    choices = [
+        {
+            "value": key,
+            "label": "%s（有效高 ≤ %.1f m）"
+            % (spec["label"], spec["max_height_m"]),
+            "defaults": section_defaults[key],
+        }
+        for key, spec in RW.WALL_TYPE_SPECS.items()
+    ]
+    limits = {
+        key: {
+            "max": spec["max_height_m"],
+            "basis": spec["basis"],
+        }
+        for key, spec in RW.WALL_TYPE_SPECS.items()
+    }
+    # Semigravity input is total wall height; the code limit is the exposed
+    # effective height, so the working limit is 4.0 m + base thickness.
+    limits["semigravity"]["input_offset_by"] = "base_thickness_m"
+    return {
+        **_passive_field_rules(),
+        "toe_soil_depth_m": {
+            "type": "number",
+            "step": 0.1,
+            "label": "牆趾覆土深 D (m)",
+            "hint": "自基底底面算起；Pp＝½KpγD²，覆土須分層夯實且不得移除",
+        },
+        "wall_type": {
+            "type": "select",
+            "choices": choices,
+            "on_change": "rerender",
+            "clear_on_change": [
+                "stem_thickness_m",
+                "base_width_m",
+                "base_thickness_m",
+                "top_width_m",
+                "front_batter_ratio",
+                "back_batter_ratio",
+                "toe_projection_m",
+                "toe_soil_depth_m",
+            ],
+        },
+        "height_m": {
+            "type": "number",
+            "step": 0.1,
+            "label": "牆高 (m)",
+            "max_by": "wall_type",
+            "limits": limits,
+        },
+        # ---- 配筋設定（2026-11-04 新增：穩定分析同時輸出配筋）----
+        "fc_mpa": {
+            "type": "number",
+            "step": 1,
+            "label": "混凝土 fc′ (MPa)",
+            "hint": "預設 21 MPa（≈210 kgf/cm²）；變更須重跑配筋檢核",
+        },
+        "fy_mpa": {
+            "type": "select",
+            "label": "鋼筋 fy (MPa)",
+            "choices": [
+                {"value": 280, "label": "SD280（280 MPa）"},
+                {"value": 420, "label": "SD420（420 MPa，預設）"},
+            ],
+        },
+        "cover_mm": {
+            "type": "number",
+            "step": 5,
+            "label": "鋼筋保護層 (mm)",
+            "hint": "擋土牆迎土面預設 75 mm；面版／排水溝 50 mm",
+        },
+        "stem_bar": {
+            "type": "select",
+            "label": "【懸臂式】牆身主筋",
+            "choices": _wall_bar_choices(include_auto=True),
+            "hint": "auto＝依撓曲需求自動選筋；指定筋號只改筋徑，間距仍由需求決定",
+        },
+        "base_bar": {
+            "type": "select",
+            "label": "【懸臂式】底板主筋（趾板／踵板）",
+            "choices": _wall_bar_choices(include_auto=True),
+        },
+        "mass_wall_face_bar": {
+            "type": "select",
+            "label": "【重力式／半重力式】牆面構造筋",
+            "choices": _wall_bar_choices(default="D13"),
+        },
+        "mass_wall_face_spacing_mm": {
+            "type": "number",
+            "step": 10,
+            "label": "【重力式／半重力式】牆面筋間距 (mm)",
+        },
+        "mass_wall_base_bar": {
+            "type": "select",
+            "label": "【重力式／半重力式】底部縱筋",
+            "choices": _wall_bar_choices(default="D16"),
+        },
+        "mass_wall_base_spacing_mm": {
+            "type": "number",
+            "step": 10,
+            "label": "【重力式／半重力式】底部縱筋間距 (mm)",
+        },
+    }
+
+
+def _block_wall_defaults() -> dict[str, dict[str, Any]]:
+    stepped = {
+        "course_count": 3,
+        "course_height_m": 1.0,
+        "base_width_m": 2.5,
+        "width_decrement_m": 0.5,
+        "step_side": "front",
+        "embedment_m": 0.5,
+    }
+    masonry = {
+        "height_m": 3.0,
+        "top_width_m": 0.5,
+        "front_batter_ratio": 0.3,
+        "back_batter_ratio": 0.2,
+        "stone_length_m": 0.5,
+        "embedment_m": 0.5,
+    }
+    return {
+        "gabion": dict(stepped),
+        "crib": dict(stepped, course_count=2, course_height_m=2.0, base_width_m=3.0,
+                     width_decrement_m=0.8),
+        "masonry_wet": dict(masonry),
+        "masonry_dry": dict(masonry, stone_length_m=0.6),
+        "sandwich": {
+            "height_m": 3.0,
+            "top_width_m": 0.5,
+            "front_batter_ratio": 0.3,
+            "back_batter_ratio": 0.0,
+            "site_condition": "cut",
+            "embedment_m": 0.5,
+        },
+    }
+
+
+def _example_block_wall() -> dict[str, Any]:
+    return {
+        "wall_type": "gabion",
+        **_block_wall_defaults()["gabion"],
+        "include_passive": True,
+        "passive_ratio": 1.0,
+        "soil": {
+            "gamma": 18.0,
+            "phi_deg": 30.0,
+            "backfill_slope_deg": 0.0,
+            "surcharge_kpa": 0.0,
+            "allowable_bearing_kpa": 200.0,
+            "base_friction": 0.6,
+            "foundation": "soil",
+        },
+        "kh": 0.0,
+    }
+
+
+def _block_wall_field_rules() -> dict[str, Any]:
+    import block_wall as BW
+
+    defaults = _block_wall_defaults()
+    choices = []
+    for key, spec in BW.BLOCK_WALL_SPECS.items():
+        extra = ""
+        if spec.get("max_layer_height_m"):
+            extra = "、每層 ≤ %.1f m" % spec["max_layer_height_m"]
+        if spec.get("max_by_site"):
+            extra = "；填方坡面 ≤ %.1f m" % spec["max_by_site"]["fill"]
+        choices.append({
+            "value": key,
+            "label": "%s（有效高 ≤ %.1f m%s）" % (spec["label"], spec["max_effective_height_m"], extra),
+            "defaults": defaults[key],
+        })
+    masonry_limits = {
+        key: {
+            "max": spec["max_effective_height_m"],
+            "basis": spec["basis"],
+            "input_offset_by": "embedment_m",
+            "offset_label": "埋入深度",
+        }
+        for key, spec in BW.BLOCK_WALL_SPECS.items()
+        if spec["layout"] == "masonry"
+    }
+    for key, spec in BW.BLOCK_WALL_SPECS.items():
+        if spec.get("max_by_site"):
+            masonry_limits[key] = {
+                "max_by": "site_condition",
+                "limits": {
+                    site: dict(masonry_limits[key], max=limit)
+                    for site, limit in spec["max_by_site"].items()
+                },
+            }
+    crib = BW.BLOCK_WALL_SPECS["crib"]
+    return {
+        "wall_type": {
+            "type": "select",
+            "label": "牆型",
+            "choices": choices,
+            "on_change": "rerender",
+            "clear_on_change": _BLOCK_WALL_SECTION_KEYS + ["embedment_m"],
+        },
+        "step_side": {
+            "type": "select",
+            "label": "階梯側",
+            "choices": [
+                {"value": "front", "label": "前階（牆面成階、背面鉛直）"},
+                {"value": "back", "label": "後階（牆面鉛直、背面成階）"},
+            ],
+        },
+        "foundation": {
+            "type": "select",
+            "label": "基礎類型",
+            "choices": [
+                {"value": "soil", "label": "土層（合力須在 1/3 中段）"},
+                {"value": "rock", "label": "岩盤（合力須在 1/2 中段）"},
+            ],
+        },
+        "site_condition": {
+            "type": "select",
+            "label": "設置位置",
+            "choices": [
+                {"value": "cut", "label": "開挖坡面（有效高 ≤ 4.0 m）"},
+                {"value": "fill", "label": "填方坡面（有效高 ≤ 2.0 m）"},
+            ],
+        },
+        "course_count": {"type": "number", "step": 1, "label": "層數（籠數）",
+                         "hint": "總高＝層數×每層高；有效高＝總高－埋入深度，由後端依 §118 檢核"},
+        "course_height_m": {
+            "type": "number", "step": 0.1, "label": "每層高 (m)",
+            "max_by": "wall_type",
+            "limits": {"crib": {"max": crib["max_layer_height_m"], "basis": crib["basis"]}},
+            "hint": "蛇籠常用 0.5 或 1.0 m",
+        },
+        "base_width_m": {"type": "number", "step": 0.1, "label": "底層寬 (m)"},
+        "width_decrement_m": {"type": "number", "step": 0.1, "label": "每層縮減寬 (m)"},
+        "embedment_m": {"type": "number", "step": 0.1, "label": "埋入深度 (m)",
+                        "hint": "§118：有效高指露出地面之高度；亦為牆趾被動土壓力的深度 D"},
+        **_passive_field_rules(),
+        "height_m": {
+            "type": "number", "step": 0.1, "label": "牆總高 (m)",
+            "max_by": "wall_type", "limits": masonry_limits,
+        },
+        "top_width_m": {"type": "number", "step": 0.05, "label": "頂寬 (m)"},
+        "front_batter_ratio": {"type": "number", "step": 0.05, "label": "牆面坡度 1:n 的 n",
+                               "hint": "§118 七：緩於 1:0.3，n ≥ 0.3"},
+        "back_batter_ratio": {"type": "number", "step": 0.05, "label": "背面坡度 1:n 的 n",
+                              "hint": "0＝背面鉛直；正值＝底部往後加寬"},
+        "stone_length_m": {"type": "number", "step": 0.05, "label": "底層石材長徑 (m)",
+                           "hint": "牆厚方向；乾砌 ×5、漿砌 ×6.5 須 ≥ 牆高"},
+        "backfill_slope_deg": {"type": "number", "step": 1, "label": "背填土坡角 β (°)"},
+        "surcharge_kpa": {"type": "number", "step": 1, "label": "上載 q (kPa)"},
+    }
+
+
+def _example_counterfort_wall() -> dict[str, Any]:
+    return {
+        "height_m": 8.0,
+        "stem_thickness_m": 0.30,
+        "base_width_m": 6.6,
+        "base_thickness_m": 0.60,
+        "toe_length_m": 1.98,
+        "counterfort_spacing_m": 3.0,
+        "counterfort_thickness_m": 0.40,
+        "counterfort_top_width_m": 0.30,
+        "front_soil_depth_m": 1.0,
+        "include_passive": True,
+        "passive_ratio": 1.0,
+        "soil": {
+            "gamma": 18.0,
+            "phi_deg": 30.0,
+            "backfill_slope_deg": 0.0,
+            "surcharge_kpa": 0.0,
+            "allowable_bearing_kpa": 300.0,
+            "base_friction": 0.6,
+            "foundation": "soil",
+        },
+        "concrete": {"fc_mpa": 21.0, "fy_mpa": 420.0, "cover_mm": 75.0},
+        "kh": 0.15,
+        "size": False,
+    }
+
+
+def _counterfort_field_rules() -> dict[str, Any]:
+    import counterfort_wall as CW
+
+    return {
+        "height_m": {
+            "type": "number", "step": 0.1, "label": "牆板高 (m)",
+            "limit": {
+                "max": CW.SPEC["max_effective_height_m"],
+                "basis": CW.SPEC["basis"],
+                "input_offset_by": "front_soil_depth_m",
+                "offset_label": "前趾覆土深",
+            },
+        },
+        "stem_thickness_m": {"type": "number", "step": 0.05, "label": "牆板厚 (m)"},
+        "base_width_m": {"type": "number", "step": 0.1, "label": "底板寬 (m)"},
+        "base_thickness_m": {"type": "number", "step": 0.05, "label": "底板厚 (m)"},
+        "toe_length_m": {"type": "number", "step": 0.05, "label": "前趾長 (m)"},
+        "counterfort_spacing_m": {"type": "number", "step": 0.1, "label": "扶壁中心距 (m)",
+                                  "hint": "常用 0.3～0.6 倍牆高（約 2.5～3.5 m）"},
+        "counterfort_thickness_m": {"type": "number", "step": 0.05, "label": "扶壁厚 (m)"},
+        "counterfort_top_width_m": {"type": "number", "step": 0.05, "label": "扶壁頂寬 (m)",
+                                    "hint": "0＝三角形扶壁"},
+        "front_soil_depth_m": {"type": "number", "step": 0.1, "label": "前趾覆土深 (m)",
+                               "hint": "§118：有效高＝牆板高－前趾覆土深；被動土壓力深度 D＝覆土深＋底板厚"},
+        **_passive_field_rules(),
+        "foundation": {
+            "type": "select",
+            "label": "基礎類型",
+            "choices": [
+                {"value": "soil", "label": "土層（合力須在 1/3 中段）"},
+                {"value": "rock", "label": "岩盤（合力須在 1/2 中段）"},
+            ],
+        },
+        "backfill_slope_deg": {"type": "number", "step": 1, "label": "背填土坡角 β (°)"},
+        "surcharge_kpa": {"type": "number", "step": 1, "label": "上載 q (kPa)"},
+        "size": {"label": "依牆高自動反推斷面（忽略上面的斷面尺寸）"},
+    }
+
+
+def _example_mse_wall() -> dict[str, Any]:
+    return {
+        "height_m": 6.0,
+        "embedment_m": 0.6,
+        "reinforcement_type": "geogrid",
+        "reinforcement_length_m": 5.4,
+        "vertical_spacing_m": 0.6,
+        "first_layer_m": 0.3,
+        "long_term_strength_kN_per_m": 40.0,
+        "coverage_ratio": 1.0,
+        "facing_type": "precast_panel",
+        "face_panel_thickness_m": 0.20,
+        "panel_width_m": 1.50,
+        "face_panel_cover_mm": 50.0,
+        "connector_capacity_kN": 100.0,
+        "connector_bearing_area_mm2": 20000.0,
+        "connector_fs": 1.5,
+        "include_passive": False,
+        "passive_ratio": 1.0,
+        "soil": {
+            "reinforced_gamma": 19.0,
+            "reinforced_phi_deg": 34.0,
+            "retained_gamma": 18.0,
+            "retained_phi_deg": 30.0,
+            "foundation_phi_deg": 30.0,
+            "foundation_gamma": 18.0,
+            "backfill_slope_deg": 0.0,
+            "surcharge_kpa": 10.0,
+            "allowable_bearing_kpa": 300.0,
+            "foundation": "soil",
+        },
+        "kh": 0.15,
+    }
+
+
+def _mse_field_rules() -> dict[str, Any]:
+    import mse_wall as MW
+
+    return {
+        "height_m": {
+            "type": "number", "step": 0.1, "label": "牆高 (m)",
+            "limit": {
+                "max": MW.SPEC["max_effective_height_m"],
+                "basis": MW.SPEC["basis"],
+                "input_offset_by": "embedment_m",
+                "offset_label": "埋入深度",
+            },
+        },
+        "embedment_m": {"type": "number", "step": 0.1, "label": "埋入深度 (m)",
+                        "hint": "§118：有效高＝牆高－埋入深度；亦為牆趾被動土壓力的深度 D"},
+        **_passive_field_rules("FHWA 簡化法外部滑動通常不計被動土壓力，故預設不勾選"),
+        "foundation_gamma": {"type": "number", "step": 0.5, "label": "牆趾覆土單位重 γ (kN/m³)"},
+        "reinforcement_type": {
+            "type": "select",
+            "label": "加勁材種類",
+            "choices": [{"value": k, "label": v["label"]} for k, v in MW.REINFORCEMENT_TYPES.items()],
+        },
+        "reinforcement_length_m": {"type": "number", "step": 0.1, "label": "加勁長度 L (m)",
+                                   "hint": "FHWA：L ≥ 0.7H 且 ≥ 2.4 m"},
+        "vertical_spacing_m": {"type": "number", "step": 0.05, "label": "垂直間距 Sv (m)",
+                               "hint": "一般 0.3～0.8 m；> 1.0 m 會被擋下"},
+        "first_layer_m": {"type": "number", "step": 0.05, "label": "最下層高程 (m)"},
+        "long_term_strength_kN_per_m": {"type": "number", "step": 1, "label": "長期設計強度 Tal (kN/m)",
+                                        "hint": "已扣潛變、施工損傷、耐久性折減"},
+        "coverage_ratio": {"type": "number", "step": 0.05, "label": "覆蓋率 Rc",
+                           "hint": "滿鋪＝1.0；條帶＝帶寬／水平間距"},
+        "facing_type": {
+            "type": "select",
+            "label": "面版種類",
+            "choices": [
+                {"value": "precast_panel", "label": "RC 預鑄面版（初步配筋）"},
+                {"value": "cast_in_place", "label": "RC 場鑄面版（初步配筋）"},
+                {"value": "segmental_block", "label": "塊狀面版（不配 RC 筋）"},
+            ],
+        },
+        "face_panel_thickness_m": {"type": "number", "step": 0.01, "label": "面版厚 (m)",
+                                   "hint": "RC 面版初步設計用；塊狀面版可忽略"},
+        "panel_width_m": {"type": "number", "step": 0.1, "label": "面版單元寬度 (m)"},
+        "face_panel_cover_mm": {"type": "number", "step": 5, "label": "面版保護層 (mm)"},
+        "connector_capacity_kN": {
+            "type": "number", "step": 1, "label": "面版連接器極限拉力 (kN)",
+            "hint": "產品型錄或試驗值；留空則不做連接檢核",
+        },
+        "connector_bearing_area_mm2": {
+            "type": "number", "step": 100, "label": "連接器承壓面積 (mm²)",
+            "hint": "承壓鈑／垫片有效面積；留空則不做局部承壓檢核",
+        },
+        "connector_fs": {
+            "type": "number", "step": 0.1, "label": "連接安全係數",
+            "hint": "預設 1.5（FHWA 容許應力法）",
+        },
+        "foundation": {
+            "type": "select",
+            "label": "基礎類型",
+            "choices": [
+                {"value": "soil", "label": "土層（e ≤ L/6）"},
+                {"value": "rock", "label": "岩盤（e ≤ L/4）"},
+            ],
+        },
+        "surcharge_kpa": {"type": "number", "step": 1, "label": "上載 q (kPa)"},
+        "backfill_slope_deg": {"type": "number", "step": 1, "label": "背填土坡角 β (°)"},
+    }
+
+
+def _example_anchored_wall() -> dict[str, Any]:
+    return {
+        "height_m": 7.0,
+        "wall_thickness_m": 0.40,
+        "base_width_m": 1.2,
+        "base_thickness_m": 0.5,
+        "front_soil_depth_m": 1.0,
+        "anchor_depths_m": [1.5, 3.5, 5.5],
+        "horizontal_spacing_m": 2.5,
+        "inclination_deg": 20.0,
+        "service": "permanent",
+        "strand_type": "12.7",
+        "strands": 4,
+        "free_length_m": 7.0,
+        "bond_length_m": 6.0,
+        "drill_diameter_mm": 135.0,
+        "bearing_plate_m": 0.30,
+        "lockoff_factor": 1.15,
+        "pressure_distribution": "apparent",
+        "soil": {
+            "gamma": 19.0,
+            "phi_deg": 30.0,
+            "backfill_slope_deg": 0.0,
+            "surcharge_kpa": 10.0,
+            "allowable_bearing_kpa": 300.0,
+            "base_friction": 0.55,
+            "bond_strength_kpa": 400.0,
+            "tendon_bond_mpa": 2.0,
+            "include_passive": True,
+            "passive_ratio": 0.5,
+        },
+        "kh": 0.15,
+    }
+
+
+def _anchored_field_rules() -> dict[str, Any]:
+    import anchored_wall as AW
+
+    return {
+        "height_m": {"type": "number", "step": 0.1, "label": "牆高 H (m)",
+                     "hint": "§118 八未訂高度上限；適用岩層破碎、節理發達、崩塌或地滑地區"},
+        "wall_thickness_m": {"type": "number", "step": 0.05, "label": "牆面厚 (m)"},
+        "base_width_m": {"type": "number", "step": 0.1, "label": "基腳寬 (m)"},
+        "base_thickness_m": {"type": "number", "step": 0.05, "label": "基腳厚 (m)"},
+        "front_soil_depth_m": {"type": "number", "step": 0.1, "label": "牆前覆土深 (m)",
+                               "hint": "有效高＝牆高－覆土深；亦為牆趾被動土壓力的深度 D（自基底起算）"},
+        "anchor_depths_m": {"label": "各排地錨深度 (m，自牆頂)",
+                            "hint": "逗號分隔，例 1.5, 3.5, 5.5；至少一排"},
+        "horizontal_spacing_m": {"type": "number", "step": 0.1, "label": "地錨水平間距 (m)",
+                                 "hint": "< 1.5 m 須檢討群錨效應"},
+        "inclination_deg": {"type": "number", "step": 1, "label": "地錨俯角 α (°)",
+                            "hint": "常用 10～45°"},
+        "service": {
+            "type": "select",
+            "label": "地錨類別",
+            "choices": [
+                {"value": k, "label": "%s：FS %.1f／%.1f／%.1f" % (v["label"], v["tendon"], v["ground_grout"],
+                                                                v["tendon_grout"])}
+                for k, v in AW.ANCHOR_FS.items()
+            ],
+        },
+        "strand_type": {
+            "type": "select",
+            "label": "鋼絞線規格",
+            "choices": [{"value": k, "label": "%s（Pu %.0f kN／股）" % (v["label"], v["Pu_kN"])}
+                        for k, v in AW.STRANDS.items()],
+        },
+        "strands": {"type": "number", "step": 1, "label": "每支股數"},
+        "free_length_m": {"type": "number", "step": 0.5, "label": "自由段長 (m)",
+                          "hint": "公路邊坡 C6.7：須穿過滑動面，原則 ≥ 4 m"},
+        "bond_length_m": {"type": "number", "step": 0.5, "label": "錨碇段長 (m)",
+                          "hint": "C6.7：≥ 3 m，一般 3～10 m"},
+        "drill_diameter_mm": {"type": "number", "step": 5, "label": "鑽孔徑 (mm)"},
+        "bearing_plate_m": {"type": "number", "step": 0.05, "label": "承壓鈑邊長 (m)"},
+        "lockoff_factor": {"type": "number", "step": 0.05, "label": "鎖定荷重／設計荷重",
+                           "hint": "C6.11：通常 1.10～1.20"},
+        "pressure_distribution": {
+            "type": "select",
+            "label": "土壓分佈",
+            "choices": [
+                {"value": "apparent", "label": "FHWA 視土壓包絡（梯形，總力 0.65KaγH²）"},
+                {"value": "triangular", "label": "三角形 Rankine（剛性牆面、岩盤）"},
+            ],
+        },
+        "bond_strength_kpa": {
+            "type": "number_with_presets",
+            "label": "地層-漿體極限握裹 τ (kPa)",
+            "step": 10,
+            "hint": "參考值，須以證明試驗確認（公路邊坡 C6.4、C6.7）",
+            "choices": AW.BOND_PRESETS,
+        },
+        "tendon_bond_mpa": {"type": "number", "step": 0.1, "label": "抗張材-漿體極限握裹 (MPa)",
+                            "hint": "水泥漿常用 2.0；特殊材料須試驗"},
+        **_passive_field_rules("預設 0.5：地錨牆位移小，只取一半被動抵抗"),
+        "surcharge_kpa": {"type": "number", "step": 1, "label": "上載 q (kPa)"},
+        "backfill_slope_deg": {"type": "number", "step": 1, "label": "背填土坡角 β (°)"},
+    }

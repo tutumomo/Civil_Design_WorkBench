@@ -36,12 +36,15 @@ STAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 sys.path.insert(0, str(ROOT / "tools"))
 try:
-    from project_paths import ingetrazo_mcp, python_exe  # noqa: E402
+    from project_paths import ingetrazo_mcp, opencadstudio_exe, python_exe  # noqa: E402
 except Exception:  # noqa: BLE001
     def python_exe() -> str:
         return sys.executable
 
     def ingetrazo_mcp() -> str | None:
+        return None
+
+    def opencadstudio_exe() -> str | None:
         return None
 
 # ---------------------------------------------------------------- 伺服器清單
@@ -83,8 +86,13 @@ def pick_python() -> str:
     raise SystemExit("找不到裝有 mcp 套件的 Python，請先 pip install mcp")
 
 
-def build_servers() -> dict[str, dict]:
-    py = pick_python()
+#: 需要「裝有 mcp 套件的 Python」才能跑的伺服器；`--only` 沒選到它們時不必找 Python
+PY_SERVERS = ("regs", "blender")
+
+
+def build_servers(only: list[str] | None = None) -> dict[str, dict]:
+    need_py = not only or any(x in PY_SERVERS for x in only)
+    py = pick_python() if need_py else "<未選用：不需 Python>"
     iz_exe = ingetrazo_mcp() or "ingetrazo-mcp"
     iz_base = re.split(r"[\\/]", iz_exe)[-1].lower()  # 跨平台取檔名（Windows 路徑在 POSIX 不會被拆）
     servers: dict[str, dict] = {
@@ -122,6 +130,13 @@ def build_servers() -> dict[str, dict]:
             "command": iz_exe,
             "args": [] if iz_base.startswith("ingetrazo-mcp") else ["--mcp"],
             "env": {"PYTHONIOENCODING": "utf-8"},
+        },
+        "opencadstudio-tw": {
+            # stdio 橋，連到「執行中」的 Open CAD Studio TW 視窗（不需 token）；GUI 沒開就沒有工具。
+            # 執行檔一律經 project_paths 解析（只認 TW 版），未安裝時留命令名讓使用者看出缺什麼。
+            "command": opencadstudio_exe() or "opencadstudio-tw",
+            "args": ["--mcp"],
+            "env": {},
         },
     }
     return servers
@@ -313,7 +328,7 @@ def main() -> int:
     a = ap.parse_args()
     apply = not a.dry_run
 
-    servers = build_servers()
+    servers = build_servers(a.only)
     if a.only:
         unknown = [x for x in a.only if x not in servers]
         if unknown:

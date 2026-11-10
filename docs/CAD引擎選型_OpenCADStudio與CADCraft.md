@@ -3,6 +3,9 @@
 > 建立日期：2026-11-08｜量測環境：Linux aarch64 / NVIDIA GB10
 > 版本：不寫死（外部工具更新頻繁）；即時查 `python tools/project_paths.py --versions`，歷史基準見 [`docs/已驗證環境快照.md`](已驗證環境快照.md)
 
+> ⚠️ **2026-11-10 更新：本檔 §1 分工表與 §9 建議已被 §13 取代。** 產線預設後端改為 **OpenCADStudio**（經 `tools/acad/acc.py`），
+> §9 第 4、5 點（批次一律 cadcraft-cli、OCS 不進 `case_package.py`）不再適用。§2~§8、§10~§12 的實測數據仍可作歷史參考。
+
 ## 1. 結論（先講該用哪一套）
 
 **兩者並用，各守一段產線；不是二選一。**
@@ -274,3 +277,46 @@ curl -s -X POST http://127.0.0.1:4271/api/v1/plot \
 | 快速批次 DXF→DWG | **cadcraft-cli convert** |
 | PNG / SVG | **cadcraft-cli convert** |
 | 保住 `TOMO_PLOTSTYLE` | **OpenCADStudio** |
+
+## 13. 預設後端切換為 OpenCADStudio（2026-11-10）
+
+### 13.1 起因與結論
+
+重編譯版 OpenCADStudio 已能正確解析 TOMO 的 SHX 中文大字體；`tools/acad/acc.py` 預設後端由 `cadcraft` 切為 `ocs`。
+`CIVIL_AI_CAD_BACKEND=cadcraft` 保留為退路（有 `accoreconsole` 用它，否則 `cadcraft-cli`）。
+
+| 產線環節 | 新預設 | 備註 |
+|---|---|---|
+| DWT／DWG→DXF、DXF→DWG | OCS（`acc.to_dxf`／`acc.to_dwg`） | `make_a3_sheet.py`、`fix_tomo_font.py` 原本直接呼叫 `cadcraft-cli`，已改走 `acc.py` |
+| DXF→DWG＋PDF 出圖 | OCS `/api/v1/plot` | `plot_style` 傳專案 CTB **絕對路徑** |
+| PNG／SVG 預覽 | 不變（`cadcraft-cli convert`） | `acc.py` 不涵蓋；OCS 的 PNG 需經 `ocs_render`（MCP） |
+
+### 13.2 實測依據（Windows，同一份排水溝 D-02 DXF）
+
+| 版本 | 中文 | 英數字 | PDF |
+|---|---|---|---|
+| OCS 2026.44（舊） | ✓ | 偏大、字距鬆（高度與中文不一致） | 369 KB |
+| OCS 2026.45.1（重編譯） | ✓ | 與中文高度一致 | 378 KB |
+| `accoreconsole`（本機） | **✗ 完全沒有文字**（PDF 5 KB，SHX 找不到） | — | 5 KB |
+
+> **誠實註記**：舊版 2026.44 在這台 Windows（`fonts_folder` 已設定）中文也正常，所以 **2026-11-08 的亂碼很可能是 Linux 環境
+> （或當時 `fonts_folder` 未設）造成，而不是新舊版差異**；新版可確認的改善只有英數字大小。Linux／macOS 尚未以新版重測。
+
+其餘驗證：`check_delivery.py` E1~E18 對 OCS 出的 D-02 為 0 錯誤，DWG→DXF 往返後 `TOMO_PLOTSTYLE`（E18）保留；
+`fix_tomo_font.py` 對 DWG 副本 `--apply` 後回讀 TOMO＝`gbenor.shx + CHINESE.SHX`、實體完整；全案回歸 11 案基準全部相符。
+
+### 13.3 切換時抓到的三個坑（皆已在 `acc.py` 修正）
+
+1. **CTB 只給名稱會用到別的檔**：OCS 把 `"monochrome.ctb"` 解析成 `%APPDATA%\OpenCADStudio\plotstyles\monochrome.ctb`
+   （檔頭格式與專案的不同，`ctb.py` 讀不開），線寬變 0.09／0.30 mm；`check_delivery.py` 只檢查 DXF 內記錄的名稱，**抓不到**。
+   改傳 `tools/acad/plot/monochrome.ctb` 絕對路徑後為 0.10／0.15／0.20／0.35 mm。
+2. **殘留檔**：被強殺的服務留 `.<檔名>.ocs.lock`；覆寫既有 DWG 時 OCS 自留 `<檔名>.bak`。`acc.py` 清「本次才出現」的殘留。
+3. **解析器抓到舊版**：`~/.local/bin/opencadstudio.cmd` 指向 `--install` 下載的舊 portable；MSI 安裝版不登錄安裝路徑。
+   `opencadstudio_exe()` 改以環境變數根目錄＋模糊名稱比對尋找，不寫死路徑（見 `docs/環境需求與自動配置.md` §8.7）。
+
+### 13.4 仍須注意
+
+- **Linux／macOS 換新版前先重測**：出圖後把 PDF 轉 PNG 目視中文；`acc.py` 會在 OCS 回報 `missing_fonts` 時於 stderr 警告。
+- OCS 設定 `plot_styles_folder` 目前可維持 `null`（已由絕對路徑繞過）；`fonts_folder` 仍必須指向 `CAD_FONTS/`。
+- 啟動「MCP 控制」選項與本產線無關：產線用的是獨立的 `--http` 服務，App 不必開著。
+

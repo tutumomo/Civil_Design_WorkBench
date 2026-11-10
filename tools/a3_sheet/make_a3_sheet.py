@@ -16,19 +16,17 @@
   * view_height(模型m) = 視口高(mm) × 比例分母 / 1000   ← 模型單位為公尺時
   * 併檔前目標文件必須先有 TOMO 樣式，否則匯入的 TEXT 掉樣式
 """
-import argparse, json, os, subprocess, sys, tempfile
+import argparse, json, os, sys, tempfile
 import sys as _sys
 from pathlib import Path
 import sys as _sys
 _sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parents[2]))
-from project_paths import artcraft_cli  # noqa: E402
 import ezdxf
 from ezdxf.addons import Importer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from drawing_rules import add_plot_layer, tag_plot_style   # noqa: E402
 
-CADCRAFT = artcraft_cli("CADCraft") or ""
 DROP_LAYERS = {"90_圖框", "91_指北針", "92_比例尺", "93_說明"}
 
 ap = argparse.ArgumentParser()
@@ -53,9 +51,11 @@ A = ap.parse_args()
 frame = A.frame
 if frame.lower().endswith(".dwt"):
     tmp = os.path.join(tempfile.gettempdir(), "_a3_frame_tmp.dxf")
-    r = subprocess.run([CADCRAFT, "convert", frame, tmp], capture_output=True)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "acad"))
+    from acc import to_dxf   # noqa: E402  後端由 CIVIL_AI_CAD_BACKEND 決定（預設 OpenCADStudio）
+    to_dxf(frame, tmp)
     if not os.path.exists(tmp):
-        sys.exit("DWT 轉 DXF 失敗: " + r.stderr.decode("utf-8", "replace")[:300])
+        sys.exit("DWT 轉 DXF 失敗")
     frame = tmp
     print("DWT -> DXF:", tmp)
 

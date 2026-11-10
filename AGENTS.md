@@ -42,15 +42,15 @@
   2. **嚴禁非 `out/` 目錄交付**：任何交付物未落地於 `out/<案名>/` 者，不得列入交付清單或宣告完成。
   3. **嚴禁自動化覆寫輸入資產**：包含參考案例、法規庫、標準圖庫等輸入資料夾，一律視為唯讀。
   4. **嚴禁臆測未核實單價**：工項單價未在價格庫查證者，必須明確標註為「假設值」，不可假造物價庫來源。
-  5. **嚴禁以腳本操控 CadCraft Studio GUI 介面**：背景轉檔與批次代工一律呼叫 headless CLI（`accoreconsole` 或 `cadcraft-cli`），嚴禁操控 Studio 視窗。
+  5. **嚴禁以腳本操控 CadCraft Studio GUI 介面**：背景轉檔與批次代工一律走 headless 介面（OpenCADStudio `--http`／`accoreconsole`／`cadcraft-cli`，統一經 `tools/acad/acc.py`），嚴禁操控 Studio 視窗。
 - **機密保護**：`claude_desktop_config.json` 含明文金鑰，嚴禁於對話或文件中輸出其內容。
 
 ## 2. DOM — 土木設計領域常數與交付契約（Durable Domain Facts）
-- **輸出格式**：交件預設必須包含 **`.dwg`**（AutoCAD 2018 格式，由 `accoreconsole` 或 `CADCraft CLI` 產出；CADCraft 相容 >80% 以上 AutoCAD 功能，支援跨平台產出 DWG 與出圖），`.dxf` 為工作檔。
+- **輸出格式**：交件預設必須包含 **`.dwg`**（AutoCAD 2018 格式，**預設由 OpenCADStudio 經 `tools/acad/acc.py` 產出**，退路為 `accoreconsole`／`CADCraft CLI`），`.dxf` 為工作檔。
 - **單位與座標系**：公制公尺（DXF 必設 `$INSUNITS=6`、`$MEASUREMENT=1`）；平面座標採 **TWD97 TM2 二度分帶（`EPSG:3826`）**，圖面即真實座標（台中一帶 `E≈215,000, N≈2,669,000` 屬正常假東移 `250,000`），嚴禁任意平移縮放。
 - **文字樣式（`TOMO`）**：字體庫、英文 `gbenor.shx` ＋ 中文大字體 `CHINESE.SHX`。
   - `ezdxf` 寫法：`st = doc.styles.add("TOMO", font="gbenor.shx"); st.dxf.bigfont = "CHINESE.SHX"`（禁留 `Standard`/`Only1`）。
-  - **SHX 只有 AutoCAD／`accoreconsole` 認得；CADCraft 不讀 SHX**（只吃**已安裝**的 TTF/OTF/TTC）。用 CADCraft 校對本專案圖面時設 `CADCRAFT_FONTALT=msjh.ttc`（**只認檔名**，家族名稱與完整路徑實測無效）；**沒有任何環境變數可以指定字型資料夾**。機制、實測雜湊見 [`docs/字型設定_CADCraft與AutoCAD.md`](docs/字型設定_CADCraft與AutoCAD.md)。
+  - **SHX 只有 AutoCAD／`accoreconsole`／OpenCADStudio 認得（OCS 需 `settings.fonts_folder` 指向 `CAD_FONTS/`，`--install`／`--configure` 會寫入）；CADCraft 不讀 SHX**（只吃**已安裝**的 TTF/OTF/TTC）。用 CADCraft 校對本專案圖面時設 `CADCRAFT_FONTALT=msjh.ttc`（**只認檔名**，家族名稱與完整路徑實測無效）；**沒有任何環境變數可以指定字型資料夾**。機制、實測雜湊見 [`docs/字型設定_CADCraft與AutoCAD.md`](docs/字型設定_CADCraft與AutoCAD.md)。
 - **圖層與色彩**：命名採 `數字前綴_中文說明`（底圖影像 `00_`、道路 `10_`、建物 `20_`、水道 `22_`、圖框說明 `90_`）；房屋與圖框文字設為 `ACI 7`（白/黑自動反轉色），禁用黃色 `ACI 2`。內嵌影像（IMAGE）須與 DXF 放同資料夾。**出圖型式一律 `monochrome.ctb`，顏色 1~8 對應固定線粗**（不重要 0.10／一般 0.15~0.20／重要 0.35~0.40 mm）；新圖層一律用 `drawing_rules.add_plot_layer()` 建，說明見 `docs/出圖樣式與線粗.md`。
 - **現況平面圖必備要素**：平滑化道路邊線與中心線、依實際方位角正交化之建物輪廓＋逐棟 `ANSI31` Hatch、標註名稱之河道雙岸線、指北針、比例尺。
 - **設計與預算核心不變量（關鍵防錯）**：
@@ -86,7 +86,7 @@
   5. 紀錄時間一律取本機系統時間。
   6. **暫存與輸出位置**：中間檔寫 `_temp/`，交付檔寫 `out/`（§1.1）。
 - **不碰共用 GUI AutoCAD，並嚴格區隔兩套同名 CadCraft**：
-  - **AI 後台自動化代工（轉檔、出圖、無人值守運算）**：走無介面 `accoreconsole.exe`（經 `tools/acad/acc.py`）或 `CADCraft CLI`（`tools/project_paths.py` 之 `artcraft_cli("CADCraft")`）。
+  - **AI 後台自動化代工（轉檔、出圖、無人值守運算）**：一律經 `tools/acad/acc.py`，**預設後端為 OpenCADStudio**（按需起 `--http` 服務，執行檔由 `project_paths.opencadstudio_exe()` 解析，**嚴禁寫死安裝路徑**）；退路為無介面 `accoreconsole.exe` 或 `CADCraft CLI`（`artcraft_cli("CADCraft")`），以 `CIVIL_AI_CAD_BACKEND=cadcraft` 切換。
   - **macOS CLI 替代層**：使用 `tools/artcraft_cli/` 封裝之 JSON-lines 殼層，維持 CLI 子指令介面。
   - **人類視覺化驗收看板**：`CadCraft Studio` 為 GUI 視窗看板，無 headless CLI，嚴禁 AI 嘗試用腳本操控其介面做背景轉檔；僅供人類開圖檢視。詳見 `docs/CadCraft與CadCraft_Studio分工規範.md`。
 - **改動留痕與驗證閉環（Git Commit & Test-Before-Delivery）**：
@@ -101,7 +101,7 @@
 | `tools/site_basemap/site_basemap.py` | 輸入案址經緯度 → 產出 TWD97 現況平面線稿 DXF | `render_dxf.py` 產 PNG 檢核；`docs/現況平面底圖作業流程.md` |
 | `tools/a3_sheet/make_sheet.py` | **A3 出圖標準工具**：套用 DWT 圖框、非矩形視口、出 DWG/PDF | 優先於舊版；搭配 `tools/a3_sheet/check_delivery.py` |
 | `tools/a3_sheet/check_delivery.py` | **交件強制品管檢核器**：檢查 E1~E18（bbox 壓字、疊字碰撞、顏色線粗、出圖型式） | 退出碼必須為 0 方可交件；見 §6 |
-| `tools/acad/acc.py` | 封裝 `accoreconsole` 執行 DWT/DWG→DXF（`todxf`）與 DXF→DWG+PDF（`publish`）；Linux 後端由 `CIVIL_AI_CAD_BACKEND` 選 `cadcraft`（**預設**，中文 SHX 出圖正確）／`ocs`（GUI 與 MCP 用，**中文 SHX 出圖會亂碼，勿交件**）／`auto` | 專案出圖型式預設使用 `tools/acad/plot/monochrome.ctb`；後端差異見 `docs/環境需求與自動配置.md` §8.7 |
+| `tools/acad/acc.py` | CAD 轉檔／出圖統一入口：DWT/DWG→DXF（`todxf`）、DXF→DWG（`to_dwg`）、DXF→DWG+PDF（`publish`）；後端由 `CIVIL_AI_CAD_BACKEND` 選 `ocs`（**預設**，OpenCADStudio，含 SHX 中文與 CTB 絕對路徑出圖）／`cadcraft`（退路：`accoreconsole` 或 `cadcraft-cli`）。OCS 回報 `missing_fonts` 會在 stderr 警告；出圖後仍須目視 PDF 中文 | 專案出圖型式預設使用 `tools/acad/plot/monochrome.ctb`；後端差異見 `docs/環境需求與自動配置.md` §8.7、切換紀錄見 `docs/CAD引擎選型_OpenCADStudio與CADCraft.md` §13 |
 | `tools/acad/ctb.py` | CTB 讀取、比對與產生工具（`report`/`verify`/`build`） | `docs/出圖樣式與線粗.md` |
 | `tools/acad/apply_plot_style.py` | 舊圖套用新出圖樣式（換顏色線粗、補寫 `TOMO_PLOTSTYLE`，幾何不動） | 來源為 `drawing_rules.PLAN_LAYER_COLORS` |
 | `tools/cadastral/make_cadastral_map.py` | **地籍套繪圖首選工具**：抓台中開放坵塊/段籍＋建物 SHP 產 A3 地籍套繪圖 | `docs/地籍套繪圖產線.md`（僅供參考，不得作產權鑑界依據） |

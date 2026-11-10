@@ -137,6 +137,23 @@ def artcraft_home() -> Path | None:
     return None
 
 
+def artcraft_launcher_exe() -> str | None:
+    """ArtCraft Launcher（Craft App Suite 的安裝／更新／開啟入口，GUI）。
+
+    `ARTCRAFT_LAUNCHER_EXE` → PATH 上的 `artcraft-launcher` → macOS `/Applications/ArtCraft Launcher.app`。
+    Windows 的 MSI 是逐使用者安裝、路徑未實測，因此只認環境變數與 PATH，不猜安裝位置。
+    不要對它跑 `--version`／`--help`（GUI 程式，可能直接開視窗）。
+    """
+    p = _env_path("ARTCRAFT_LAUNCHER_EXE")
+    if p:
+        return str(p)
+    found = shutil.which("artcraft-launcher")
+    if found:
+        return found
+    app = Path("/Applications/ArtCraft Launcher.app")
+    return str(app) if app.exists() else None
+
+
 def artcraft_cli(app: str) -> str | None:
     """回傳某個 ArtCraft App 的 CLI 路徑；找不到回傳 None。
 
@@ -582,6 +599,7 @@ def report() -> dict:
         "temp": str(TEMP),
         "out": str(OUT),
         "artcraft_home": str(art) if art else None,
+        "artcraft_launcher": artcraft_launcher_exe(),
         "artcraft": {a: artcraft_cli(a) for a in ARTCRAFT_APPS},
         "cadcraft_studio": cadcraft_studio_exe(),
         "accoreconsole": accoreconsole(),
@@ -685,6 +703,7 @@ def main(argv=None) -> int:
         print(f"臺中建物SHP: 待解壓！隨 repo 已附 {info['taichung_bldg_archive']}，請就地解壓縮至 data/臺中市建物/")
     else:
         print("臺中建物SHP: —（缺少 data/臺中市建物/臺中市建物_114.7z）")
+    print(f"ArtCraft Launcher: {info['artcraft_launcher'] or '—（必備；見 README 步驟 3.1，從 storytold/craft-launcher 取得）'}")
     print(f"ArtCraft   : {info['artcraft_home'] or '（未安裝，或設定 ARTCRAFT_HOME）'}")
     for k, v in info["artcraft"].items():
         print(f"  {k:<12} {'OK  ' + v if v else '—'}")

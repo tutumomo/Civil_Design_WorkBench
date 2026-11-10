@@ -92,13 +92,17 @@ AI 智能體跑一輪設計、審查、出圖會用掉不少 token。**magpie** 
    安裝 OpenCADStudio TW（tutumomo/OpenCADStudio）與 Open CalcSheet Studio TW（tutumomo/Open-CalcSheet-Studio），
    不要改回上游版；並自動把 TOMO 字型（CAD_FONTS/ 的 *.shx，推薦 gbenor.shx＋CHINA1.SHX）複製進 OpenCADStudio TW 的字型夾，並設好 CTB 出圖樣式夾。
    若印出需要我執行的 sudo／mv 指令，列給我確認。
+   必備工具共四項：另外 **ArtCraft Launcher**（https://github.com/storytold/craft-launcher ，十幾套開源軟體，可平替 Adobe／Office／CAD）
+   與 **Blender**（blender.org）`--install` 只偵測；缺少時依它印出的指引幫我裝好（Launcher 裝好後在它的視窗內安裝 GridCraft、WordCraft），
+   再重跑 `--install` 直到退出碼為 0。
    裝好 OCSS 後提醒我「開 TW 版一次並在設定啟用 MCP/API」，再跑
    `python tools/crosscheck/ocss_crosscheck.py register-mcp --apply` 與 `probe`。嚴禁對 OCSS 跑 --version／--help。
 3. 缺規範資料：`python tools/regs/fetch_regs.py` 然後 `python tools/regs/build_index.py`。
    若 `data/臺中市建物/臺中市建物_114.7z` 尚未解壓，請將其就地解壓縮至 `data/臺中市建物/`（產生 `01-SHP/`）。
 4. 註冊 MCP 通道：`python tools/mcp/register_all.py --dry-run` 看會改哪些檔，我同意後再 `--apply`，然後提醒我重開 AI 客戶端。
-5. ArtCraft／SolidCraft 不在 `--install` 範圍，無法自動安裝：ArtCraft 建議裝（但 CAD 主力是 OpenCADStudio TW，
-   CADCraft 只是備援），AutoCAD 不需要裝。請列出我還缺哪幾套，以及該設哪個環境變數（ARTCRAFT_HOME／SOLIDCRAFT_CLI／CAD_FONTS）。
+5. ArtCraft 各 App（經 ArtCraft Launcher 安裝）與 SolidCraft 無法由 `--install` 自動安裝：GridCraft、WordCraft 為交付必要，
+   其餘建議裝（CAD 主力是 OpenCADStudio TW，CADCraft 只是備援），AutoCAD 不需要裝。請列出我還缺哪幾套，
+   以及該設哪個環境變數（ARTCRAFT_LAUNCHER_EXE／BLENDER／ARTCRAFT_HOME／SOLIDCRAFT_CLI／CAD_FONTS）。
 6. 完成後跑 `python tools/regs/verified_selftest.py` 與
    `python tools/selftest/regression.py --ignore-new` 確認可用。
 限制：不要改 tools/ 內的程式；不要上傳 data/、out/、_temp/ 內任何檔案。
@@ -235,13 +239,16 @@ python tools/project_paths.py --install             # 實際安裝；退出碼 0
 python tools/project_paths.py --install --only OpenCalcSheet   # 只補單一工具
 ```
 
-兩個**必備**工具一律從使用者 fork 的 GitHub Releases 取「本地化 TW 版」，**不得改回上游**；
-本機若同時裝著上游版，專案一律不採用（路徑只經 `project_paths` 解析）：
+**必備工具共四項**。其中 OpenCADStudio、Open CalcSheet Studio 一律從使用者 fork 的 GitHub Releases 取「本地化 TW 版」，
+**不得改回上游**，由 `--install` 自動安裝；本機若同時裝著上游版，專案一律不採用（路徑只經 `project_paths` 解析）。
+ArtCraft Launcher 與 Blender 是 GUI／官方發行版，`--install` **只偵測、缺了就印取得指引並讓退出碼非 0**，不會替你下載：
 
 | 工具 | 用途 |
 |---|---|
 | **OpenCADStudio TW**<br>來源：[`tutumomo/OpenCADStudio`](https://github.com/tutumomo/OpenCADStudio) | **CAD 主力**（開源、台灣在地化，Big5 SHX 修正，中文不亂碼）：DXF → DWG／PDF、CTB 出圖、MCP 控制。安裝後自動設好 TOMO 字型夾與 CTB 樣式夾（見步驟 3.5） |
 | **Open CalcSheet Studio TW**<br>來源：[`tutumomo/Open-CalcSheet-Studio`](https://github.com/tutumomo/Open-CalcSheet-Studio) | 開放計算環境、逐式可稽核計算書、第二套獨立算法（交叉驗算） |
+| **ArtCraft Launcher**<br>來源：[`storytold/craft-launcher`](https://github.com/storytold/craft-launcher) | Craft App Suite 的安裝／更新／開啟入口。內含十幾套開源軟體，可平替 Adobe、Office、CAD（PhotoCraft、VectorCraft、PdfCraft、WordCraft、GridCraft、DeckCraft、CADCraft 等）；交付流程必要的 GridCraft（預算書 xlsx）、WordCraft（報告 docx）由它安裝 |
+| **Blender**<br>來源：[blender.org](https://www.blender.org/download/) | 3D 景觀模擬與擬真算輪（`blender` MCP 與 3D 軸） |
 
 各平台安裝方式（`--install` 自動處理）：
 
@@ -251,7 +258,15 @@ python tools/project_paths.py --install --only OpenCalcSheet   # 只補單一工
 | **macOS** | <sub>dmg → `Open CAD Studio TW.app`</sub> | <sub>dmg</sub> |
 | **Linux** | <sub>AppImage → `~/.local/bin/opencadstudio-tw`，自動補選單項目</sub> | <sub>`.deb`：先試 `sudo -n apt-get install`；需密碼時印出 `sudo apt install` 指令請你執行，裝好後再跑一次 `--install` 補防黑屏啟動腳本與選單項目</sub> |
 
-> ArtCraft 套件（13 套）**建議安裝**，但不在 `--install` 範圍；其中 CADCraft 已退居備援，CAD 工作不依賴它。
+**ArtCraft Launcher 與 Blender 的取得方式**（裝好後再跑一次 `--install` 確認；裝在非標準位置時以 `ARTCRAFT_LAUNCHER_EXE`／`BLENDER` 指定）：
+
+| 平台 | ArtCraft Launcher（[Releases](https://github.com/storytold/craft-launcher/releases/latest)） | Blender |
+|---|---|---|
+| **Windows** | <sub>`*-windows-x64.msi`（ARM 取 `-arm64`）；裝好後開啟，在視窗內安裝各 App</sub> | <sub>`winget install BlenderFoundation.Blender` 或 blender.org 安裝檔</sub> |
+| **macOS** | <sub>`*-macos-universal.dmg` → `/Applications`</sub> | <sub>`brew install --cask blender`</sub> |
+| **Linux** | <sub>`*-linux-x86_64`／`-aarch64` 的 `.AppImage`（或 `.deb`／`.rpm`）；AppImage 放 `~/.local/bin/artcraft-launcher`</sub> | <sub>套件管理器、snap／flatpak，或 blender.org 壓縮檔</sub> |
+
+> Launcher 只是入口，**各 App 要在它的視窗裡按 Install**（至少 GridCraft、WordCraft）。CADCraft 隨套件一起裝，但已退居 CAD 備援，CAD 工作不依賴它。
 
 ### 步驟 3.2：Open CalcSheet Studio 一次性設定（裝好後做一次）
 
@@ -387,7 +402,9 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 一行裝完：`python -m pip install -r requirements.txt`。
 **不需要**編譯器、GDAL 或任何系統級服務（`pyshp` 取代 GDAL 讀 SHP）。
 
-**必備外部工具**（`python tools/project_paths.py --install` 自動安裝，見步驟 3.1）：**OpenCADStudio TW**（CAD 主力、預設出圖後端，TOMO 字型自動複製進它的字型夾、CTB 樣式夾自動設定）、**Open CalcSheet Studio TW**（交叉驗算／開放計算環境）。只綁 TW 版，上游版不採用。
+**必備外部工具（共四項，見步驟 3.1，`python tools/project_paths.py --install` 檢查）**：
+**OpenCADStudio TW**（CAD 主力、預設出圖後端，TOMO 字型自動複製進它的字型夾、CTB 樣式夾自動設定）與 **Open CalcSheet Studio TW**（交叉驗算／開放計算環境）由它自動安裝，只綁 TW 版、上游版不採用；
+**ArtCraft Launcher**（Craft App Suite 啟動器，十幾套開源軟體，可平替 Adobe／Office／CAD）與 **Blender**（3D）為手動安裝，`--install` 只偵測並印取得指引。
 
 ### 選用但影響交付品質
 
@@ -395,8 +412,8 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 |---|---|---|---|
 | **AutoCAD 2020+**、**CADCraft**（皆為備援） | CAD 主力已是必備的 OpenCADStudio TW；只有 OpenCADStudio 異常或要跨後端比對時，設 `CIVIL_AI_CAD_BACKEND=cadcraft` 才改走 accoreconsole／CADCraft | 不影響（OpenCADStudio TW 已可出 DWG／PDF） | AutoCAD 僅 Windows；CADCraft 支援跨平台 |
 | **CAD 字體**（`gbenor.shx`、`CHINA1.SHX`，推薦組合） | TOMO 中文文字樣式 | 圖面中文變替代字體 | **已隨 repo 附於 `CAD_FONTS/`**，`--install`／`--configure` 自動複製進 OpenCADStudio TW 的字型夾；AutoCAD 備援另需手動，見步驟 3.5 |
-| **ArtCraft**（建議安裝；GridCraft／WordCraft 為交付必要，其餘選用。內含的 CADCraft 僅備援） | 預算書 xlsx、報告 docx、轉檔 | 對應產出需改用其他方式 | 依該套是否有該平台版本 |
-| SolidCraft／Blender | 3D 模型與渲染 | 3D 軸停用 | Blender 有 macOS／Linux 版 |
+| **ArtCraft 各 App**（經必備的 ArtCraft Launcher 安裝；GridCraft／WordCraft 為交付必要，其餘選用。內含的 CADCraft 僅備援） | 預算書 xlsx、報告 docx、轉檔 | 對應產出需改用其他方式 | 依該套是否有該平台版本 |
+| SolidCraft | 3D 參數化建模 | 對應功能停用 | 依平台而定 |
 
 ### 跨平台差異
 
@@ -416,7 +433,9 @@ python tools/case_package/case_package.py cases/<案名>/case.json
 ```bash
 CIVIL_AI_ROOT      # 專案根目錄（預設＝repo 位置）
 CIVIL_AI_REGS_DB   # 規範索引 sqlite（預設 data/法規/_regs_index.sqlite）
-ARTCRAFT_HOME      # ArtCraft 安裝根目錄（建議安裝；Windows 預設 C:\Program\ArtCraft）
+ARTCRAFT_LAUNCHER_EXE  # ArtCraft Launcher 執行檔（必備；PATH 上有 artcraft-launcher 時可不設）
+BLENDER            # Blender 執行檔（必備；PATH 上有 blender 時可不設）
+ARTCRAFT_HOME      # ArtCraft 各 App 安裝根目錄（Windows 預設 C:\Program\ArtCraft）
 AUTOCAD_HOME       # AutoCAD 安裝目錄（含 accoreconsole.exe；僅備援後端用）
 SOLIDCRAFT_CLI     # SolidCraft CLI 完整路徑
 INGETRAZO_HOME     # IngeTrazo 安裝根目錄（預設 C:\Program Files\IngeTrazo）

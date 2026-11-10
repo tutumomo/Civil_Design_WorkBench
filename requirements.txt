@@ -30,6 +30,9 @@ urllib3>=2.0
 # --- Word 報告（tools/report 的後處理與驗證需要；產 docx 由 WordCraft 負責）---
 python-docx>=1.1
 
+# --- MCP 通道（tools/mcp/register_all.py、tools/regs/regs_server.py、tools/blender/blender_mcp.py 需要）---
+mcp>=1.0
+
 # --- 選用 ---
 # opencv-python>=4.9   # tools/site_basemap 的影像處理實驗腳本
 # beautifulsoup4>=4.12 # tools/regs/fetch_regs.py 抓法規網頁（純 HTML 解析）

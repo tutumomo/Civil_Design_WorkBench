@@ -2481,7 +2481,7 @@ class WallCasePipelineTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    suite = unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__])
-    outcome = unittest.TextTestRunner(verbosity=2).run(suite)
-    raise SystemExit(0 if outcome.wasSuccessful() else 1)
+    # unittest.main() 才吃命令列參數：類別、類別.方法、-k 關鍵字。
+    # （先前用 loadTestsFromModule 直接跑，任何參數都被忽略。）
+    unittest.main(verbosity=2)
 

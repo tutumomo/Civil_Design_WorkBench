@@ -32,21 +32,23 @@ python tools/project_paths.py --configure  # Re-configure CADCraft/OpenCADStudio
 
 ### Testing & Verification
 ```bash
-# Full regression test suite across all case types (compares numbers against tools/selftest/baseline.json)
-# NOTE: no argparse — ANY invocation (even `--help`) runs the full suite. Only flags: --update, --ignore-new.
-# `--update` rewrites the baseline: ask-first, only for an intentional design change.
+# Full regression test suite across all case types (compares numbers against tools/selftest/baseline.json).
+# `--update` rewrites the baseline: ask-first, only for an intentional design change; with --only it
+# rewrites just those cases. `--only` accepts repeats or comma lists; `--list` prints scanned cases.
 .venv/bin/python tools/selftest/regression.py
+.venv/bin/python tools/selftest/regression.py --only 排水溝U型
+.venv/bin/python tools/selftest/regression.py --list
 
 # Single-module self-tests
 .venv/bin/python tools/selftest/design_core_selftest.py       # Design engines, hand-calc comparisons
 .venv/bin/python tools/selftest/design_workbench_selftest.py  # Design workbench API / catalog rules
 .venv/bin/python tools/regs/regq_selftest.py                  # Regulations query engine
 
-# Single test class / single test: the script's __main__ ignores argv and always runs everything,
-# so go through `-m unittest` from inside tools/selftest/ (design_core_selftest only; the workbench
-# selftest is a custom check runner with no per-test filter)
-(cd tools/selftest && ../../.venv/bin/python -m unittest design_core_selftest.WallRebarTests)
-(cd tools/selftest && ../../.venv/bin/python -m unittest design_core_selftest.WallRebarTests.<test_name>)
+# Single test class / single test (design_core_selftest is plain unittest; the workbench selftest
+# is a custom check runner with no per-test filter)
+.venv/bin/python tools/selftest/design_core_selftest.py WallRebarTests
+.venv/bin/python tools/selftest/design_core_selftest.py WallRebarTests.<test_name>
+.venv/bin/python tools/selftest/design_core_selftest.py -k rebar
 
 # Calculator launch check G0~G8 (one calculator, or all)
 .venv/bin/python tools/selftest/design_launch_check.py <id>

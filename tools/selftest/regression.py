@@ -8,8 +8,10 @@ r"""全案回歸測試：一次跑完所有案件，並與基準值比對。
 
 本模組把回歸變成**一條指令**：
 
-    python tools\selftest\regression.py            # 跑全部案件，比對基準
-    python tools\selftest\regression.py --update   # 重寫基準（改了設計才用）
+    python tools\selftest\regression.py                    # 跑全部案件，比對基準
+    python tools\selftest\regression.py --only 排水溝U型    # 只跑指定案件（可重複或逗號分隔）
+    python tools\selftest\regression.py --list             # 列出會被掃到的案件
+    python tools\selftest\regression.py --update           # 重寫基準（改了設計才用）
 
 基準檔：`tools\selftest\baseline.json`
   · 每案的三大軸是否通過
@@ -20,6 +22,7 @@ r"""全案回歸測試：一次跑完所有案件，並與基準值比對。
 任一項不符 → 退出碼 1，並列出「基準 → 現在」的差異。
 """
 
+import argparse
 import json
 import os
 import re
@@ -200,22 +203,35 @@ def collect(case_dir):
     return rec
 
 
-def collect_all():
+def case_names():
+    """cases/ 下所有含 case.json 的案件（排序後）。"""
     base = os.path.join(ROOT, "cases")
-    out = {}
+    out = []
     for d in sorted(os.listdir(base)):
         p = os.path.join(base, d)
-        if not os.path.isdir(p) or not os.path.exists(os.path.join(p, "case.json")):
-            continue
+        if os.path.isdir(p) and os.path.exists(os.path.join(p, "case.json")):
+            out.append(d)
+    return out
+
+
+def collect_all(names=None):
+    base = os.path.join(ROOT, "cases")
+    if names is None:
+        names = case_names()
+    out = {}
+    for d in names:
+        p = os.path.join(base, d)
         out[d] = collect(p)
         print("  跑完 %-18s %s" % (d, "✓" if out[d]["ok"] else "✗"))
     return out
 
 
-def compare(base, now, ignore_new=False):
-    """回傳差異清單。"""
+def compare(base, now, ignore_new=False, only=None):
+    """回傳差異清單。only 給定時，未跑的案件不列「案件已不存在」。"""
     diffs = []
     for name, b in base.items():
+        if only is not None and name not in only:
+            continue
         n = now.get(name)
         if n is None:
             diffs.append("%s：案件已不存在" % name)
@@ -250,12 +266,45 @@ def compare(base, now, ignore_new=False):
     return diffs
 
 
-def main():
-    update = "--update" in sys.argv
-    ignore_new = "--ignore-new" in sys.argv
-    print("全案回歸：")
-    now = collect_all()
-    base = json.load(open(BASELINE, encoding="utf-8")) if os.path.exists(BASELINE) else {}
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description="全案回歸測試：跑完所有案件並與基準值比對。",
+        epilog="例：regression.py --only 排水溝U型；regression.py --only 排水溝U型,箱涵三孔測試")
+    ap.add_argument("--update", action="store_true",
+                    help="重寫基準（改了設計才用）；與 --only 併用時只改寫指定案件")
+    ap.add_argument("--ignore-new", action="store_true",
+                    help="基準沒有的新案件不計入失敗")
+    ap.add_argument("--only", action="append", metavar="案名",
+                    help="只跑指定案件，可重複或逗號分隔")
+    ap.add_argument("--list", action="store_true", help="列出會被掃到的案件後結束")
+    args = ap.parse_args(argv)
+
+    names = case_names()
+    if args.list:
+        for n in names:
+            print(n)
+        return 0
+
+    only = None
+    if args.only:
+        only = []
+        for chunk in args.only:
+            for n in chunk.split(","):
+                n = n.strip()
+                if n and n not in only:
+                    only.append(n)
+        unknown = [n for n in only if n not in names]
+        if unknown:
+            print("找不到案件：%s（用 --list 查看可用案名）" % "、".join(unknown))
+            return 2
+        names = [n for n in names if n in only]
+
+    update = args.update
+    ignore_new = args.ignore_new
+    print("全案回歸%s：" % ("" if only is None else "（指定 %d 案）" % len(names)))
+    now = collect_all(names)
+    exists = os.path.exists(BASELINE)
+    base = json.load(open(BASELINE, encoding="utf-8")) if exists else {}
     _base_ids = set(base)
     # --ignore-new：別的行程剛新增、尚未納入基準的案件，不計入失敗（其自身三軸狀態仍會印✗）
     # 基準已記錄為「未通過」的案件（例如案件資料本身缺工項）不算回歸；否則整條回歸
@@ -265,15 +314,22 @@ def main():
               if not v["ok"] and k not in known_bad
               and not (ignore_new and k not in _base_ids)]
 
-    if update or not os.path.exists(BASELINE):
-        json.dump(now, open(BASELINE, "w", encoding="utf-8"),
+    if update or not exists:
+        if only is not None and exists:
+            # 只改寫指定案件的基準段落，其餘案件原樣保留
+            base.update(now)
+            merged = base
+        else:
+            merged = now
+        json.dump(merged, open(BASELINE, "w", encoding="utf-8"),
                   ensure_ascii=False, indent=1)
-        print("\n已寫入基準 %s（%d 案）" % (BASELINE, len(now)))
+        print("\n已寫入基準 %s（本次 %d 案，基準共 %d 案）"
+              % (BASELINE, len(now), len(merged)))
         if not update:
             print("（首次執行自動建立基準；之後再跑就會比對）")
         return 0 if not failed else 1
 
-    diffs = compare(base, now, ignore_new)
+    diffs = compare(base, now, ignore_new, only)
     print()
     if not diffs:
         print("✓ 基準全部相符（%d 案）" % len(now))

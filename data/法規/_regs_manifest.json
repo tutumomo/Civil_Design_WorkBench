@@ -1143,5 +1143,24 @@
    "folder": "營建工程空氣污染防制設施管理辦法_1101018",
    "text": "營建工程空氣污染防制設施管理辦法_1101018_全文.txt"
   }
+ },
+ "barrier108": {
+  "id": "barrier108",
+  "name": "建築物無障礙設施設計規範_1080104",
+  "authority": "內政部",
+  "version": "108.01.04 台內營字第1070820550號令修正，108.07.01 施行",
+  "url": "https://glrs.moi.gov.tw/LawContent.aspx?id=GL000734",
+  "type": "pdf",
+  "bytes": 3122328,
+  "sha256": "1ff0c1cc4cb27c6f74219bfb0d264cac056f88fe9109e36031c53cd6358c0245",
+  "pages": 105,
+  "text_chars": 28564,
+  "files": {
+   "original": "建築物無障礙設施設計規範_1080104.pdf",
+   "text": "建築物無障礙設施設計規範_1080104_全文.txt"
+  },
+  "splitter": "barrier",
+  "fetched": "2026-11-11T01:33:46",
+  "note": "PDF 與全文已於 2026-11-04 在本機取得；本次僅登錄 manifest（未重新下載）。glrs 頁面同時掛「修正總說明及對照表」與「規範本文」，取檔名含「生效」者。"
  }
 }

@@ -25,13 +25,7 @@ jobs:
         run: python -m pip install -r requirements.txt
 
       - name: Unified selftest entry
-        # regs-verified 目前有已知缺口（建築物無障礙設施設計規範尚未進索引），
-        # 先排除以免擋住其他測試；該缺口另由下一步以不擋 workflow 的方式持續顯示。
-        run: python tools/selftest/run_all.py --no-cad --skip regs-verified
-
-      - name: Known gap — regs-verified
-        continue-on-error: true
-        run: python tools/regs/verified_selftest.py
+        run: python tools/selftest/run_all.py --no-cad
 
       - name: Calculator launch check (all)
         # design_launch_check --all 已含在 run_all；此步獨立保留，讓失敗訊息在 CI 上更明顯。

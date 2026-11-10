@@ -61,7 +61,7 @@ OCSS 開放環境手寫計算書                                          = 0.98
 
 ### 3.3 MCP／REST 給智能體
 
-43 個工具，MCP 與 REST 完全等價（`POST /api/v1/tools/{name}` 帶 MCP 參數即可）。註冊方式見第 6 節。
+43 個工具，MCP 與 REST 完全等價（`POST /api/v1/tools/{name}` 帶 MCP 參數即可）。註冊方式見第 6 節。**逐一工具的用途、參數與路由見 [`OpenCalcSheetStudio_工具清單.md`](OpenCalcSheetStudio_工具清單.md)**（由 `tools/crosscheck/ocss_tools_doc.py` 從執行中的 OCSS 生成，升版後重跑；`--check` 可比對是否過期）。
 
 ## 4. 能力邊界（重要）
 
@@ -177,6 +177,8 @@ claude mcp add --transport http --scope user open-calcsheet-studio \
 ### 6.4 執行檔路徑
 
 `project_paths.opencalcsheet_exe()`：環境變數 `OCSS_EXE` → Windows 安裝根目錄（忽略空格與大小寫比對資料夾名）→ `~/.local/bin` → PATH。**不要在程式或文件寫死安裝路徑**（與 OpenCADStudio 同一原則，見 EXP-B15）。
+
+**Linux（aarch64，2026-11-10 實測）**：官方只給 `.deb`（需 root）。無 root 時可 `dpkg-deb -x <deb> <目錄>` 解壓，把 `usr/bin/open-calcsheet-studio` 連結到 `~/.local/bin/`；解壓不會建選單項目，需自寫 `~/.local/share/applications/open-calcsheet-studio.desktop`。設定檔在 `~/.local/share/studio.openstructuralcalculation.app/`（`ocss_settings_dir()` 已修正，原先誤指 `~/.config`）。視窗全黑時以 `WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_COMPOSITING_MODE=1` 啟動（見 EXP-J4）。
 
 ## 7. 已知限制與風險
 

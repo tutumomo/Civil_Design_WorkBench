@@ -592,12 +592,41 @@ def opencadstudio_config_dir() -> Path:
     return Path.home() / ".config" / "OpenCADStudio"
 
 
+def _sync_shx_fonts(src: Path, dst: Path) -> tuple[list[str], list[str]]:
+    """把 `src` 內的 *.shx 複製到 `dst`（檔名不分大小寫比對）。回傳 (有複製的檔名, 已是最新的檔名)。
+
+    目的檔存在且內容不同：舊檔先另存 `<檔名>.bak` 再覆蓋；內容相同則不動。
+    """
+    dst.mkdir(parents=True, exist_ok=True)
+    existing = {f.name.lower(): f for f in dst.iterdir() if f.is_file()}
+    copied: list[str] = []
+    kept: list[str] = []
+    for f in sorted(src.iterdir()):
+        if not (f.is_file() and f.suffix.lower() == ".shx"):
+            continue
+        cur = existing.get(f.name.lower())
+        if cur is not None:
+            if cur.read_bytes() == f.read_bytes():
+                kept.append(f.name)
+                continue
+            shutil.copy2(cur, cur.with_name(cur.name + ".bak"))
+            cur.unlink()
+        shutil.copy2(f, dst / f.name)
+        copied.append(f.name)
+    return copied, kept
+
+
 def configure_opencadstudio(quiet: bool = False) -> bool:
-    """把 TOMO 字型夾與 CTB 出圖樣式夾寫進 OpenCADStudio 的 settings.json。
+    """把 TOMO 字型**複製**進 OpenCADStudio 自己的字型夾，並設好 CTB 出圖樣式夾。
 
     為什麼要這一步：OCS 的 `settings.fonts_folder` 預設是 null，開 TOMO 圖面會警告
-    `Missing fonts: CHINESE.SHX, gbenor.shx`；`plot_styles_folder` 預設 null 則無法套
-    monochrome.ctb。兩者都指向本專案內的路徑即可（實測可即時生效、無須重啟）。
+    `Missing fonts: CHINA1.SHX, gbenor.shx`；`plot_styles_folder` 預設 null 則無法套
+    monochrome.ctb（設定可即時生效、無須重啟）。
+
+    字型：把專案 `CAD_FONTS/` 的 `*.shx` 複製到 OCS 設定目錄下的 `fonts/`，`fonts_folder`
+    指向該夾（一勞永逸：之後搬動或刪除專案資料夾，OCS 仍找得到字型）。目的檔已存在且內容
+    不同時，先把舊檔另存 `<檔名>.bak` 再覆蓋；內容相同則略過。複製失敗才退回直接指向 `CAD_FONTS/`。
+    出圖樣式：指向專案 `tools/acad/plot`（不複製，避免蓋掉 OCS 自帶的同名 monochrome.ctb）。
 
     只覆蓋這兩個鍵，其餘設定原樣保留；原檔先備份為 settings.json.bak。
     """
@@ -632,13 +661,24 @@ def configure_opencadstudio(quiet: bool = False) -> bool:
         if not isinstance(d.get("settings"), dict):
             d["settings"] = {}
 
-        d["settings"]["fonts_folder"] = str(fonts_dir.resolve())
+        # 字型：複製進 OCS 自己的 fonts/，再把 fonts_folder 指過去
+        ocs_fonts = cfg_dir / "fonts"
+        try:
+            copied, kept = _sync_shx_fonts(fonts_dir, ocs_fonts)
+            fonts_target = ocs_fonts
+        except OSError as e:
+            if not quiet:
+                print(f"    ! 複製字型失敗（{e}），退回直接指向 {fonts_dir}")
+            copied, kept, fonts_target = [], [], fonts_dir
+
+        d["settings"]["fonts_folder"] = str(fonts_target.resolve())
         d["settings"]["plot_styles_folder"] = str(plot_dir.resolve())
 
         cfg_file.write_text(json.dumps(d, ensure_ascii=False, indent=4) + "\n",
                             encoding="utf-8")
         if not quiet:
-            print(f"    ✓ 字型夾   → {fonts_dir.resolve()}")
+            print(f"    ✓ 字型夾   → {fonts_target.resolve()}"
+                  f"（新複製 {len(copied)} 個、已是最新 {len(kept)} 個）")
             print(f"    ✓ 出圖樣式 → {plot_dir.resolve()}")
             print(f"    ✓ 已寫入 {cfg_file}")
         return True

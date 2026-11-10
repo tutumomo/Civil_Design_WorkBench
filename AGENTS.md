@@ -50,7 +50,7 @@
 - **單位與座標系**：公制公尺（DXF 必設 `$INSUNITS=6`、`$MEASUREMENT=1`）；平面座標採 **TWD97 TM2 二度分帶（`EPSG:3826`）**，圖面即真實座標（台中一帶 `E≈215,000, N≈2,669,000` 屬正常假東移 `250,000`），嚴禁任意平移縮放。
 - **文字樣式（`TOMO`）**：字體庫、英文 `gbenor.shx` ＋ 中文大字體 `CHINESE.SHX`。
   - `ezdxf` 寫法：`st = doc.styles.add("TOMO", font="gbenor.shx"); st.dxf.bigfont = "CHINESE.SHX"`（禁留 `Standard`/`Only1`）。
-  - **SHX 只有 AutoCAD／`accoreconsole`／OpenCADStudio 認得（OCS 需 `settings.fonts_folder` 指向 `CAD_FONTS/`，`--install`／`--configure` 會寫入）；CADCraft 不讀 SHX**（只吃**已安裝**的 TTF/OTF/TTC）。用 CADCraft 校對本專案圖面時設 `CADCRAFT_FONTALT=msjh.ttc`（**只認檔名**，家族名稱與完整路徑實測無效）；**沒有任何環境變數可以指定字型資料夾**。機制、實測雜湊見 [`docs/字型設定_CADCraft與AutoCAD.md`](docs/字型設定_CADCraft與AutoCAD.md)。
+  - **SHX 只有 AutoCAD／`accoreconsole`／OpenCADStudio 認得（`--install`／`--configure` 會把 `CAD_FONTS/*.shx` **複製進 OCS 自己的 `fonts/`** 並把 `settings.fonts_folder` 指過去）；CADCraft 不讀 SHX**（只吃**已安裝**的 TTF/OTF/TTC）。用 CADCraft 校對本專案圖面時設 `CADCRAFT_FONTALT=msjh.ttc`（**只認檔名**，家族名稱與完整路徑實測無效）；**沒有任何環境變數可以指定字型資料夾**。機制、實測雜湊見 [`docs/字型設定_CADCraft與AutoCAD.md`](docs/字型設定_CADCraft與AutoCAD.md)。
 - **圖層與色彩**：命名採 `數字前綴_中文說明`（底圖影像 `00_`、道路 `10_`、建物 `20_`、水道 `22_`、圖框說明 `90_`）；房屋與圖框文字設為 `ACI 7`（白/黑自動反轉色），禁用黃色 `ACI 2`。內嵌影像（IMAGE）須與 DXF 放同資料夾。**出圖型式一律 `monochrome.ctb`，顏色 1~8 對應固定線粗**（不重要 0.10／一般 0.15~0.20／重要 0.35~0.40 mm）；新圖層一律用 `drawing_rules.add_plot_layer()` 建，說明見 `docs/出圖樣式與線粗.md`。
 - **現況平面圖必備要素**：平滑化道路邊線與中心線、依實際方位角正交化之建物輪廓＋逐棟 `ANSI31` Hatch、標註名稱之河道雙岸線、指北針、比例尺。
 - **設計與預算核心不變量（關鍵防錯）**：
@@ -74,7 +74,7 @@
   python tools/project_paths.py --install --dry-run  # 先看計畫
   ```
   **只跑 `python tools/project_paths.py` 是唯讀回報，不會安裝任何東西**——它印出 OK／— 清單後就結束，缺的工具仍然缺。要宣稱「環境已備妥」之前，必須先跑過 `--install` 且其退出碼為 0，並在回報中貼出該指令的總結段。
-  **`--install` 會一併寫好 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾**（`settings.fonts_folder` → `CAD_FONTS/`、`settings.plot_styles_folder` → `tools/acad/plot/`）；已安裝的機器也會補寫。只想重寫設定、不下載時用 `python tools/project_paths.py --configure`。驗證方式是開一張 TOMO 圖後看 REST 回應的 `state.missing_fonts` 是否為 `[]`，不要只憑「沒有警告」判斷。詳見 `docs/環境需求與自動配置.md` §8.8。
+  **`--install` 會一併寫好 OpenCADStudio 的 TOMO 字型夾與 CTB 樣式夾**（字型：複製 `CAD_FONTS/*.shx` 進 OCS 設定夾的 `fonts/` 並設 `settings.fonts_folder`；`settings.plot_styles_folder` → `tools/acad/plot/`，只指向不複製）；已安裝的機器也會補寫。只想重寫設定、不下載時用 `python tools/project_paths.py --configure`。驗證方式是開一張 TOMO 圖後看 REST 回應的 `state.missing_fonts` 是否為 `[]`，不要只憑「沒有警告」判斷。詳見 `docs/環境需求與自動配置.md` §8.8。
   安裝規範：免 root、成品落 `~/.local/opt/<name>-<ver>/`、`~/.local/bin/` 建 symlink、來源為官方 GitHub Releases；symlink 衝突時改建 `<name>-new` 並印出 `mv` 指令交使用者確認，不直接覆蓋。
   **兩個必備工具都由 `--install` 自動安裝，來源是使用者自己的 fork，且只綁「本地化 TW 版」應用程式（2026-11-10 定案，不得改回上游）**。使用者本機會**同時安裝上游版與 TW 版**（識別碼與安裝資料夾不同），解析器只認 TW 版、**絕不退回上游版**：
 

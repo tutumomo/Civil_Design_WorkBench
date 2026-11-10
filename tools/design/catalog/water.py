@@ -3,7 +3,9 @@
 自 `design_api.py` 原樣搬出，內容未改。
 """
 
-from typing import Any
+from typing import Any, Mapping
+
+from catalog._shared import _num
 
 
 def _example_channel() -> dict[str, Any]:
@@ -368,3 +370,237 @@ def _network_field_rules() -> dict[str, Any]:
         }
     )
     return rules
+
+
+def _run_channel(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import channel_hydraulics as CH
+
+    params = {
+        "manning_n": _num(payload, "manning_n", 0.014),
+        "freeboard_min_m": _num(payload, "freeboard_min_m", 0.20),
+    }
+    if payload.get("size"):
+        best, tried = CH.size_channel(
+            _num(payload, "design_flow_m3s"),
+            _num(payload, "slope"),
+            params,
+        )
+        if best is None:
+            raise DesignAPIError("搜尋 %d 組 U 型溝斷面仍無法全部通過，請檢查設計流量或縱坡（流速限制 0.8~4.57 m/s）" % tried)
+        res = dict(best["res"])
+        sized = {"inner_width_m": best["b"], "depth_m": best["h"]}
+        res["sized_section"] = sized
+        res["warnings"] = [
+            "已依設計流量自動反推最小合格斷面（搜尋 %d 組）：內寬 b=%.2f m、溝深 h=%.2f m"
+            % (tried, best["b"], best["h"])
+        ] + list(res.get("warnings") or [])
+        return res
+    return CH.analyse(
+        _num(payload, "design_flow_m3s"),
+        _num(payload, "inner_width_m"),
+        _num(payload, "depth_m"),
+        _num(payload, "slope"),
+        params,
+    )
+
+
+def _run_channel_profile(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import channel_profile as CP
+
+    width = payload.get("bottom_width_m", payload.get("inner_width_m"))
+    depth = payload.get("channel_depth_m", payload.get("depth_m"))
+    return CP.analyse(
+        design_flow_m3s=_num(payload, "design_flow_m3s"),
+        bottom_width_m=float(width) if width not in (None, "") else _num(payload, "bottom_width_m"),
+        side_slope_h_v=_num(payload, "side_slope_h_v", 0.0),
+        slope=_num(payload, "slope"),
+        manning_n=_num(payload, "manning_n", 0.014),
+        reach_length_m=_num(payload, "reach_length_m"),
+        step_m=_num(payload, "step_m", 10.0),
+        control_depth_m=payload.get("control_depth_m"),
+        channel_depth_m=depth if depth not in (None, "") else None,
+        freeboard_min_m=_num(payload, "freeboard_min_m", 0.20),
+        minor_loss_coefficient=_num(payload, "minor_loss_coefficient", 0.0),
+        velocity_min_m_s=_num(payload, "velocity_min_m_s", 0.0),
+        velocity_max_m_s=payload.get("velocity_max_m_s"),
+    )
+
+
+def _run_network(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import drainage_network as DN
+
+    return DN.analyse(payload)
+
+
+def _run_basin(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import detention_basin as DB
+
+    return DB.analyse(payload)
+
+
+def _run_hydrology(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import hydrology as HY
+
+    return HY.design_flow(
+        _num(payload, "P_mm"),
+        _num(payload, "return_period_yr"),
+        _num(payload, "area_ha"),
+        str(payload.get("condition", "丘陵地或森林")),
+        developed=bool(payload.get("developed", False)),
+        upper_c=bool(payload.get("upper_c", False)),
+        l_m=_num(payload, "l_m", 100.0),
+        v_ms=_num(payload, "v_ms", 0.4),
+        L_km=_num(payload, "L_km", 0.0),
+        H_km=_num(payload, "H_km", 0.0),
+        area_type=str(payload.get("area_type", "集水區")),
+        t_override_min=payload.get("t_override_min"),
+    )
+
+
+def _run_sediment(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import sediment_basin as SB
+
+    result = SB.analyse(
+        _num(payload, "area_ha"),
+        excavated_ha=_num(payload, "excavated_ha", 0.0),
+        impervious_ha=_num(payload, "impervious_ha", 0.0),
+        kind=str(payload.get("kind", "temporary")),
+        years=_num(payload, "years", 1.0),
+        depth=payload.get("depth_m"),
+        side_ratio=_num(payload, "side_ratio", 1.5),
+        Am=payload.get("Am"),
+        Rm=payload.get("Rm"),
+        Km=payload.get("Km"),
+        LS=payload.get("LS"),
+        C=payload.get("C"),
+        P=payload.get("P"),
+    )
+    if payload.get("structure"):
+        s = payload["structure"]
+        result["structure"] = SB.structural_design(
+            result,
+            wall_t_m=float(s.get("wall_t_m", 0.25)),
+            base_t_m=float(s.get("base_t_m", 0.25)),
+            water_level_m=s.get("water_level_m"),
+            groundwater_head_m=float(s.get("groundwater_head_m", 0.0)),
+        )
+    if payload.get("outlet"):
+        o = payload["outlet"]
+        result["outlet"] = SB.outlet_and_overflow_design(
+            _num(o, "design_q_m3s"),
+            _num(o, "outlet_head_m"),
+            outlet_d_m=o.get("outlet_d_m"),
+            overflow_head_m=o.get("overflow_head_m"),
+            overflow_length_m=o.get("overflow_length_m"),
+        )
+    return result
+
+
+ENTRIES = [
+    {
+        "id": "channel_hydraulics",
+        "group": "排水系統",
+        "title": "排水溝水力檢核／選配",
+        "oral": ["排水溝", "渠道", "曼寧", "流速", "出水高", "通水容量"],
+        "description": "矩形明渠正常水深、容量、流速、福祿數、出水高與最小斷面選配。",
+        "engine": "channel_hydraulics.py",
+        "codes": ["水土保持技術規範 §78", "水土保持技術規範 §83～86"],
+        "limitations": "穩定等速流；迴水、漸變水面線、跌水消能與連接井損失需另案分析。",
+        "field_rules": _channel_field_rules(),
+        "example": _example_channel(),
+    },
+    {
+        "id": "channel_profile",
+        "group": "排水系統",
+        "title": "排水溝水面線（迴水）",
+        "oral": ["水面線", "迴水", "漸變水面線", "標準步法", "M1", "M2", "S2", "出水高檢核"],
+        "description": "矩形／梯形渠道標準步法水面線：自由出流或指定下游控制水深，逐段向上游演算水深、流速、福祿數與剖面型態，並檢核出水高與容許流速。",
+        "engine": "channel_profile.py",
+        "codes": ["水土保持技術規範 §84～86", "公路排水設計規範第四章"],
+        "limitations": "一維緩變流；不處理水躍、橋涵束縮、側流入流、彎道二次流與分段糙度變化；超臨界段僅供參考。",
+        "field_rules": _channel_profile_field_rules(),
+        "example": _example_channel_profile(),
+    },
+    {
+        "id": "drainage_network",
+        "group": "排水系統",
+        "title": "排水網路流量分配",
+        "oral": ["排水系統", "排水網路", "匯流", "分流", "管渠", "容量"],
+        "description": "節點—連線網路、指定或容量權重分流、渠道／圓管／箱涵／指定容量檢核。",
+        "engine": "drainage_network.py",
+        "codes": ["水土保持技術規範 §82～87", "公路排水設計規範", "下水道工程設施標準"],
+        "limitations": "目前為穩定尖峰流量平衡；尚無儲蓄、時間延遲、迴水與漸變水面線。",
+        "field_rules": _network_field_rules(),
+        "example": _example_network(),
+    },
+    {
+        "id": "detention_basin",
+        "group": "滯洪池",
+        "title": "滯洪池調洪演算",
+        "oral": ["滯洪池", "滯洪", "調洪", "Modified Puls", "容許出流", "溢洪道"],
+        "description": "水位—面積—蓄水曲線、孔口／堰出流、Modified Puls 演算、最高水位與出水高。",
+        "engine": "detention_basin.py",
+        "codes": ["水土保持技術規範 §94～97", "水土保持技術規範 §160、§166"],
+        "limitations": "孔口以中心水頭計算，水位低於孔口中心時出流以 0 計；尚無多峰雨型、閘門操作、下游迴水、池堤穩定與緊急溢洪道完整設計。",
+        "example": _example_basin(),
+        "field_rules": {
+            "outlet.orifice.invert_m": {
+                "label": "孔底高程 (m)",
+                "hint": "自池底起算；孔口中心取孔底＋孔徑/2，以中心水頭計算出流",
+            },
+        },
+    },
+    {
+        "id": "hydrology",
+        "group": "水文",
+        "title": "集水區設計流量",
+        "oral": ["水文", "降雨強度", "合理化公式", "逕流係數", "集流時間", "設計流量"],
+        "description": "水土保持技術規範第 16～19 條降雨強度、逕流係數、集流時間與合理化公式。",
+        "engine": "hydrology.py",
+        "codes": ["水土保持技術規範 §16～19"],
+        "limitations": "降雨與土地利用參數必須用當地資料；第 16 條公式推估值是下限。",
+        "field_rules": _hydrology_field_rules(),
+        "example": {
+            "P_mm": 2000.0,
+            "return_period_yr": 25.0,
+            "area_ha": 2.0,
+            "condition": "丘陵地或森林",
+            "developed": False,
+            "upper_c": False,
+            "area_type": "集水區",
+            "l_m": 100.0,
+            "v_ms": 0.4,
+            "L_km": 0.0,
+            "H_km": 0.0,
+        },
+    },
+    {
+        "id": "sediment_basin",
+        "group": "水保設施",
+        "title": "沉砂池容量",
+        "oral": ["沉砂池", "泥砂生產量", "USLE", "土壤流失", "沉砂"],
+        "description": "USLE、泥砂生產量、容量下限、深度與可選池壁／出水口／溢流檢核。",
+        "engine": "sediment_basin.py",
+        "codes": ["水土保持技術規範 §35、§92～93", "下水道工程設施標準 §12"],
+        "limitations": "結構與出水口為初步檢核；未計池外土壓、地震、滲流、阻塞與消能。",
+        "field_rules": _sediment_field_rules(),
+        "example": {
+            "area_ha": 2.0,
+            "excavated_ha": 1.2,
+            "impervious_ha": 0.2,
+            "kind": "temporary",
+            "years": 1.0,
+            "Am": 40.0,
+            "depth_m": 2.0,
+        },
+    }
+]
+
+RUNNERS = {
+    'channel_hydraulics': _run_channel,
+    'channel_profile': _run_channel_profile,
+    'drainage_network': _run_network,
+    'detention_basin': _run_basin,
+    'hydrology': _run_hydrology,
+    'sediment_basin': _run_sediment,
+}

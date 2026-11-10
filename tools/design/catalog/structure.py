@@ -3,7 +3,9 @@
 自 `design_api.py` 原樣搬出，內容未改。
 """
 
-from typing import Any
+from typing import Any, Mapping
+
+from catalog._shared import _num
 
 
 def _example_building() -> dict[str, Any]:
@@ -479,3 +481,296 @@ def _steel_column_field_rules() -> dict[str, Any]:
         },
     })
     return rules
+
+
+def _run_building(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import building_frame as BF
+
+    geometry = payload.get("geometry") or payload
+    loads = payload.get("loads") or {}
+    return BF.analyse(geometry, loads)
+
+
+def _run_foundation(payload: Mapping[str, Any], kind: str) -> Mapping[str, Any]:
+    import foundation_design as FD
+
+    geometry = payload.get("geometry") or payload
+    load = payload.get("load") or payload
+    common = {
+        "q_allow_kpa": float(payload.get("q_allow_kpa", 200.0)),
+        "fc_mpa": float(payload.get("fc_mpa", 28.0)),
+        "fy_mpa": float(payload.get("fy_mpa", 420.0)),
+    }
+    if kind == "isolated":
+        return FD.analyse_isolated_footing(
+            load,
+            B_m=float(geometry.get("B_m")),
+            L_m=float(geometry.get("L_m")),
+            thickness_m=float(geometry.get("thickness_m")),
+            column_b_m=float(geometry.get("column_b_m")),
+            column_l_m=float(geometry.get("column_l_m")),
+            cover_mm=float(payload.get("cover_mm", 75.0)),
+            friction_coefficient=float(payload.get("friction_coefficient", 0.5)),
+            settlement=payload.get("settlement"),
+            **common,
+        )
+    if kind == "combined":
+        return FD.analyse_combined_footing(
+            payload.get("columns") or [],
+            B_m=float(payload.get("B_m")),
+            L_m=float(payload.get("L_m")),
+            thickness_m=float(payload.get("thickness_m")),
+            column_b_m=float(payload.get("column_b_m", 0.4)),
+            column_l_m=float(payload.get("column_l_m", 0.4)),
+            settlement=payload.get("settlement"),
+            **common,
+        )
+    return FD.pile_group_check(
+        payload.get("piles") or [],
+        P_kN=float(payload.get("P_kN")),
+        Mx_kNm=float(payload.get("Mx_kNm", 0.0)),
+        My_kNm=float(payload.get("My_kNm", 0.0)),
+        Q_allow_kN=float(payload.get("Q_allow_kN")),
+    )
+
+
+def _run_rc_beam(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import rc_design as RC
+
+    return RC.beam_design(
+        _num(payload, "Mu_kNm"),
+        _num(payload, "Vu_kN"),
+        b_mm=_num(payload, "b_mm", 300.0),
+        h_mm=_num(payload, "h_mm", 600.0),
+        M_service_kNm=payload.get("M_service_kNm"),
+        fc_mpa=_num(payload, "fc_mpa", 28.0),
+        fy_mpa=_num(payload, "fy_mpa", 420.0),
+        cover_mm=_num(payload, "cover_mm", 40.0),
+    )
+
+
+def _run_rc_column(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import rc_design as RC
+
+    return RC.column_design(
+        _num(payload, "Pu_kN"),
+        _num(payload, "Mu_kNm"),
+        b_mm=_num(payload, "b_mm", 400.0),
+        h_mm=_num(payload, "h_mm", 400.0),
+        fc_mpa=_num(payload, "fc_mpa", 28.0),
+        fy_mpa=_num(payload, "fy_mpa", 420.0),
+        cover_mm=_num(payload, "cover_mm", 40.0),
+    )
+
+
+def _run_settlement_assessment(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import foundation_design as FD
+
+    return FD.settlement_assessment(payload)
+
+
+def _run_steel_column(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import steel_column as SC
+
+    return SC.analyse(payload)
+
+
+def _run_channel_cover(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import channel_cover as CC
+
+    if payload.get("size"):
+        p2 = dict(payload)
+        geo = dict(payload.get("geometry") or {})
+        geo["slab_thickness_mm"] = None
+        p2["geometry"] = geo
+        p2["slab"] = {"main_bar": "", "main_spacing_mm": 0.0, "dist_bar": "", "dist_spacing_mm": 0.0}
+        res = dict(CC.analyse(p2))
+        sized = {
+            "geometry.slab_thickness_mm": (res.get("geometry") or {}).get("slab_thickness_mm", 250.0),
+            "slab.main_bar": "",
+            "slab.main_spacing_mm": 0.0,
+            "slab.dist_bar": "",
+            "slab.dist_spacing_mm": 0.0,
+        }
+        res["sized_section"] = sized
+        res["warnings"] = [
+            "已自動搜尋最小合格版厚與配筋：版厚 %.0f mm"
+            % float(sized["geometry.slab_thickness_mm"] or 250.0)
+        ] + list(res.get("warnings") or [])
+        return res
+    return CC.analyse(payload)
+
+
+ENTRIES = [
+    {
+        "id": "channel_cover",
+        "group": "排水系統",
+        "title": "RC 路側溝加蓋（溝蓋版＋植筋）",
+        "oral": [
+            "溝蓋", "加蓋", "暗溝", "路側溝加蓋", "溝蓋板", "明溝加蓋", "植筋",
+            "溝蓋配筋", "溝蓋載重",
+        ],
+        "description": (
+            "既有 RC 明溝加蓋：HS20-44 後輪載重（可乘重型貨車係數 1.25）下，"
+            "溝蓋版撓曲、剪力、裂縫、撓度，溝壁頂承壓，以及黏結式植筋拉力、"
+            "剪力與拉剪互制。"
+        ),
+        "engine": "channel_cover.py",
+        "codes": [
+            "公路橋梁設計規範（98.12 初版；104.04.13／109.01.03 修訂）§3.7.6、§4.3、§7.1.5、§9",
+            "建築物混凝土結構設計規範（112.08.10）§17.6.5、§17.7、§17.9、§22.9",
+            "公路工程施工規範（112.02.22）§01525 施工縫及植筋",
+        ],
+        "limitations": (
+            "只做簡支版正彎矩，不把 20 cm 溝壁當固接支承；植筋拉力需求採抗掀名義比例"
+            "（非規範明文）。未檢核既有溝壁側向穩定、基礎承載、疲勞、溫度與地震；"
+            "植筋膠須有黏結式錨栓評估準則（ACI 355.4）認證並以產品資料覆核。"
+        ),
+        "field_rules": _channel_cover_field_rules(),
+        "example": _example_channel_cover(),
+    },
+    {
+        "id": "building_frame",
+        "group": "建築結構",
+        "title": "建築 RC 平面剛架",
+        "oral": ["樑", "柱", "樑柱", "建築構架", "樓層", "地震", "層間位移"],
+        "description": "規則 2D RC 剛架、靜載／活載／等值靜力地震、內力包絡、樑柱初步配筋與層間位移。",
+        "engine": "building_frame.py",
+        "codes": ["建築技術規則建築構造編", "建築物耐震設計規範", "建築物混凝土結構設計規範"],
+        "limitations": "代表性 2D 平面、單軸彎矩；未計 3D 扭轉、雙向彎矩、二階效應、接頭剪力與錨定。",
+        "field_rules": _building_field_rules(),
+        "example": _example_building(),
+    },
+    {
+        "id": "foundation_isolated",
+        "group": "建築基礎",
+        "title": "獨立基腳",
+        "oral": ["獨立基腳", "基腳", "基礎承載", "沖剪", "柱腳", "淺基礎"],
+        "description": "矩形獨立基腳承載應力、全面受壓、滑動、單向剪力、沖剪、撓曲與可選分層沉陷檢核。",
+        "engine": "foundation_design.py",
+        "codes": ["建築物基礎構造設計規範 §4", "建築物混凝土結構設計規範"],
+        "limitations": "沉陷須提供土層參數；可分層 2:1 法估算瞬時沉陷，選填 consolidation_layers 時可加算壓密與次壓縮。單一基腳不計算差異沉陷或角變量，請另用 settlement_assessment；液化與土壤—結構互制未計。",
+        "field_rules": _foundation_field_rules(),
+        "example": _example_footing("isolated"),
+    },
+    {
+        "id": "foundation_combined",
+        "group": "建築基礎",
+        "title": "聯合基腳",
+        "oral": ["聯合基腳", "兩柱基礎", "合併基腳", "條形基礎"],
+        "description": "剛性聯合基腳線性基底反力、縱向撓曲、沖剪、柱載重分配與可選分層沉陷檢核。",
+        "engine": "foundation_design.py",
+        "codes": ["建築物基礎構造設計規範 §4", "建築物混凝土結構設計規範"],
+        "limitations": "縱向條帶分析；沉陷須提供土層，可算分層瞬時、壓密與次壓縮總沉陷。橫向柱下局部分析、三維沖剪、差異沉陷與角變量須另用 settlement_assessment；土壤—結構互制未計。",
+        "field_rules": _foundation_field_rules(),
+        "example": _example_footing("combined"),
+    },
+    {
+        "id": "foundation_pile",
+        "group": "建築基礎",
+        "title": "樁帽／樁群載重分配",
+        "oral": ["樁帽", "樁群", "基樁", "樁基礎", "軸力分配"],
+        "description": "等軸勁度與剛性樁帽假設下的樁群軸力分配、最大樁壓與拉力檢查。",
+        "engine": "foundation_design.py",
+        "codes": ["建築物基礎構造設計規範"],
+        "limitations": "未做側向樁、群樁效率、沉陷、上浮與完整樁帽配筋。",
+        "example": _example_footing("pile"),
+    },
+    {
+        "id": "settlement_assessment",
+        "group": "建築基礎",
+        "title": "沉陷與角變量評估",
+        "oral": [
+            "沉陷",
+            "壓密沉陷",
+            "次壓縮",
+            "差異沉陷",
+            "角變量",
+            "基礎變形",
+            "相鄰柱沉陷",
+        ],
+        "description": "分層瞬時沉陷、單向度壓密、次壓縮、總沉陷，以及扣除剛體轉動後的多基礎差異沉陷與角變量。",
+        "engine": "foundation_design.py",
+        "codes": [
+            "建築物基礎構造設計規範 §4.4.2～4.4.7",
+            "建築物基礎構造設計規範 §4.5.3～4.5.4",
+        ],
+        "limitations": "地層採分層 2:1 應力擴散；差異沉陷為幾何篩檢，未做土壤—結構互制、筏基有限元、側向樁或三維勁度重分配。",
+        "field_rules": _settlement_field_rules(),
+        "example": _example_settlement_assessment(),
+    },
+    {
+        "id": "rc_beam",
+        "group": "RC 構材",
+        "title": "RC 梁斷面配筋",
+        "oral": ["梁配筋", "樑配筋", "撓曲", "剪力", "裂縫"],
+        "description": "矩形梁撓曲、最小鋼筋、剪力與裂縫控制，輸出建議筋號與間距。",
+        "engine": "rc_design.py",
+        "codes": ["建築物混凝土結構設計規範"],
+        "limitations": "單筋矩形梁、常重混凝土；未計扭力、疲勞、耐震塑鉸與接頭細節。",
+        "example": {
+            "Mu_kNm": 180.0,
+            "Vu_kN": 120.0,
+            "b_mm": 350.0,
+            "h_mm": 750.0,
+            "fc_mpa": 28.0,
+            "fy_mpa": 420.0,
+        },
+    },
+    {
+        "id": "rc_column",
+        "group": "RC 構材",
+        "title": "RC 柱軸彎互制",
+        "oral": ["柱配筋", "軸彎互制", "柱設計", "軸力", "彎矩"],
+        "description": "矩形柱軸力—彎矩互制曲線與鋼筋配置初步選筋。",
+        "engine": "rc_design.py",
+        "codes": ["建築物混凝土結構設計規範"],
+        "limitations": "單軸彎矩、對稱鋼筋配置；雙向彎矩、二階效應、剪力與耐震圍束須另做。",
+        "example": {
+            "Pu_kN": 1600.0,
+            "Mu_kNm": 280.0,
+            "b_mm": 450.0,
+            "h_mm": 450.0,
+            "fc_mpa": 28.0,
+            "fy_mpa": 420.0,
+        },
+    },
+    {
+        "id": "steel_column",
+        "group": "鋼結構",
+        "title": "鋼構柱、柱腳基板與基礎螺栓",
+        "oral": [
+            "鋼柱",
+            "柱腳",
+            "基板",
+            "基礎螺栓",
+            "錨栓",
+            "鋼構設計",
+        ],
+        "description": (
+            "H 型鋼柱軸壓、撓曲與梁柱互制檢核，柱腳混凝土承壓、基板厚度、"
+            "基礎錨栓群拉力、剪力傳遞與拉剪互制聯合檢核。"
+        ),
+        "engine": "steel_column.py",
+        "codes": ["建築物鋼結構設計技術規範（99.09.16）"],
+        "limitations": (
+            "只做露出式柱腳與澆置前預埋錨栓；埋入式柱腳、後置錨栓與特殊預埋件不在本模組。"
+            "基板厚度採簡化懸臂法，雙向彎矩採彈性錨栓群法，"
+            "未做柱腹板剪力、焊道、灌漿與埋入式細部，須人工覆核。"
+        ),
+        "field_rules": _steel_column_field_rules(),
+        "example": _example_steel_column(),
+    }
+]
+
+RUNNERS = {
+    'channel_cover': _run_channel_cover,
+    'building_frame': _run_building,
+    'foundation_isolated': lambda p: _run_foundation(p, "isolated"),
+    'foundation_combined': lambda p: _run_foundation(p, "combined"),
+    'foundation_pile': lambda p: _run_foundation(p, "pile"),
+    'settlement_assessment': _run_settlement_assessment,
+    'rc_beam': _run_rc_beam,
+    'rc_column': _run_rc_column,
+    'steel_column': _run_steel_column,
+}

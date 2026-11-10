@@ -3,7 +3,9 @@
 自 `design_api.py` 原樣搬出，內容未改。
 """
 
-from typing import Any
+from typing import Any, Mapping
+
+from catalog._shared import _num
 
 
 def _slope_field_rules() -> dict[str, Any]:
@@ -52,3 +54,37 @@ def _slope_field_rules() -> dict[str, Any]:
             "label": "土壤單位重 γ (kN/m³)",
         },
     }
+
+
+def _run_slope(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    import slope_stability as SS
+
+    return SS.analyse(payload)
+
+
+ENTRIES = [
+    {
+        "id": "slope_stability",
+        "group": "邊坡",
+        "title": "邊坡穩定分析",
+        "oral": ["邊坡", "坡角", "無限邊坡", "圓弧滑動", "安全係數"],
+        "description": "無限邊坡法、Fellenius 坡趾圓與容許坡角反算，依永久／臨時與工況查最小 FS。",
+        "engine": "slope_stability.py",
+        "codes": ["水土保持技術規範 §72～73"],
+        "limitations": "均質土層與坡趾圓家族；分層土、軟弱夾層與滲流網須另行分析。",
+        "field_rules": _slope_field_rules(),
+        "example": {
+            "height_m": 5.0,
+            "slope_angle_deg": 25.0,
+            "cohesion_kpa": 0.0,
+            "unit_weight_kn_m3": 18.0,
+            "stage": "永久性",
+            "condition": "平時",
+            "friction_deg": 35.0,
+        },
+    }
+]
+
+RUNNERS = {
+    'slope_stability': _run_slope,
+}

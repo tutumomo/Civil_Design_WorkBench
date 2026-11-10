@@ -23,17 +23,65 @@
 
 ## 這個專案能做什麼
 
-| 能力 | 指令 | 產出 |
-|---|---|---|
-| 現況平面底圖 | `tools/site_basemap/site_basemap.py` | TWD97 線稿 DXF（道路邊線、建物、河道） |
-| A3 出圖 | `tools/a3_sheet/make_sheet.py` | DXF／**DWG**／PDF／PNG（含圖框、視口、比例尺） |
-| 地籍套繪圖 | `tools/cadastral/make_cadastral_map.py` | A3 地籍圖（坵塊、段籍、建物） |
-| 斷面圖／配筋圖 | `tools/wall_section/make_wall_section.py` | 擋土牆 S-01／S-02、排水溝 D-01／D-02 |
-| 結構與水理設計 | `tools/design/design_cli.py`（20 個計算器） | 擋土牆、箱涵、渠道、邊坡、基礎、RC 樑柱… |
-| 工程預算書 | `tools/boq/boq_build.py` | 5 工作表 `.xlsx` ＋ PDF（費率層活公式） |
-| 設計報告書 | `tools/report/make_report.py` | 14 章 `.docx` ＋ PDF |
-| 規範查詢 | `tools/regs/regq.py` | 主題卡／條文全文／**公式**／**表格** |
-| 三軸一鍵交付 | `tools/case_package/case_package.py` | 設計圖＋預算書＋報告書＋交付清單 |
+功能依工作類型分成六類。「狀態」欄的意思：
+
+- **現成**：有專用指令，可重跑、有自測或回歸把關。
+- **AI 協作**：沒有單一指令，由 AI 組合現有工具（規範庫、設計引擎、OpenCADStudio MCP、品管閘門）完成，依對應文件的 SOP 操作，成果須人工複核。
+- **規劃中**：構想已確認可行，尚無專用產線。
+
+### 一、規範查詢與彙整
+
+| 功能 | 你給什麼 → 得到什麼 | 工具／依據 | 狀態 |
+|---|---|---|---|
+| 規範查詢 | 關鍵字或條號 → 主題卡、條文全文、**已驗證公式**、**表格** | `tools/regs/regq.py`、MCP `regs`（`regs_ask`／`regs_clause`／`regs_formula`／`regs_table`） | 現成 |
+| 依需求彙整設計規範 | 一句設計需求（例：「公路邊的護欄有什麼設計規範？」、「交叉路口改成圓環要考慮哪些？」）→ 適用規範清單、關鍵條文、設計檢核項目與引用出處 | `regs_ask` 依據卡 → `regs_clause` 讀全文確認；34 份規範、1,011 條已驗證公式表格 | 現成（查詢）＋ AI 協作（彙整成清單） |
+
+### 二、設計計算與交叉驗算
+
+| 功能 | 你給什麼 → 得到什麼 | 工具／依據 | 狀態 |
+|---|---|---|---|
+| 結構與水理設計 | 構造物參數 → 檢核結果與計算書數據（擋土牆、箱涵、渠道、邊坡、基礎、RC 樑柱…） | `tools/design/design_cli.py`（20 個計算器，統一入口 `design_api.py`） | 現成 |
+| 第二套獨立算法交叉驗算 | 同一題目 → 本專案引擎與 Open CalcSheet Studio TW 各算一次並比對數值與單位 | `tools/crosscheck/ocss_crosscheck.py`（需 OCSS 桌面程式開著） | 現成 |
+
+### 三、製圖、重繪與轉繪
+
+| 功能 | 你給什麼 → 得到什麼 | 工具／依據 | 狀態 |
+|---|---|---|---|
+| 現況平面底圖 | 座標或範圍 → TWD97 線稿 DXF（道路邊線、建物、河道） | `tools/site_basemap/site_basemap.py`、`docs/現況平面底圖作業流程.md` | 現成 |
+| 地籍套繪圖 | 座標或地號範圍 → A3 地籍圖（坵塊、段籍、建物） | `tools/cadastral/make_cadastral_map.py`、`docs/地籍套繪圖產線.md` | 現成 |
+| 斷面圖／配筋圖 | `case.json` → 擋土牆 S-01／S-02、排水溝 D-01／D-02、箱涵斷面 | `tools/wall_section/make_wall_section.py`、`tools/box_section/make_box_section.py` | 現成 |
+| A3 出圖 | DXF → DXF／**DWG**／PDF／PNG（圖框、視口、比例尺、monochrome.ctb） | `tools/a3_sheet/make_sheet.py` → `tools/acad/acc.py`（OpenCADStudio TW） | 現成 |
+| 依圖面按實尺重繪 | 一張圖面（PDF／影像／他人 DWG）→ 模型空間以**公尺**為單位、真實尺寸的 DXF／DWG，再套本專案圖層、TOMO 字型與圖框 | ezdxf ＋ OpenCADStudio TW MCP（`ocs_measure`／`ocs_audit`）；`tools/drawing_rules.py`；出圖後過 E1~E18 | AI 協作 |
+| 他人設計圖收編進標準圖庫 | 他人圖面 → 本專案格式 DWG，分類登錄進元件目錄 | `_ref/build_inventory.py`、`_ref/components_catalog.json`、`docs/常用元件標準圖盤點.md`。`標準圖圖庫/` 為唯讀，實際寫入須你核可 | AI 協作 |
+| 參數化可變尺寸結構體 | 構造物型式與可變參數 → 改尺寸即自動更新的圖塊／模型 | 2D：OpenCADStudio 動態圖塊（block editor 參數與動作）；3D：SolidCraft 參數化（skill `solidcraft-param`） | 2D 規劃中；3D 現成 |
+
+### 四、圖面與預算審查、除錯
+
+| 功能 | 你給什麼 → 得到什麼 | 工具／依據 | 狀態 |
+|---|---|---|---|
+| 設計圖合規審查 | 一張設計圖（PDF／DWG）→ 審查意見：尺寸、材料、構造是否符合相關規範，逐條附出處 | DWG → DXF 抽圖元與文字、OpenCADStudio TW MCP 量測、`regs` 查條文、設計引擎重算；本專案自產圖另有 `check_delivery.py`（E1~E18）。前例：`docs/審查_*.md` | AI 協作 |
+| 修改 DWG 元件規格／尺寸並同步檢核 | DWG ＋ 要改的元件與新規格 → 修改後 DWG（`ocs_save_verified`）＋ 改後合規檢核 | OpenCADStudio TW MCP（`ocs_query`／`ocs_run`／`ocs_save_verified`）＋ 設計引擎 ＋ `regs` | AI 協作 |
+| 預算書除錯 | 預算書 `.xlsx`／`.xlsm` → 錯誤清單：公式斷鏈、數量與單價分析不符、單價無來源、費率與合計錯誤 | `tools/boq/price_audit.py`（單價來源稽核）＋ 逐表解析重算；前例：`docs/審查_崙背羅厝路面改善.md`（路工表 40 段逐段重算） | 現成（單價稽核）＋ AI 協作（全表除錯） |
+| 圖／數對帳 | DXF ＋ `case.json` → 圖面量回數量與預算數量比對、配筋間距對帳 | `tools/takeoff/dxf_takeoff.py`（`--rebar`） | 現成 |
+
+### 五、文件產製（預算書、報告書、監造計畫）
+
+| 功能 | 你給什麼 → 得到什麼 | 工具／依據 | 狀態 |
+|---|---|---|---|
+| 工程預算書 | `case.json` → 5 工作表 `.xlsx` ＋ PDF（費率層活公式） | `tools/boq/boq_build.py`、`docs/預算書產線.md` | 現成 |
+| 設計報告書 | `case.json` → 14 章 `.docx` ＋ PDF（R1~R16 回讀驗證） | `tools/report/make_report.py`、`docs/設計報告產線.md` | 現成 |
+| 三軸一鍵交付 | `case.json` → 設計圖＋預算書＋報告書＋交付清單 | `tools/case_package/case_package.py` | 現成 |
+| 優質報告書格式內化為範本 | 一份參考報告書 → 章節架構、版面、用語整理成本專案報告範本，之後 `make_report.py` 套用 | `tools/report/`（`chapters.py`／`report_model.py`／`docx_build.py`）、`templates/report/` | AI 協作 |
+| 依預算書改寫監造計畫 | 預算書 ＋ 監造計畫範例 → 依主辦機關、經費、施作工項、檢查停留點、施工中檢核改寫的監造計畫 `.docx` | 預算書逐表解析 ＋ docx 編輯；尚無專用產線 | 規劃中 |
+
+### 六、3D 與景觀模擬
+
+| 功能 | 你給什麼 → 得到什麼 | 工具／依據 | 狀態 |
+|---|---|---|---|
+| 景觀平面圖轉 3D 景觀模擬 | 景觀平面圖或手繪示意 → 3D 意象模擬圖（**意象，不是施工圖**）＋正交俯視補圖 | `tools/landscape3d/`（`bay_scene.py`、`park_scene.py`、`plan_view.py`）、Blender；`docs/3D景觀模擬_作業經驗與踩坑.md` | AI 協作（有參考實作） |
+| 參數化 3D 構造物 | 口述需求 → 參數化模型、STEP／STL／3MF、成果圖與數量表 | SolidCraft（`tools/solidcraft/`、skill `solidcraft-param`） | 現成 |
+
+所有交付物一律落在 `out/<案名>/`，並須通過[交付前的六道閘門](#交付前的六道閘門)。
 
 ## 五分鐘上手
 

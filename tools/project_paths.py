@@ -454,7 +454,7 @@ def ocss_settings_dir() -> Path:
     """Open CalcSheet Studio 的使用者資料夾（preferences.json 所在）。
 
     Tauri app id 固定為 `studio.openstructuralcalculation.app`，各平台慣例路徑：
-    Windows `%APPDATA%`、macOS `~/Library/Application Support`、Linux `~/.config`。
+    Windows `%APPDATA%`、macOS `~/Library/Application Support`、Linux `~/.local/share`（Tauri app_data_dir，實測）。
     資料夾不存在時仍回傳路徑（呼叫端自行判斷）。
     """
     app_id = "studio.openstructuralcalculation.app"
@@ -463,7 +463,7 @@ def ocss_settings_dir() -> Path:
     elif sys.platform == "darwin":
         base = str(Path.home() / "Library" / "Application Support")
     else:
-        base = os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
+        base = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
     return Path(base) / app_id
 
 

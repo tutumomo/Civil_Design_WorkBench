@@ -67,6 +67,12 @@ TESTS = [
         "what": "預算費率核心（對真實預算書）",
     },
     {
+        "id": "portable-paths",
+        "cmd": ["tools/selftest/check_portable_paths.py"],
+        "globs": [""],  # 任何改動都跑：文件與程式都可能寫死路徑；本身只要約 0.1 秒
+        "what": "沒有寫死的 Windows 絕對路徑",
+    },
+    {
         "id": "regression",
         "cmd": ["tools/selftest/regression.py"],
         "globs": ["tools/"],  # AGENTS.md §3：改動 tools/ 任一處都必跑全案回歸

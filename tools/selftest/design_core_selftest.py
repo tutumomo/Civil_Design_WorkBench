@@ -242,12 +242,13 @@ class SteelColumnTests(unittest.TestCase):
         # §10.9（(二) 版）：φcPp = 0.6 × 0.85fc′A1√(A2/A1)
         #   A1 = 0.50×0.55 m² = 2750 cm²；A2 = 0.80×0.85 m² = 6800 cm²（≤ 4A1）
         #   fc′ = 28 MPa = 285.5216 kgf/cm²
-        #   φcPp = 0.6×0.85×285.5216×2750×√(6800/2750) = 629694.6 kgf = 61751.9 kN
+        #   φcPp = 0.6×0.85×285.5216×2750×√(6800/2750) = 629694.6 kgf = 629.69 tf = 6175.2 kN
+        #   （X3 修正：原式 kgf→tf 除以 100，使容量高估 10 倍；1 tf = 1000 kgf）
         refs = SC._Refs()
         out = SC.base_plate_bearing("lrfd", 0.50, 0.55, 28.0, 0.80, 0.85, refs)
         self.assertAlmostEqual(out["A1_cm2"], 2750.0, places=6)
         self.assertAlmostEqual(out["A2_cm2"], 6800.0, places=6)
-        self.assertAlmostEqual(out["capacity_kN"], 61751.94, places=2)
+        self.assertAlmostEqual(out["capacity_kN"], 6175.19, places=2)
         # (一) 版：Fp = 0.35fc′√(A2/A1) ≤ 0.7fc′
         asd = SC.base_plate_bearing("asd", 0.50, 0.55, 28.0, 0.80, 0.85, refs)
         expected_fp = 0.35 * 28.0 * math.sqrt(6800.0 / 2750.0)
@@ -280,15 +281,15 @@ class SteelColumnTests(unittest.TestCase):
         self.assertAlmostEqual(group["total_tension_kn"], 316.6667, places=3)
 
     def test_contact_pressure_hand_calc(self) -> None:
-        # 全板線性接觸壓力 q = P/A + M/S
-        #   A = 0.55×0.50 = 0.275 m²；S = 0.50×0.55²/6 = 0.0252083 m³
-        #   q_mean = 700/0.275 = 2545.4545 kPa；q_edge = 280×0.275/0.0252083 = 3054.5455 kPa
-        #   q_max = 5600.0 kPa、q_min = −509.0909 kPa（揚起）
+        # 全板線性接觸壓力 q = P/A ± M/S（X3 修正：原式多乘 L/2 且 x／y 邊長互換）
+        #   A = 0.55×0.50 = 0.275 m²；S = 0.50×0.55²/6 = 0.02520833 m³
+        #   q_mean = 700/0.275 = 2545.4545 kPa；q_edge = 280/0.02520833 = 11107.4380 kPa
+        #   q_max = 13652.8926 kPa、q_min = −8561.9835 kPa（揚起）
         out = SC._contact_pressure(700.0, 280.0, 0.55, 0.50)
         self.assertAlmostEqual(out["area_m2"], 0.275, places=9)
         self.assertAlmostEqual(out["section_modulus_m3"], 0.02520833, places=7)
-        self.assertAlmostEqual(out["q_max_kpa"], 5600.0, places=4)
-        self.assertAlmostEqual(out["q_min_kpa"], -509.0909, places=3)
+        self.assertAlmostEqual(out["q_max_kpa"], 13652.8926, places=3)
+        self.assertAlmostEqual(out["q_min_kpa"], -8561.9835, places=3)
         self.assertTrue(out["uplift"])
 
     def test_cone_projected_area_hand_calc(self) -> None:

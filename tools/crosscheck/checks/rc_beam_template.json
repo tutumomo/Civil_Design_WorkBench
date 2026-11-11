@@ -1,0 +1,51 @@
+{
+ "_note": "X3／D4：RC 梁。本專案 rc_beam 是「每米寬」選筋（As 以 mm²/m 表示、spacing 為每米間距），模板 tw-rc-beam 只收整支數，所以模板用 n_t=5 支 D16（A_s 993 mm²）對應本專案的 5 支/m（995 mm²）。模板 d 依 c_c=40 實算（h−c_c−箍筋−db/2 = 692.52），本專案撓曲取 d = h − 50（未扣主筋半徑），兩者差 7.5 mm（約 1%），是 φM_n 與 A_smin 唯一差異來源。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "RC 梁撓曲與剪力（本專案 rc_beam ↔ tw-rc-beam）",
+   "calculator": "rc_beam",
+   "payload": {
+    "Mu_kNm": 200.0,
+    "Vu_kN": 120.0,
+    "b_mm": 350.0,
+    "h_mm": 750.0,
+    "fc_mpa": 28.0,
+    "fy_mpa": 420.0
+   },
+   "template": "tw-rc-beam",
+   "ocss_inputs": {
+    "f_c": 28,
+    "f_y": 420,
+    "f_yt": 420,
+    "b": 350,
+    "h": 750,
+    "L": 6.0,
+    "c_c": 40,
+    "support_type": 1,
+    "bar_t": 1,
+    "n_t": 5,
+    "rebar_layers": 1,
+    "has_top": 1,
+    "bar_c": 1,
+    "n_c": 0,
+    "bar_v": 1,
+    "n_legs": 2,
+    "s_v": 150,
+    "M_u": 200,
+    "V_u": 120,
+    "M_D": 60,
+    "M_L": 40,
+    "q_sus": 0.2
+   },
+   "compare": [
+    {"name": "主筋量 A_s（本專案每米／模板 5 支 D16）", "ours": "result.flexure.As_prov_mm2", "ocss": "var:A_s", "tol": {"rel": 0.005}},
+    {"name": "混凝土剪力 V_c", "ours": "result.shear.Vc_kN", "ocss": "var:V_c", "tol": {"rel": 1e-6}},
+    {"name": "最小鋼筋量 A_s,min", "ours": "result.flexure.As_min_mm2", "ocss": "var:A_smin", "tol": {"rel": 0.001},
+     "disposition": {"kind": "explained", "reason": "同一式（1.4/fy·b·d）但 d 不同：本專案撓曲取 d＝h−50（只扣保護層＋箍筋），模板扣到主筋中心（h−c_c−箍筋−db/2＝692.52）。差 7.5 mm 即差 1.1%。屬引擎既有慣例，改動會動回歸基準，已記錄待技師決定。"}},
+    {"name": "撓曲設計強度 φM_n", "ours": "result.flexure.phiMn_kNm", "ocss": "var:ϕM_n", "tol": {"rel": 0.005},
+     "disposition": {"kind": "explained", "reason": "差異全部來自 d：本專案 700 mm、模板 692.52 mm（見 A_s,min 說明），As 另差 0.2%（995 vs 993 mm²）。以 d 折算約 1.05%，與實測 1.32% 相符。"}}
+   ]
+  }
+ ]
+}

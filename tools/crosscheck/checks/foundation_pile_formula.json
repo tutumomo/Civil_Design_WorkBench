@@ -1,0 +1,38 @@
+{
+ "_note": "X3／D5-2：樁群。原本想對 tw-pile-cap，但讀模板原始碼後確認：模板是壓拉桿模型，R_out 是「柱心至樁心的水平距離」（mm）而不是單樁反力，模板也沒有彎矩輸入——兩者沒有共同的數值輸出（X0 待確認項的答案就是「無」）。改用手寫公式鏈（X4 的 formula 型）獨立算同一條樁群分配式：R = P/n + Mx·y/Ix + My·x/Iy，Ix = Σy²、Iy = Σx²。",
+ "checks": [
+  {
+   "type": "formula",
+   "name": "樁群反力分配（本專案 foundation_pile ↔ OCSS 手寫公式鏈）",
+   "calculator": "foundation_pile",
+   "payload": {
+    "piles": [
+     {"x_m": -1.0, "y_m": -1.0},
+     {"x_m": 1.0, "y_m": -1.0},
+     {"x_m": -1.0, "y_m": 1.0},
+     {"x_m": 1.0, "y_m": 1.0}
+    ],
+    "P_kN": 2000.0,
+    "Mx_kNm": 300.0,
+    "My_kNm": 150.0,
+    "Q_allow_kN": 800.0
+   },
+   "source": [
+    "P = 2000 kN",
+    "Mx = 300 kN*m",
+    "My = 150 kN*m",
+    "n = 4",
+    "x = 1 m",
+    "y = 1 m",
+    "Ix = 4 * y^2 to m^2",
+    "Iy = 4 * x^2 to m^2",
+    "R_max = P/n + Mx*y/Ix + My*x/Iy to kN",
+    "R_min = P/n - Mx*y/Ix - My*x/Iy to kN"
+   ],
+   "compare": [
+    {"name": "最大樁軸力 R_max", "ours": "result.max_pile_load_kN", "ocss": "var:R_max", "tol": {"rel": 1e-6}},
+    {"name": "最小樁軸力 R_min", "ours": "result.min_pile_load_kN", "ocss": "var:R_min", "tol": {"rel": 1e-6}}
+   ]
+  }
+ ]
+}

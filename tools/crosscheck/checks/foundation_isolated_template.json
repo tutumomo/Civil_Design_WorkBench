@@ -1,0 +1,43 @@
+{
+ "_note": "X3／D5（DG9 必做）：獨立基腳。灌值刻意把模板的基腳自重、覆土重與水平力歸零（gamma_c=0、gamma_s=0、D_f=0、Hx=Hy=0），因為本專案 foundation_isolated 的 pressure 只吃柱傳來的 P／Mx／My，不含基腳自重與覆土；不對齊的話比的是兩個不同的載重模型，不是公式。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+   "calculator": "foundation_isolated",
+   "payload": {"example": true},
+   "template": "tw-isolated-footing",
+   "ocss_inputs": {
+    "fc_in": 28,
+    "fy_in": 420,
+    "gamma_c": 0,
+    "gamma_s": 0,
+    "cover": 75,
+    "B_f": 2500,
+    "L_f": 2500,
+    "h_f": 600,
+    "D_f": 0,
+    "c_1": 450,
+    "c_2": 450,
+    "P_serv": 1000,
+    "Mx_serv": 100,
+    "My_serv": 50,
+    "Hx_serv": 0,
+    "Hy_serv": 0,
+    "P_u": 1400,
+    "M_ux": 140,
+    "M_uy": 70,
+    "q_a_in": 300,
+    "mu_base": 0.5
+   },
+   "compare": [
+    {"name": "基底平均壓力 q_avg", "ours": "result.pressure.q_average_kpa", "ocss": "var:q_avg_serv", "tol": {"rel": 1e-6}},
+    {"name": "最大基底壓力 q_max", "ours": "result.pressure.q_max_kpa", "ocss": "var:q_max_serv", "tol": {"rel": 1e-6}},
+    {"name": "最小基底壓力 q_min", "ours": "result.pressure.q_min_kpa", "ocss": "var:q_min_serv", "tol": {"rel": 1e-6}},
+    {"name": "偏心距 e_x（mm，本專案 m×1000）", "ours": "result.pressure.e_x_m", "ocss": "var:e_x", "scale": 1000, "tol": {"rel": 1e-6}},
+    {"name": "偏心距 e_y", "ours": "result.pressure.e_y_m", "ocss": "var:e_y", "scale": 1000, "tol": {"rel": 1e-6}},
+    {"name": "基底面積 A", "ours": "result.pressure.area_m2", "ocss": "var:Area_f", "tol": {"rel": 1e-6}}
+   ]
+  }
+ ]
+}

@@ -25,6 +25,7 @@ ocss：
   * `var:Ka`                               — 計算書中該變數（取最後一次賦值）的數值與單位
   * `uc:UC_sl`                             — `ucValues` 中的值
   * 比較項可加 `"reciprocal": true`（取 OCSS 值的倒數，用於 UC → FS）
+  * 比較項可加 `"scale": 1000`（本專案值乘上此倍數後再比，用於兩邊單位不同，例 m ↔ mm）
 
 灌值方式（盤點發現的兩種輸入型態，見 `ocss_inventory.py`）
   * `prompt` 型：`evaluate(source, values=…)`
@@ -195,6 +196,9 @@ def run_case(client, case: dict, emit=print) -> dict:
         total += 1
         ours, ou = get_ours(run, cmp_["ours"])
         theirs, tu = get_ocss(ev, cmp_["ocss"])
+        if cmp_.get("scale"):                      # 兩邊單位不同時先換算（例：m → mm）
+            ours *= float(cmp_["scale"])
+            ou = ""
         if cmp_.get("reciprocal"):
             theirs = 1.0 / theirs if theirs else float("inf")
         diff = abs(ours - theirs)

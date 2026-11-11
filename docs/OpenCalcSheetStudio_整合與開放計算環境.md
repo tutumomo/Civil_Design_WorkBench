@@ -151,6 +151,29 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp    # 預覽 .mcp.json �
 
 新增對照案例：在 `tools/crosscheck/checks/` 放一個 JSON，`reference` 指本專案引擎的檔案／函式／參數，`ocss` 放計算書與要取用的結果變數，`tolerance` 給 `rel`／`abs`。CLI 會自動載入引擎、執行、比對數值與單位。
 
+**template／formula 型案例**（X1 起）：`{"type": "template", "calculator": ..., "payload": ..., "template": "tw-*", "ocss_inputs": {...}, "compare": [...]}`；無模板者用 `"type": "formula"` 改寫 `"source"`（逐行手寫公式鏈，一律無因次化）。比較項可用 `reciprocal`（UC→FS）與 `scale`（兩邊單位不同，例 m→mm）。差異超過容差時必須寫 `disposition`（`engine_fixed`／`template_issue`／`explained`＋理由），沒有處置的差異視為失敗。
+
+現有案例（2026-11-11，13 項；12 過、1 項刻意維持未處置＝懸臂牆 M_over）：
+
+| 案例檔 | 對象 | 結果 |
+|---|---|---|
+| `channel_hydraulics_template.json` | 排水溝 ↔ `tw-drainage-channel` | 6 項全過 |
+| `gravity_wall_template.json` | 重力牆 ↔ `tw-gravity-retaining-wall` | 全過（超載設 0 對齊） |
+| `box_culvert_template.json` | 箱涵 ↔ `tw-box-culvert` | 2 項處置（倒角扣面積、載重模型不同） |
+| `wall_stability_template.json` | 懸臂牆 ↔ `tw-retaining-wall` | M_over 差 1.2%，**刻意未處置**（引擎不計超載、土壓高度不含底板厚） |
+| `foundation_isolated_template.json` | 獨立基腳 ↔ `tw-isolated-footing` | 6 項全過（自重／覆土歸零對齊） |
+| `rc_beam_template.json` | RC 梁 ↔ `tw-rc-beam` | V_c 全等；A_s,min／φM_n 差 1.1%／1.3%，處置為「本專案撓曲 d＝h−50 未扣主筋半徑」 |
+| `rc_column_template.json` | RC 柱 ↔ `tw-rc-column` | A_st 差 0.2%；φM_n 差 6.3%，處置為「120 點應變相容曲線 vs 三點簡化折線」 |
+| `steel_column_template.json` | 鋼柱柱腳 ↔ `tw-steel-column` | 7 項全過（錨栓改 4 支以對齊模板假設）；**查出並修正兩個引擎錯誤**（見下） |
+| `foundation_pile_formula.json` | 樁群 ↔ 手寫公式鏈 | R_max／R_min 全等（`tw-pile-cap` 無單樁反力輸出，R_out 是幾何距離） |
+| `hydrology_formula.json`／`channel_cover_formula.json`／`foundation_combined_formula.json` | X4 公式鏈 | 全過（最大差 0.005%） |
+
+**X3 查出的引擎錯誤（2026-11-11 已修）**：
+1. `steel_column._contact_pressure()` 基板接觸壓力寫成 `M×(L/2)/S`（多乘 L/2）且 x／y 向邊長互換 → q_max 低估 (L/2) 倍（例 0.5×0.55 m 基板、P=700 kN、M=280 kN·m：應 13,653 kPa，原式只給 5,600 kPa），連帶基板厚度與揚起判定偏不安全。
+2. `steel_column.base_plate_bearing()` 規範式回傳 kgf，卻以 `/100` 換算 tf（應 `/1000`）→ 混凝土承壓設計強度 φPp 高估 **10 倍**（61,752 kN vs 正確 6,175 kN）。
+
+**尚未處置、待技師決定**：`rc_column` 的互制曲線未套 rc112 10.3.6.2 拴柱 `0.80P0` 軸壓上限（近純軸壓時偏高）；`retaining_wall.analyse()` 不計超載、土壓高度不含底板厚（X2 已知）；`foundation_isolated` 的壓力只吃柱載重 P／M，不含基腳自重與覆土（模板含）。三者都會改動設計結果與回歸基準，屬設計變更。
+
 ### 6.2 Token 與埠（機密）
 
 依序取用，**一律不寫死**：

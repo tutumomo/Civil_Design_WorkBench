@@ -44,7 +44,7 @@ FAILS: list[str] = []
 EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
         "foundation_isolated", "foundation_combined", "detention_basin", "sediment_basin", "channel_profile",
-        "steel_column",
+        "steel_column", "building_frame",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -488,6 +488,108 @@ def main() -> int:
                 check("柱斷面大於基板時拒絕出圖", False, "竟然出了圖")
             except DS.SectionError:
                 check("柱斷面大於基板時拒絕出圖", True)
+
+        print("[2j] 構架立面圖：線架幾何與構材配筋表＝計算結果（D9，DG2）")
+        if "building_frame" in DS.CAPABILITIES:
+            sys.path.insert(0, str(ROOT / "tools" / "frame_section"))
+            import make_frame as MF
+            ex = rows["building_frame"]["example"]
+            res = DS.generate("building_frame", ex, publish=False)
+            run = API.run_calculation("building_frame", ex)["result"]
+            doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+            msp = doc.modelspace()
+            geo = MF.frame_geo(run)
+            txt = _texts(res)
+            n_bay = len(geo["grid"]) - 1
+            n_sto = len(geo["storey_heights"])
+
+            check("構材數＝引擎：梁 %d、柱 %d" % (len(geo["beams"]), len(geo["columns"])),
+                  len(geo["beams"]) == n_bay * n_sto and len(geo["columns"]) == len(geo["grid"]) * n_sto)
+            check("構材編號與引擎 members 完全一致",
+                  {b["member"] for b in geo["beams"]} | {c["member"] for c in geo["columns"]}
+                  == {m["member"] for m in run["members"]},
+                  str({b["member"] for b in geo["beams"]} ^
+                      {m["member"] for m in run["members"] if m["kind"] == "beam"}))
+            # 梁矩形：柱面之間、梁頂＝該層樓層高、梁深＝斷面深
+            ok = True
+            for b in geo["beams"]:
+                lv, ix = b["level"], b["bay"]
+                ok = ok and abs(b["x0"] - (geo["grid"][ix] + geo["col_w"] / 2.0)) < 1e-9 \
+                    and abs(b["x1"] - (geo["grid"][ix + 1] - geo["col_w"] / 2.0)) < 1e-9 \
+                    and abs(b["y_top"] - geo["elevs"][lv]) < 1e-9 \
+                    and abs((b["y_top"] - b["y_bot"]) - geo["beam_d"]) < 1e-9
+            check("梁矩形＝柱面之間×梁深、梁頂＝樓層高", ok)
+            ok = all(abs((c["y1"] - c["y0"]) - geo["storey_heights"][c["level"] - 1]) < 1e-9
+                     and abs(c["x"] - geo["grid"][c["axis"]]) < 1e-9 for c in geo["columns"])
+            check("柱矩形＝樓層高、位於軸線上", ok)
+            # 圖面折線：每支構材一個封閉矩形，四角＝geo
+            for layer, items in (("31_梁", geo["beams"]), ("30_柱", geo["columns"])):
+                got = []
+                for e in msp.query('LWPOLYLINE[layer=="%s"]' % layer):
+                    pts = [(p[0], p[1]) for p in e.get_points("xy")]
+                    got.append((round(min(p[0] for p in pts), 6), round(max(p[0] for p in pts), 6),
+                                round(min(p[1] for p in pts), 6), round(max(p[1] for p in pts), 6)))
+                want = []
+                for it in items:
+                    if layer == "31_梁":
+                        want.append((round(it["x0"], 6), round(it["x1"], 6),
+                                     round(it["y_bot"], 6), round(it["y_top"], 6)))
+                    else:
+                        want.append((round(it["x"] - geo["col_w"] / 2.0, 6),
+                                     round(it["x"] + geo["col_w"] / 2.0, 6),
+                                     round(it["y0"], 6), round(it["y1"], 6)))
+                check("%s 有 %d 個矩形且與結果一致" % (layer, len(items)),
+                      sorted(got) == sorted(want), "%d/%d" % (len(got), len(want)))
+            check("每支構材的編號都標在圖上",
+                  all(m["member"] in txt for m in run["members"]))
+            check("軸線圈數＝軸線數，標 X1…Xn",
+                  len(msp.query('CIRCLE[layer=="34_軸線"]')) == len(geo["grid"])
+                  and all("X%d" % (i + 1) in txt for i in range(len(geo["grid"]))))
+            check("尺寸標註數＝層高＋跨徑＋總寬＋總高",
+                  len(msp.query("DIMENSION")) == n_sto + n_bay + 2,
+                  str(len(msp.query("DIMENSION"))))
+            # 構材配筋表＝designs[] 逐列引用
+            rows_s = MF.schedule_rows(run)
+            des = {d["member"]: d for d in run["designs"]}
+            check("配筋表列數＝構材數", len(rows_s) == len(run["members"]))
+            b0 = des["B1_0"]["flexure"]
+            c0 = des["C1_0"]["chosen"]
+            row_b = next(r for r in rows_s if r["id"] == "B1_0")
+            row_c = next(r for r in rows_s if r["id"] == "C1_0")
+            check("梁主筋＝引擎 bar@spacing",
+                  row_b["main"] == "%s@%d" % (b0["bar"], b0["spacing_mm"]), row_b["main"])
+            check("梁箍筋＝引擎 shear",
+                  row_b["stirrup"] == "%s@%d %d肢" % (
+                      des["B1_0"]["shear"]["bar"], des["B1_0"]["shear"]["spacing_mm"],
+                      des["B1_0"]["shear"]["legs"]), row_b["stirrup"])
+            check("柱主筋＝引擎 chosen 支數×筋號（每面支數）",
+                  row_c["main"] == "%d-%s（%d/面）" % (c0["bars_total"], c0["bar"],
+                                                      c0["bars_per_face"]), row_c["main"])
+            check("梁利用率取撓曲與剪力較大者",
+                  abs(float(row_b["util"]) - max(b0["utilization"],
+                                                 des["B1_0"]["shear"]["utilization"])) < 5e-4)
+            check("斷面欄＝引擎 b×h（cm）",
+                  row_b["section"] == "%d×%d" % (round(b0["b_mm"] / 10), round(b0["h_mm"] / 10))
+                  and row_c["section"] == "%d×%d" % (round(des["C1_0"]["b_mm"] / 10),
+                                                     round(des["C1_0"]["h_mm"] / 10)))
+            check("摘要引用靜載重合計與層間位移比",
+                  ("%.0f kN" % run["loads"]["total_dead_weight_kn"]) in txt
+                  and ("%.5f" % max(d["max_storey_drift_ratio"] for d in run["drift"])) in txt)
+            check("每米寬選筋的慣例已揭露（每米／mm²/m）", "每米寬" in txt and "mm²/m" in txt)
+            check("分張限制寫在說明欄", "尚未實作自動分張" in txt)
+            H = MF.pick_scale(geo)
+            check("自動比例放得進 A3 可繪區且不粗於 1:%d" % MF.MAX_SHEET_SCALE,
+                  H <= MF.MAX_SHEET_SCALE
+                  and MF.content_size(geo)[0] * 1000.0 / H <= 183.0
+                  and MF.content_size(geo)[1] * 1000.0 / H <= 249.45, "1:%d" % H)
+            # 分張守門：跨度拉到 40 跨 12 m 必須明確拒絕，不得偷偷縮比例
+            wide = {"grid": [12.0 * i for i in range(41)],
+                    "elevs": geo["elevs"], "storey_heights": geo["storey_heights"]}
+            try:
+                MF.pick_scale(wide)
+                check("跨數過多時明確拒絕（未實作分張）", False, "竟然挑了比例 %d" % MF.pick_scale(wide))
+            except SystemExit as se:
+                check("跨數過多時明確拒絕（未實作分張）", "分張" in str(se), str(se))
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

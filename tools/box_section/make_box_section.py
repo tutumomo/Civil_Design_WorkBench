@@ -832,7 +832,9 @@ def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
         poly = [(x0, sy), (x0 + seg, sy), (x0 + seg, sy + 3.0), (x0, sy + 3.0)]
         lay.add_lwpolyline(poly, close=True, dxfattribs={"layer": L_SCALE})
         if i == 0:
-            lay.add_solid(poly, dxfattribs={"layer": L_SCALE})
+            # 實心格：以兩個三角形填滿（4 點 SOLID 的點序在部分出圖器會畫成 X 交叉）
+            lay.add_solid([poly[0], poly[1], poly[2]], dxfattribs={"layer": L_SCALE})
+            lay.add_solid([poly[0], poly[2], poly[3]], dxfattribs={"layer": L_SCALE})
     us = MWS.unit_spec(unit)
     put(vx0 - 0.8, sy - 5.0, "0", 3.0, L_SCALE)
     # 刻度只標數值、單位寫在標題，避免「0.5 m」與「1 m」在較小比例尺疊字（E10）。

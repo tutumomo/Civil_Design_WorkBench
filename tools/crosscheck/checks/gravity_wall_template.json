@@ -1,0 +1,91 @@
+{
+ "_note": "X2 重力式。超載設 0：本專案 analyse() 不讀 surcharge（見 wall_stability_template 之 M_over 差異）。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "重力式擋土牆（本專案 wall_stability[gravity] ↔ tw-gravity-retaining-wall）",
+   "calculator": "wall_stability",
+   "payload": {
+    "example": true,
+    "patch": {
+     "wall_type": "gravity",
+     "height_m": 3.0,
+     "stem_thickness_m": 0.8,
+     "base_width_m": 2.6,
+     "include_passive": false,
+     "soil": {
+      "gamma": 18.0,
+      "phi_deg": 30.0,
+      "c_kpa": 0.0,
+      "allowable_bearing_kpa": 200.0,
+      "surcharge_kpa": 0.0,
+      "base_friction": 0.5
+     }
+    }
+   },
+   "template": "tw-gravity-retaining-wall",
+   "ocss_inputs": {
+    "H": 3.0,
+    "t_top": 0.8,
+    "B": 2.6,
+    "g_w": 24,
+    "g_s": 18,
+    "phi_s": 30,
+    "q_sur": 0,
+    "mu_b": 0.5,
+    "q_a": 200,
+    "base": 1
+   },
+   "compare": [
+    {
+     "name": "主動土壓係數 Ka",
+     "ours": "result.Ka",
+     "ocss": "var:Ka_out",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "主動推力 Pa",
+     "ours": "result.Pa_kN_per_m",
+     "ocss": "var:Pa_out",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "傾覆力矩 M_o",
+     "ours": "result.M_over_kNm",
+     "ocss": "var:Mo_out",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "牆身自重 W_t",
+     "ours": "result.W_conc_kN_per_m",
+     "ocss": "var:Wt_out",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "抵抗力矩 M_r",
+     "ours": "result.M_resist_kNm",
+     "ocss": "var:Mr_out",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "偏心距 e",
+     "ours": "result.e_m",
+     "ocss": "var:e_out",
+     "tol": {
+      "rel": 0.001
+     }
+    }
+   ]
+  }
+ ]
+}

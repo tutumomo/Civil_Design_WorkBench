@@ -1,0 +1,77 @@
+{
+ "_note": "X2 排水溝。對齊：use_rational=0 以 Q_direct 直接指定流量；z_side=0（矩形）。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "排水溝水理（本專案 channel_hydraulics ↔ tw-drainage-channel）",
+   "calculator": "channel_hydraulics",
+   "payload": {
+    "design_flow_m3s": 0.45,
+    "inner_width_m": 0.6,
+    "depth_m": 0.8,
+    "slope": 0.01,
+    "manning_n": 0.014
+   },
+   "template": "tw-drainage-channel",
+   "ocss_inputs": {
+    "use_rational": 0,
+    "Q_direct": 0.45,
+    "B_chan": 0.6,
+    "H_chan": 0.8,
+    "z_side": 0.0,
+    "S_chan": 0.01,
+    "n_manning": 0.014
+   },
+   "compare": [
+    {
+     "name": "滿管通水量 Q_cap",
+     "ours": "result.Q_cap_m3s",
+     "ocss": "var:Q_cap",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "滿管流速 V_full",
+     "ours": "result.V_full_ms",
+     "ocss": "var:V_full",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "正常水深 h_n",
+     "ours": "result.h_normal_m",
+     "ocss": "var:d_n",
+     "tol": {
+      "rel": 0.005
+     }
+    },
+    {
+     "name": "設計流速 V",
+     "ours": "result.V_design_ms",
+     "ocss": "var:V_design",
+     "tol": {
+      "rel": 0.005
+     }
+    },
+    {
+     "name": "福祿數 Fr",
+     "ours": "check:福祿數",
+     "ocss": "var:Fr_num",
+     "tol": {
+      "rel": 0.005
+     }
+    },
+    {
+     "name": "所需出水高 fb_req",
+     "ours": "result.freeboard_required_m",
+     "ocss": "var:fb_req",
+     "tol": {
+      "rel": 0.001
+     }
+    }
+   ]
+  }
+ ]
+}

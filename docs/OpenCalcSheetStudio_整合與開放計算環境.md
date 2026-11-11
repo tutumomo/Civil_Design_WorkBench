@@ -18,7 +18,7 @@ OCSS 的台灣版另有 **17 個 `tw-*` 現成模板**，但那只是它的示�
 ## 2. 實測環境（2026-11-10，Windows 11）
 
 * 桌面程式：**TW 版**（fork 本地化版，資料夾「Open CalcSheet Studio TW」、識別碼 `tw.opencalcsheet.studio`）。本機同時裝有上游版（「Open CalcSheet Studio」、`studio.openstructuralcalculation.app`），**本專案只綁 TW 版**；路徑**不寫死**，見第 6.4 節
-* 橋接器：`http://127.0.0.1:3879`，MCP 在 `/mcp`、REST 在 `/api/v1`，同一支 Rust 橋接器、同一份工具 registry（43 個工具）
+* 橋接器：`http://127.0.0.1:3879`，MCP 在 `/mcp`、REST 在 `/api/v1`，同一支 Rust 橋接器、同一份工具 registry（49 個工具）
 * 模組 22 個：台灣 17 個（全部 `gereed`）＋上游 5 個（`ligger`、`doorsnede-spanningen`、`balklaag`、`tweepaalspoer`、`rekentaal-demo`）
 * 版本查詢：`python tools/crosscheck/ocss_crosscheck.py probe`（**不要把版本號當規格寫進程式或檢核條件**，見 AGENTS.md §3）
 
@@ -61,7 +61,9 @@ OCSS 開放環境手寫計算書                                          = 0.98
 
 ### 3.3 MCP／REST 給智能體
 
-43 個工具，MCP 與 REST 完全等價（`POST /api/v1/tools/{name}` 帶 MCP 參數即可）。註冊方式見第 6 節。**逐一工具的用途、參數與路由見 [`OpenCalcSheetStudio_工具清單.md`](OpenCalcSheetStudio_工具清單.md)**（由 `tools/crosscheck/ocss_tools_doc.py` 從執行中的 OCSS 生成，升版後重跑；`--check` 可比對是否過期）。
+49 個工具，MCP 與 REST 完全等價（`POST /api/v1/tools/{name}` 帶 MCP 參數即可）。註冊方式見第 6 節。**逐一工具的用途、參數與路由見 [`OpenCalcSheetStudio_工具清單.md`](OpenCalcSheetStudio_工具清單.md)**（由 `tools/crosscheck/ocss_tools_doc.py` 從執行中的 OCSS 生成，升版後重跑；`--check` 可比對是否過期）。
+
+**工作表種類（2026.45.2-tw.5 起，`sheet_add` 的 `kind` 參數）**：`calculation`（預設，土木計算）｜`markdown`（說明文字）｜`graph`（節點圖）｜`drawing`（繪圖工作表）｜`spreadsheet`（XLSX 活頁簿）｜`jupyter`（`.ipynb` 工作資料夾）｜`marimo`（`.py` 筆記本）；PDF 另有 `sheet_add_pdf`。對應的「整張取代」工具為 `sheet_set_markdown`／`sheet_set_graph`／`sheet_set_drawing`／`sheet_set_spreadsheet`／`sheet_set_jupyter`／`sheet_set_marimo`（2026.45.2-tw.5 新增，6 項；tw.4 以前只有 `sheet_set_source`／`sheet_set_input`／`sheet_set_pdf`）。
 
 ## 4. 能力邊界（重要）
 

@@ -2,8 +2,8 @@
 
 > 本檔由 `python tools/crosscheck/ocss_tools_doc.py` 從**執行中的 OCSS 即時抓取**後生成，**請勿手改**；OCSS 升版後重跑即可更新。整合脈絡、單位陷阱與能力邊界見 [`OpenCalcSheetStudio_整合與開放計算環境.md`](OpenCalcSheetStudio_整合與開放計算環境.md)。
 
-- **OCSS 版本**：2026.45.2　**工具總數**：43
-- **分類（kind）**：檔案 I/O 4、改動專案 21、讀取 15、介面操作 3
+- **OCSS 版本**：2026.45.2　**工具總數**：49
+- **分類（kind）**：檔案 I/O 4、改動專案 27、讀取 15、介面操作 3
 - **同一份 registry、三種進入點**：MCP `http://127.0.0.1:3879/mcp`、REST 通用 `POST /api/v1/tools/<name>`、以及部分工具的語意化 REST 路由（下表『REST 路由』）。三者行為一致，token 相同。
 - **認證**：`Authorization: Bearer <token>`；token 在 `preferences.json` 的 `mcpToken`（機密，不入文件／版控）。
 - **Linux 設定檔位置**：`~/.local/share/tw.opencalcsheet.studio/preferences.json`（TW 版；上游為 `studio.openstructuralcalculation.app`）（Tauri `app_data_dir`；非 `~/.config`）。
@@ -65,6 +65,17 @@
 | `sheet_move` | 改動專案 | 會改動、非冪等 | 上移／下移工作表（影響報告與列印順序） |
 | `sheet_remove` | 改動專案 | 會改動、破壞性、冪等 | 刪除工作表，可 undo |
 | `sheet_select` | 介面操作 | 會改動、冪等 | 讓 App 開啟指定工作表（id 可為 'project'＝專案資料、'report'＝報告），給使用者看 |
+
+### 工作表內容取代（2026.45.2-tw.5 新增）
+
+| 工具 | 類別 | 特性 | 用途 |
+|---|---|---|---|
+| `sheet_set_markdown` | 改動專案 | 會改動、冪等 | 取代 Markdown 工作表的文字（text）；省略的欄位保持原值 |
+| `sheet_set_graph` | 改動專案 | 會改動、冪等 | 取代工作表整張圖（graph：{versie, nodes, verbindingen}），計算會重跑 |
+| `sheet_set_drawing` | 改動專案 | 會改動、冪等 | 改繪圖工作表：drawing 取代整張，或只給 paper／orientation |
+| `sheet_set_spreadsheet` | 改動專案 | 會改動、破壞性、冪等 | 以本機檔（path）或 base64 取代試算表工作表的 XLSX 活頁簿 |
+| `sheet_set_jupyter` | 改動專案 | 會改動、破壞性、冪等 | 以本機檔（path）或 base64 取代 Jupyter 工作表的工作資料夾（ZIP，含 .ipynb） |
+| `sheet_set_marimo` | 改動專案 | 會改動、冪等 | 取代 Marimo 筆記本工作表的程式碼（code，.py 含 @app.cell）；輸出屬於舊程式碼 |
 
 ### 計算
 
@@ -305,11 +316,23 @@
 
 | 參數 | 型別 | 必填 | 說明 |
 |---|---|---|---|
-| `templateId` | string |  | Module to insert (see modules_list). Omit for an empty sheet. |
+| `kind` | string：`calculation`／`markdown`／`graph`／`drawing`／`spreadsheet`／`jupyter`／`marimo` |  | Sort of sheet. Default 'calculation'. |
+| `templateId` | string |  | Module to insert (calculation only; see modules_list). Omit for an empty sheet. |
 | `name` | string |  | Name of the new sheet. |
-| `source` | string |  | Calculation text of an empty sheet. Not allowed together with templateId. |
+| `source` | string |  | Calculation text of an empty calculation sheet. Not allowed together with templateId. |
+| `text` | string |  | Markdown text (kind=markdown). |
+| `code` | string |  | Marimo notebook code, a .py file (kind=marimo). Default: a start notebook. |
+| `graph` | object |  | Graph {versie, nodes, verbindingen} (kind=graph). Default: an empty graph. |
+| `drawing` | object |  | Drawing sheet {paper, orientation, views} (kind=drawing). Default: A3 landscape with one empty view. |
+| `paper` | string：`A4`／`A3`／`A2` |  | Paper size of a drawing sheet. Default A3. |
+| `orientation` | string：`staand`／`liggend` |  | Orientation of a drawing sheet: staand (portrait) or liggend (landscape). Default liggend. |
+| `path` | string |  | Path of the file on this computer (desktop app only). |
+| `base64` | string |  | The file as base64 (a data: prefix is allowed). |
+| `fileName` | string |  | File name to store with the sheet. |
+| `withCode` | boolean |  | jupyter/marimo: print the code in the report. Default true. |
+| `automatic` | boolean |  | jupyter: run every cell again after a change. Default false. |
 
-> Add a calculation sheet to the project and open it. Either pass templateId (from modules_list) to insert that module, or omit it to add an empty sheet, optionally with your own calculation text in source. name sets the sheet name (default: the module name with a number). Returns the new sheet id and its input fields.
+> Add a sheet to the project and open it. kind picks the sort: 'calculation' (default), 'markdown', 'graph', 'drawing', 'spreadsheet', 'jupyter' or 'marimo'; a PDF has its own tool (sheet_add_pdf). For a calculation sheet pass templateId (from modules_list), or omit it to add an empty sheet with your own calculation text in source. For the other sorts pass their content: text (markdown), code (marimo), graph (graph), drawing/paper/orientation (drawing), path or base64 (spreadsheet XLSX, jupyter work folder ZIP). Without content a sensible empty sheet is made (an empty Markdown text, a start notebook, an empty graph or A3 drawing, an empty workbook). name sets the sheet name.
 
 #### `sheet_add_pdf`
 
@@ -337,8 +360,9 @@
 |---|---|---|---|
 | `id` | string |  | Sheet id. Default: the sheet that is open in the app. |
 | `evaluate` | boolean |  | Compute the sheet to report the outcome (a large sheet can take a second). Default true. |
+| `full` | boolean |  | Drawing and Marimo: return the whole sheet (views with shapes, stored output) instead of a summary. Default false. |
 
-> Read one sheet: its calculation text (source), its input fields (input fields and choice lists, with current value, unit and options) and, unless evaluate=false, the outcome: title, norm, governing UC (UC_max), verdict (passes) and every UC value. For a PDF sheet: the file name and size.
+> Read one sheet. A calculation sheet gives its text (source), its input fields and, unless evaluate=false, the outcome (title, norm, governing UC, verdict, UC values). A PDF or spreadsheet gives the file name and size; Markdown gives its text; a graph its nodes and connections; a drawing a summary (pass full=true for the whole sheet); Jupyter its file name, size and files; Marimo its code, cell count and stored output.
 
 #### `sheet_set_source`
 
@@ -447,6 +471,99 @@
 | `id` | string | 是 | Sheet id, 'project' or 'report'. |
 
 > Open a sheet in the app so the user sees it. id is a sheet id, or 'project' for the project data form, or 'report' for the structural report. Does not change the project.
+
+### 工作表內容取代（2026.45.2-tw.5 新增）
+
+#### `sheet_set_markdown`
+
+- **用途**：取代 Markdown 工作表的文字（text）；省略的欄位保持原值
+- **類別／特性**：改動專案；會改動、冪等
+- **REST 路由**：`PUT /api/v1/sheets/{id}/markdown`、`POST /api/v1/tools/sheet_set_markdown`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `text` | string | 是 | The new Markdown text. |
+| `fileName` | string |  | Source file name to store with the sheet. |
+| `headingsInToc` | boolean |  | Keep the headings of this sheet in the table of contents of the report. |
+
+> Replace the text of a Markdown sheet. fileName and headingsInToc are optional; what you leave out stays as it is. Undoable (undo).
+
+#### `sheet_set_graph`
+
+- **用途**：取代工作表整張圖（graph：{versie, nodes, verbindingen}），計算會重跑
+- **類別／特性**：改動專案；會改動、冪等
+- **REST 路由**：`PUT /api/v1/sheets/{id}/graph`、`POST /api/v1/tools/sheet_set_graph`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `graph` | object | 是 | The graph: {versie, nodes, verbindingen}. |
+
+> Replace the whole graph of a graph sheet: nodes and connections as JSON ({versie, nodes, verbindingen}). The sheet recomputes its values from the graph. Undoable (undo).
+
+#### `sheet_set_drawing`
+
+- **用途**：改繪圖工作表：drawing 取代整張，或只給 paper／orientation
+- **類別／特性**：改動專案；會改動、冪等
+- **REST 路由**：`PUT /api/v1/sheets/{id}/drawing`、`POST /api/v1/tools/sheet_set_drawing`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `drawing` | object |  | The whole drawing sheet {paper, orientation, views}. |
+| `paper` | string：`A4`／`A3`／`A2` |  | New paper size. |
+| `orientation` | string：`staand`／`liggend` |  | New orientation: staand or liggend. |
+
+> Change a drawing sheet: pass drawing to replace the whole sheet ({paper, orientation, views}), or paper and/or orientation to change only the sheet size. A view holds shapes in mm; see sheet_get with full=true for the current sheet. Undoable (undo).
+
+#### `sheet_set_spreadsheet`
+
+- **用途**：以本機檔（path）或 base64 取代試算表工作表的 XLSX 活頁簿
+- **類別／特性**：改動專案；會改動、破壞性、冪等
+- **REST 路由**：`PUT /api/v1/sheets/{id}/spreadsheet`、`POST /api/v1/tools/sheet_set_spreadsheet`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `path` | string |  | Path of the file on this computer (desktop app only). |
+| `base64` | string |  | The file as base64 (a data: prefix is allowed). |
+| `fileName` | string |  | File name to store with the sheet. |
+
+> Replace the workbook (XLSX) of a spreadsheet sheet with a file from this computer (path) or base64. Name and position stay. Undoable (undo).
+
+#### `sheet_set_jupyter`
+
+- **用途**：以本機檔（path）或 base64 取代 Jupyter 工作表的工作資料夾（ZIP，含 .ipynb）
+- **類別／特性**：改動專案；會改動、破壞性、冪等
+- **REST 路由**：`PUT /api/v1/sheets/{id}/jupyter`、`POST /api/v1/tools/sheet_set_jupyter`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `path` | string |  | Path of the file on this computer (desktop app only). |
+| `base64` | string |  | The file as base64 (a data: prefix is allowed). |
+| `fileName` | string |  | File name to store with the sheet. |
+| `withCode` | boolean |  | Print the code in the report. |
+| `automatic` | boolean |  | Run every cell again after a change. |
+
+> Replace the work folder (ZIP with .ipynb files) of a Jupyter sheet with a file from this computer (path) or base64. withCode and automatic are optional; what you leave out stays as it is. Undoable (undo).
+
+#### `sheet_set_marimo`
+
+- **用途**：取代 Marimo 筆記本工作表的程式碼（code，.py 含 @app.cell）；輸出屬於舊程式碼
+- **類別／特性**：改動專案；會改動、冪等
+- **REST 路由**：`PUT /api/v1/sheets/{id}/marimo`、`POST /api/v1/tools/sheet_set_marimo`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `code` | string | 是 | The Marimo notebook as Python code. |
+| `fileName` | string |  | Source file name to store with the sheet. |
+| `withCode` | boolean |  | Print the code in the report. Default: keep the current setting. |
+| `clearOutput` | boolean |  | Drop the stored output of the old code. Default true. |
+
+> Replace the code of a Marimo notebook sheet (a .py file with @app.cell blocks). The stored output belongs to the old code, so it is cleared unless clearOutput=false; the app computes new output when the user runs the notebook. Undoable (undo).
 
 ### 計算
 

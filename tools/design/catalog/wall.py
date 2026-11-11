@@ -6,6 +6,8 @@
 import json
 from typing import Any, Mapping
 
+from catalog._shared import DesignAPIError
+
 
 
 _PASSIVE_RATIO_HINT = "1＝全 Rankine；牆身位移不足以發揮全被動時取小於 1"

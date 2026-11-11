@@ -142,6 +142,7 @@
 | `tools/box_section/make_box_section.py` | 箱涵標準斷面圖與配筋圖（S-01/S-02）：含 45° 倒角加腋與角隅補強斜筋 | 自動接 `check_delivery.py` 與 `dxf_takeoff.py` |
 | `tools/selftest/regression.py` | **全案回歸測試**：一鍵驗證全案件預算、斷面積、通水容量、FS、配筋間距 | 比對 `tools/selftest/baseline.json`；`docs/回歸測試.md` |
 | `tools/selftest/check_portable_paths.py` | **寫死路徑守門**：掃描版控中的 `.py`／`.md`，出現 Windows 磁碟絕對路徑（如 Python 安裝目錄下的 python.exe）即失敗 | 例外僅 `docs/已驗證環境快照.md`；已納入 `run_all.py` |
+| `tools/selftest/regs_table_render_selftest.py` | **已驗證表格前端渲染守門**：驗 `verified.table_grid()` 對 400 張表的欄數一致、格內無 dict／list；並用 node 抽出 `regs_web.html` 的 `verifiedGrid()` 真跑一次，輸出不得含 `[object Object]` | 2026-11-11 使用者回報的規範查詢台表格缺陷守門；已納入 `run_all.py`（`regs-table-render`） |
 | `tools/selftest/run_all.py` | **統一測試入口**：跑專案全部自測並彙總（`--changed` 依 git 改動挑選、`--no-cad` 跳過回歸、`--skip` 排除已知缺口） | CI 唯一入口（`.github/workflows/selftest.yml`）；對照表與 `AGENTS.md` §5 同步；`docs/回歸測試.md` |
 
 - **交付六道閘門**（總表見 [`docs/交付閘門總表.md`](docs/交付閘門總表.md)）：

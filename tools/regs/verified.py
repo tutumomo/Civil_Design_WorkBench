@@ -73,6 +73,47 @@ def load():
     return f, t
 
 
+def _cell(v):
+    """單一表格儲存格的可讀化：清單以頓號串接、None 以破折號、其餘原值。"""
+    if isinstance(v, list):
+        return "、".join(str(_cell(x)) for x in v)
+    if v is None:
+        return "—"
+    return v
+
+
+def table_grid(x):
+    """把已驗證表格正規化成「欄名 + 每列字串陣列」的顯示格線。
+
+    儲存層的列有三種形狀，前端必須都能畫：
+      1. ``{"key": 列名, "values": {欄: 值}}``  lookup（多數表）
+      2. ``{"x": 數值, "values": {欄: 值}}``    stepdown（階梯表，x 為自變數）
+      3. ``[值, 值, ...]``                        interp（內插表，欄序即欄名）
+    回傳 ``{"columns": [...], "rows": [[...], ...]}``；字典列會在最左補一欄列名
+    （stepdown 補 "x"，lookup 補 "項目"）。
+    """
+    cols = list(x.get("columns") or [])
+    rows = x.get("rows") or []
+    if not cols or not rows:
+        return {"columns": cols, "rows": []}
+    first = rows[0]
+    dict_rows = isinstance(first, dict)
+    label_col = ""
+    if dict_rows:
+        label_col = "x" if "x" in first else "項目"
+    out = []
+    for r in rows:
+        if isinstance(r, dict):
+            vals = r.get("values") or {}
+            label = r.get("key") if r.get("key") is not None else r.get("x")
+            out.append([_cell(label)] + [_cell(vals.get(c)) for c in cols])
+        elif isinstance(r, list):
+            out.append([_cell(c) for c in r])
+        else:
+            out.append([_cell(r)])
+    return {"columns": ([label_col] if dict_rows else []) + cols, "rows": out}
+
+
 def _brief(x):
     return {k: x.get(k) for k in ("id", "title", "src", "clause", "page", "status", "engineer_signed")}
 
@@ -93,6 +134,7 @@ def _detail(x, kind):
         "vars": x.get("vars", {}),
         "columns": x.get("columns", []),
         "rows": (x.get("rows") or [])[:12],
+        "grid": table_grid(x) if kind == "table" else {"columns": [], "rows": []},
         "unit": x.get("unit", ""),
         "notes": x.get("notes", ""),
         "conditions": x.get("conditions", []),
@@ -176,9 +218,10 @@ def table(tid, row=None, col=None, x=None):
     meta = {"id": tid, "title": tb["title"], "unit": tb.get("unit", ""), "status": tb["status"],
             "source": {"src": tb["src"], "clause": tb["clause"], "page": tb.get("page")},
             "notes": tb.get("notes", ""), "engineer_signed": tb["engineer_signed"]}
+    full = dict(meta, columns=tb["columns"], rows=tb["rows"], grid=table_grid(tb))
     if tb["kind"] == "stepdown":
         if x is None:
-            return dict(meta, columns=tb["columns"], rows=tb["rows"])
+            return full
         xs = [r["x"] for r in tb["rows"]]
         if x < xs[0]:
             raise VerifiedError(f"x={x} 小於表範圍下限 {xs[0]}（{tb['src']} {tb['clause']}）")
@@ -186,7 +229,7 @@ def table(tid, row=None, col=None, x=None):
         return dict(meta, x=x, row_x=hit["x"], values=hit["values"], method="階梯取不大於 x 之最近一列（保守，不內插）")
     if tb["kind"] == "interp":
         if x is None:
-            return dict(meta, columns=tb["columns"], rows=tb["rows"])
+            return full
         xs = [r[0] for r in tb["rows"]]
         if not xs[0] <= x <= xs[-1]:
             raise VerifiedError(f"x={x} 超出表範圍 [{xs[0]}, {xs[-1]}]，不外插（{tb['src']} {tb['clause']}）")
@@ -195,7 +238,7 @@ def table(tid, row=None, col=None, x=None):
                 k = 0 if b[0] == a[0] else (x - a[0]) / (b[0] - a[0])
                 return dict(meta, x=x, value=a[1] + k * (b[1] - a[1]), method="線性內插")
     if row is None:
-        return dict(meta, columns=tb["columns"], rows=tb["rows"])
+        return full
     hit = [r for r in tb["rows"] if r["key"] == row]
     if not hit:
         raise VerifiedError(f"表中沒有列「{row}」；可用：{'、'.join(r['key'] for r in tb['rows'])}")
@@ -217,6 +260,10 @@ def format_text(r):
             s.append("中間值：" + json.dumps({k: round(v, 6) for k, v in r["steps"].items()}, ensure_ascii=False))
         s += ["⚠ " + w for w in r["warnings"]]
         return "\n".join(s)
+    if r.get("grid"):
+        # 整表輸出改用已正規化的格線，代理端不必自己從 {key, values} 猜欄位
+        r = dict(r, rows=r["grid"]["rows"], columns=r["grid"]["columns"])
+        r.pop("grid", None)
     return json.dumps(r, ensure_ascii=False, indent=1)
 
 
@@ -235,6 +282,7 @@ def references_for(calc_id):
                         "latex": x.get("latex", ""), "expr": x.get("expr", ""),
                         "output": x.get("output", ""), "vars": x.get("vars", {}),
                         "columns": x.get("columns", []), "rows": (x.get("rows") or [])[:6],
+                        "grid": table_grid(x) if i in tb else {"columns": [], "rows": []},
                         "unit": x.get("unit", ""), "notes": x.get("notes", ""),
                         "conditions": x.get("conditions", [])})
     return out

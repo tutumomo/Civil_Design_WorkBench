@@ -1,0 +1,89 @@
+{
+ "_note": "X4 公式鏈：水文（含 (H/L)^0.6 與 (t+B)^C 分數次方，已無因次化）。",
+ "checks": [
+  {
+   "type": "formula",
+   "name": "集水區水文（本專案 hydrology ↔ OCSS 手寫公式鏈，水保第16~19條）",
+   "calculator": "hydrology",
+   "payload": {
+    "P_mm": 2500.0,
+    "return_period_yr": 50.0,
+    "area_ha": 15.0,
+    "condition": "丘陵地或森林",
+    "developed": false,
+    "upper_c": false,
+    "area_type": "集水區",
+    "l_m": 100.0,
+    "v_ms": 0.4,
+    "L_km": 0.8,
+    "H_km": 0.05
+   },
+   "source": [
+    "\"集水區水文：第16條降雨強度、第17條合理化公式、第19條集流時間（無因次化）",
+    "P = 2500",
+    "T = 50",
+    "A_ha = 15",
+    "l = 100",
+    "v = 0.4",
+    "L = 0.8",
+    "Hd = 0.05",
+    "C_r = 0.5",
+    "'C_r 依第18條表（丘陵地或森林、無開發整地、下限）查得，非公式",
+    "I60 = (P/(25.29 + 0.094*P))^2",
+    "A_c = (P/(-189.96 + 0.31*P))^2",
+    "B_c = 55",
+    "C_c = (P/(-381.71 + 1.45*P))^2",
+    "G_c = (P/(42.89 + 1.33*P))^2",
+    "H_c = (P/(-65.33 + 1.836*P))^2",
+    "t1 = l/v/60",
+    "W = 72*(Hd/L)^0.6",
+    "t2 = L/W*60",
+    "tc = t1 + t2",
+    "I = I60*(G_c + H_c*log10(T))*A_c/(tc + B_c)^C_c",
+    "Qp = C_r*I*A_ha/360"
+   ],
+   "compare": [
+    {
+     "name": "I60^25",
+     "ours": "result.coef.I60_25",
+     "ocss": "var:I60",
+     "tol": {
+      "rel": 0.0001
+     }
+    },
+    {
+     "name": "芮哈流速 W",
+     "ours": "result.tc_detail.W_kmh",
+     "ocss": "var:W",
+     "tol": {
+      "rel": 0.0001
+     }
+    },
+    {
+     "name": "集流時間 tc",
+     "ours": "result.tc_min",
+     "ocss": "var:tc",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "降雨強度 I",
+     "ours": "result.I_mm_hr",
+     "ocss": "var:I",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "洪峰流量 Qp",
+     "ours": "result.Qp_m3s",
+     "ocss": "var:Qp",
+     "tol": {
+      "rel": 0.001
+     }
+    }
+   ]
+  }
+ ]
+}

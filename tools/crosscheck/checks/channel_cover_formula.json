@@ -1,0 +1,88 @@
+{
+ "_note": "X4 公式鏈：蓋版彎矩（HS20×1.25）與植筋握裹（τ·π·da·hef，ψed、ψcp 折減）。",
+ "checks": [
+  {
+   "type": "formula",
+   "name": "排水溝蓋版與植筋（本專案 channel_cover ↔ OCSS 手寫公式鏈）",
+   "calculator": "channel_cover",
+   "payload": {
+    "example": true
+   },
+   "source": [
+    "\"溝蓋版彎矩與植筋握裹（無因次化；kN、m、kgf、cm 分開書寫）",
+    "b = 0.6",
+    "t_w = 0.2",
+    "h = 0.25",
+    "g_c = 24",
+    "P20 = 7300*0.00980665",
+    "k_h = 1.25",
+    "LF = 1.67",
+    "S = min(b + t_w; b + h)",
+    "I_m = min(15.24/(S + 38.1); 0.30)",
+    "M_L = P20*k_h*(S + 6.0)/6.9*(1 + I_m)",
+    "M_D = g_c*h*S^2/8",
+    "M_u = 1.25*M_D + LF*M_L",
+    "tau = 14",
+    "tau_u = 45",
+    "d_a = 1.59",
+    "h_ef = 20",
+    "c_a = 10",
+    "N_ba = tau*pi*d_a*h_ef",
+    "c_Na = 10*d_a*sqrt(tau_u/77)",
+    "psi_ed = if(c_a ≥ c_Na; 1; 0.7 + 0.3*c_a/c_Na)",
+    "psi_cp = if(c_a ≥ 2*h_ef; 1; max(c_a/(2*h_ef); c_Na/(2*h_ef)))",
+    "N_a = psi_ed*psi_cp*N_ba"
+   ],
+   "compare": [
+    {
+     "name": "有效跨徑 S",
+     "ours": "result.geometry.effective_span_m",
+     "ocss": "var:S",
+     "tol": {
+      "rel": 0.0001
+     }
+    },
+    {
+     "name": "活載彎矩 M_L",
+     "ours": "result.loads.live_moment_service_kNm",
+     "ocss": "var:M_L",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "靜載彎矩 M_D",
+     "ours": "result.loads.dead_moment_kNm",
+     "ocss": "var:M_D",
+     "tol": {
+      "rel": 0.01
+     }
+    },
+    {
+     "name": "設計彎矩 Mu",
+     "ours": "result.loads.design_moment_kNm",
+     "ocss": "var:M_u",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "植筋握裹 Nba",
+     "ours": "result.anchors.tension.Nba_kgf",
+     "ocss": "var:N_ba",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "折減後 Na",
+     "ours": "result.anchors.tension.Na_kgf",
+     "ocss": "var:N_a",
+     "tol": {
+      "rel": 0.001
+     }
+    }
+   ]
+  }
+ ]
+}

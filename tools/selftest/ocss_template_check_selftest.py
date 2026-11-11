@@ -105,6 +105,24 @@ def main() -> int:
     r = run_one(1.0 / val, reciprocal=True)
     check("reciprocal 取倒數", r["failed"] == 0)
 
+    print("[3b] formula 型（X4）")
+    seen: list[str] = []
+
+    class SpyClient(FakeClient):
+        def evaluate(self, source, values=None):
+            seen.append(source)
+            return super().evaluate(source, values)
+
+    fcase = {"type": "formula", "calculator": "hydrology", "payload": {"example": True},
+             "source": ["a = 1", "v = 2"],
+             "compare": [{"name": "x", "ours": path, "ocss": "var:v", "tol": {"rel": 0.01}}]}
+    r = TC.run_case(SpyClient([{"type": "assignment", "name": "v", "value": val}]),
+                    fcase, emit=lambda *_: None)
+    check("formula 型不需模板即可比對", r == {"total": 1, "failed": 0, "handled": 0})
+    check("formula 型 source 陣列逐行送出", seen and seen[-1] == "a = 1\nv = 2\n")
+    check("formula 型缺 source 報錯", raises(lambda: TC.run_case(
+        FakeClient([]), dict(fcase, source=""), emit=lambda *_: None)))
+
     print("[4] 模板雜湊")
     check("缺盤點資料報錯", raises(lambda: TC.load_template("tw-不存在")))
     src_t, inv_t = TC.load_template("tw-retaining-wall")

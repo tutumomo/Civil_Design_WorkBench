@@ -1,0 +1,63 @@
+{
+ "_note": "X4 公式鏈：聯合基腳合力與基底壓力（全面接觸）。",
+ "checks": [
+  {
+   "type": "formula",
+   "name": "聯合基腳合力與基底壓力（本專案 foundation_combined ↔ OCSS 手寫公式鏈）",
+   "calculator": "foundation_combined",
+   "payload": {
+    "example": true
+   },
+   "source": [
+    "\"聯合基腳（無因次化：kN、m）",
+    "x1 = 0.5",
+    "P1 = 500",
+    "x2 = 3.5",
+    "P2 = 700",
+    "B = 2.75",
+    "L = 4.0",
+    "P = P1 + P2",
+    "x_R = (P1*x1 + P2*x2)/P",
+    "e = x_R - L/2",
+    "A_f = B*L",
+    "S_x = B*L^2/6",
+    "q_max = P/A_f + P*abs(e)/S_x",
+    "q_min = P/A_f - P*abs(e)/S_x"
+   ],
+   "compare": [
+    {
+     "name": "合力位置 x_R",
+     "ours": "result.resultant_x_m",
+     "ocss": "var:x_R",
+     "tol": {
+      "rel": 1e-06
+     }
+    },
+    {
+     "name": "偏心距 e",
+     "ours": "result.pressure.e_y_m",
+     "ocss": "var:e",
+     "tol": {
+      "rel": 1e-06
+     }
+    },
+    {
+     "name": "q_max",
+     "ours": "result.pressure.q_max_kpa",
+     "ocss": "var:q_max",
+     "tol": {
+      "rel": 1e-06
+     }
+    },
+    {
+     "name": "q_min",
+     "ours": "result.pressure.q_min_kpa",
+     "ocss": "var:q_min",
+     "tol": {
+      "rel": 1e-06
+     }
+    }
+   ]
+  }
+ ]
+}

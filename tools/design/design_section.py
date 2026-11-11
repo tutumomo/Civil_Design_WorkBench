@@ -98,6 +98,14 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
             {"suffix": "S-02_擋土牆配筋圖", "rebar": True},
         ],
     },
+    "block_wall": {
+        "title": "疊式／砌石擋土牆標準斷面圖（S-01）",
+        "tool": "wall_section",
+        "model": "block_wall",
+        "sheets": [
+            {"suffix": "S-01_疊式砌石擋土牆標準斷面圖", "rebar": False},
+        ],
+    },
     "counterfort_wall": {
         "title": "扶壁式擋土牆標準斷面圖（S-01）＋配筋圖（S-02）",
         "tool": "wall_section",
@@ -378,6 +386,17 @@ def _slope_values(payload: Mapping[str, Any]) -> tuple[dict[str, Any], list[str]
     return values, missing
 
 
+def _block_values(payload: Mapping[str, Any]) -> tuple[dict[str, Any], list[str]]:
+    """疊式／砌石牆：幾何由 block_wall 引擎依這些輸入推導，這裡只把輸入原樣帶過去。"""
+    skip = {"soil", "kh", "seismic"}
+    values = {k: v for k, v in dict(payload).items() if k not in skip}
+    wt = str(values.get("wall_type") or "").strip().lower()
+    if not wt:
+        raise SectionError("疊式／砌石牆出圖缺少 wall_type。")
+    values["wall_type"] = wt
+    return values, []
+
+
 def build_case(calc_id: str, payload: Mapping[str, Any],
                *, project: str = "") -> dict[str, Any]:
     """把計算器輸入組成統一案件檔（`civil-case/1`）。
@@ -397,6 +416,8 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         values, missing = _channel_values(payload)
     elif model == "slope":
         values, missing = _slope_values(payload)
+    elif model == "block_wall":
+        values, missing = _block_values(payload)
     else:                                          # pragma: no cover - 防呆
         raise SectionError("未知的出圖模型 %s。" % model)
 

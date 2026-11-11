@@ -1,0 +1,51 @@
+{
+  "templateId": "tw-seismic-load",
+  "module": "建築物靜力分析法地震力計算（seis113）",
+  "title": "建築物靜力分析法地震力計算（seis113）",
+  "input_style": "prompt",
+  "status": "draft-本專案無對照案例",
+  "calculator": null,
+  "checks": [],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "S_DS",
+      "unit": "seis113 2.5，視圖可依行政區、地盤與近斷層距離一鍵帶入",
+      "default": "0.80",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "S_D1",
+      "unit": "seis113 2.5，視圖可依行政區、地盤與近斷層距離一鍵帶入",
+      "default": "0.45",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [],
+  "case_inputs": [],
+  "ocss_outputs": [
+    "I_eq",
+    "h_n",
+    "C_t",
+    "T_a",
+    "T_0D",
+    "S_aD",
+    "R_a",
+    "F_u",
+    "SaD_Fu",
+    "W_tot",
+    "V",
+    "V_W",
+    "F_t",
+    "F_top",
+    "F_bot"
+  ],
+  "ours_only": [],
+  "blockers": [
+    "本專案沒有對應計算器，也沒有對照案例——本模板不列入交叉驗算範圍。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

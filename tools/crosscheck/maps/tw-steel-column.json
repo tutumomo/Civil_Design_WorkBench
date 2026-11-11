@@ -1,0 +1,466 @@
+{
+  "templateId": "tw-steel-column",
+  "module": "鋼結構 H 型鋼柱與柱腳（steel99 LRFD）",
+  "title": "鋼結構熱軋 H 型鋼柱與柱腳設計（steel99 LRFD／ASD）",
+  "input_style": "prompt",
+  "status": "draft-輸入欄位對應待人工核對",
+  "calculator": "steel_column",
+  "checks": [
+    {
+      "file": "steel_column_template.json",
+      "name": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）"
+    }
+  ],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "design_method",
+      "unit": "",
+      "default": "1",
+      "candidates": [
+        "design_method"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_y_in",
+      "unit": "",
+      "default": "325",
+      "candidates": [
+        "y_m",
+        "fy_mpa",
+        "Lb_y_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_y_bp_in",
+      "unit": "",
+      "default": "325",
+      "candidates": [
+        "y_m",
+        "Lb_y_m",
+        "Cm_y"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "fc_in",
+      "unit": "",
+      "default": "280",
+      "candidates": [
+        "fc_mpa"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "anchor_grade",
+      "unit": "",
+      "default": "1",
+      "candidates": [
+        "grade"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "shear_mode",
+      "unit": "",
+      "default": "1",
+      "candidates": [
+        "shear_path",
+        "shear_Vy_kN",
+        "shear_Vx_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_col",
+      "unit": "",
+      "default": "4.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "K_x",
+      "unit": "",
+      "default": "1.0",
+      "candidates": [
+        "x_m",
+        "Kx",
+        "Cm_x"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "K_y",
+      "unit": "",
+      "default": "1.0",
+      "candidates": [
+        "y_m",
+        "Ky",
+        "Lb_y_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_b",
+      "unit": "",
+      "default": "4.0",
+      "candidates": [
+        "b_mm",
+        "Lb_m",
+        "plate_B_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "C_b",
+      "unit": "",
+      "default": "1.0",
+      "candidates": [
+        "b_mm",
+        "plate_B_m",
+        "pedestal_B_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "P_u",
+      "unit": "",
+      "default": "700",
+      "candidates": [
+        "axial_P_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_ux",
+      "unit": "",
+      "default": "120",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_uy",
+      "unit": "",
+      "default": "20",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "V_u",
+      "unit": "",
+      "default": "80",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "B_p",
+      "unit": "",
+      "default": "500",
+      "candidates": [
+        "b_mm",
+        "plate_B_m",
+        "pedestal_B_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "N_p",
+      "unit": "",
+      "default": "500",
+      "candidates": [
+        "plate_N_m",
+        "pedestal_N_m",
+        "axial_P_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "t_p",
+      "unit": "",
+      "default": "32",
+      "candidates": [
+        "plate_t_mm",
+        "axial_P_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "B_ped",
+      "unit": "",
+      "default": "700",
+      "candidates": [
+        "b_mm",
+        "plate_B_m",
+        "pedestal_B_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "N_ped",
+      "unit": "",
+      "default": "700",
+      "candidates": [
+        "plate_N_m",
+        "pedestal_N_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "d_b",
+      "unit": "",
+      "default": "30",
+      "candidates": [
+        "b_mm",
+        "plate_B_m",
+        "pedestal_B_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "b_x",
+      "unit": "",
+      "default": "350",
+      "candidates": [
+        "x_m",
+        "b_mm",
+        "plate_B_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "b_y",
+      "unit": "",
+      "default": "350",
+      "candidates": [
+        "y_m",
+        "b_mm",
+        "plate_B_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "h_ef",
+      "unit": "",
+      "default": "450",
+      "candidates": [
+        "h_mm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "section_id",
+      "unit": "",
+      "default": "7",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "name": "基板最大接觸壓力 q_max（MPa，本專案 kPa×0.001）",
+      "ours": "result.base_plate.contact_pressure_x.q_max_kpa",
+      "ocss": "var:q_max",
+      "verified": true
+    },
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "name": "基板最小接觸壓力 q_min（揚起側）",
+      "ours": "result.base_plate.contact_pressure_x.q_min_kpa",
+      "ocss": "var:q_min",
+      "verified": true
+    },
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "name": "基板承壓面積 A1",
+      "ours": "result.base_plate.bearing.A1_cm2",
+      "ocss": "var:A1",
+      "verified": true
+    },
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "name": "圍束面積 A2",
+      "ours": "result.base_plate.bearing.A2_cm2",
+      "ocss": "var:A2",
+      "verified": true
+    },
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "name": "混凝土承壓設計強度 φPp",
+      "ours": "result.base_plate.bearing.capacity_kN",
+      "ocss": "var:phiP_p",
+      "verified": true
+    },
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "name": "單支錨栓最大拉力 T",
+      "ours": "result.anchors.max_tension_kn",
+      "ocss": "var:T_bolt",
+      "verified": true
+    },
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "name": "錨栓拉力設計強度 φRn,t",
+      "ours": "result.anchors.capacity.tension_capacity_kN",
+      "ocss": "var:phiRn_t",
+      "verified": true
+    }
+  ],
+  "case_inputs": [
+    {
+      "case": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+      "ocss_inputs": [
+        "B_p",
+        "B_ped",
+        "C_b",
+        "K_x",
+        "K_y",
+        "L_b",
+        "L_col",
+        "M_ux",
+        "M_uy",
+        "N_p",
+        "N_ped",
+        "P_u",
+        "V_u",
+        "anchor_grade",
+        "b_x",
+        "b_y",
+        "d_b",
+        "design_method",
+        "f_y_bp_in",
+        "f_y_in",
+        "fc_in",
+        "h_ef",
+        "section_id",
+        "shear_mode",
+        "t_p"
+      ],
+      "payload": [
+        "Cm_x",
+        "Cm_y",
+        "E_mpa",
+        "Fu_mpa",
+        "Kx",
+        "Ky",
+        "Lb_m",
+        "Lb_y_m",
+        "M1_over_M2",
+        "axial_P_kN",
+        "b_mm",
+        "cantilever",
+        "corrosion_allowance_mm",
+        "design_method",
+        "diameter_mm",
+        "embedment_mm",
+        "fc_mpa",
+        "fy_mpa",
+        "grade",
+        "grout_above_concrete",
+        "h_mm",
+        "length_m",
+        "moment_Mx_kNm",
+        "moment_My_kNm",
+        "pedestal_B_m",
+        "pedestal_N_m",
+        "plate_B_m",
+        "plate_N_m",
+        "plate_t_mm",
+        "rolled",
+        "shear_Vx_kN",
+        "shear_Vy_kN",
+        "shear_path",
+        "support_condition",
+        "tf_mm",
+        "threads_in_shear_plane",
+        "tw_mm",
+        "x_m",
+        "x_m",
+        "x_m",
+        "x_m",
+        "y_m",
+        "y_m",
+        "y_m",
+        "y_m"
+      ]
+    }
+  ],
+  "ocss_outputs": [
+    "f_y",
+    "f_y_bp",
+    "fc_in",
+    "E_s",
+    "G_s",
+    "h",
+    "b",
+    "t_w",
+    "t_f",
+    "A",
+    "I_x",
+    "W_x",
+    "Z_x",
+    "i_x",
+    "I_y",
+    "W_y",
+    "Z_y",
+    "i_y",
+    "J",
+    "C_w",
+    "lambda_f",
+    "lambda_pf",
+    "lambda_rf",
+    "lambda_w",
+    "lambda_pw",
+    "lambda_rw",
+    "is_nonslender",
+    "KLr_x",
+    "KLr_y",
+    "KLr_max",
+    "lambda_c",
+    "F_cr",
+    "phiP_n",
+    "UC_P",
+    "L_p",
+    "L_r",
+    "phiM_nx",
+    "phiM_ny",
+    "UC_col",
+    "A1",
+    "A2",
+    "ratio_A",
+    "phiP_p",
+    "UC_bearing",
+    "q_max",
+    "q_min",
+    "l_flange",
+    "l_web",
+    "l_cant",
+    "m_pl",
+    "tp_req",
+    "t_p",
+    "UC_tp",
+    "Ab",
+    "T_bolt",
+    "phiRn_t",
+    "UC_anchor_t",
+    "T_group",
+    "A_cone",
+    "phiTc",
+    "UC_cone",
+    "phiV_n",
+    "UC_V",
+    "UC_max"
+  ],
+  "ours_only": [
+    "anchors",
+    "base_plate"
+  ],
+  "blockers": [
+    "本專案對應計算器：steel_column。",
+    "案例中有未處置的差異（見 checks 檔的 disposition 欄）。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

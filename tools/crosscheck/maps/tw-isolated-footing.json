@@ -1,0 +1,366 @@
+{
+  "templateId": "tw-isolated-footing",
+  "module": "鋼筋混凝土獨立基腳（found112 / rc112）",
+  "title": "鋼筋混凝土獨立基腳設計與檢核（found112 / rc112）",
+  "input_style": "prompt",
+  "status": "draft-輸入欄位對應待人工核對",
+  "calculator": "foundation_isolated",
+  "checks": [
+    {
+      "file": "foundation_isolated_template.json",
+      "name": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）"
+    }
+  ],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "fc_in",
+      "unit": "",
+      "default": "28",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "fy_in",
+      "unit": "",
+      "default": "420",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "gamma_c",
+      "unit": "",
+      "default": "24",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "gamma_s",
+      "unit": "",
+      "default": "18",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "cover",
+      "unit": "",
+      "default": "75",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "B_f",
+      "unit": "",
+      "default": "2500",
+      "candidates": [
+        "B_m",
+        "column_b_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_f",
+      "unit": "",
+      "default": "2500",
+      "candidates": [
+        "L_m",
+        "column_l_m"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "h_f",
+      "unit": "",
+      "default": "600",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "D_f",
+      "unit": "",
+      "default": "1000",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "c_1",
+      "unit": "",
+      "default": "500",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "c_2",
+      "unit": "",
+      "default": "500",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "P_serv",
+      "unit": "",
+      "default": "1200",
+      "candidates": [
+        "P_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "Mx_serv",
+      "unit": "",
+      "default": "80",
+      "candidates": [
+        "Mx_kNm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "My_serv",
+      "unit": "",
+      "default": "40",
+      "candidates": [
+        "My_kNm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "Hx_serv",
+      "unit": "",
+      "default": "60",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "Hy_serv",
+      "unit": "",
+      "default": "30",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "P_u",
+      "unit": "",
+      "default": "1680",
+      "candidates": [
+        "P_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_ux",
+      "unit": "",
+      "default": "112",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_uy",
+      "unit": "",
+      "default": "56",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "q_a_in",
+      "unit": "",
+      "default": "300",
+      "candidates": [
+        "q_allow_kpa"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "mu_base",
+      "unit": "",
+      "default": "0.50",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "bar_x_id",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_bx",
+      "unit": "",
+      "default": "11",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "bar_y_id",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_by",
+      "unit": "",
+      "default": "11",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "hook_mode",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [
+    {
+      "case": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+      "name": "基底平均壓力 q_avg",
+      "ours": "result.pressure.q_average_kpa",
+      "ocss": "var:q_avg_serv",
+      "verified": true
+    },
+    {
+      "case": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+      "name": "最大基底壓力 q_max",
+      "ours": "result.pressure.q_max_kpa",
+      "ocss": "var:q_max_serv",
+      "verified": true
+    },
+    {
+      "case": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+      "name": "最小基底壓力 q_min",
+      "ours": "result.pressure.q_min_kpa",
+      "ocss": "var:q_min_serv",
+      "verified": true
+    },
+    {
+      "case": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+      "name": "偏心距 e_x（mm，本專案 m×1000）",
+      "ours": "result.pressure.e_x_m",
+      "ocss": "var:e_x",
+      "verified": true
+    },
+    {
+      "case": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+      "name": "偏心距 e_y",
+      "ours": "result.pressure.e_y_m",
+      "ocss": "var:e_y",
+      "verified": true
+    },
+    {
+      "case": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+      "name": "基底面積 A",
+      "ours": "result.pressure.area_m2",
+      "ocss": "var:Area_f",
+      "verified": true
+    }
+  ],
+  "case_inputs": [
+    {
+      "case": "獨立基腳基底壓力（本專案 foundation_isolated ↔ tw-isolated-footing）",
+      "ocss_inputs": [
+        "B_f",
+        "D_f",
+        "Hx_serv",
+        "Hy_serv",
+        "L_f",
+        "M_ux",
+        "M_uy",
+        "Mx_serv",
+        "My_serv",
+        "P_serv",
+        "P_u",
+        "c_1",
+        "c_2",
+        "cover",
+        "fc_in",
+        "fy_in",
+        "gamma_c",
+        "gamma_s",
+        "h_f",
+        "mu_base",
+        "q_a_in"
+      ],
+      "payload": [
+        "example"
+      ]
+    }
+  ],
+  "ocss_outputs": [
+    "Area_f",
+    "W_footing",
+    "W_soil",
+    "P_tot_serv",
+    "q_avg_serv",
+    "q_max_serv",
+    "q_min_serv",
+    "q_a_in",
+    "UC_bearing",
+    "e_x",
+    "e_y",
+    "UC_ecc",
+    "H_tot_serv",
+    "R_friction",
+    "FS_slide",
+    "UC_slide",
+    "qu_net",
+    "d_eff",
+    "cant_x",
+    "Lx_shear",
+    "V_ux",
+    "phiVc_x",
+    "UC_vx",
+    "cant_y",
+    "Ly_shear",
+    "V_uy",
+    "phiVc_y",
+    "UC_vy",
+    "b_o",
+    "Area_punch",
+    "V_up",
+    "lambda_s",
+    "beta_col",
+    "vc_punch",
+    "phiV_punch",
+    "UC_punch",
+    "M_ux_cant",
+    "As_x",
+    "As_x_min",
+    "phiMn_x",
+    "UC_flex_x",
+    "M_uy_cant",
+    "As_y",
+    "As_y_min",
+    "phiMn_y",
+    "UC_flex_y",
+    "s_x",
+    "s_y",
+    "UC_rhox",
+    "UC_rhoy",
+    "UC_space_x",
+    "UC_space_y",
+    "gamma_band",
+    "A1_col",
+    "ratio_bearing",
+    "phiPn_bearing",
+    "UC_bearing_col",
+    "L_avail_x",
+    "ld_req_x",
+    "UC_ld_x",
+    "L_avail_y",
+    "ld_req_y",
+    "UC_ld_y",
+    "UC_ld",
+    "UC_max"
+  ],
+  "ours_only": [
+    "pressure"
+  ],
+  "blockers": [
+    "本專案對應計算器：foundation_isolated。",
+    "案例中有未處置的差異（見 checks 檔的 disposition 欄）。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

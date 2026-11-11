@@ -1,0 +1,94 @@
+{
+  "templateId": "tw-dead-live-loads",
+  "module": "樓版與屋頂靜載重與活載重彙整（btr_struct）",
+  "title": "樓版與屋頂單位面積靜載重與活載重彙整（btr_struct）",
+  "input_style": "literal",
+  "status": "draft-本專案無對照案例",
+  "calculator": null,
+  "checks": [],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "t_s",
+      "unit": "m",
+      "default": "0.15",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "gam_c",
+      "unit": "kgf/m^3",
+      "default": "2400",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "w_fin",
+      "unit": "kgf/m^2",
+      "default": "100",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "w_oth",
+      "unit": "kgf/m^2",
+      "default": "60",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "cat",
+      "unit": "-",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_in",
+      "unit": "kgf/m^2",
+      "default": "200",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "roof",
+      "unit": "-",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "A_t",
+      "unit": "m^2",
+      "default": "30",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "crowd",
+      "unit": "-",
+      "default": "0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [],
+  "case_inputs": [],
+  "ocss_outputs": [
+    "D_slab",
+    "D",
+    "L",
+    "R_pct",
+    "L_red",
+    "L_col",
+    "w_u1",
+    "w_u2",
+    "w_u2c"
+  ],
+  "ours_only": [],
+  "blockers": [
+    "本專案沒有對應計算器，也沒有對照案例——本模板不列入交叉驗算範圍。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

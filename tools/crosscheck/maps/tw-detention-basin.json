@@ -1,0 +1,114 @@
+{
+  "templateId": "tw-detention-basin",
+  "module": "滯洪池設計與檢核（swc_tech）",
+  "title": "滯洪池設計與檢核（swc_tech 第 94～97 條）",
+  "input_style": "prompt",
+  "status": "draft-本專案無對照案例",
+  "calculator": null,
+  "checks": [],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "L0_pond",
+      "unit": "m",
+      "default": "30.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "B0_pond",
+      "unit": "m",
+      "default": "25.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "z_pond",
+      "unit": "水平/垂直",
+      "default": "2.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "H_w",
+      "unit": "m",
+      "default": "2.4",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "z_inv",
+      "unit": "m",
+      "default": "0.10",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "H_crest",
+      "unit": "m",
+      "default": "3.4",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "D_orf",
+      "unit": "m",
+      "default": "0.45",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_orf",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_spill",
+      "unit": "m",
+      "default": "8.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "h_spill",
+      "unit": "m",
+      "default": "0.30",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [],
+  "case_inputs": [],
+  "ocss_outputs": [
+    "Q1",
+    "Q2",
+    "Q3",
+    "tb_eff",
+    "Vs1",
+    "Vs2",
+    "Vsd",
+    "Q_in_peak",
+    "Q_out_cap",
+    "V_total",
+    "V_dead",
+    "V_eff",
+    "A_orf",
+    "h_c",
+    "Q_orf",
+    "Q_spill",
+    "fb_act",
+    "UC_vol",
+    "UC_out",
+    "UC_spill",
+    "UC_fb",
+    "UC_max"
+  ],
+  "ours_only": [],
+  "blockers": [
+    "本專案沒有對應計算器，也沒有對照案例——本模板不列入交叉驗算範圍。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

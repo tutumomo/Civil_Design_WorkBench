@@ -1,0 +1,139 @@
+{
+  "templateId": "tw-rc-slab",
+  "module": "鋼筋混凝土單向板（rc112）",
+  "title": "鋼筋混凝土單向板設計與檢核（rc112）",
+  "input_style": "literal",
+  "status": "draft-本專案無對照案例",
+  "calculator": null,
+  "checks": [],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "f_c",
+      "unit": "-",
+      "default": "28",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_y",
+      "unit": "-",
+      "default": "420",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "h",
+      "unit": "-",
+      "default": "150",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "ln",
+      "unit": "-",
+      "default": "3.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_long",
+      "unit": "-",
+      "default": "7.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "sup",
+      "unit": "-",
+      "default": "3",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "mc",
+      "unit": "-",
+      "default": "4",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "w_D",
+      "unit": "-",
+      "default": "2.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "w_L",
+      "unit": "-",
+      "default": "3.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "env",
+      "unit": "-",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "cover",
+      "unit": "-",
+      "default": "20",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "bar",
+      "unit": "-",
+      "default": "13",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "s",
+      "unit": "-",
+      "default": "150",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "bar_t",
+      "unit": "-",
+      "default": "10",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "s_t",
+      "unit": "-",
+      "default": "250",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [],
+  "case_inputs": [],
+  "ocss_outputs": [
+    "D_all",
+    "w_u_out",
+    "M_u_out",
+    "V_u_out",
+    "h_min_out",
+    "d_out",
+    "As_out",
+    "eps_out",
+    "phiMn_out",
+    "lam_s_out",
+    "phiVc_out",
+    "UC_max"
+  ],
+  "ours_only": [],
+  "blockers": [
+    "本專案沒有對應計算器，也沒有對照案例——本模板不列入交叉驗算範圍。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

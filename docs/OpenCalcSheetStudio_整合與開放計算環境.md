@@ -197,6 +197,15 @@ python tools/crosscheck/ocss_load_suggest.py merge --file _temp/case_payload.jso
 
 **X6 上游載重模組**：`tw-seismic-load`／`tw-wind-load`／`tw-dead-live-loads` 以無狀態 `evaluate` 跑，回傳 11 項 `building_frame` 建議值，每項標註來源模板與公式意義。`merge_loads()` 只補**未填**欄位，永不覆寫使用者輸入。**地震只帶入絕對值 `base_shear_kn`**——OCSS 的 V/W 係數分母是它自己的 W 口徑，與 `building_frame` 自算總重量不同，帶入係數會算錯（係數只列為參考值）。單位換算：1 kgf/m² = 9.80665/1000 kN/m²、1 tf = 9.80665 kN。
 
+### 6.1c 模板對照表（X0）
+
+```bash
+python tools/crosscheck/ocss_map_gen.py --list   # 只列統計
+python tools/crosscheck/ocss_map_gen.py          # 產生缺少的對照表
+```
+
+17 個 `tw-*` 模板各有 `tools/crosscheck/maps/<模板Id>.json`。OCSS 側取自盤點原始資料（`maps/_inventory/`），本專案側取自既有對照案例實際用到的欄位；**輸出對應**（`compare` 欄）只收實際驗過的項，**未核實的輸入欄位**一律列在 `unmapped` 並附「候選」欄位名供人工核實——不臆測對應。已存在的人工對照表不被覆寫。
+
 ### 6.2 Token 與埠（機密）
 
 依序取用，**一律不寫死**：

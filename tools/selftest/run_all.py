@@ -68,6 +68,12 @@ TESTS = [
         "what": "逐式計算書建置與報告附錄 D（X5，假客戶端，不需桌面程式）",
     },
     {
+        "id": "ocss-map-gen",
+        "cmd": ["tools/selftest/ocss_map_gen_selftest.py"],
+        "globs": ["tools/crosscheck/", "tools/selftest/"],
+        "what": "模板對照表產生器（X0，只讀磁碟，不需桌面程式）",
+    },
+    {
         "id": "design-launch",
         "cmd": ["tools/selftest/design_launch_check.py", "--all"],
         "globs": ["tools/design/", "tools/selftest/"],

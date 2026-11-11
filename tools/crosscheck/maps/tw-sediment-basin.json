@@ -1,0 +1,217 @@
+{
+  "templateId": "tw-sediment-basin",
+  "module": "沉砂池設計與檢核（swc_tech 第 35、92、93 條）",
+  "title": "沉砂池設計與檢核（swc_tech 第 35、92、93 條）",
+  "input_style": "literal",
+  "status": "draft-本專案無對照案例",
+  "calculator": null,
+  "checks": [],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "is_perm",
+      "unit": "-",
+      "default": "0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "A_dev",
+      "unit": "ha",
+      "default": "2.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "A_exc",
+      "unit": "ha",
+      "default": "1.2",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "A_imp",
+      "unit": "ha",
+      "default": "0.2",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_years",
+      "unit": "-",
+      "default": "1.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "Rm",
+      "unit": "-",
+      "default": "15000",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "Km",
+      "unit": "-",
+      "default": "0.030",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_fac",
+      "unit": "-",
+      "default": "1.50",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "S_fac",
+      "unit": "-",
+      "default": "2.00",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "C_exc",
+      "unit": "-",
+      "default": "0.05",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "P_exc",
+      "unit": "-",
+      "default": "0.50",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "C_oth",
+      "unit": "-",
+      "default": "0.01",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "P_oth",
+      "unit": "-",
+      "default": "1.00",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L0_pond",
+      "unit": "m",
+      "default": "20.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "B0_pond",
+      "unit": "m",
+      "default": "10.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "z_pond",
+      "unit": "-",
+      "default": "1.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "H_pond",
+      "unit": "m",
+      "default": "2.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "co_located",
+      "unit": "-",
+      "default": "0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "C_run",
+      "unit": "-",
+      "default": "0.95",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "I_rain",
+      "unit": "mm/h",
+      "default": "120.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_weir",
+      "unit": "m",
+      "default": "3.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "h_weir",
+      "unit": "m",
+      "default": "0.30",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "Cw_weir",
+      "unit": "-",
+      "default": "1.84",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "H_crest",
+      "unit": "m",
+      "default": "2.80",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "fb_min",
+      "unit": "m",
+      "default": "0.30",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [],
+  "case_inputs": [],
+  "ocss_outputs": [
+    "Am_exc",
+    "Am_oth",
+    "v_exc",
+    "v_oth",
+    "A_exc_net",
+    "A_oth_net",
+    "V_sed_exc",
+    "V_sed_oth",
+    "V_sed",
+    "V_req",
+    "V_prov",
+    "Q_design",
+    "Q_weir",
+    "fb_act",
+    "UC_vol",
+    "UC_depth",
+    "UC_weir",
+    "UC_fb",
+    "rate_req",
+    "UC_max"
+  ],
+  "ours_only": [],
+  "blockers": [
+    "本專案沒有對應計算器，也沒有對照案例——本模板不列入交叉驗算範圍。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

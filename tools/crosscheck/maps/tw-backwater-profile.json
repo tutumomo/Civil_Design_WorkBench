@@ -1,0 +1,185 @@
+{
+  "templateId": "tw-backwater-profile",
+  "module": "明渠水面線標準步進法（swc_tech）",
+  "title": "明渠水面線標準步進法（swc_tech / 曼寧公式）",
+  "input_style": "literal",
+  "status": "draft-輸入欄位對應待人工核對",
+  "calculator": "channel_profile",
+  "checks": [
+    {
+      "file": "channel_profile_template.json",
+      "name": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）"
+    }
+  ],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "Q_d",
+      "unit": "-",
+      "default": "10",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "b_w",
+      "unit": "-",
+      "default": "3",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "m_s",
+      "unit": "-",
+      "default": "1",
+      "candidates": [
+        "velocity_min_m_s",
+        "velocity_max_m_s",
+        "min_velocity_m_s"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_m",
+      "unit": "-",
+      "default": "0.015",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "S_0",
+      "unit": "-",
+      "default": "0.001",
+      "candidates": [
+        "velocity_min_m_s",
+        "velocity_max_m_s",
+        "min_velocity_m_s"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "y_0",
+      "unit": "-",
+      "default": "1.8",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_r",
+      "unit": "-",
+      "default": "400",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "N_s",
+      "unit": "-",
+      "default": "20",
+      "candidates": [
+        "velocity_min_m_s",
+        "velocity_max_m_s",
+        "min_velocity_m_s"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "H_ch",
+      "unit": "-",
+      "default": "3.0",
+      "candidates": [
+        "side_slope_h_v"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "V_allow",
+      "unit": "-",
+      "default": "4.57",
+      "candidates": [
+        "side_slope_h_v"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [
+    {
+      "case": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）",
+      "name": "正常水深 y_n",
+      "ours": "result.normal_depth_m",
+      "ocss": "var:y_n_out",
+      "verified": true
+    },
+    {
+      "case": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）",
+      "name": "臨界水深 y_c",
+      "ours": "result.critical_depth_m",
+      "ocss": "var:y_c_out",
+      "verified": true
+    },
+    {
+      "case": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）",
+      "name": "最大水深 y_max",
+      "ours": "result.max_depth_m",
+      "ocss": "var:ymax_out",
+      "verified": true
+    },
+    {
+      "case": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）",
+      "name": "最大流速 V_max",
+      "ours": "result.max_velocity_m_s",
+      "ocss": "var:Vmax_out",
+      "verified": true
+    },
+    {
+      "case": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）",
+      "name": "最小流速 V_min",
+      "ours": "result.min_velocity_m_s",
+      "ocss": "var:Vmin_out",
+      "verified": true
+    }
+  ],
+  "case_inputs": [
+    {
+      "case": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）",
+      "ocss_inputs": [
+        "H_ch",
+        "L_r",
+        "N_s",
+        "Q_d",
+        "S_0",
+        "V_allow",
+        "b_w",
+        "m_s",
+        "n_m",
+        "y_0"
+      ],
+      "payload": [
+        "example"
+      ]
+    }
+  ],
+  "ocss_outputs": [
+    "y_n_out",
+    "y_c_out",
+    "dx_out",
+    "y_end_out",
+    "y_mid_out",
+    "ymax_out",
+    "Vmax_out",
+    "Vmin_out",
+    "fb_out",
+    "UC_max"
+  ],
+  "ours_only": [
+    "critical_depth_m",
+    "max_depth_m",
+    "max_velocity_m_s",
+    "min_velocity_m_s",
+    "normal_depth_m"
+  ],
+  "blockers": [
+    "本專案對應計算器：channel_profile。",
+    "案例中有未處置的差異（見 checks 檔的 disposition 欄）。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

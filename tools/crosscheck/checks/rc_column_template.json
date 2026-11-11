@@ -1,0 +1,46 @@
+{
+ "_note": "X3／D4：RC 柱。本專案 rc_column 用 120 點應變相容互制曲線（在 φPn 上內插取 φMn），模板 tw-rc-column 用 rc112 22.4 的三點簡化折線（純彎 φMn0／平衡點／軸壓上限）。兩者主筋配置相同（7/面、14 支 D16），A_st 只差模板用 198.6 mm²/支、本專案用 199 mm²/支。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "RC 柱軸彎互制（本專案 rc_column ↔ tw-rc-column）",
+   "calculator": "rc_column",
+   "payload": {
+    "Pu_kN": 1600.0,
+    "Mu_kNm": 280.0,
+    "b_mm": 450.0,
+    "h_mm": 450.0,
+    "fc_mpa": 28.0,
+    "fy_mpa": 420.0
+   },
+   "template": "tw-rc-column",
+   "ocss_inputs": {
+    "f_c": 28,
+    "f_y": 420,
+    "f_yt": 280,
+    "b": 450,
+    "h": 450,
+    "l_u": 3.0,
+    "k_factor": 1.0,
+    "c_c": 40,
+    "beta_dns": 0.6,
+    "P_u": 1600,
+    "M_1": 280,
+    "M_2": 280,
+    "V_u": 100,
+    "main_bar": 1,
+    "tie_bar": 1,
+    "n_face": 7,
+    "n_side": 0,
+    "n_legs": 2,
+    "s_tie": 250
+   },
+   "compare": [
+    {"name": "縱向鋼筋量 A_st（cm²，本專案 mm²×0.01）", "ours": "result.chosen.As_mm2", "ocss": "var:A_st", "scale": 0.01, "tol": {"rel": 0.005}},
+    {"name": "柱編號（D16，支數）", "ours": "result.chosen.bars_total", "ocss": "var:n_b", "tol": {"abs": 0.5}},
+    {"name": "軸彎互制容量 φM_n（Pu = 1600 kN）", "ours": "result.chosen.phiMn_available_kNm", "ocss": "var:phiMn_cap", "tol": {"rel": 0.02},
+     "disposition": {"kind": "explained", "reason": "互制曲線法不同：本專案為 120 點應變相容曲線並在 φPn 上線性內插；模板為 rc112 22.4 三點簡化折線（φMn0=183.9、平衡點 φM_bal=296.9、φP0）。同一斷面同一軸力下折線法的 φMn 較低，差 6%；另本專案曲線未套用 rc112 10.3.6.2 拴柱 0.80P0 軸壓上限（近純軸壓時偏高），已另列為待決事項。"}}
+   ]
+  }
+ ]
+}

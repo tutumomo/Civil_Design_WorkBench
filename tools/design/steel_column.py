@@ -563,10 +563,12 @@ def base_plate_bearing(method: str, plate_b_m: float, plate_n_m: float, fc_mpa: 
         "steel99_concrete_bearing_Pp",
         {"fc": fc_mpa * 10.1972, "A1": a1_cm2, "A2": a2_cm2},
     )
+    # 規範式回傳 kgf（1 tf = 1000 kgf），換成 kN：kgf/1000×9.80665。
+    # 2026-11-11（X3）修正：原式寫 /100（等於 kgf→tf 除以 100）使承壓容量高估 10 倍。
     out.update(
         {
             "allowable_mpa": None,
-            "capacity_kN": phi_pp_kgf / 100.0 * KN_PER_TF,
+            "capacity_kN": phi_pp_kgf / 1000.0 * KN_PER_TF,
             "code": "steel99 §10.9（(二) 版：φcPp = 0.6×0.85fc′A1√(A2/A1)，φc=0.6）",
             "formula": "steel99_concrete_bearing_Pp",
         }
@@ -682,15 +684,20 @@ def _anchor_group_elastic(positions: Sequence[Mapping[str, float]], p_kn: float,
 
 def _contact_pressure(p_kn: float, moment_knm: float, plate_len_m: float,
                       plate_width_m: float) -> dict[str, Any]:
-    """全板線性接觸壓力 q = P/A + M/S（用於揚起判定與峰值承壓檢核）。
+    """全板線性接觸壓力 q = P/A ± M/S（用於揚起判定與峰值承壓檢核）。
 
-    壓力沿彎曲方向線性變化：q_max 在受壓側、q_min 在受拉側；
+    ``plate_len_m`` 是**彎曲方向**的邊長（S = 寬 × 長²/6），呼叫端要依彎矩方向
+    傳對應的邊長。壓力沿彎曲方向線性變化：q_max 在受壓側、q_min 在受拉側；
     q_min < 0 表示該側將離開混凝土（柱腳揚起／搖滾）。
+
+    2026-11-11（X3）修正：原式寫成 ``M×(L/2)/S``（多乘了 L/2），且 x／y 兩向的
+    邊長互換，使 q_max 低估 (L/2) 倍（例：基板 0.5×0.55 m、P=700 kN、M=280 kN·m
+    應為 14,764 kPa，原式只給 5,600 kPa），基板厚度與承壓檢核因此偏不安全。
     """
     area = plate_len_m * plate_width_m
     s_mod = plate_width_m * plate_len_m ** 2 / 6.0
     q_mean = float(p_kn) / area if area > 0 else 0.0
-    q_edge = abs(float(moment_knm)) * (plate_len_m / 2.0) / s_mod if s_mod > 0 else 0.0
+    q_edge = abs(float(moment_knm)) / s_mod if s_mod > 0 else 0.0
     return {
         "area_m2": area,
         "section_modulus_m3": s_mod,
@@ -1005,8 +1012,9 @@ def analyse(payload: Mapping[str, Any]) -> dict[str, Any]:
     t_total = sum(tensions)
     t_max = max(tensions) if tensions else 0.0
 
-    contact_x = _contact_pressure(max(p_kn, 0.0), abs(mx_knm), plate_b, plate_n)
-    contact_y = _contact_pressure(max(p_kn, 0.0), abs(my_knm), plate_n, plate_b)
+    # 彎曲方向的邊長才是 S 的分母：Mx 繞 x 彎 → 沿 N；My 繞 y 彎 → 沿 B
+    contact_x = _contact_pressure(max(p_kn, 0.0), abs(mx_knm), plate_n, plate_b)
+    contact_y = _contact_pressure(max(p_kn, 0.0), abs(my_knm), plate_b, plate_n)
     q_allow_kpa = (0.35 * fc_mpa if method == "asd" else 0.6 * 0.85 * fc_mpa) * 1000.0
 
     # 混凝土 45° 應力錐投影面積（受墩座外緣截斷）
@@ -1483,8 +1491,8 @@ def selftest() -> dict[str, Any]:
            % (max(grp["tensions_kn"]), syy, hand_t))
 
     # 9. 全板線性接觸壓力：q = P/A + M/S
-    contact = _contact_pressure(700.0, 280.0, 0.50, 0.55)
-    hand_qmax = 700.0 / (0.50 * 0.55) + 280.0 * (0.55 / 2.0) / (0.50 * 0.55 ** 2 / 6.0)
+    contact = _contact_pressure(700.0, 280.0, 0.55, 0.50)
+    hand_qmax = 700.0 / (0.50 * 0.55) + 280.0 / (0.50 * 0.55 ** 2 / 6.0)
     record("全板接觸壓力 q = P/A + M/S 手算對照", abs(contact["q_max_kpa"] - hand_qmax) < 1e-9,
            "q_max = %.2f kPa（手算 %.2f kPa）、q_min = %.2f kPa、揚起 = %s"
            % (contact["q_max_kpa"], hand_qmax, contact["q_min_kpa"], contact["uplift"]))

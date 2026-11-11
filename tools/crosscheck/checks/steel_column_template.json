@@ -1,0 +1,95 @@
+{
+ "_note": "X3／D8（DG9 必做）：鋼柱柱腳。模板 tw-steel-column 的錨栓拉力式固定假設「4 支錨栓」（T = Mx/(2·by) + My/(2·bx) − Pu/4），所以本案例把本專案的錨栓位置改成 4 支（±190、±210 mm）以對齊；8 支的原範例會得到一半的單支拉力（79.17 vs 158.33 kN），那是支數差異不是公式差異。柱構材本身不比：模板斷面取自內建型鋼表，與本專案的 H400×300×13×22 對不上。錨栓 45° 應力錐投影面積也不比：兩邊對墩座／基板邊界的截斷規則不同。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "鋼柱柱腳基板與錨栓（本專案 steel_column ↔ tw-steel-column）",
+   "calculator": "steel_column",
+   "payload": {
+    "design_method": "lrfd",
+    "column": {
+     "section": {"h_mm": 400.0, "b_mm": 300.0, "tw_mm": 13.0, "tf_mm": 22.0},
+     "fy_mpa": 245.0,
+     "Fu_mpa": 400.0,
+     "E_mpa": 206000.0,
+     "rolled": true,
+     "length_m": 3.0,
+     "Kx": 1.0,
+     "Ky": 1.0,
+     "Lb_m": 3.0,
+     "Lb_y_m": 3.0,
+     "axial_P_kN": 700.0,
+     "moment_Mx_kNm": 280.0,
+     "moment_My_kNm": 0.0,
+     "shear_Vx_kN": 30.0,
+     "shear_Vy_kN": 0.0,
+     "Cm_x": 0.85,
+     "Cm_y": 0.85,
+     "M1_over_M2": 1.0,
+     "cantilever": false
+    },
+    "base_plate": {
+     "plate_B_m": 0.5,
+     "plate_N_m": 0.55,
+     "plate_t_mm": 32.0,
+     "fc_mpa": 28.0,
+     "pedestal_B_m": 0.8,
+     "pedestal_N_m": 0.85,
+     "support_condition": "grout_embedded",
+     "grout_above_concrete": 0.0,
+     "corrosion_allowance_mm": 0.0
+    },
+    "anchors": {
+     "positions": [
+      {"x_m": -0.19, "y_m": -0.21},
+      {"x_m": 0.19, "y_m": -0.21},
+      {"x_m": -0.19, "y_m": 0.21},
+      {"x_m": 0.19, "y_m": 0.21}
+     ],
+     "diameter_mm": 32.0,
+     "grade": "A307",
+     "embedment_mm": 900.0,
+     "threads_in_shear_plane": true,
+     "shear_path": "friction"
+    }
+   },
+   "template": "tw-steel-column",
+   "ocss_inputs": {
+    "design_method": 1,
+    "f_y_in": 245,
+    "f_y_bp_in": 245,
+    "fc_in": 285.52,
+    "anchor_grade": 1,
+    "shear_mode": 1,
+    "L_col": 3.0,
+    "K_x": 1.0,
+    "K_y": 1.0,
+    "L_b": 3.0,
+    "C_b": 1.0,
+    "P_u": 700,
+    "M_ux": 280,
+    "M_uy": 0,
+    "V_u": 30,
+    "B_p": 500,
+    "N_p": 550,
+    "t_p": 32,
+    "B_ped": 800,
+    "N_ped": 850,
+    "d_b": 32,
+    "b_x": 380,
+    "b_y": 420,
+    "h_ef": 900,
+    "section_id": 7
+   },
+   "compare": [
+    {"name": "基板最大接觸壓力 q_max（MPa，本專案 kPa×0.001）", "ours": "result.base_plate.contact_pressure_x.q_max_kpa", "ocss": "var:q_max", "scale": 0.001, "tol": {"rel": 1e-6}},
+    {"name": "基板最小接觸壓力 q_min（揚起側）", "ours": "result.base_plate.contact_pressure_x.q_min_kpa", "ocss": "var:q_min", "scale": 0.001, "tol": {"rel": 1e-6}},
+    {"name": "基板承壓面積 A1", "ours": "result.base_plate.bearing.A1_cm2", "ocss": "var:A1", "tol": {"rel": 1e-9}},
+    {"name": "圍束面積 A2", "ours": "result.base_plate.bearing.A2_cm2", "ocss": "var:A2", "tol": {"rel": 1e-9}},
+    {"name": "混凝土承壓設計強度 φPp", "ours": "result.base_plate.bearing.capacity_kN", "ocss": "var:phiP_p", "tol": {"rel": 0.001}},
+    {"name": "單支錨栓最大拉力 T", "ours": "result.anchors.max_tension_kn", "ocss": "var:T_bolt", "tol": {"rel": 0.001}},
+    {"name": "錨栓拉力設計強度 φRn,t", "ours": "result.anchors.capacity.tension_capacity_kN", "ocss": "var:phiRn_t", "tol": {"rel": 0.001}}
+   ]
+  }
+ ]
+}

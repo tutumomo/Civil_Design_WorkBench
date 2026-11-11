@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import math
-from typing import Any
+from typing import Any, Mapping
 
 
 GAMMA_WATER = 9.81

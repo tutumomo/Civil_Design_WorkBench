@@ -133,8 +133,9 @@ ROOT = HERE.parent.parent
 RUN_DIR = ROOT / "out" / "design_workbench" / "runs"
 
 
-class DesignAPIError(ValueError):
-    """Invalid calculator id or input payload."""
+# 例外類別定義在 catalog._shared：design_api 會 import catalog.*，反向 import 會循環。
+# 外部仍以 design_api.DesignAPIError 取用（與原本同一個類別物件）。
+from catalog._shared import DesignAPIError  # noqa: E402
 
 
 

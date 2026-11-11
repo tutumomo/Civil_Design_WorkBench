@@ -92,6 +92,12 @@ TESTS = [
         "what": "已驗證公式／圖表庫",
     },
     {
+        "id": "regs-table-render",
+        "cmd": ["tools/selftest/regs_table_render_selftest.py"],
+        "globs": ["tools/regs/", "tools/design/", "tools/selftest/"],
+        "what": "已驗證表格前端渲染（[object Object] 守門）",
+    },
+    {
         "id": "boq-rules",
         "cmd": ["tools/boq/selftest/selftest_rules.py"],
         "globs": ["tools/boq/", "tools/selftest/"],

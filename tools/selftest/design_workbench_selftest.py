@@ -378,6 +378,15 @@ def main() -> int:
         "missing parameters return structured error",
         missing.get("ok") is False and bool(missing.get("error")),
     )
+    # 2026-11-11：catalog 各模組曾直接用 DesignAPIError 卻沒 import，缺參數時會拋 NameError。
+    checks.check(
+        "missing parameters do not raise NameError (DesignAPIError imported in catalog)",
+        "NameError" not in str(missing.get("error", "")),
+    )
+    checks.check(
+        "DesignAPIError is the shared class (catalog._shared)",
+        API.DesignAPIError is __import__("catalog._shared", fromlist=["x"]).DesignAPIError,
+    )
     custom_manning = dict(channel["example"])
     custom_manning["manning_n"] = 0.017
     custom_manning_result = API.run_calculation(

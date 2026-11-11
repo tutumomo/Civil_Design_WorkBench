@@ -5,7 +5,7 @@
 
 from typing import Any, Mapping
 
-from catalog._shared import _num
+from catalog._shared import DesignAPIError, _num
 
 
 def _example_channel() -> dict[str, Any]:

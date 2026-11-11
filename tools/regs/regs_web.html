@@ -2058,6 +2058,42 @@ async function loadAssets(src, p, i, openAuto) {  // original page image + PDF t
   }
 }
 
+// 已驗證表格的列有三種形狀：{key, values} / {x, values} / [值, 值…]。
+// 直接把物件丟進 esc() 會變成 "[object Object]"，故一律先正規化成欄名＋字串陣列。
+// 伺服端（tools/regs/verified.py::table_grid）已算好 grid；此處仍保留前端 fallback，
+// 讓雲端靜態版或舊快取資料也能正常顯示。
+function verifiedCell(v) {
+  if (Array.isArray(v)) return v.map(verifiedCell).join("、");
+  if (v === null || v === undefined) return "—";
+  if (typeof v === "object") {
+    const vals = v.values && typeof v.values === "object" ? v.values : v;
+    return Object.entries(vals).map(([k, vv]) => `${k}: ${verifiedCell(vv)}`).join("、");
+  }
+  return String(v);
+}
+function verifiedGrid(v) {
+  if (v.grid && v.grid.columns && v.grid.rows && v.grid.rows.length) {
+    return {columns: v.grid.columns, rows: v.grid.rows.map(r => r.map(verifiedCell))};
+  }
+  const cols = v.columns || [];
+  const rows = v.rows || [];
+  if (!rows.length) return {columns: cols, rows: []};
+  const isDict = rows[0] && typeof rows[0] === "object" && !Array.isArray(rows[0]);
+  const labelCol = isDict ? ("x" in rows[0] ? "x" : "項目") : "";
+  return {
+    columns: (isDict ? [labelCol] : []).concat(cols),
+    rows: rows.map(r => {
+      if (Array.isArray(r)) return r.map(verifiedCell);
+      if (r && typeof r === "object") {
+        const vals = r.values && typeof r.values === "object" ? r.values : {};
+        const label = r.key !== undefined && r.key !== null ? r.key : r.x;
+        return [verifiedCell(label)].concat(cols.map(c => verifiedCell(vals[c])));
+      }
+      return [verifiedCell(r)];
+    })
+  };
+}
+
 function buildVerifiedPanelHtml(vlist) {
   if (!vlist || !vlist.length) return "";
   const cards = vlist.map(v => {
@@ -2080,9 +2116,10 @@ function buildVerifiedPanelHtml(vlist) {
       body += `<div class="v-vars">${varItems}</div>`;
     }
     if (v.columns && v.columns.length && v.rows && v.rows.length) {
+      const g = verifiedGrid(v);
       body += `<div class="v-table-wrap"><table class="v-table">
-        <thead><tr>${v.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>
-        <tbody>${v.rows.map(r => `<tr>${(Array.isArray(r) ? r : [r]).map(cell => `<td>${esc(cell)}</td>`).join("")}</tr>`).join("")}</tbody>
+        <thead><tr>${g.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+        <tbody>${g.rows.map(r => `<tr>${r.map(cell => `<td>${esc(cell)}</td>`).join("")}</tr>`).join("")}</tbody>
       </table></div>`;
     }
     if (v.conditions && v.conditions.length) {

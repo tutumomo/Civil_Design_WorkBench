@@ -164,6 +164,7 @@
 - **Before designing rebar for walls, channels, or box culverts (RC 配筋設計)**: Read [`docs/擋土牆配筋設計SOP.md`](docs/擋土牆配筋設計SOP.md) 與 [`docs/箱涵計算SOP.md`](docs/箱涵計算SOP.md)（落實牆型分流與 6% 損耗率）。
 - **Before any numerical civil/structural design (結構數值計算)**: 使用 `tools/design/design_api.py`、`design_cli.py` 或網頁工作台；計算器地圖詳見 [`docs/設計工作台.md`](docs/設計工作台.md)。
 - **When adding or changing a design calculator (新增／修改計算器上架)**: Read [`docs/設計計算器上架SOP.md`](docs/設計計算器上架SOP.md) 並落實 G1~G8 規範；完成前必跑 `tools/selftest/design_launch_check.py <id>`。
+- **When adding or changing the workbench「產生設計圖」for a calculator (計算器出圖上架)**: Read [`docs/計算器出圖SOP.md`](docs/計算器出圖SOP.md) 並落實 DG0～DG8（圖上數字一律來自計算結果、預設值須標「假設值」、每種新圖至少交使用者目視一次）；待補清單見 [`docs/設計圖產線補齊_工作計劃書_2026-11-11.md`](docs/設計圖產線補齊_工作計劃書_2026-11-11.md)。
 - **Before producing a retaining-wall or box-culvert drawing (擋土牆／箱涵出圖)**: Read [`docs/擋土牆斷面圖產線.md`](docs/擋土牆斷面圖產線.md) 或 [`docs/箱涵斷面圖產線.md`](docs/箱涵斷面圖產線.md)（箱涵 45° 加腋與角隅斜筋不可省）。
 - **When starting a new case (新案件建立與三軸交付)**: Read [`cases/README.md`](cases/README.md) 與 [`docs/案件交付包.md`](docs/案件交付包.md)；建立 `cases/<案名>/case.json`，執行 `case_core.py check` 與 `case_package.py`。
 - **When generating a site basemap or laying out an A3 sheet**: 載入 `civil-site-basemap` skill 或閱讀 [`docs/現況平面底圖作業流程.md`](docs/現況平面底圖作業流程.md)。

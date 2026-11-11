@@ -1,0 +1,626 @@
+{
+ "templateId": "tw-isolated-footing",
+ "module": "鋼筋混凝土獨立基腳（found112 / rc112）",
+ "title": "鋼筋混凝土獨立基腳設計與檢核（found112 / rc112）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "fc_in",
+   "label": "混凝土規定抗壓強度 f'c<span class=\"alleen-scherm\">（17～70 MPa，found112／rc112）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "28",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "fy_in",
+   "label": "鋼筋規定降伏強度 fy<span class=\"alleen-scherm\">（SD420 為 420 MPa、SD280 為 280 MPa）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "420",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "gamma_c",
+   "label": "鋼筋混凝土單位體積重量 γc<span class=\"alleen-scherm\">（建築構造編第 11 條）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "24",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "gamma_s",
+   "label": "覆土土壤單位體積重量 γs<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "18",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "cover",
+   "label": "底層鋼筋淨保護層厚度<span class=\"alleen-scherm\">（rc112 表 20.6.1.3.1 地下澆置接觸地盤最少 75 mm）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "75",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "B_f",
+   "label": "基腳 X 向寬度 Bf<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "2500",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "L_f",
+   "label": "基腳 Y 向長度 Lf<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "2500",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "h_f",
+   "label": "基腳全厚度 hf<span class=\"alleen-scherm\">（rc112 13.3.1.2 鋼筋上方厚度不得小於 150 mm）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "600",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "D_f",
+   "label": "基腳頂面至地表覆土深度 Df<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "1000",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "c_1",
+   "label": "支承柱 X 向寬度 c1<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "500",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "c_2",
+   "label": "支承柱 Y 向寬度 c2<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "500",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "P_serv",
+   "label": "柱傳來服務垂直軸力 P_serv<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "1200",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "Mx_serv",
+   "label": "繞 X 軸服務彎矩 Mx,serv<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "80",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "My_serv",
+   "label": "繞 Y 軸服務彎矩 My,serv<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "40",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "Hx_serv",
+   "label": "服務水平剪力 Hx,serv<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "60",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "Hy_serv",
+   "label": "服務水平剪力 Hy,serv<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "30",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "P_u",
+   "label": "因數化柱軸力 Pu<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "1680",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_ux",
+   "label": "因數化繞 X 軸彎矩 Mux<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "112",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_uy",
+   "label": "因數化繞 Y 軸彎矩 Muy<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "56",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "q_a_in",
+   "label": "容許地盤支承力 qa<span class=\"alleen-scherm\">（依工址鑽探報告輸入，found112 4.3）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "300",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "mu_base",
+   "label": "基底摩擦係數 μ = tanδ<span class=\"alleen-scherm\">（found112 4.6.2，混凝土澆置於地層通常取 0.40～0.50）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "0.50",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "bar_x_id",
+   "label": "bar_x_id",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "D25（直徑 25.4 mm，單根 506.7 mm²）"
+    },
+    {
+     "value": "2",
+     "text": "D16（直徑 15.9 mm，單根 198.6 mm²）"
+    },
+    {
+     "value": "3",
+     "text": "D19（直徑 19.1 mm，單根 286.5 mm²）"
+    },
+    {
+     "value": "4",
+     "text": "D22（直徑 22.2 mm，單根 387.1 mm²）"
+    },
+    {
+     "value": "5",
+     "text": "D29（直徑 28.7 mm，單根 646.9 mm²）"
+    },
+    {
+     "value": "6",
+     "text": "D32（直徑 32.2 mm，單根 814.3 mm²）"
+    }
+   ]
+  },
+  {
+   "name": "n_bx",
+   "label": "X 向配筋總根數 nbx<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "11",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "bar_y_id",
+   "label": "bar_y_id",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "D25（直徑 25.4 mm，單根 506.7 mm²）"
+    },
+    {
+     "value": "2",
+     "text": "D16（直徑 15.9 mm，單根 198.6 mm²）"
+    },
+    {
+     "value": "3",
+     "text": "D19（直徑 19.1 mm，單根 286.5 mm²）"
+    },
+    {
+     "value": "4",
+     "text": "D22（直徑 22.2 mm，單根 387.1 mm²）"
+    },
+    {
+     "value": "5",
+     "text": "D29（直徑 28.7 mm，單根 646.9 mm²）"
+    },
+    {
+     "value": "6",
+     "text": "D32（直徑 32.2 mm，單根 814.3 mm²）"
+    }
+   ]
+  },
+  {
+   "name": "n_by",
+   "label": "Y 向配筋總根數 nby<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "11",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "hook_mode",
+   "label": "hook_mode",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "90° 標準彎鉤（端部設置彎鉤）"
+    },
+    {
+     "value": "2",
+     "text": "直鋼筋伸展（無端部彎鉤）"
+    }
+   ]
+  }
+ ],
+ "literal_inputs": [],
+ "outputs": [
+  {
+   "name": "Area_f",
+   "unit": "m^2",
+   "value_at_default": 6.25
+  },
+  {
+   "name": "W_footing",
+   "unit": "kN",
+   "value_at_default": 90
+  },
+  {
+   "name": "W_soil",
+   "unit": "kN",
+   "value_at_default": 112.5
+  },
+  {
+   "name": "P_tot_serv",
+   "unit": "kN",
+   "value_at_default": 1402.5
+  },
+  {
+   "name": "q_avg_serv",
+   "unit": "kPa",
+   "value_at_default": 224.4
+  },
+  {
+   "name": "q_max_serv",
+   "unit": "kPa",
+   "value_at_default": 270.48
+  },
+  {
+   "name": "q_min_serv",
+   "unit": "kPa",
+   "value_at_default": 178.32
+  },
+  {
+   "name": "q_a_in",
+   "unit": "kPa",
+   "value_at_default": 300
+  },
+  {
+   "name": "UC_bearing",
+   "unit": "",
+   "value_at_default": 0.9016
+  },
+  {
+   "name": "e_x",
+   "unit": "mm",
+   "value_at_default": 28.520499108734402
+  },
+  {
+   "name": "e_y",
+   "unit": "mm",
+   "value_at_default": 57.040998217468804
+  },
+  {
+   "name": "UC_ecc",
+   "unit": "",
+   "value_at_default": 0.1368983957219251
+  },
+  {
+   "name": "H_tot_serv",
+   "unit": "kN",
+   "value_at_default": 67.08203932499369
+  },
+  {
+   "name": "R_friction",
+   "unit": "kN",
+   "value_at_default": 701.25
+  },
+  {
+   "name": "FS_slide",
+   "unit": "",
+   "value_at_default": 10.453617794811517
+  },
+  {
+   "name": "UC_slide",
+   "unit": "",
+   "value_at_default": 0.14349099320854264
+  },
+  {
+   "name": "qu_net",
+   "unit": "kPa",
+   "value_at_default": 268.8
+  },
+  {
+   "name": "d_eff",
+   "unit": "mm",
+   "value_at_default": 499.6
+  },
+  {
+   "name": "cant_x",
+   "unit": "mm",
+   "value_at_default": 1000
+  },
+  {
+   "name": "Lx_shear",
+   "unit": "mm",
+   "value_at_default": 500.3999999999999
+  },
+  {
+   "name": "V_ux",
+   "unit": "kN",
+   "value_at_default": 336.2688
+  },
+  {
+   "name": "phiVc_x",
+   "unit": "kN",
+   "value_at_default": 842.6585638175169
+  },
+  {
+   "name": "UC_vx",
+   "unit": "",
+   "value_at_default": 0.3990570017785058
+  },
+  {
+   "name": "cant_y",
+   "unit": "mm",
+   "value_at_default": 1000
+  },
+  {
+   "name": "Ly_shear",
+   "unit": "mm",
+   "value_at_default": 500.3999999999999
+  },
+  {
+   "name": "V_uy",
+   "unit": "kN",
+   "value_at_default": 336.2688
+  },
+  {
+   "name": "phiVc_y",
+   "unit": "kN",
+   "value_at_default": 842.6585638175169
+  },
+  {
+   "name": "UC_vy",
+   "unit": "",
+   "value_at_default": 0.3990570017785058
+  },
+  {
+   "name": "b_o",
+   "unit": "mm",
+   "value_at_default": 3998.4
+  },
+  {
+   "name": "Area_punch",
+   "unit": "m^2",
+   "value_at_default": 0.9992001600000001
+  },
+  {
+   "name": "V_up",
+   "unit": "kN",
+   "value_at_default": 1411.414996992
+  },
+  {
+   "name": "lambda_s",
+   "unit": "",
+   "value_at_default": 0.8167144004810014
+  },
+  {
+   "name": "beta_col",
+   "unit": "",
+   "value_at_default": 1
+  },
+  {
+   "name": "vc_punch",
+   "unit": "MPa",
+   "value_at_default": 1.426143309253041
+  },
+  {
+   "name": "phiV_punch",
+   "unit": "kN",
+   "value_at_default": 2136.6485904716947
+  },
+  {
+   "name": "UC_punch",
+   "unit": "",
+   "value_at_default": 0.6605742297943391
+  },
+  {
+   "name": "M_ux_cant",
+   "unit": "kN m",
+   "value_at_default": 336
+  },
+  {
+   "name": "As_x",
+   "unit": "cm^2",
+   "value_at_default": 55.736999999999995
+  },
+  {
+   "name": "As_x_min",
+   "unit": "cm^2",
+   "value_at_default": 26.999999999999996
+  },
+  {
+   "name": "phiMn_x",
+   "unit": "kN m",
+   "value_at_default": 1011.1406820465178
+  },
+  {
+   "name": "UC_flex_x",
+   "unit": "",
+   "value_at_default": 0.33229797392776866
+  },
+  {
+   "name": "M_uy_cant",
+   "unit": "kN m",
+   "value_at_default": 336
+  },
+  {
+   "name": "As_y",
+   "unit": "cm^2",
+   "value_at_default": 55.736999999999995
+  },
+  {
+   "name": "As_y_min",
+   "unit": "cm^2",
+   "value_at_default": 26.999999999999996
+  },
+  {
+   "name": "phiMn_y",
+   "unit": "kN m",
+   "value_at_default": 1011.1406820465178
+  },
+  {
+   "name": "UC_flex_y",
+   "unit": "",
+   "value_at_default": 0.33229797392776866
+  },
+  {
+   "name": "s_x",
+   "unit": "mm",
+   "value_at_default": 232.46000000000004
+  },
+  {
+   "name": "s_y",
+   "unit": "mm",
+   "value_at_default": 232.46000000000004
+  },
+  {
+   "name": "UC_rhox",
+   "unit": "",
+   "value_at_default": 0.48441789116744705
+  },
+  {
+   "name": "UC_rhoy",
+   "unit": "",
+   "value_at_default": 0.48441789116744705
+  },
+  {
+   "name": "UC_space_x",
+   "unit": "",
+   "value_at_default": 0.5165777777777778
+  },
+  {
+   "name": "UC_space_y",
+   "unit": "",
+   "value_at_default": 0.5165777777777778
+  },
+  {
+   "name": "gamma_band",
+   "unit": "",
+   "value_at_default": 1
+  },
+  {
+   "name": "A1_col",
+   "unit": "cm^2",
+   "value_at_default": 2500
+  },
+  {
+   "name": "ratio_bearing",
+   "unit": "",
+   "value_at_default": 2
+  },
+  {
+   "name": "phiPn_bearing",
+   "unit": "kN",
+   "value_at_default": 7735
+  },
+  {
+   "name": "UC_bearing_col",
+   "unit": "",
+   "value_at_default": 0.2171945701357466
+  },
+  {
+   "name": "L_avail_x",
+   "unit": "mm",
+   "value_at_default": 925
+  },
+  {
+   "name": "ld_req_x",
+   "unit": "mm",
+   "value_at_default": 480.01488072171844
+  },
+  {
+   "name": "UC_ld_x",
+   "unit": "",
+   "value_at_default": 0.5189350061856415
+  },
+  {
+   "name": "L_avail_y",
+   "unit": "mm",
+   "value_at_default": 925
+  },
+  {
+   "name": "ld_req_y",
+   "unit": "mm",
+   "value_at_default": 480.01488072171844
+  },
+  {
+   "name": "UC_ld_y",
+   "unit": "",
+   "value_at_default": 0.5189350061856415
+  },
+  {
+   "name": "UC_ld",
+   "unit": "",
+   "value_at_default": 0.5189350061856415
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.91
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_bearing": 0.9016,
+  "UC_ecc": 0.1368983957219251,
+  "UC_slide": 0.14349099320854264,
+  "UC_vx": 0.3990570017785058,
+  "UC_vy": 0.3990570017785058,
+  "UC_punch": 0.6605742297943391,
+  "UC_flex_x": 0.33229797392776866,
+  "UC_flex_y": 0.33229797392776866,
+  "UC_rhox": 0.48441789116744705,
+  "UC_rhoy": 0.48441789116744705,
+  "UC_space_x": 0.5165777777777778,
+  "UC_space_y": 0.5165777777777778,
+  "UC_bearing_col": 0.2171945701357466,
+  "UC_ld_x": 0.5189350061856415,
+  "UC_ld_y": 0.5189350061856415,
+  "UC_ld": 0.5189350061856415,
+  "UC_max": 0.91
+ },
+ "uc_at_default": 0.91,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

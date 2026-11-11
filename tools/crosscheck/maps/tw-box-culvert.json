@@ -1,0 +1,71 @@
+{
+ "templateId": "tw-box-culvert",
+ "calculator": "box_culvert",
+ "status": "draft-未經試算驗證",
+ "input_style": "literal（須改寫 source；values 無效）",
+ "inputs": [
+  {
+   "ocss": "B_clear",
+   "ours": "clear_width_m"
+  },
+  {
+   "ocss": "H_clear",
+   "ours": "clear_height_m"
+  },
+  {
+   "ocss": "t_top",
+   "ours": "top_slab_thickness_m"
+  },
+  {
+   "ocss": "t_bot",
+   "ours": "bottom_slab_thickness_m"
+  },
+  {
+   "ocss": "t_wall",
+   "ours": "wall_thickness_m"
+  },
+  {
+   "ocss": "c_chamfer",
+   "ours": "inner_chamfer_m"
+  },
+  {
+   "ocss": "H_cover",
+   "ours": "cover_depth_m"
+  },
+  {
+   "ocss": "S_slope",
+   "ours": "slope"
+  },
+  {
+   "ocss": "n_manning",
+   "ours": "manning_n"
+  },
+  {
+   "ocss": "Q_design",
+   "ours": "design_flow_m3s"
+  },
+  {
+   "ocss": "fc_kpa",
+   "ours": "（本專案 fc 輸入待查）",
+   "unit": "kPa"
+  }
+ ],
+ "ocss_only": [
+  "H_gw（地下水位，本專案無）",
+  "truck_type／k_truck／s_wheel／s_axle（OCSS 車載模型）",
+  "gamma_*、qa_allow、phi_deg、q_surcharge（本專案土壓輸入待查）"
+ ],
+ "ours_only": [
+  "cell_count（本專案 1～3 孔）",
+  "interior_wall_thickness_m",
+  "traffic_type／traffic_lanes（H20-S16 車道數）",
+  "crack_limit_mm",
+  "inlet_type、tailwater、allowable_headwater（進出口水理）"
+ ],
+ "compare": [],
+ "blockers": [
+  "OCSS 只有單孔：僅能對 cell_count=1",
+  "車載模型不同（本專案 h20_s16 多車道，OCSS 為單卡車參數）→ 彎矩不可直接比，需先對齊車載",
+  "OCSS 配筋是輸入（db／s），本專案是引擎選配 → 比需求鋼筋量，不比選配"
+ ]
+}

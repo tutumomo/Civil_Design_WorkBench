@@ -1,0 +1,395 @@
+{
+ "templateId": "tw-drainage-channel",
+ "module": "鋼筋混凝土排水溝與明渠水理（swc_tech / rc112）",
+ "title": "鋼筋混凝土排水溝與明渠水理設計檢核（swc_tech / rc112）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "use_rational",
+   "default": "1",
+   "unit": "-",
+   "label": "流量推估方式：1 = 採用合理化公式 Q = (1/360)·C·I·A；0 = 直接輸入設計流量"
+  },
+  {
+   "name": "C_runoff",
+   "default": "0.85",
+   "unit": "-",
+   "label": "逕流係數 C（swc_tech 表 18：開發整地區非農業 0.95～1.0，平坦耕地 0.85，丘陵 0.90）"
+  },
+  {
+   "name": "I_rain",
+   "default": "90.0",
+   "unit": "mm/h",
+   "label": "設計降雨強度 I（swc_tech §83：坡地農地重現期距 10 年，其他非農業使用 25 年）"
+  },
+  {
+   "name": "A_catch",
+   "default": "2.0",
+   "unit": "ha",
+   "label": "集水區面積 A（公頃，ha；合理化公式適用面積 ≤ 1000 ha）"
+  },
+  {
+   "name": "Q_direct",
+   "default": "0.45",
+   "unit": "m^3/s",
+   "label": "直接指定之設計流量 Q_direct（當 use_rational = 0 時採用）"
+  },
+  {
+   "name": "B_chan",
+   "default": "0.60",
+   "unit": "m",
+   "label": "渠道底寬 B（水土保持技術規範 §78 一(二)：U形/矩形/梯形側溝寬度最小 0.30 m）"
+  },
+  {
+   "name": "H_chan",
+   "default": "0.80",
+   "unit": "m",
+   "label": "渠道淨深 H（水土保持技術規範 §78 一(二)：側溝深度最小 0.30 m）"
+  },
+  {
+   "name": "z_side",
+   "default": "0.0",
+   "unit": "-",
+   "label": "渠道側坡比 1:z（水平/垂直；垂直矩形 U 型溝 z = 0；梯形溝例如 0.5 或 1.0）"
+  },
+  {
+   "name": "S_chan",
+   "default": "0.01",
+   "unit": "-",
+   "label": "渠底縱坡度 S（水土保持技術規範 §78 一(一)：邊溝須陡於 0.2%，即 S ≥ 0.002；山區農路 ≥ 0.005）"
+  },
+  {
+   "name": "n_manning",
+   "default": "0.014",
+   "unit": "-",
+   "label": "曼寧粗糙係數 n（swc_tech §84；光面混凝土取 0.013～0.015，漿砌石取 0.020～0.025）"
+  },
+  {
+   "name": "V_min_req",
+   "default": "0.8",
+   "unit": "m/s",
+   "label": "最小容許流速下限（swc_tech §85 一：混凝土或鋼筋混凝土設施防淤流速 ≥ 0.8 m/s）"
+  },
+  {
+   "name": "V_max_req",
+   "default": "4.57",
+   "unit": "m/s",
+   "label": "最大容許流速上限（swc_tech §85 二(一)表列混凝土常流水 4.57～6.10 m/s，取保守下限 4.57；市區道路規範 §7.3.6 與下水道工程設施標準限 3.0 m/s，屬市區雨水下水道者請改填 3.0）"
+  },
+  {
+   "name": "sf_cap_req",
+   "default": "1.2",
+   "unit": "-",
+   "label": "通水容量安全加成係數（非規範明文，為工程慣例之設計流量裕度，由設計者自訂；填 1.0 即不加成）"
+  },
+  {
+   "name": "t_wall",
+   "default": "0.15",
+   "unit": "m",
+   "label": "側壁厚度 t_wall（m）"
+  },
+  {
+   "name": "t_base",
+   "default": "0.15",
+   "unit": "m",
+   "label": "底版厚度 t_base（m）"
+  },
+  {
+   "name": "fc_kpa",
+   "default": "24000",
+   "unit": "kN/m^2",
+   "label": "混凝土規定抗壓強度 f'c（24 MPa = 24000 kN/m²）"
+  },
+  {
+   "name": "fy_kpa",
+   "default": "420000",
+   "unit": "kN/m^2",
+   "label": "鋼筋規定降伏強度 fy（SD420 = 420 MPa = 420000 kN/m²）"
+  },
+  {
+   "name": "gamma_soil",
+   "default": "19.0",
+   "unit": "kN/m^3",
+   "label": "溝壁外側回填土單位重 γ_s"
+  },
+  {
+   "name": "phi_deg",
+   "default": "30",
+   "unit": "deg",
+   "label": "土壤有效內摩擦角 φ"
+  },
+  {
+   "name": "q_surcharge",
+   "default": "10.0",
+   "unit": "kN/m^2",
+   "label": "溝側地表活載重等效均布超載 q_sur"
+  },
+  {
+   "name": "db_wall",
+   "default": "12.7",
+   "unit": "mm",
+   "label": "側壁受拉主筋直徑（D13 = 12.7 mm，單根面積 126.7 mm²）"
+  },
+  {
+   "name": "Ab_wall",
+   "default": "126.7",
+   "unit": "mm^2",
+   "label": "單根鋼筋斷面積"
+  },
+  {
+   "name": "s_wall",
+   "default": "200",
+   "unit": "mm",
+   "label": "側壁受拉主筋間距 s"
+  },
+  {
+   "name": "cc_wall",
+   "default": "50",
+   "unit": "mm",
+   "label": "鋼筋淨保護層厚度（接觸土壤面取 50 mm）"
+  },
+  {
+   "name": "fb_min",
+   "default": "0.20",
+   "unit": "m",
+   "label": "出水高法定下限 20 cm"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Q_design",
+   "unit": "",
+   "value_at_default": 0.425
+  },
+  {
+   "name": "fc_mpa",
+   "unit": "",
+   "value_at_default": 24
+  },
+  {
+   "name": "fy_mpa",
+   "unit": "",
+   "value_at_default": 420
+  },
+  {
+   "name": "A_full",
+   "unit": "",
+   "value_at_default": 0.48
+  },
+  {
+   "name": "P_full",
+   "unit": "",
+   "value_at_default": 2.2
+  },
+  {
+   "name": "R_full",
+   "unit": "",
+   "value_at_default": 0.21818181818181814
+  },
+  {
+   "name": "Q_cap",
+   "unit": "",
+   "value_at_default": 1.2425834723066136
+  },
+  {
+   "name": "V_full",
+   "unit": "",
+   "value_at_default": 2.588715567305445
+  },
+  {
+   "name": "d_n",
+   "unit": "",
+   "value_at_default": 0.3379827169745971
+  },
+  {
+   "name": "A_design",
+   "unit": "",
+   "value_at_default": 0.20278963018475823
+  },
+  {
+   "name": "P_design",
+   "unit": "",
+   "value_at_default": 1.2759654339491941
+  },
+  {
+   "name": "R_design",
+   "unit": "",
+   "value_at_default": 0.15893034778936874
+  },
+  {
+   "name": "T_design",
+   "unit": "",
+   "value_at_default": 0.6
+  },
+  {
+   "name": "V_design",
+   "unit": "",
+   "value_at_default": 2.0957679128503246
+  },
+  {
+   "name": "D_hyd",
+   "unit": "",
+   "value_at_default": 0.3379827169745971
+  },
+  {
+   "name": "Fr_num",
+   "unit": "",
+   "value_at_default": 1.1509631964500546
+  },
+  {
+   "name": "fb_calc",
+   "unit": "",
+   "value_at_default": 0.08449567924364927
+  },
+  {
+   "name": "fb_req",
+   "unit": "",
+   "value_at_default": 0.2
+  },
+  {
+   "name": "fb_actual",
+   "unit": "",
+   "value_at_default": 0.46201728302540296
+  },
+  {
+   "name": "H_req",
+   "unit": "",
+   "value_at_default": 0.5379827169745971
+  },
+  {
+   "name": "K0_soil",
+   "unit": "",
+   "value_at_default": 0.5
+  },
+  {
+   "name": "V_u_wall",
+   "unit": "",
+   "value_at_default": 11.264000000000003
+  },
+  {
+   "name": "M_u_wall",
+   "unit": "",
+   "value_at_default": 3.8570666666666678
+  },
+  {
+   "name": "dw_wall",
+   "unit": "",
+   "value_at_default": 93.65
+  },
+  {
+   "name": "As_wall",
+   "unit": "",
+   "value_at_default": 633.5
+  },
+  {
+   "name": "a_block",
+   "unit": "",
+   "value_at_default": 13.04264705882353
+  },
+  {
+   "name": "phi_Mn_wall",
+   "unit": "",
+   "value_at_default": 20.864094253676473
+  },
+  {
+   "name": "phi_Vc_wall",
+   "unit": "",
+   "value_at_default": 58.49565217496938
+  },
+  {
+   "name": "As_min_wall",
+   "unit": "",
+   "value_at_default": 270
+  },
+  {
+   "name": "s_max_wall",
+   "unit": "",
+   "value_at_default": 449.99999999999994
+  },
+  {
+   "name": "UC_cap",
+   "unit": "",
+   "value_at_default": 0.34202933603411806
+  },
+  {
+   "name": "UC_cap_sf",
+   "unit": "",
+   "value_at_default": 0.4104352032409417
+  },
+  {
+   "name": "UC_fb",
+   "unit": "",
+   "value_at_default": 0.6724783962182463
+  },
+  {
+   "name": "UC_vmin",
+   "unit": "",
+   "value_at_default": 0.3817216568183685
+  },
+  {
+   "name": "UC_vmax",
+   "unit": "",
+   "value_at_default": 0.45859254110510383
+  },
+  {
+   "name": "UC_b_min",
+   "unit": "",
+   "value_at_default": 0.5
+  },
+  {
+   "name": "UC_h_min",
+   "unit": "",
+   "value_at_default": 0.37499999999999994
+  },
+  {
+   "name": "UC_s_min",
+   "unit": "",
+   "value_at_default": 0.2
+  },
+  {
+   "name": "UC_m_wall",
+   "unit": "",
+   "value_at_default": 0.1848662405264495
+  },
+  {
+   "name": "UC_v_wall",
+   "unit": "",
+   "value_at_default": 0.1925613200500384
+  },
+  {
+   "name": "UC_rho_wall",
+   "unit": "",
+   "value_at_default": 0.4262036306235201
+  },
+  {
+   "name": "UC_s_wall",
+   "unit": "",
+   "value_at_default": 0.4444444444444445
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.68
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_cap": 0.34202933603411806,
+  "UC_cap_sf": 0.4104352032409417,
+  "UC_fb": 0.6724783962182463,
+  "UC_vmin": 0.3817216568183685,
+  "UC_vmax": 0.45859254110510383,
+  "UC_b_min": 0.5,
+  "UC_h_min": 0.37499999999999994,
+  "UC_s_min": 0.2,
+  "UC_m_wall": 0.1848662405264495,
+  "UC_v_wall": 0.1925613200500384,
+  "UC_rho_wall": 0.4262036306235201,
+  "UC_s_wall": 0.4444444444444445,
+  "UC_max": 0.68
+ },
+ "uc_at_default": 0.68,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

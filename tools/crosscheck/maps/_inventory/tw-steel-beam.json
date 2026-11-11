@@ -1,0 +1,417 @@
+{
+ "templateId": "tw-steel-beam",
+ "module": "鋼結構 H 型鋼梁（steel99 LRFD）",
+ "title": "鋼結構熱軋 H 型鋼梁設計與檢核（steel99 LRFD／ASD）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "design_method",
+   "label": "design_method",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "極限設計法 LRFD（steel99 第（二）篇）"
+    },
+    {
+     "value": "2",
+     "text": "容許應力設計法 ASD（steel99 第（一）篇）"
+    }
+   ]
+  },
+  {
+   "name": "f_y_in",
+   "label": "鋼材標稱降伏強度 Fy（依鋼種與板厚取 CNS 規定值或鋼廠證明書，例：SN490B 板厚 12～40 mm 取 325 MPa）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "325",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "L_span",
+   "label": "鋼梁跨度 L<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "6.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "L_b",
+   "label": "受壓翼板側向無支撐長度 Lb<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "3.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "C_b",
+   "label": "側向扭轉挫屈彎矩梯度修正因數 Cb（均勻彎矩取 1.0，上限 2.3，依 7.2.2 計算後填入）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "1.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "n_delta",
+   "label": "服務載重容許活載撓度比限值分母 n_delta（L/360）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "360",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_u",
+   "label": "設計彎矩需求 Mu（ASD 時為服務載重彎矩 M）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "220",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "V_u",
+   "label": "設計剪力需求 Vu（ASD 時為服務載重剪力 V）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "150",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "w_L",
+   "label": "服務載重均布活載重 wL（供撓度檢核）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "15",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "section_id",
+   "label": "section_id",
+   "unit_in_label": "",
+   "default": "14",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "14",
+     "text": "RH 400x200x8x13 (h=400, b=200, tw=8, tf=13 mm, W=66.0 kg/m)"
+    },
+    {
+     "value": "10",
+     "text": "RH 200x100x5.5x8 (h=200, b=100, tw=5.5, tf=8 mm, W=21.3 kg/m)"
+    },
+    {
+     "value": "11",
+     "text": "RH 250x125x6x9 (h=250, b=125, tw=6, tf=9 mm, W=29.6 kg/m)"
+    },
+    {
+     "value": "12",
+     "text": "RH 300x150x6.5x9 (h=300, b=150, tw=6.5, tf=9 mm, W=36.7 kg/m)"
+    },
+    {
+     "value": "13",
+     "text": "RH 350x175x7x11 (h=350, b=175, tw=7, tf=11 mm, W=49.6 kg/m)"
+    },
+    {
+     "value": "15",
+     "text": "RH 450x200x9x14 (h=450, b=200, tw=9, tf=14 mm, W=76.0 kg/m)"
+    },
+    {
+     "value": "16",
+     "text": "RH 500x200x10x16 (h=500, b=200, tw=10, tf=16 mm, W=89.6 kg/m)"
+    },
+    {
+     "value": "17",
+     "text": "RH 600x200x11x17 (h=600, b=200, tw=11, tf=17 mm, W=106.0 kg/m)"
+    },
+    {
+     "value": "18",
+     "text": "RH 700x300x13x24 (h=700, b=300, tw=13, tf=24 mm, W=185.0 kg/m)"
+    },
+    {
+     "value": "19",
+     "text": "RH 800x300x14x26 (h=800, b=300, tw=14, tf=26 mm, W=210.0 kg/m)"
+    },
+    {
+     "value": "20",
+     "text": "RH 900x300x16x28 (h=900, b=300, tw=16, tf=28 mm, W=243.0 kg/m)"
+    },
+    {
+     "value": "5",
+     "text": "RH 200x200x8x12 (h=200, b=200, tw=8, tf=12 mm, W=49.9 kg/m)"
+    },
+    {
+     "value": "6",
+     "text": "RH 250x250x9x14 (h=250, b=250, tw=9, tf=14 mm, W=72.4 kg/m)"
+    },
+    {
+     "value": "7",
+     "text": "RH 300x300x10x15 (h=300, b=300, tw=10, tf=15 mm, W=94.0 kg/m)"
+    },
+    {
+     "value": "8",
+     "text": "RH 350x350x12x19 (h=350, b=350, tw=12, tf=19 mm, W=137.0 kg/m)"
+    },
+    {
+     "value": "9",
+     "text": "RH 400x400x13x21 (h=400, b=400, tw=13, tf=21 mm, W=172.0 kg/m)"
+    }
+   ]
+  }
+ ],
+ "literal_inputs": [],
+ "outputs": [
+  {
+   "name": "f_y",
+   "unit": "MPa",
+   "value_at_default": 325
+  },
+  {
+   "name": "E_s",
+   "unit": "MPa",
+   "value_at_default": 200055.66
+  },
+  {
+   "name": "G_s",
+   "unit": "MPa",
+   "value_at_default": 79433.865
+  },
+  {
+   "name": "F_L",
+   "unit": "MPa",
+   "value_at_default": 256.35345
+  },
+  {
+   "name": "h",
+   "unit": "mm",
+   "value_at_default": 400
+  },
+  {
+   "name": "b",
+   "unit": "mm",
+   "value_at_default": 200
+  },
+  {
+   "name": "t_w",
+   "unit": "mm",
+   "value_at_default": 8
+  },
+  {
+   "name": "t_f",
+   "unit": "mm",
+   "value_at_default": 13
+  },
+  {
+   "name": "A",
+   "unit": "cm^2",
+   "value_at_default": 84.09999999999998
+  },
+  {
+   "name": "I_x",
+   "unit": "cm^4",
+   "value_at_default": 23700
+  },
+  {
+   "name": "W_x",
+   "unit": "cm^3",
+   "value_at_default": 1190
+  },
+  {
+   "name": "Z_x",
+   "unit": "cm^3",
+   "value_at_default": 1330
+  },
+  {
+   "name": "i_x",
+   "unit": "cm",
+   "value_at_default": 16.8
+  },
+  {
+   "name": "I_y",
+   "unit": "cm^4",
+   "value_at_default": 1740
+  },
+  {
+   "name": "W_y",
+   "unit": "cm^3",
+   "value_at_default": 174
+  },
+  {
+   "name": "Z_y",
+   "unit": "cm^3",
+   "value_at_default": 269
+  },
+  {
+   "name": "i_y",
+   "unit": "cm",
+   "value_at_default": 4.54
+  },
+  {
+   "name": "J",
+   "unit": "cm^4",
+   "value_at_default": 35.67626666666666
+  },
+  {
+   "name": "C_w",
+   "unit": "cm^6",
+   "value_at_default": 648998.9999999999
+  },
+  {
+   "name": "w",
+   "unit": "kg / m",
+   "value_at_default": 66
+  },
+  {
+   "name": "lambda_f",
+   "unit": "",
+   "value_at_default": 7.692307692307692
+  },
+  {
+   "name": "lambda_pf",
+   "unit": "",
+   "value_at_default": 9.338294771036585
+  },
+  {
+   "name": "lambda_rf",
+   "unit": "",
+   "value_at_default": 22.884555357340872
+  },
+  {
+   "name": "UC_lambda_f",
+   "unit": "",
+   "value_at_default": 0.8237379394111605
+  },
+  {
+   "name": "lambda_w",
+   "unit": "",
+   "value_at_default": 46.75
+  },
+  {
+   "name": "lambda_pw",
+   "unit": "",
+   "value_at_default": 93.38294771036585
+  },
+  {
+   "name": "lambda_rw",
+   "unit": "",
+   "value_at_default": 142.82097885114777
+  },
+  {
+   "name": "UC_lambda_w",
+   "unit": "",
+   "value_at_default": 0.5006267326771329
+  },
+  {
+   "name": "is_compact",
+   "unit": "",
+   "value_at_default": 1
+  },
+  {
+   "name": "M_p",
+   "unit": "kN m",
+   "value_at_default": 432.25
+  },
+  {
+   "name": "M_r",
+   "unit": "kN m",
+   "value_at_default": 305.0606055
+  },
+  {
+   "name": "L_p",
+   "unit": "m",
+   "value_at_default": 1.9950992122591102
+  },
+  {
+   "name": "L_r",
+   "unit": "m",
+   "value_at_default": 5.243770503264279
+  },
+  {
+   "name": "L_b",
+   "unit": "m",
+   "value_at_default": 3
+  },
+  {
+   "name": "M_n",
+   "unit": "kN m",
+   "value_at_default": 392.9069236231375
+  },
+  {
+   "name": "phiM_n",
+   "unit": "kN m",
+   "value_at_default": 353.6162312608238
+  },
+  {
+   "name": "UC_M",
+   "unit": "",
+   "value_at_default": 0.6221433875237763
+  },
+  {
+   "name": "A_w",
+   "unit": "cm^2",
+   "value_at_default": 32
+  },
+  {
+   "name": "htw_ratio",
+   "unit": "",
+   "value_at_default": 46.75
+  },
+  {
+   "name": "lim_v1",
+   "unit": "",
+   "value_at_default": 61.41488794696659
+  },
+  {
+   "name": "lim_v2",
+   "unit": "",
+   "value_at_default": 76.15446105423857
+  },
+  {
+   "name": "V_n",
+   "unit": "kN",
+   "value_at_default": 624
+  },
+  {
+   "name": "phiV_n",
+   "unit": "kN",
+   "value_at_default": 561.6
+  },
+  {
+   "name": "UC_V",
+   "unit": "",
+   "value_at_default": 0.2670940170940171
+  },
+  {
+   "name": "Delta",
+   "unit": "mm",
+   "value_at_default": 5.3387041120633345
+  },
+  {
+   "name": "Delta_lim",
+   "unit": "mm",
+   "value_at_default": 16.666666666666668
+  },
+  {
+   "name": "UC_delta",
+   "unit": "",
+   "value_at_default": 0.3203222467238001
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.63
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_lambda_f": 0.8237379394111605,
+  "UC_lambda_w": 0.5006267326771329,
+  "UC_M": 0.6221433875237763,
+  "UC_V": 0.2670940170940171,
+  "UC_delta": 0.3203222467238001,
+  "UC_max": 0.63
+ },
+ "uc_at_default": 0.63,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

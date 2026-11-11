@@ -1,0 +1,100 @@
+{
+ "templateId": "tw-wind-load",
+ "module": "建築物風速壓與各層風力（wind103full）",
+ "title": "建築物風速壓與各層風力（wind103full）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "V_10",
+   "label": "基本設計風速 V10(C)（m/s；wind103full 2.4，依工址查表；視圖可依行政區帶入建議值）",
+   "unit_in_label": "m/s；wind103full 2.4，依工址查表；視圖可依行政區帶入建議值",
+   "default": "40.0",
+   "kind": "input",
+   "options": null
+  }
+ ],
+ "literal_inputs": [
+  {
+   "name": "K_zt",
+   "default": "1.0",
+   "unit": "-",
+   "label": "地形係數 Kzt（無特殊地形取 1.0）"
+  },
+  {
+   "name": "GCp",
+   "default": "1.3",
+   "unit": "-",
+   "label": "順風向淨風壓係數 G·(Cp 迎風 − Cp 背風)（2.7、2.8 節，使用者自行查算）"
+  },
+  {
+   "name": "n_st",
+   "default": "8",
+   "unit": "-",
+   "label": "樓層數 n（各層等高）"
+  },
+  {
+   "name": "h_st",
+   "default": "3.5",
+   "unit": "m",
+   "label": "各層樓高 h"
+  },
+  {
+   "name": "B_w",
+   "default": "20",
+   "unit": "m",
+   "label": "垂直於風向之建築物寬度 B"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "I_w",
+   "unit": "",
+   "value_at_default": 1
+  },
+  {
+   "name": "alpha_w",
+   "unit": "",
+   "value_at_default": 0.15
+  },
+  {
+   "name": "z_g",
+   "unit": "",
+   "value_at_default": 300
+  },
+  {
+   "name": "H",
+   "unit": "",
+   "value_at_default": 28
+  },
+  {
+   "name": "K_h",
+   "unit": "",
+   "value_at_default": 1.3618130440387295
+  },
+  {
+   "name": "q_h",
+   "unit": "",
+   "value_at_default": 130.73405222771802
+  },
+  {
+   "name": "F_1",
+   "unit": "",
+   "value_at_default": 7.095348100708566
+  },
+  {
+   "name": "V_w",
+   "unit": "",
+   "value_at_default": 78.04348894009601
+  },
+  {
+   "name": "M_w",
+   "unit": "",
+   "value_at_default": 1331.2612431367381
+  }
+ ],
+ "ucValues_at_default": {},
+ "uc_at_default": null,
+ "passes_at_default": null,
+ "errorLines": 0,
+ "unit_warnings": []
+}

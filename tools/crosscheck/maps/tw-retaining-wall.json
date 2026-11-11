@@ -1,0 +1,91 @@
+{
+ "templateId": "tw-retaining-wall",
+ "calculator": "wall_stability",
+ "status": "draft-未經試算驗證",
+ "input_style": "prompt（evaluate 的 values 可直接覆寫）",
+ "inputs": [
+  {
+   "ocss": "H_wall",
+   "ours": "height_m",
+   "unit": "m",
+   "note": "一致"
+  },
+  {
+   "ocss": "B_base",
+   "ours": "base_width_m",
+   "unit": "m"
+  },
+  {
+   "ocss": "h_base",
+   "ours": "base_thickness_m",
+   "unit": "m"
+  },
+  {
+   "ocss": "t_stem",
+   "ours": "stem_thickness_m",
+   "unit": "m",
+   "note": "OCSS 為立壁底厚；本專案 stem_thickness_m 是否為底厚待確認"
+  },
+  {
+   "ocss": "D_soil_toe",
+   "ours": "toe_soil_depth_m",
+   "unit": "m"
+  },
+  {
+   "ocss": "gamma_s",
+   "ours": "soil.gamma",
+   "unit": "kN/m3"
+  },
+  {
+   "ocss": "phi_deg",
+   "ours": "soil.phi_deg",
+   "unit": "deg"
+  },
+  {
+   "ocss": "qa_allow",
+   "ours": "soil.allowable_bearing_kpa",
+   "unit": "kPa"
+  },
+  {
+   "ocss": "q_surcharge",
+   "ours": "soil.surcharge_kpa（引擎讀 surcharge_kpa；CATALOG 範例未列，預設 0）",
+   "unit": "kPa",
+   "note": "範例未給＝0，對照時需顯式設 OCSS q_surcharge=0"
+  },
+  {
+   "ocss": "mu_base",
+   "ours": null,
+   "note": "本專案引擎的底摩擦係數來源待查（可能由 phi 推得，tan(2/3φ) 類），須對齊後才能比滑動 FS"
+  }
+ ],
+ "ocss_only": [
+  "t_top（頂厚，本專案無此輸入）",
+  "L_toe（牆趾長，本專案以 base_width 與 stem 位置推）"
+ ],
+ "ours_only": [
+  "include_passive／passive_ratio（OCSS 無被動土壓選項）",
+  "soil.c_kpa（OCSS 無凝聚力）",
+  "seismic（OCSS 此模板無地震）",
+  "配筋輸入 stem_bar／base_bar／mass_wall_*"
+ ],
+ "compare": [
+  {
+   "ours": "checks[滑動（常時）].value",
+   "ocss": "1/UC_sl（UC 為需求／容許，FS 要換算）",
+   "note": "OCSS 的 UC_sl 定義（容許 FS 為何）待查"
+  },
+  {
+   "ours": "checks[傾倒（常時）].value",
+   "ocss": "1/UC_ot"
+  },
+  {
+   "ours": "result.q_max_kPa",
+   "ocss": "輸出變數待查（UC_bearing 為比值）"
+  }
+ ],
+ "blockers": [
+  "本專案預設含被動土壓；OCSS 無 → 對照時須設 include_passive=false",
+  "mu_base 對應不明",
+  "頂厚 t_top 本專案沒有輸入：以 t_top = t_stem 對照（等厚）可能與本專案梯形斷面不同，需先確認引擎幾何"
+ ]
+}

@@ -1,0 +1,156 @@
+{
+ "templateId": "tw-pile-cap",
+ "module": "三樁／四樁樁帽壓拉桿模型（rc112）",
+ "title": "三樁／四樁樁帽壓拉桿模型設計與檢核（rc112）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "f_c",
+   "default": "28",
+   "unit": "-",
+   "label": "混凝土規定抗壓強度 f'c（MPa）"
+  },
+  {
+   "name": "f_y",
+   "default": "420",
+   "unit": "-",
+   "label": "拉桿鋼筋降伏強度 f_y（MPa）"
+  },
+  {
+   "name": "n_p",
+   "default": "4",
+   "unit": "-",
+   "label": "樁數（3 = 正三角形；4 = 正方形）"
+  },
+  {
+   "name": "s",
+   "default": "2400",
+   "unit": "-",
+   "label": "樁中心間距 s（mm；三樁為三角形邊長，四樁為方形邊長）"
+  },
+  {
+   "name": "d_p",
+   "default": "800",
+   "unit": "-",
+   "label": "樁徑 d_p（mm）"
+  },
+  {
+   "name": "b_c",
+   "default": "700",
+   "unit": "-",
+   "label": "方形柱邊長 b_c（mm）"
+  },
+  {
+   "name": "h",
+   "default": "1600",
+   "unit": "-",
+   "label": "樁帽厚度 h（mm）"
+  },
+  {
+   "name": "cover",
+   "default": "75",
+   "unit": "-",
+   "label": "拉桿鋼筋重心至底面之淨保護層 c（mm；貼地澆置 75）"
+  },
+  {
+   "name": "bar",
+   "default": "32",
+   "unit": "-",
+   "label": "拉桿鋼筋號數 D（19、22、25、29、32、36）"
+  },
+  {
+   "name": "n_bar",
+   "default": "10",
+   "unit": "-",
+   "label": "每條拉桿鋼筋根數"
+  },
+  {
+   "name": "z_r",
+   "default": "0.85",
+   "unit": "-",
+   "label": "桁架力臂比 z/d（工程假設，0.50～0.95）"
+  },
+  {
+   "name": "beta_s",
+   "default": "0.4",
+   "unit": "-",
+   "label": "壓桿係數 β_s（表 23.4.3(a)：0.4 或 0.75；0.75 須符合 23.5 配筋）"
+  },
+  {
+   "name": "P_u",
+   "default": "6000",
+   "unit": "-",
+   "label": "柱因數化軸壓力 P_u（kN）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "d_out",
+   "unit": "",
+   "value_at_default": 1508.9
+  },
+  {
+   "name": "z_out",
+   "unit": "",
+   "value_at_default": 1282.565
+  },
+  {
+   "name": "R_out",
+   "unit": "",
+   "value_at_default": 1697.056274847714
+  },
+  {
+   "name": "theta_out",
+   "unit": "",
+   "value_at_default": 37.080481146262166
+  },
+  {
+   "name": "C_out",
+   "unit": "",
+   "value_at_default": 2487.825241647326
+  },
+  {
+   "name": "T_out",
+   "unit": "",
+   "value_at_default": 1403.4376425366354
+  },
+  {
+   "name": "Tcap_out",
+   "unit": "",
+   "value_at_default": 2565.045
+  },
+  {
+   "name": "Fnp_out",
+   "unit": "",
+   "value_at_default": 4349.592317531175
+  },
+  {
+   "name": "Fnc_out",
+   "unit": "",
+   "value_at_default": 8746.499999999998
+  },
+  {
+   "name": "Fst_out",
+   "unit": "",
+   "value_at_default": 2899.7282116874503
+  },
+  {
+   "name": "smin_out",
+   "unit": "",
+   "value_at_default": 2000
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.86
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_max": 0.86
+ },
+ "uc_at_default": 0.86,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

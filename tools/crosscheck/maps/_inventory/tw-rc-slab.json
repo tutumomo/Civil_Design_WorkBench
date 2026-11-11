@@ -1,0 +1,168 @@
+{
+ "templateId": "tw-rc-slab",
+ "module": "鋼筋混凝土單向板（rc112）",
+ "title": "鋼筋混凝土單向板設計與檢核（rc112）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "f_c",
+   "default": "28",
+   "unit": "-",
+   "label": "混凝土規定抗壓強度 f'c（MPa；rc112 19.2.1，≥ 21）"
+  },
+  {
+   "name": "f_y",
+   "default": "420",
+   "unit": "-",
+   "label": "鋼筋規定降伏強度 f_y（MPa；本模組僅支援 420）"
+  },
+  {
+   "name": "h",
+   "default": "150",
+   "unit": "-",
+   "label": "板厚 h（mm）"
+  },
+  {
+   "name": "ln",
+   "default": "3.0",
+   "unit": "-",
+   "label": "短向淨跨 ℓn（m；支承面到面）"
+  },
+  {
+   "name": "L_long",
+   "default": "7.0",
+   "unit": "-",
+   "label": "長向淨跨（m；須 ≥ 2ℓn，否則為雙向板）"
+  },
+  {
+   "name": "sup",
+   "default": "3",
+   "unit": "-",
+   "label": "支承條件（表 7.3.1.1）：1 = 簡支；2 = 一端連續；3 = 兩端連續；4 = 懸臂"
+  },
+  {
+   "name": "mc",
+   "default": "4",
+   "unit": "-",
+   "label": "彎矩斷面（表 6.5.2）：1 = 簡支跨中 ℓn²/8；2 = 端跨正彎矩（不連續端與支承一體）1/14；3 = 端跨正彎矩（不連續端不受束縛）1/11；4 = 內跨正彎矩 1/16；5 = 第一內支承外面（二跨）1/9；6 = 第一內支承外面（二跨以上）1/10；7 = 其他支承面 1/11；8 = 懸臂固定端 ℓn²/2；9 = 跨距 &lt; 3 m 板之所有支承面 1/12"
+  },
+  {
+   "name": "w_D",
+   "default": "2.0",
+   "unit": "-",
+   "label": "附加靜載重（不含板自重；kN/m²）"
+  },
+  {
+   "name": "w_L",
+   "default": "3.0",
+   "unit": "-",
+   "label": "活載重 L（kN/m²）"
+  },
+  {
+   "name": "env",
+   "default": "1",
+   "unit": "-",
+   "label": "暴露環境（表 20.5.1.3.1）：1 = 不暴露且不接觸大地之樓板；2 = 暴露大氣或接觸大地；3 = 貼地澆置且永久接觸大地；4 = 海水或腐蝕環境"
+  },
+  {
+   "name": "cover",
+   "default": "20",
+   "unit": "-",
+   "label": "採用淨保護層 c（mm）"
+  },
+  {
+   "name": "bar",
+   "default": "13",
+   "unit": "-",
+   "label": "主筋號數 D（10、13、16、19、22、25）"
+  },
+  {
+   "name": "s",
+   "default": "150",
+   "unit": "-",
+   "label": "主筋間距（mm）"
+  },
+  {
+   "name": "bar_t",
+   "default": "10",
+   "unit": "-",
+   "label": "溫度收縮鋼筋號數 D（10、13、16、19、22、25）"
+  },
+  {
+   "name": "s_t",
+   "default": "250",
+   "unit": "-",
+   "label": "溫度收縮鋼筋間距（mm）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "D_all",
+   "unit": "",
+   "value_at_default": 5.6
+  },
+  {
+   "name": "w_u_out",
+   "unit": "",
+   "value_at_default": 11.52
+  },
+  {
+   "name": "M_u_out",
+   "unit": "",
+   "value_at_default": 6.4799999999999995
+  },
+  {
+   "name": "V_u_out",
+   "unit": "",
+   "value_at_default": 17.28
+  },
+  {
+   "name": "h_min_out",
+   "unit": "",
+   "value_at_default": 107.14285714285714
+  },
+  {
+   "name": "d_out",
+   "unit": "",
+   "value_at_default": 123.65
+  },
+  {
+   "name": "As_out",
+   "unit": "",
+   "value_at_default": 844.6666666666666
+  },
+  {
+   "name": "eps_out",
+   "unit": "",
+   "value_at_default": 0.01815322612470403
+  },
+  {
+   "name": "phiMn_out",
+   "unit": "",
+   "value_at_default": 37.099861729411764
+  },
+  {
+   "name": "lam_s_out",
+   "unit": "",
+   "value_at_default": 1
+  },
+  {
+   "name": "phiVc_out",
+   "unit": "",
+   "value_at_default": 63.31506506526016
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 1
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_max": 1
+ },
+ "uc_at_default": 1,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

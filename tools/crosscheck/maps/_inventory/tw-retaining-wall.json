@@ -1,0 +1,712 @@
+{
+ "templateId": "tw-retaining-wall",
+ "module": "鋼筋混凝土懸臂式擋土牆（found112 / swc_tech）",
+ "title": "鋼筋混凝土懸臂式擋土牆設計與檢核（found112 / swc_tech / rc112）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "H_wall",
+   "label": "擋土牆總高度 H（水土保持技術規範 §118 四：懸臂式以 8 m 以下為原則）（m）",
+   "unit_in_label": "m",
+   "default": "5.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "B_base",
+   "label": "基礎底版總寬度 B（建議約 0.5H～0.7H）（m）",
+   "unit_in_label": "m",
+   "default": "3.2",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "h_base",
+   "label": "基礎底版厚度 h_b（m）",
+   "unit_in_label": "m",
+   "default": "0.5",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "L_toe",
+   "label": "牆趾前伸長度 L_toe（m）",
+   "unit_in_label": "m",
+   "default": "0.9",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "t_top",
+   "label": "立壁頂端厚度 t_top（rc112 §11.3.1.1 規定外牆 ≥ 0.20 m）（m）",
+   "unit_in_label": "m",
+   "default": "0.3",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "t_stem",
+   "label": "立壁底部厚度 t_stem（m）",
+   "unit_in_label": "m",
+   "default": "0.5",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "D_soil_toe",
+   "label": "牆趾前方覆土埋置深度 D_f（m）",
+   "unit_in_label": "m",
+   "default": "0.8",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "gamma_s",
+   "label": "回填土單位重 γ_s（kN/m^3）",
+   "unit_in_label": "kN/m^3",
+   "default": "19.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "phi_deg",
+   "label": "回填土有效內摩擦角 φ",
+   "unit_in_label": "",
+   "default": "32",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "q_surcharge",
+   "label": "牆頂地表等效活載重超載 q_sur（kN/m^2）",
+   "unit_in_label": "kN/m^2",
+   "default": "10.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "qa_allow",
+   "label": "地盤容許承載力 q_a（長期載重）（kN/m^2）",
+   "unit_in_label": "kN/m^2",
+   "default": "220.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "mu_base",
+   "label": "基底土壤摩擦係數 μ（found112 表 4.6-1：粗砂、碎石約 0.55；中砂約 0.50；細砂粉土約 0.45）",
+   "unit_in_label": "found112 表 4.6-1：粗砂、碎石約 0.55；中砂約 0.50；細砂粉土約 0.45",
+   "default": "0.55",
+   "kind": "input",
+   "options": null
+  }
+ ],
+ "literal_inputs": [
+  {
+   "name": "fc_kpa",
+   "default": "28000",
+   "unit": "kN/m^2",
+   "label": "混凝土規定抗壓強度 f'c（28 MPa = 28000 kN/m²）"
+  },
+  {
+   "name": "fy_kpa",
+   "default": "420000",
+   "unit": "kN/m^2",
+   "label": "鋼筋規定降伏強度 fy（SD420 = 420 MPa = 420000 kN/m²）"
+  },
+  {
+   "name": "gamma_c",
+   "default": "24.0",
+   "unit": "kN/m^3",
+   "label": "鋼筋混凝土單位重 γ_c"
+  },
+  {
+   "name": "db_stem",
+   "default": "22.2",
+   "unit": "mm",
+   "label": "（D22 鋼筋，單根面積 387.1 mm²）"
+  },
+  {
+   "name": "Ab_stem",
+   "default": "387.1",
+   "unit": "mm^2",
+   "label": ""
+  },
+  {
+   "name": "s_stem",
+   "default": "150",
+   "unit": "mm",
+   "label": "立壁垂直受拉主筋間距 s_stem"
+  },
+  {
+   "name": "db_toe",
+   "default": "19.1",
+   "unit": "mm",
+   "label": "（D19 鋼筋，單根面積 286.5 mm²）"
+  },
+  {
+   "name": "Ab_toe",
+   "default": "286.5",
+   "unit": "mm^2",
+   "label": ""
+  },
+  {
+   "name": "s_toe",
+   "default": "150",
+   "unit": "mm",
+   "label": "前趾受拉主筋間距 s_toe"
+  },
+  {
+   "name": "db_heel",
+   "default": "19.1",
+   "unit": "mm",
+   "label": "（D19 鋼筋，單根面積 286.5 mm²）"
+  },
+  {
+   "name": "Ab_heel",
+   "default": "286.5",
+   "unit": "mm^2",
+   "label": ""
+  },
+  {
+   "name": "s_heel",
+   "default": "150",
+   "unit": "mm",
+   "label": "後踵受拉主筋間距 s_heel"
+  },
+  {
+   "name": "cover_stem",
+   "default": "50",
+   "unit": "mm",
+   "label": ""
+  },
+  {
+   "name": "cover_base_bottom",
+   "default": "75",
+   "unit": "mm",
+   "label": "貼地澆置保護層 75 mm（表 20.5.1.3.1）"
+  },
+  {
+   "name": "cover_base_top",
+   "default": "50",
+   "unit": "mm",
+   "label": "頂面接觸土壤保護層 50 mm"
+  },
+  {
+   "name": "drain_dia",
+   "default": "60",
+   "unit": "mm",
+   "label": "排水孔直徑（規範規定 ≥ 50 mm，工程常用 60～100 mm PVC 管）"
+  },
+  {
+   "name": "drain_spacing_h",
+   "default": "1.5",
+   "unit": "m",
+   "label": "排水孔水平間距"
+  },
+  {
+   "name": "drain_spacing_v",
+   "default": "1.2",
+   "unit": "m",
+   "label": "排水孔垂直間距"
+  },
+  {
+   "name": "joint_spacing",
+   "default": "25.0",
+   "unit": "m",
+   "label": "伸縮縫配置間距（規範規定 20～40 m 設一處）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "h_stem",
+   "unit": "",
+   "value_at_default": 4.5
+  },
+  {
+   "name": "L_heel",
+   "unit": "",
+   "value_at_default": 1.8000000000000003
+  },
+  {
+   "name": "fc_mpa",
+   "unit": "",
+   "value_at_default": 28
+  },
+  {
+   "name": "fy_mpa",
+   "unit": "",
+   "value_at_default": 420
+  },
+  {
+   "name": "Ka",
+   "unit": "",
+   "value_at_default": 0.3072585245224685
+  },
+  {
+   "name": "P_A_soil",
+   "unit": "",
+   "value_at_default": 72.97389957408626
+  },
+  {
+   "name": "P_A_sur",
+   "unit": "",
+   "value_at_default": 15.362926226123426
+  },
+  {
+   "name": "P_ah",
+   "unit": "",
+   "value_at_default": 88.33682580020968
+  },
+  {
+   "name": "M_O",
+   "unit": "",
+   "value_at_default": 160.030481522119
+  },
+  {
+   "name": "W_1",
+   "unit": "",
+   "value_at_default": 32.4
+  },
+  {
+   "name": "arm_1",
+   "unit": "",
+   "value_at_default": 1.25
+  },
+  {
+   "name": "M_R1",
+   "unit": "",
+   "value_at_default": 40.5
+  },
+  {
+   "name": "W_2",
+   "unit": "",
+   "value_at_default": 10.8
+  },
+  {
+   "name": "arm_2",
+   "unit": "",
+   "value_at_default": 1.0333333333333334
+  },
+  {
+   "name": "M_R2",
+   "unit": "",
+   "value_at_default": 11.160000000000002
+  },
+  {
+   "name": "W_3",
+   "unit": "",
+   "value_at_default": 38.400000000000006
+  },
+  {
+   "name": "arm_3",
+   "unit": "",
+   "value_at_default": 1.6
+  },
+  {
+   "name": "M_R3",
+   "unit": "",
+   "value_at_default": 61.44000000000001
+  },
+  {
+   "name": "W_4",
+   "unit": "",
+   "value_at_default": 153.9
+  },
+  {
+   "name": "arm_4",
+   "unit": "",
+   "value_at_default": 2.3
+  },
+  {
+   "name": "M_R4",
+   "unit": "",
+   "value_at_default": 353.96999999999997
+  },
+  {
+   "name": "W_sur",
+   "unit": "",
+   "value_at_default": 18.000000000000004
+  },
+  {
+   "name": "arm_sur",
+   "unit": "",
+   "value_at_default": 2.3
+  },
+  {
+   "name": "M_Rsur",
+   "unit": "",
+   "value_at_default": 41.400000000000006
+  },
+  {
+   "name": "h_toe_soil",
+   "unit": "",
+   "value_at_default": 0.30000000000000004
+  },
+  {
+   "name": "W_toe_soil",
+   "unit": "",
+   "value_at_default": 5.130000000000001
+  },
+  {
+   "name": "arm_toe",
+   "unit": "",
+   "value_at_default": 0.45
+  },
+  {
+   "name": "M_Rtoe",
+   "unit": "",
+   "value_at_default": 2.3085000000000004
+  },
+  {
+   "name": "sum_V",
+   "unit": "",
+   "value_at_default": 258.63
+  },
+  {
+   "name": "sum_MR",
+   "unit": "",
+   "value_at_default": 510.7785
+  },
+  {
+   "name": "FS_ot",
+   "unit": "",
+   "value_at_default": 3.191757564819934
+  },
+  {
+   "name": "UC_ot",
+   "unit": "",
+   "value_at_default": 0.62661400791975
+  },
+  {
+   "name": "R_friction",
+   "unit": "",
+   "value_at_default": 142.2465
+  },
+  {
+   "name": "FS_sl",
+   "unit": "",
+   "value_at_default": 1.610274069862066
+  },
+  {
+   "name": "UC_sl",
+   "unit": "",
+   "value_at_default": 0.9315184465017735
+  },
+  {
+   "name": "x_R",
+   "unit": "",
+   "value_at_default": 1.3561768490812398
+  },
+  {
+   "name": "e_base",
+   "unit": "",
+   "value_at_default": 0.24382315091876028
+  },
+  {
+   "name": "e_limit",
+   "unit": "",
+   "value_at_default": 0.5333333333333333
+  },
+  {
+   "name": "UC_ecc",
+   "unit": "",
+   "value_at_default": 0.45716840797267555
+  },
+  {
+   "name": "q_toe",
+   "unit": "",
+   "value_at_default": 117.77108292311657
+  },
+  {
+   "name": "q_heel",
+   "unit": "",
+   "value_at_default": 43.87266707688342
+  },
+  {
+   "name": "q_max",
+   "unit": "",
+   "value_at_default": 117.77108292311657
+  },
+  {
+   "name": "UC_bearing",
+   "unit": "",
+   "value_at_default": 0.5353231041959844
+  },
+  {
+   "name": "P_A_stem",
+   "unit": "",
+   "value_at_default": 59.108858655009875
+  },
+  {
+   "name": "P_sur_stem",
+   "unit": "",
+   "value_at_default": 13.826633603511084
+  },
+  {
+   "name": "M_u_stem",
+   "unit": "",
+   "value_at_default": 191.6371417446636
+  },
+  {
+   "name": "V_u_stem",
+   "unit": "",
+   "value_at_default": 116.69678761363353
+  },
+  {
+   "name": "d_stem",
+   "unit": "",
+   "value_at_default": 438.9
+  },
+  {
+   "name": "phi_v",
+   "unit": "",
+   "value_at_default": 0.75
+  },
+  {
+   "name": "phi_Vc_stem",
+   "unit": "",
+   "value_at_default": 296.11116385869343
+  },
+  {
+   "name": "UC_v_stem",
+   "unit": "",
+   "value_at_default": 0.39409789922450256
+  },
+  {
+   "name": "As_stem",
+   "unit": "",
+   "value_at_default": 2580.666666666667
+  },
+  {
+   "name": "As_min_stem",
+   "unit": "",
+   "value_at_default": 900
+  },
+  {
+   "name": "UC_rhos_stem",
+   "unit": "",
+   "value_at_default": 0.34874709377421853
+  },
+  {
+   "name": "a_stem",
+   "unit": "",
+   "value_at_default": 45.54117647058825
+  },
+  {
+   "name": "phi_m",
+   "unit": "",
+   "value_at_default": 0.9
+  },
+  {
+   "name": "phi_Mn_stem",
+   "unit": "",
+   "value_at_default": 405.9309121411765
+  },
+  {
+   "name": "UC_m_stem",
+   "unit": "",
+   "value_at_default": 0.47209299911117675
+  },
+  {
+   "name": "q_front",
+   "unit": "",
+   "value_at_default": 96.9871534663635
+  },
+  {
+   "name": "w_toe_down",
+   "unit": "",
+   "value_at_default": 17.700000000000003
+  },
+  {
+   "name": "qu_toe_net",
+   "unit": "",
+   "value_at_default": 167.1937326769865
+  },
+  {
+   "name": "qu_front_net",
+   "unit": "",
+   "value_at_default": 133.9394455461816
+  },
+  {
+   "name": "V_u_toe",
+   "unit": "",
+   "value_at_default": 135.50993020042566
+  },
+  {
+   "name": "M_u_toe",
+   "unit": "",
+   "value_at_default": 63.22413297152088
+  },
+  {
+   "name": "d_toe",
+   "unit": "",
+   "value_at_default": 415.45
+  },
+  {
+   "name": "phi_Vc_toe",
+   "unit": "",
+   "value_at_default": 280.29023245635494
+  },
+  {
+   "name": "UC_v_toe",
+   "unit": "",
+   "value_at_default": 0.48346290562061034
+  },
+  {
+   "name": "As_toe",
+   "unit": "",
+   "value_at_default": 1910
+  },
+  {
+   "name": "As_min_base",
+   "unit": "",
+   "value_at_default": 900
+  },
+  {
+   "name": "UC_rhos_toe",
+   "unit": "",
+   "value_at_default": 0.4712041884816754
+  },
+  {
+   "name": "a_toe",
+   "unit": "",
+   "value_at_default": 33.705882352941174
+  },
+  {
+   "name": "phi_Mn_toe",
+   "unit": "",
+   "value_at_default": 287.7791045294117
+  },
+  {
+   "name": "UC_m_toe",
+   "unit": "",
+   "value_at_default": 0.21969674648514734
+  },
+  {
+   "name": "q_stem_back",
+   "unit": "",
+   "value_at_default": 85.44052599038956
+  },
+  {
+   "name": "wu_heel_down",
+   "unit": "",
+   "value_at_default": 133
+  },
+  {
+   "name": "V_u_heel",
+   "unit": "",
+   "value_at_default": 123.01812623945433
+  },
+  {
+   "name": "M_u_heel",
+   "unit": "",
+   "value_at_default": 121.93963552215558
+  },
+  {
+   "name": "d_heel",
+   "unit": "",
+   "value_at_default": 440.45
+  },
+  {
+   "name": "phi_Vc_heel",
+   "unit": "",
+   "value_at_default": 297.1568970643917
+  },
+  {
+   "name": "UC_v_heel",
+   "unit": "",
+   "value_at_default": 0.4139837488368887
+  },
+  {
+   "name": "As_heel",
+   "unit": "",
+   "value_at_default": 1910
+  },
+  {
+   "name": "UC_rhos_heel",
+   "unit": "",
+   "value_at_default": 0.4712041884816754
+  },
+  {
+   "name": "a_heel",
+   "unit": "",
+   "value_at_default": 33.705882352941174
+  },
+  {
+   "name": "phi_Mn_heel",
+   "unit": "",
+   "value_at_default": 305.82860452941173
+  },
+  {
+   "name": "UC_m_heel",
+   "unit": "",
+   "value_at_default": 0.3987188697073905
+  },
+  {
+   "name": "s_limit_stem",
+   "unit": "",
+   "value_at_default": 450
+  },
+  {
+   "name": "UC_space_stem",
+   "unit": "",
+   "value_at_default": 0.3333333333333333
+  },
+  {
+   "name": "drain_area_per_hole",
+   "unit": "",
+   "value_at_default": 1.7999999999999998
+  },
+  {
+   "name": "UC_drain_dia",
+   "unit": "",
+   "value_at_default": 0.8333333333333334
+  },
+  {
+   "name": "UC_drain_area",
+   "unit": "",
+   "value_at_default": 0.8999999999999999
+  },
+  {
+   "name": "UC_drain",
+   "unit": "",
+   "value_at_default": 0.8999999999999999
+  },
+  {
+   "name": "UC_joint",
+   "unit": "",
+   "value_at_default": 0.5
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.94
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_ot": 0.62661400791975,
+  "UC_sl": 0.9315184465017735,
+  "UC_ecc": 0.45716840797267555,
+  "UC_bearing": 0.5353231041959844,
+  "UC_v_stem": 0.39409789922450256,
+  "UC_rhos_stem": 0.34874709377421853,
+  "UC_m_stem": 0.47209299911117675,
+  "UC_v_toe": 0.48346290562061034,
+  "UC_rhos_toe": 0.4712041884816754,
+  "UC_m_toe": 0.21969674648514734,
+  "UC_v_heel": 0.4139837488368887,
+  "UC_rhos_heel": 0.4712041884816754,
+  "UC_m_heel": 0.3987188697073905,
+  "UC_space_stem": 0.3333333333333333,
+  "UC_drain_dia": 0.8333333333333334,
+  "UC_drain_area": 0.8999999999999999,
+  "UC_drain": 0.8999999999999999,
+  "UC_joint": 0.5,
+  "UC_max": 0.94
+ },
+ "uc_at_default": 0.94,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

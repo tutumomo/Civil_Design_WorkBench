@@ -1,0 +1,657 @@
+{
+ "templateId": "tw-steel-column",
+ "module": "鋼結構 H 型鋼柱與柱腳（steel99 LRFD）",
+ "title": "鋼結構熱軋 H 型鋼柱與柱腳設計（steel99 LRFD／ASD）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "design_method",
+   "label": "design_method",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "極限設計法 LRFD（steel99 第（二）篇）"
+    },
+    {
+     "value": "2",
+     "text": "容許應力設計法 ASD（steel99 第（一）篇，僅純軸壓柱構材）"
+    }
+   ]
+  },
+  {
+   "name": "f_y_in",
+   "label": "鋼柱鋼材標稱降伏強度 Fy<span class=\"alleen-scherm\">（常用 SN490 / SM490 為 325 MPa，範圍 2.0～4.55 tf/cm²）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "325",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "f_y_bp_in",
+   "label": "柱腳基板鋼材標稱降伏強度 Fy_bp<span class=\"alleen-scherm\">（基板材質常用 SM490 或 SN490）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "325",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "fc_in",
+   "label": "基礎混凝土規定抗壓強度 f'c<span class=\"alleen-scherm\">（一般基礎常用 210～350 kgf/cm²）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "280",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "anchor_grade",
+   "label": "anchor_grade",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "A307 螺栓（Fnt = 3.15, Fnv = 1.68 tf/cm²，φ = 0.75）"
+    },
+    {
+     "value": "2",
+     "text": "F10T 高強度螺栓（Fnt = 7.50, Fnv = 4.00 tf/cm²，φ = 0.75）"
+    },
+    {
+     "value": "3",
+     "text": "螺牙桿件（Fu = 400 MPa，Fnt = 0.75Fu，Fnv = 0.40Fu，φ = 0.75）"
+    }
+   ]
+  },
+  {
+   "name": "shear_mode",
+   "label": "shear_mode",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "接觸面摩擦力傳遞（μ = 0.9，埋置於灌漿內）"
+    },
+    {
+     "value": "2",
+     "text": "4 支錨栓承壓式直接抗剪"
+    }
+   ]
+  },
+  {
+   "name": "L_col",
+   "label": "鋼柱未支撐長度 L（樓層淨高）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "4.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "K_x",
+   "label": "強軸有效長度係數 Kx<span class=\"alleen-scherm\">（依 §4.8，側移構架不得任意取 1.0）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "1.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "K_y",
+   "label": "弱軸有效長度係數 Ky<span class=\"alleen-scherm\">（依構架穩定性與柱端束制填入）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "1.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "L_b",
+   "label": "側向無支撐長度 Lb（弱軸側撐間距）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "4.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "C_b",
+   "label": "側向扭轉挫屈彎矩梯度修正因數 Cb（均勻彎矩取 1.0）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "1.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "P_u",
+   "label": "設計軸壓力 Pu（受壓為正；ASD 時為服務載重軸力 P）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "700",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_ux",
+   "label": "強軸因數化設計彎矩 Mux<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "120",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_uy",
+   "label": "弱軸因數化設計彎矩 Muy<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "20",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "V_u",
+   "label": "柱腳因數化設計水平剪力 Vu<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "80",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "B_p",
+   "label": "基板寬度 Bp（平行於柱強軸／腹板向）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "500",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "N_p",
+   "label": "基板長度 Np（平行於柱弱軸／翼板向）<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "500",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "t_p",
+   "label": "基板厚度 tp<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "32",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "B_ped",
+   "label": "基礎墩座頂面寬度 Bped<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "700",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "N_ped",
+   "label": "基礎墩座頂面長度 Nped<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "700",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "d_b",
+   "label": "錨栓公稱直徑 db<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "30",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "b_x",
+   "label": "錨栓 X 向中心間距 bx<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "350",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "b_y",
+   "label": "錨栓 Y 向中心間距 by<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "350",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "h_ef",
+   "label": "錨栓有效埋深 hef<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "450",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "section_id",
+   "label": "section_id",
+   "unit_in_label": "",
+   "default": "7",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "7",
+     "text": "RH 300x300x10x15 (h=300, b=300, tw=10, tf=15 mm, W=94.0 kg/m)"
+    },
+    {
+     "value": "5",
+     "text": "RH 200x200x8x12 (h=200, b=200, tw=8, tf=12 mm, W=49.9 kg/m)"
+    },
+    {
+     "value": "6",
+     "text": "RH 250x250x9x14 (h=250, b=250, tw=9, tf=14 mm, W=72.4 kg/m)"
+    },
+    {
+     "value": "8",
+     "text": "RH 350x350x12x19 (h=350, b=350, tw=12, tf=19 mm, W=137.0 kg/m)"
+    },
+    {
+     "value": "9",
+     "text": "RH 400x400x13x21 (h=400, b=400, tw=13, tf=21 mm, W=172.0 kg/m)"
+    },
+    {
+     "value": "14",
+     "text": "RH 400x200x8x13 (h=400, b=200, tw=8, tf=13 mm, W=66.0 kg/m)"
+    },
+    {
+     "value": "10",
+     "text": "RH 200x100x5.5x8 (h=200, b=100, tw=5.5, tf=8 mm, W=21.3 kg/m)"
+    },
+    {
+     "value": "11",
+     "text": "RH 250x125x6x9 (h=250, b=125, tw=6, tf=9 mm, W=29.6 kg/m)"
+    },
+    {
+     "value": "12",
+     "text": "RH 300x150x6.5x9 (h=300, b=150, tw=6.5, tf=9 mm, W=36.7 kg/m)"
+    },
+    {
+     "value": "13",
+     "text": "RH 350x175x7x11 (h=350, b=175, tw=7, tf=11 mm, W=49.6 kg/m)"
+    },
+    {
+     "value": "15",
+     "text": "RH 450x200x9x14 (h=450, b=200, tw=9, tf=14 mm, W=76.0 kg/m)"
+    },
+    {
+     "value": "16",
+     "text": "RH 500x200x10x16 (h=500, b=200, tw=10, tf=16 mm, W=89.6 kg/m)"
+    },
+    {
+     "value": "17",
+     "text": "RH 600x200x11x17 (h=600, b=200, tw=11, tf=17 mm, W=106.0 kg/m)"
+    },
+    {
+     "value": "18",
+     "text": "RH 700x300x13x24 (h=700, b=300, tw=13, tf=24 mm, W=185.0 kg/m)"
+    },
+    {
+     "value": "19",
+     "text": "RH 800x300x14x26 (h=800, b=300, tw=14, tf=26 mm, W=210.0 kg/m)"
+    },
+    {
+     "value": "20",
+     "text": "RH 900x300x16x28 (h=900, b=300, tw=16, tf=28 mm, W=243.0 kg/m)"
+    },
+    {
+     "value": "1",
+     "text": "RH 100x100x6x8 (h=100, b=100, tw=6, tf=8 mm, W=17.2 kg/m)"
+    },
+    {
+     "value": "2",
+     "text": "RH 125x125x6.5x9 (h=125, b=125, tw=6.5, tf=9 mm, W=23.8 kg/m)"
+    },
+    {
+     "value": "3",
+     "text": "RH 150x150x7x10 (h=150, b=150, tw=7, tf=10 mm, W=31.5 kg/m)"
+    },
+    {
+     "value": "4",
+     "text": "RH 175x175x7.5x11 (h=175, b=175, tw=7.5, tf=11 mm, W=40.2 kg/m)"
+    }
+   ]
+  }
+ ],
+ "literal_inputs": [],
+ "outputs": [
+  {
+   "name": "f_y",
+   "unit": "MPa",
+   "value_at_default": 325
+  },
+  {
+   "name": "f_y_bp",
+   "unit": "MPa",
+   "value_at_default": 325
+  },
+  {
+   "name": "fc_in",
+   "unit": "kgf / cm^2",
+   "value_at_default": 280
+  },
+  {
+   "name": "E_s",
+   "unit": "MPa",
+   "value_at_default": 200055.66
+  },
+  {
+   "name": "G_s",
+   "unit": "MPa",
+   "value_at_default": 79433.865
+  },
+  {
+   "name": "h",
+   "unit": "mm",
+   "value_at_default": 300
+  },
+  {
+   "name": "b",
+   "unit": "mm",
+   "value_at_default": 300
+  },
+  {
+   "name": "t_w",
+   "unit": "mm",
+   "value_at_default": 10
+  },
+  {
+   "name": "t_f",
+   "unit": "mm",
+   "value_at_default": 15
+  },
+  {
+   "name": "A",
+   "unit": "cm^2",
+   "value_at_default": 119.80000000000001
+  },
+  {
+   "name": "I_x",
+   "unit": "cm^4",
+   "value_at_default": 20400
+  },
+  {
+   "name": "W_x",
+   "unit": "cm^3",
+   "value_at_default": 1360
+  },
+  {
+   "name": "Z_x",
+   "unit": "cm^3",
+   "value_at_default": 1510
+  },
+  {
+   "name": "i_x",
+   "unit": "cm",
+   "value_at_default": 13.1
+  },
+  {
+   "name": "I_y",
+   "unit": "cm^4",
+   "value_at_default": 6750
+  },
+  {
+   "name": "W_y",
+   "unit": "cm^3",
+   "value_at_default": 450
+  },
+  {
+   "name": "Z_y",
+   "unit": "cm^3",
+   "value_at_default": 686
+  },
+  {
+   "name": "i_y",
+   "unit": "cm",
+   "value_at_default": 7.51
+  },
+  {
+   "name": "J",
+   "unit": "cm^4",
+   "value_at_default": 76.5
+  },
+  {
+   "name": "C_w",
+   "unit": "cm^6",
+   "value_at_default": 1370671.8749999998
+  },
+  {
+   "name": "lambda_f",
+   "unit": "",
+   "value_at_default": 10
+  },
+  {
+   "name": "lambda_pf",
+   "unit": "",
+   "value_at_default": 8.788983313916786
+  },
+  {
+   "name": "lambda_rf",
+   "unit": "",
+   "value_at_default": 13.732786427994979
+  },
+  {
+   "name": "lambda_w",
+   "unit": "",
+   "value_at_default": 27
+  },
+  {
+   "name": "lambda_pw",
+   "unit": "",
+   "value_at_default": 27.465572855989958
+  },
+  {
+   "name": "lambda_rw",
+   "unit": "",
+   "value_at_default": 54.931145711979916
+  },
+  {
+   "name": "is_nonslender",
+   "unit": "",
+   "value_at_default": 1
+  },
+  {
+   "name": "KLr_x",
+   "unit": "",
+   "value_at_default": 30.534351145038165
+  },
+  {
+   "name": "KLr_y",
+   "unit": "",
+   "value_at_default": 53.26231691078562
+  },
+  {
+   "name": "KLr_max",
+   "unit": "",
+   "value_at_default": 53.26231691078562
+  },
+  {
+   "name": "lambda_c",
+   "unit": "",
+   "value_at_default": 0.6833393663454487
+  },
+  {
+   "name": "F_cr",
+   "unit": "MPa",
+   "value_at_default": 267.2466474989324
+  },
+  {
+   "name": "phiP_n",
+   "unit": "kN",
+   "value_at_default": 2721.372611481629
+  },
+  {
+   "name": "UC_P",
+   "unit": "",
+   "value_at_default": 0.2572231369738416
+  },
+  {
+   "name": "L_p",
+   "unit": "m",
+   "value_at_default": 3.3002632343757528
+  },
+  {
+   "name": "L_r",
+   "unit": "m",
+   "value_at_default": 9.86232092107391
+  },
+  {
+   "name": "phiM_nx",
+   "unit": "kN m",
+   "value_at_default": 428.03671745763046
+  },
+  {
+   "name": "phiM_ny",
+   "unit": "kN m",
+   "value_at_default": 197.43750000000006
+  },
+  {
+   "name": "UC_col",
+   "unit": "",
+   "value_at_default": 0.5964655014871862
+  },
+  {
+   "name": "A1",
+   "unit": "cm^2",
+   "value_at_default": 2500
+  },
+  {
+   "name": "A2",
+   "unit": "cm^2",
+   "value_at_default": 4900.000000000001
+  },
+  {
+   "name": "ratio_A",
+   "unit": "",
+   "value_at_default": 1.4000000000000001
+  },
+  {
+   "name": "phiP_p",
+   "unit": "kN",
+   "value_at_default": 4901.36367
+  },
+  {
+   "name": "UC_bearing",
+   "unit": "",
+   "value_at_default": 0.1428173967756202
+  },
+  {
+   "name": "q_max",
+   "unit": "MPa",
+   "value_at_default": 9.52
+  },
+  {
+   "name": "q_min",
+   "unit": "MPa",
+   "value_at_default": -3.92
+  },
+  {
+   "name": "l_flange",
+   "unit": "mm",
+   "value_at_default": 100
+  },
+  {
+   "name": "l_web",
+   "unit": "mm",
+   "value_at_default": 100
+  },
+  {
+   "name": "l_cant",
+   "unit": "mm",
+   "value_at_default": 100
+  },
+  {
+   "name": "m_pl",
+   "unit": "MPa mm^2",
+   "value_at_default": 42800.00000000001
+  },
+  {
+   "name": "tp_req",
+   "unit": "mm",
+   "value_at_default": 29.630199424720686
+  },
+  {
+   "name": "t_p",
+   "unit": "mm",
+   "value_at_default": 32
+  },
+  {
+   "name": "UC_tp",
+   "unit": "",
+   "value_at_default": 0.9259437320225214
+  },
+  {
+   "name": "Ab",
+   "unit": "cm^2",
+   "value_at_default": 7.068583470577034
+  },
+  {
+   "name": "T_bolt",
+   "unit": "kN",
+   "value_at_default": 25
+  },
+  {
+   "name": "phiRn_t",
+   "unit": "kN",
+   "value_at_default": 163.7664306667222
+  },
+  {
+   "name": "UC_anchor_t",
+   "unit": "",
+   "value_at_default": 0.1526564381859003
+  },
+  {
+   "name": "T_group",
+   "unit": "kN",
+   "value_at_default": 50
+  },
+  {
+   "name": "A_cone",
+   "unit": "cm^2",
+   "value_at_default": 9430.420690816227
+  },
+  {
+   "name": "phiTc",
+   "unit": "kN",
+   "value_at_default": 1230.262784952578
+  },
+  {
+   "name": "UC_cone",
+   "unit": "",
+   "value_at_default": 0.04064172355008472
+  },
+  {
+   "name": "phiV_n",
+   "unit": "kN",
+   "value_at_default": 472.50000000000006
+  },
+  {
+   "name": "UC_V",
+   "unit": "",
+   "value_at_default": 0.1693121693121693
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.93
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_P": 0.2572231369738416,
+  "UC_col": 0.5964655014871862,
+  "UC_bearing": 0.1428173967756202,
+  "UC_tp": 0.9259437320225214,
+  "UC_anchor_t": 0.1526564381859003,
+  "UC_cone": 0.04064172355008472,
+  "UC_V": 0.1693121693121693,
+  "UC_max": 0.93
+ },
+ "uc_at_default": 0.93,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

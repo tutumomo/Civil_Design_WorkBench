@@ -1,0 +1,272 @@
+{
+ "templateId": "tw-sediment-basin",
+ "module": "沉砂池設計與檢核（swc_tech 第 35、92、93 條）",
+ "title": "沉砂池設計與檢核（swc_tech 第 35、92、93 條）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "is_perm",
+   "default": "0",
+   "unit": "-",
+   "label": "沉砂設施型式：0 = 臨時性（施工期間）；1 = 永久性"
+  },
+  {
+   "name": "A_dev",
+   "default": "2.0",
+   "unit": "ha",
+   "label": "計畫開發面積（集水面積）A"
+  },
+  {
+   "name": "A_exc",
+   "default": "1.2",
+   "unit": "ha",
+   "label": "其中開挖整地部分面積 A_exc"
+  },
+  {
+   "name": "A_imp",
+   "default": "0.2",
+   "unit": "ha",
+   "label": "不透水鋪面面積 A_imp（第 92 條末項得扣除；先扣未開挖部分，不足再扣開挖部分）"
+  },
+  {
+   "name": "n_years",
+   "default": "1.0",
+   "unit": "-",
+   "label": "泥砂生產量估算年期（年）；條文未定年期，依施工期或清除週期填寫並於報告寫明"
+  },
+  {
+   "name": "Rm",
+   "default": "15000",
+   "unit": "-",
+   "label": "降雨沖蝕指數 Rm（百萬焦耳·公釐/公頃·小時·年）"
+  },
+  {
+   "name": "Km",
+   "default": "0.030",
+   "unit": "-",
+   "label": "土壤沖蝕指數 Km（公噸·公頃·年/公頃·百萬焦耳·公釐）"
+  },
+  {
+   "name": "L_fac",
+   "default": "1.50",
+   "unit": "-",
+   "label": "坡長因子 L"
+  },
+  {
+   "name": "S_fac",
+   "default": "2.00",
+   "unit": "-",
+   "label": "坡度因子 S"
+  },
+  {
+   "name": "C_exc",
+   "default": "0.05",
+   "unit": "-",
+   "label": "開挖整地部分覆蓋與管理因子 C（第 35 條二：不得小於 0.05）"
+  },
+  {
+   "name": "P_exc",
+   "default": "0.50",
+   "unit": "-",
+   "label": "開挖整地部分水土保持處理因子 P（第 35 條二：不得小於 0.5）"
+  },
+  {
+   "name": "C_oth",
+   "default": "0.01",
+   "unit": "-",
+   "label": "未開挖或已完成水土保持處理部分之 C"
+  },
+  {
+   "name": "P_oth",
+   "default": "1.00",
+   "unit": "-",
+   "label": "未開挖或已完成水土保持處理部分之 P"
+  },
+  {
+   "name": "L0_pond",
+   "default": "20.0",
+   "unit": "m",
+   "label": "池底長度 L0"
+  },
+  {
+   "name": "B0_pond",
+   "default": "10.0",
+   "unit": "m",
+   "label": "池底寬度 B0"
+  },
+  {
+   "name": "z_pond",
+   "default": "1.0",
+   "unit": "-",
+   "label": "池邊坡比 1:z（水平/垂直；RC 直立池壁填 0）"
+  },
+  {
+   "name": "H_pond",
+   "default": "2.0",
+   "unit": "m",
+   "label": "沉砂設施深度 H（自池底至溢流口底緣，沉砂容積計算深度）"
+  },
+  {
+   "name": "co_located",
+   "default": "0",
+   "unit": "-",
+   "label": "是否與滯洪設施垂直共構：0 = 否；1 = 是（第 93 條一但書：設計具合理性者深度不受 1.5～3.5 m 限制）"
+  },
+  {
+   "name": "C_run",
+   "default": "0.95",
+   "unit": "-",
+   "label": "逕流係數 C（臨時性取開發中、永久性取開發後；swc_tech 第 18 條表）"
+  },
+  {
+   "name": "I_rain",
+   "default": "120.0",
+   "unit": "mm/h",
+   "label": "設計降雨強度 I（依主管機關審查要求之重現期距）"
+  },
+  {
+   "name": "L_weir",
+   "default": "3.0",
+   "unit": "m",
+   "label": "溢流口寬度 L_w"
+  },
+  {
+   "name": "h_weir",
+   "default": "0.30",
+   "unit": "m",
+   "label": "溢流口設計溢流水深 h_w"
+  },
+  {
+   "name": "Cw_weir",
+   "default": "1.84",
+   "unit": "-",
+   "label": "矩形堰係數 Cw（SI，工程慣用值，非規範明文）"
+  },
+  {
+   "name": "H_crest",
+   "default": "2.80",
+   "unit": "m",
+   "label": "池頂高程（自池底起算）"
+  },
+  {
+   "name": "fb_min",
+   "default": "0.30",
+   "unit": "m",
+   "label": "池頂最小出水高（工程慣例值，非規範明文，由設計者自訂）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Am_exc",
+   "unit": "",
+   "value_at_default": 33.75
+  },
+  {
+   "name": "Am_oth",
+   "unit": "",
+   "value_at_default": 13.5
+  },
+  {
+   "name": "v_exc",
+   "unit": "",
+   "value_at_default": 24.107142857142858
+  },
+  {
+   "name": "v_oth",
+   "unit": "",
+   "value_at_default": 9.642857142857144
+  },
+  {
+   "name": "A_exc_net",
+   "unit": "",
+   "value_at_default": 1.2
+  },
+  {
+   "name": "A_oth_net",
+   "unit": "",
+   "value_at_default": 0.6000000000000001
+  },
+  {
+   "name": "V_sed_exc",
+   "unit": "",
+   "value_at_default": 300
+  },
+  {
+   "name": "V_sed_oth",
+   "unit": "",
+   "value_at_default": 18.000000000000004
+  },
+  {
+   "name": "V_sed",
+   "unit": "",
+   "value_at_default": 318
+  },
+  {
+   "name": "V_req",
+   "unit": "",
+   "value_at_default": 477
+  },
+  {
+   "name": "V_prov",
+   "unit": "",
+   "value_at_default": 530.6666666666666
+  },
+  {
+   "name": "Q_design",
+   "unit": "",
+   "value_at_default": 0.6333333333333333
+  },
+  {
+   "name": "Q_weir",
+   "unit": "",
+   "value_at_default": 0.9070285552285551
+  },
+  {
+   "name": "fb_act",
+   "unit": "",
+   "value_at_default": 0.49999999999999983
+  },
+  {
+   "name": "UC_vol",
+   "unit": "",
+   "value_at_default": 0.8988693467336684
+  },
+  {
+   "name": "UC_depth",
+   "unit": "",
+   "value_at_default": 0.75
+  },
+  {
+   "name": "UC_weir",
+   "unit": "",
+   "value_at_default": 0.6982507107218301
+  },
+  {
+   "name": "UC_fb",
+   "unit": "",
+   "value_at_default": 0.6000000000000002
+  },
+  {
+   "name": "rate_req",
+   "unit": "",
+   "value_at_default": 238.5
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.9
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_vol": 0.8988693467336684,
+  "UC_depth": 0.75,
+  "UC_weir": 0.6982507107218301,
+  "UC_fb": 0.6000000000000002,
+  "UC_max": 0.9
+ },
+ "uc_at_default": 0.9,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

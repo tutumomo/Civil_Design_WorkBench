@@ -21,6 +21,7 @@ Run:
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
@@ -43,6 +44,7 @@ FAILS: list[str] = []
 EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
         "foundation_isolated", "foundation_combined", "detention_basin", "sediment_basin", "channel_profile",
+        "steel_column",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -52,6 +54,11 @@ def check(name: str, ok: bool, detail: str = "") -> None:
     print(("  ✓ " if ok else "  ✗ ") + name + ((" — " + detail) if detail and not ok else ""))
     if not ok:
         FAILS.append(name)
+
+
+def _gi_sel(x):
+    x = float(x)
+    return "%d" % round(x) if abs(x - round(x)) < 1e-9 else "%.1f" % x
 
 
 def _dxf_ok(path: str) -> tuple[bool, str]:
@@ -390,6 +397,97 @@ def main() -> int:
             check("出水高不足時圖上標「出水高不足區段」", short2 and "出水高不足區段" in txt2)
             check("出水高不足樁號與結果一致（摘要把樁號列全）",
                   all(("%g m" % c) in txt2 for c in short2), str(short2))
+
+        print("[2i] 鋼柱柱腳詳圖：平面／立面幾何與圖上數字＝計算結果（D8，DG2）")
+        if "steel_column" in DS.CAPABILITIES:
+            sys.path.insert(0, str(ROOT / "tools" / "steel_base_section"))
+            import make_steel_base as SB
+            ex = rows["steel_column"]["example"]
+            res = DS.generate("steel_column", ex, publish=False)
+            run = API.run_calculation("steel_column", ex)["result"]
+            doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+            msp = doc.modelspace()
+            lay_ = SB.layout(ex, run)
+            txt = _texts(res)
+
+            def rects(layer, upper):
+                # 平面在 y > -1、立面在 y < -1（立面整體下移），用 -1 m 分界
+                out = []
+                for e in msp.query('LWPOLYLINE[layer=="%s"]' % layer):
+                    pts = list(e.vertices_in_wcs())
+                    ys = [p[1] for p in pts]
+                    if (max(ys) > -1.0) == upper:
+                        xs = [p[0] for p in pts]
+                        out.append((max(xs) - min(xs), max(ys) - min(ys), min(ys), max(ys)))
+                return out
+
+            plate = rects("31_基板", True)
+            check("平面基板 = B×N",
+                  len(plate) == 1 and abs(plate[0][0] - lay_["B"]) < 1e-6
+                  and abs(plate[0][1] - lay_["N"]) < 1e-6, str(plate))
+            ped = rects("32_承台混凝土", True)
+            check("平面承台 = 承台 B×N",
+                  len(ped) == 1 and abs(ped[0][0] - lay_["ped_B"]) < 1e-6
+                  and abs(ped[0][1] - lay_["ped_N"]) < 1e-6, str(ped))
+            st = []
+            for e in msp.query('LWPOLYLINE[layer=="30_鋼構材"]'):
+                pts = list(e.vertices_in_wcs())
+                if max(p[1] for p in pts) > -1.0:
+                    st.append(pts)
+            w = max(p[0] for pts in st for p in pts) - min(p[0] for pts in st for p in pts)
+            hh = max(p[1] for pts in st for p in pts) - min(p[1] for pts in st for p in pts)
+            check("平面 H 型鋼 = h×b", abs(w - lay_["b"]) < 1e-6 and abs(hh - lay_["h"]) < 1e-6,
+                  "%.3f×%.3f" % (hh, w))
+            holes = {(round(c.dxf.center.x, 6), round(c.dxf.center.y, 6))
+                     for c in msp.query('CIRCLE[layer=="40_錨栓"]')}
+            want = {(round(x, 6), round(y, 6)) for x, y in lay_["positions"]}
+            check("錨栓孔位＝結果 %d 個" % lay_["n_anchor"], holes == want, str(holes ^ want))
+            check("錨栓孔徑＝結果 Ø%s" % _gi_sel(lay_["d_mm"]),
+                  all(abs(c.dxf.radius * 2000 - lay_["d_mm"]) < 1e-6
+                      for c in msp.query('CIRCLE[layer=="40_錨栓"]')))
+            rods = [e for e in msp.query('LINE[layer=="40_錨栓"]')
+                    if abs(e.dxf.start.x - e.dxf.end.x) < 1e-9]
+            want_len = lay_["embed"] + lay_["grout"] + lay_["t"]    # 由基板頂算到埋深底
+            check("立面錨栓長＝埋深＋基板厚（由板頂起算）",
+                  bool(rods) and all(abs(abs(e.dxf.start.y - e.dxf.end.y) - want_len) < 1e-6 for e in rods),
+                  "%d 支，%.3f m" % (len(rods), abs(rods[0].dxf.start.y - rods[0].dxf.end.y) if rods else 0.0))
+            pede = rects("32_承台混凝土", False)
+            check("立面承台深度＝埋深＋%s mm" % _gi_sel(SB.PED_EXTRA_M * 1000),
+                  len(pede) == 1 and abs(pede[0][1] - (lay_["embed"] + SB.PED_EXTRA_M)) < 1e-6, str(pede))
+            check("摘要含錨栓型式與埋深",
+                  ("%d-" % lay_["n_anchor"]) in txt and ("埋深 hef" in txt)
+                  and (_gi_sel(lay_["embed_mm"]) in txt))
+            check("腹板方向板厚參考值揭露（＞板厚）", "腹板方向（參考）" in txt and "＞ 板厚" in txt)
+            check("承台高度未提供已揭露", "承台高度計算結果未提供" in txt)
+            check("圖上有平面圖與立面圖標題", "平面圖" in txt and "立面圖" in txt)
+            if lay_["edge_edge"] is not None:
+                check("錨栓至板邊距離＝檢核結果",
+                      (_gi_sel(lay_["edge_edge"]) in txt) and (_gi_sel(lay_["edge_limit"]) in txt))
+            # 有灌漿層時：基板底與承台頂的距離＝灌漿厚度
+            ex2 = json.loads(json.dumps(ex))
+            ex2["base_plate"]["grout_above_concrete"] = 0.05
+            ex2["base_plate"]["support_condition"] = "grout_pad"
+            res2 = DS.generate("steel_column", ex2, publish=False)
+            doc2 = ezdxf.readfile(next(f["path"] for f in res2["files"] if f["kind"] == "dxf"))
+            m2 = doc2.modelspace()
+            grout = [e for e in m2.query('LWPOLYLINE[layer=="34_灌漿層"]')]
+            check("灌漿高出混凝土面時畫出灌漿層", len(grout) == 1)
+
+            ped_top = [p[1] for e in m2.query('LWPOLYLINE[layer=="32_承台混凝土"]')
+                       for p in e.vertices_in_wcs() if p[1] < -1.0]
+            plate_bot = [p[1] for e in m2.query('LWPOLYLINE[layer=="31_基板"]')
+                         for p in e.vertices_in_wcs() if p[1] < -1.0]
+            check("灌漿層厚＝輸入 0.05 m",
+                  bool(ped_top) and bool(plate_bot)
+                  and abs(min(plate_bot) - max(ped_top) - 0.05) < 1e-6)
+            # 柱斷面大於基板 → 拒絕出圖
+            ex3 = json.loads(json.dumps(ex))
+            ex3["column"]["section"]["h_mm"] = 900.0
+            try:
+                DS.generate("steel_column", ex3, publish=False)
+                check("柱斷面大於基板時拒絕出圖", False, "竟然出了圖")
+            except DS.SectionError:
+                check("柱斷面大於基板時拒絕出圖", True)
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

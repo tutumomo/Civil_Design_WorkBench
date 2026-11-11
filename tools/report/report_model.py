@@ -132,6 +132,9 @@ class ReportModel:
     boilerplate: dict
     project: dict = field(default_factory=dict)
     consistency: list[ConsistencyCheck] = field(default_factory=list)
+    # OCSS 交叉驗算結果（附錄 D）；沒有就空（`make_report.py --crosscheck` 帶入）
+    crosscheck: list[dict] = field(default_factory=list)
+    crosscheck_meta: dict = field(default_factory=dict)
 
     # ---- 載入 -----------------------------------------------------------------
     @classmethod
@@ -156,6 +159,46 @@ class ReportModel:
         model.project = model._normalise_project()
         model.consistency = model._consistency_checks()
         return model
+
+    # ---- 交叉驗算結果（附錄 D）------------------------------------------------
+    def load_crosscheck(self, path: str | Path) -> int:
+        """讀入 OCSS 交叉驗算結果檔（`tools/crosscheck/ocss_calcbook.py` 產出）。
+
+        回傳載入的比較項數。檔案不存在或格式不符一律不報錯（報告照常產出，
+        附錄 D 不出現），因為交叉驗算需要 OCSS 桌面程式，不是每份報告都有。
+        """
+        p = Path(path)
+        if not p.is_file():
+            return 0
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return 0
+        results = data.get("results") or []
+        rows: list[dict] = []
+        for r in results:
+            for it in r.get("items") or []:
+                rows.append({
+                    "case": r.get("name") or "",
+                    "item": it.get("name") or "",
+                    "ours": it.get("ours"),
+                    "ocss": it.get("ocss"),
+                    "unit": it.get("unit") or "",
+                    "rel": it.get("rel"),
+                    "status": it.get("status") or "",
+                    "disposition": (it.get("disposition") or {}).get("kind") or "",
+                    "reason": (it.get("disposition") or {}).get("reason") or "",
+                })
+        self.crosscheck = rows
+        self.crosscheck_meta = {
+            "project_file": data.get("project_file") or "",
+            "case_count": data.get("case_count", len(results)),
+            "item_count": data.get("item_count", len(rows)),
+            "failed": data.get("failed", 0),
+            "handled": data.get("handled", 0),
+            "note": data.get("note") or "",
+        }
+        return len(rows)
 
     # ---- 專案基本資料 ---------------------------------------------------------
     def _normalise_project(self) -> dict:

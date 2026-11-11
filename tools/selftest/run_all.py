@@ -56,6 +56,18 @@ TESTS = [
         "what": "OCSS template 型交叉驗算框架（假客戶端，不需桌面程式）",
     },
     {
+        "id": "ocss-load-suggest",
+        "cmd": ["tools/selftest/ocss_load_suggest_selftest.py"],
+        "globs": ["tools/crosscheck/", "tools/selftest/"],
+        "what": "OCSS 上游載重模組建議值（X6，假客戶端，不需桌面程式）",
+    },
+    {
+        "id": "ocss-calcbook",
+        "cmd": ["tools/selftest/ocss_calcbook_selftest.py"],
+        "globs": ["tools/crosscheck/", "tools/report/", "tools/selftest/"],
+        "what": "逐式計算書建置與報告附錄 D（X5，假客戶端，不需桌面程式）",
+    },
+    {
         "id": "design-launch",
         "cmd": ["tools/selftest/design_launch_check.py", "--all"],
         "globs": ["tools/design/", "tools/selftest/"],

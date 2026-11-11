@@ -177,6 +177,26 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp    # 預覽 .mcp.json �
 
 **尚未處置、待技師決定**：`rc_column` 的互制曲線未套 rc112 10.3.6.2 拴柱 `0.80P0` 軸壓上限（近純軸壓時偏高）；`retaining_wall.analyse()` 不計超載、土壓高度不含底板厚（X2 已知）；`foundation_isolated` 的壓力只吃柱載重 P／M，不含基腳自重與覆土（模板含）。三者都會改動設計結果與回歸基準，屬設計變更。
 
+### 6.1b 逐式計算書（X5）與上游載重模組（X6）
+
+```bash
+# X5：把交叉驗算案例做成 OCSS 專案檔（.ifccalculation）＋機讀結果 JSON
+python tools/crosscheck/ocss_calcbook.py build --out out/<案名> --name <案名>
+python tools/crosscheck/ocss_calcbook.py summary --out out/<案名> --name <案名>
+
+# X6：地震／風／靜活載模組 → building_frame 建議值（不動專案、不覆寫使用者輸入）
+python tools/crosscheck/ocss_load_suggest.py suggest --file _temp/loads.json
+python tools/crosscheck/ocss_load_suggest.py merge --file _temp/case_payload.json --out _temp/merged.json
+```
+
+**X5 逐式計算書**：`checks/*.json` 的每個案例做成一張工作表，輸入值直接內嵌在那一行（literal 改寫數值、prompt 整段換掉 `?{預設}`、choice 在 `@select` 區塊之後補一行賦值），技師在 App 裡看得到每一行怎麼算出來。產出 `out/<案名>/<案名>_逐式計算書.ifccalculation`（可開啟、可列印）與 `out/<案名>/<案名>_交叉驗算結果.json`（schema `civil-ocss-calcbook/1`，逐項帶本專案值／OCSS 值／單位／相對差異／處置）。
+
+**不動使用者專案**：專案有未儲存變更且沒有檔案路徑時，工具**直接中止**並提示先在 App 裡存檔（開新專案會遺失內容）。有檔案路徑者先存檔再開新專案。失敗時自動清掉自己加的工作表，不留半套東西擋住下次執行。
+
+**接進報告**：`make_report.py --crosscheck <json>` → 報告附錄 D「計算交叉驗算紀錄」（8 欄比對表：對照案例／比對項目／本專案／OCSS／單位／相對差異／結果／處置，另附產製資訊表）。`case_package.py` 有 `crosscheck` 軸（`--with-crosscheck`），報告軸會自動帶上該 JSON。
+
+**X6 上游載重模組**：`tw-seismic-load`／`tw-wind-load`／`tw-dead-live-loads` 以無狀態 `evaluate` 跑，回傳 11 項 `building_frame` 建議值，每項標註來源模板與公式意義。`merge_loads()` 只補**未填**欄位，永不覆寫使用者輸入。**地震只帶入絕對值 `base_shear_kn`**——OCSS 的 V/W 係數分母是它自己的 W 口徑，與 `building_frame` 自算總重量不同，帶入係數會算錯（係數只列為參考值）。單位換算：1 kgf/m² = 9.80665/1000 kN/m²、1 tf = 9.80665 kN。
+
 ### 6.2 Token 與埠（機密）
 
 依序取用，**一律不寫死**：
@@ -221,4 +241,3 @@ claude mcp add --transport http --scope user open-calcsheet-studio \
 
 * `case.json` → 模板輸入的自動灌值：`cases/<案名>/case.json` 的水理參數並不完整（例如 `排水溝U型` 只有幾何與數量，沒有 Q、n、S），逐模組對照表需要人工定義，不可猜測。
 * `design_run` ↔ `sheet_evaluate` 的多輸出比對（目前對照案例一比一）。
-* 將交叉驗算結果寫入 `make_report.py` 的計算附錄章節。

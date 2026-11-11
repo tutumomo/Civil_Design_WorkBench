@@ -1024,6 +1024,61 @@ class DocxReport:
         self.boilerplate_block("generator_note")
         self.boilerplate_block("disclaimer_long")
 
+    def appendix_crosscheck_table(self, rows: list, meta: dict | None = None):
+        """附錄 D：OCSS 交叉驗算紀錄（本專案引擎 vs 開放計算環境）。"""
+        meta = meta or {}
+        labels = {"pass": "一致", "handled": "已處置", "fail": "未處置差異"}
+        disp_labels = {"engine_fixed": "已修正引擎", "template_issue": "模板問題",
+                       "explained": "已說明差異"}
+        body = []
+        for r in rows:
+            ours = r.get("ours")
+            theirs = r.get("ocss")
+            rel = r.get("rel")
+            body.append([
+                r.get("case") or "—",
+                r.get("item") or "—",
+                ("%g" % ours) if isinstance(ours, (int, float)) else "—",
+                ("%g" % theirs) if isinstance(theirs, (int, float)) else "—",
+                (r.get("unit") or "—"),
+                ("%.4g%%" % (rel * 100.0)) if isinstance(rel, (int, float)) else "—",
+                labels.get(r.get("status"), r.get("status") or "—"),
+                disp_labels.get(r.get("disposition"), "") if r.get("disposition") else "",
+            ])
+        self.table({
+            "caption": "計算交叉驗算紀錄（本專案引擎 vs Open CalcSheet Studio）",
+            "columns": [
+                {"name": "對照案例", "width_cm": 3.4, "align": "left"},
+                {"name": "比對項目", "width_cm": 3.0, "align": "left"},
+                {"name": "本專案", "width_cm": 2.0, "align": "right"},
+                {"name": "OCSS", "width_cm": 2.0, "align": "right"},
+                {"name": "單位", "width_cm": 1.3, "align": "center"},
+                {"name": "相對差異", "width_cm": 1.5, "align": "right"},
+                {"name": "結果", "width_cm": 1.4, "align": "center"},
+                {"name": "處置", "width_cm": 1.6, "align": "center"},
+            ],
+            "rows": body,
+            "note": "「一致」指差值在案例容差內；「已處置」指差異經查明並有處置說明"
+                    "（引擎已修正／模板問題／已說明差異）；「未處置差異」不得隨交付"
+                    "（須先修正引擎或另案說明）。相對差異以 OCSS 值為分母。",
+        })
+        extra = []
+        if meta.get("project_file"):
+            extra.append(["逐式計算書專案檔", meta["project_file"]])
+        if meta.get("case_count") is not None:
+            extra.append(["對照案例數", str(meta.get("case_count"))])
+        if meta.get("item_count") is not None:
+            extra.append(["比對項數", str(meta.get("item_count"))])
+        if meta.get("failed") is not None:
+            extra.append(["未處置差異數", str(meta.get("failed"))])
+        if meta.get("handled") is not None:
+            extra.append(["已處置差異數", str(meta.get("handled"))])
+        if meta.get("note"):
+            extra.append(["產出說明", meta["note"]])
+        if extra:
+            self.table({"caption": "交叉驗算產製資訊",
+                        "columns": ["項目", "內容"], "rows": extra})
+
     def end_mark(self):
         p = self._para(align=WD_ALIGN_PARAGRAPH.CENTER, before=18, after=6)
         f = self.fonts["caption"]

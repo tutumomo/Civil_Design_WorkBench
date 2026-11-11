@@ -161,6 +161,36 @@ class OcssClient:
     def project(self) -> dict:
         return self._request("/project")
 
+    def project_new(self, force: bool = False) -> dict:
+        """開新空白專案。有未儲存變更時回 CONFLICT，除非 force=True。
+
+        `force=True` 會**丟棄**使用者未儲存的內容，呼叫端必須先確認。
+        """
+        return self._request("/project/new", {"force": bool(force)})
+
+    def project_save(self, path: str | None = None) -> dict:
+        """覆存專案檔；專案還沒有檔案時需給 path。"""
+        payload = {"path": str(path)} if path else {}
+        return self._request("/project/save", payload)
+
+    def project_save_as(self, path: str) -> dict:
+        """另存新檔（自動補 .ifccalculation），專案改指向新檔。"""
+        return self._request("/project/save-as", {"path": str(path)})
+
+    def project_set_name(self, name: str) -> dict:
+        return self._request("/project/name", {"name": name}, method="PUT")
+
+    def project_set_data(self, values: dict) -> dict:
+        """設定專案資料欄位（套用到所有工作表）。任一值無效則全部不寫。"""
+        return self._request("/project/data", {"values": values}, method="PATCH")
+
+    def sheet_add_source(self, source: str, name: str | None = None) -> dict:
+        """以計算文字新增工作表（不是套模板）。"""
+        payload: dict = {"source": source}
+        if name:
+            payload["name"] = name
+        return self._request("/sheets", payload)
+
     def tools(self) -> list[dict]:
         return self._request("/tools").get("tools", [])
 

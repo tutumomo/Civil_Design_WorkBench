@@ -67,7 +67,8 @@ TOOLS = {
 }
 
 AXIS_NAMES = {"boq": "預算書", "report": "設計報告",
-              "drawing": "設計圖（現況平面圖）", "section": "設計圖（擋土牆斷面圖）"}
+              "drawing": "設計圖（現況平面圖）", "section": "設計圖（擋土牆斷面圖）",
+              "crosscheck": "逐式計算書（OCSS 交叉驗算）"}
 
 
 def _run(cmd, log_path):
@@ -142,6 +143,11 @@ def run_report(master, out_dir, no_pdf, allow_placeholder=False):
 
     sub = os.path.join(out_dir, "設計報告")
     cmd = [PY, TOOLS["report"], "--case", case_path, "--out-dir", sub]
+    # 逐式計算書軸已跑過 → 交叉驗算結果帶進報告附錄 D（沒有就略過該附錄）
+    title = master.get("title") or "未命名案件"
+    _cc = os.path.join(out_dir, f"{title}_交叉驗算結果.json")
+    if os.path.exists(_cc):
+        cmd += ["--crosscheck", _cc]
     if no_pdf:
         cmd.append("--no-pdf")
     if allow_placeholder:
@@ -174,6 +180,30 @@ def run_report(master, out_dir, no_pdf, allow_placeholder=False):
     return {"axis": "report", "name": AXIS_NAMES["report"], "ok": ok, "returncode": code,
             "files": files, "log": tail,
             "note": "docx 已產出；章節內容完整度須人工複核（標示「需人工補」者）" if ok else "失敗"}
+
+
+def run_crosscheck(master, out_dir):
+    """X5：產出逐式計算書（OCSS 專案檔）與交叉驗算結果 JSON。
+
+    需要 OCSS 桌面程式開著（無 headless 模式），且會動 OCSS 專案狀態
+    （開新空白專案 → 加工作表 → 另存新檔；使用者有內容的專案會被擋下）。
+    所以預設**不**跑，須以 `--only crosscheck`（或含 crosscheck 的 --only）明確指定。
+    """
+    title = master.get("title") or "未命名案件"
+    calcbook = os.path.join(ROOT, "tools", "crosscheck", "ocss_calcbook.py")
+    cmd = [PY, calcbook, "build", "--out", out_dir, "--name", title]
+    code, tail = _run(cmd, os.path.join(out_dir, "_log_crosscheck.txt"))
+    files = []
+    for fn in (f"{title}_逐式計算書.ifccalculation", f"{title}_交叉驗算結果.json"):
+        p = os.path.join(out_dir, fn)
+        if os.path.exists(p):
+            files.append({"path": p, "bytes": os.path.getsize(p)})
+    ok = code == 0 and any(f["path"].endswith(".ifccalculation") for f in files)
+    return {"axis": "crosscheck", "name": AXIS_NAMES["crosscheck"], "ok": ok,
+            "returncode": code, "files": files, "log": tail,
+            "note": ("逐式計算書專案檔已產出（PDF 需使用者在 OCSS App 內按 Rapport 輸出）；"
+                     "結果 JSON 供設計報告附錄 D 引用"
+                     if ok else "失敗（需 OCSS 桌面程式開著）")}
 
 
 def run_drawing(master, out_dir):
@@ -475,7 +505,9 @@ def main():
     ap = argparse.ArgumentParser(description="案件交付包：三軸一次跑完")
     ap.add_argument("master", help="案件主檔 JSON")
     ap.add_argument("--out-dir", default=None)
-    ap.add_argument("--only", default=None, help="只跑指定軸，逗號分隔：boq,report,drawing")
+    ap.add_argument("--only", default=None, help="只跑指定軸，逗號分隔：boq,report,drawing,crosscheck")
+    ap.add_argument("--with-crosscheck", action="store_true",
+                    help="加跑逐式計算書軸（需 OCSS 桌面程式開著；預設不跑）")
     ap.add_argument("--no-pdf", action="store_true")
     ap.add_argument("--allow-placeholder", action="store_true",
                     help="允許案名／主辦機關未確認就產報告書（內部測試用；交件前不得使用）")
@@ -516,6 +548,8 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
 
     want = set((a.only or "boq,report,drawing,section").split(","))
+    if a.with_crosscheck:
+        want.add("crosscheck")
     print(f"案件：{master.get('title', '')}")
     print(f"輸出：{out_dir}")
 
@@ -533,6 +567,9 @@ def main():
 
     if "section" in want:
         results.append(run_section(master, out_dir, a.no_pdf))
+    if "crosscheck" in want:
+        # 先跑交叉驗算，報告軸才帶得到附錄 D 的資料
+        results.append(run_crosscheck(master, out_dir))
     if "report" in want:
         results.append(run_report(master, out_dir, a.no_pdf, a.allow_placeholder))
 

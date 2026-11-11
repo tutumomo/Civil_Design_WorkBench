@@ -192,6 +192,7 @@ def run_case(client, case: dict, emit=print) -> dict:
         raise TemplateCheckError("OCSS 計算有錯誤行：%s" % ev.get("errorLines"))
     emit("  本專案 ok=%s　OCSS UC=%s 判定=%s" % (run.get("ok"), ev.get("uc"), ev.get("passes")))
     total = failed = handled = 0
+    items: list[dict] = []
     for cmp_ in case["compare"]:
         total += 1
         ours, ou = get_ours(run, cmp_["ours"])
@@ -207,16 +208,29 @@ def run_case(client, case: dict, emit=print) -> dict:
         within = diff <= tol.get("abs", 0.0) or rel <= tol.get("rel", 0.0)
         line = "  %-22s 本專案 %-12.6g OCSS %-12.6g %s　差 %.3g%%" % (
             cmp_["name"], ours, theirs, (tu or ou or "").ljust(6), rel * 100)
+        item = {
+            "name": cmp_["name"],
+            "ours": ours, "ocss": theirs,
+            "unit": tu or ou or "",
+            "diff": diff, "rel": rel,
+            "tol": tol,
+            "status": "pass" if within else "fail",
+            "disposition": None,
+        }
         if within:
             emit("  ✓" + line[1:])
+            items.append(item)
             continue
         disp = cmp_.get("disposition") or {}
         if disp.get("kind") in DISPOSITIONS and str(disp.get("reason", "")).strip():
             handled += 1
             emit("  △" + line[1:] + "　已處置[%s]：%s" % (disp["kind"], disp["reason"]))
+            item["status"] = "handled"
+            item["disposition"] = disp
         else:
             failed += 1
             emit("  ✗" + line[1:] + "　未處置的差異（容差 %s）" % tol)
+        items.append(item)
     for w in unit_warnings(ev):
         emit("  ⚠ " + w)
-    return {"total": total, "failed": failed, "handled": handled}
+    return {"total": total, "failed": failed, "handled": handled, "items": items}

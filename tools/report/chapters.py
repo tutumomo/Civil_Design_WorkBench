@@ -174,16 +174,24 @@ def render_chapters(builder: DocxReport, model: ReportModel) -> list[ChapterStat
 
 
 def render_appendices(builder: DocxReport, model: ReportModel, extra_meta: dict | None = None):
-    """排附錄 A（章節狀態）、B（待補清單）、C（產製資訊）。"""
+    """排附錄 A（章節狀態）、B（待補清單）、C（產製資訊）、D（交叉驗算紀錄）。
+
+    附錄 D 只在有交叉驗算結果時出現（`make_report.py --crosscheck` 帶入）——
+    交叉驗算需要 OCSS 桌面程式，不是每份報告都有該結果。
+    """
     for app in model.template.get("appendices", []):
+        aid = app.get("id")
+        if aid == "crosscheck" and not getattr(model, "crosscheck", None):
+            continue
         builder.appendix_title(app.get("letter", ""), app.get("title", ""))
         if app.get("note"):
             builder.note(app["note"])
-        aid = app.get("id")
         if aid == "status":
             builder.appendix_status_table()
         elif aid == "todo":
             builder.appendix_todo_table()
         elif aid == "meta":
             builder.appendix_meta(extra_meta)
+        elif aid == "crosscheck":
+            builder.appendix_crosscheck_table(model.crosscheck, model.crosscheck_meta)
     builder.end_mark()

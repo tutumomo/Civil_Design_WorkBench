@@ -121,6 +121,13 @@ def main() -> int:
             for f in dxfs:
                 ok, why = _dxf_ok(f["path"])
                 check("%s %s 合乎 DXF 基本規定" % (cid, f["name"]), ok, why)
+            qc = res.get("qc") or []
+            check("%s 品管閘門有跑（check_delivery E1~E18）" % cid,
+                  len(qc) == len(spec["sheets"]), str(qc))
+            check("%s 品管閘門零錯誤" % cid,
+                  all(c["passed"] for c in qc),
+                  "；".join("%s exit=%s" % (c["file"], c["exit"]) for c in qc
+                            if not c["passed"]))
 
         print("[2b] 疊式／砌石牆五型：圖面斷面積＝引擎 area_m2_per_m（D2）")
         if "block_wall" in DS.CAPABILITIES:

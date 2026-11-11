@@ -248,5 +248,5 @@ claude mcp add --transport http --scope user open-calcsheet-studio \
 
 ## 8. 後續（尚未實作）
 
-* `case.json` → 模板輸入的自動灌值：`cases/<案名>/case.json` 的水理參數並不完整（例如 `排水溝U型` 只有幾何與數量，沒有 Q、n、S），逐模組對照表需要人工定義，不可猜測。
-* `design_run` ↔ `sheet_evaluate` 的多輸出比對（目前對照案例一比一）。
+* `case.json` → 模板輸入的自動灌值：`cases/<案名>/case.json` 的水理參數並不完整（例如 `排水溝U型` 只有幾何與數量，沒有 Q、n、S），逐模組對照表需要人工定義，不可猜測。X0 的對照表（§6.1c）已把每個模板的欄位對應列出，可作為人工定義的基礎。
+* 待技師決定的差異（會動回歸基準，屬設計變更）：懸臂牆 M_over（差 1.2%）、`rc_column` 互制曲線未套 0.80P0 軸壓上限、`foundation_isolated` 壓力未含基腳自重與覆土。

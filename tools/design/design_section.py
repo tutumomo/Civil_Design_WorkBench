@@ -652,6 +652,25 @@ def _resolve_scale(log: str, fallback: int = 20) -> int:
     return int(m.group(1)) if m else fallback
 
 
+def _qc(dxf: str, scale: int) -> tuple[int, str]:
+    """跑交件品管閘門（`tools/a3_sheet/check_delivery.py` E1~E18）。
+
+    **比例必須帶這張圖自己的比例**：`check_delivery.py` 的 `--scale` 預設 600 是為
+    A3 現況平面圖寫的，設計圖各圖比例不同（1:10～1:1000），用錯會讓 E6／E15 誤報
+    （見 `docs/踩坑紀錄.md` §AL）。`scale` 由出圖工具的實際輸出解析而來。
+    """
+    checker = os.path.join(ROOT, "tools", "a3_sheet", "check_delivery.py")
+    if not os.path.isfile(checker):
+        return 0, "找不到 check_delivery.py，跳過品管"
+    cmd = [_python_exe(), checker, dxf, "--scale", str(int(scale))]
+    env = dict(os.environ)
+    env["PYTHONIOENCODING"] = "utf-8"
+    proc = subprocess.run(cmd, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace", env=env, cwd=ROOT)
+    tail = "\n".join((proc.stdout or "").strip().splitlines()[-12:])
+    return proc.returncode, tail
+
+
 def _publish(dxf: str) -> tuple[dict[str, str], str]:
     """DXF → DWG＋PDF（經 tools/acad/acc.py，預設後端 OpenCADStudio，退路 accoreconsole／CADCraft）。失敗不致命，只回報。"""
     try:
@@ -695,6 +714,7 @@ def generate(calc_id: str, payload: Mapping[str, Any], *,
     files: list[dict[str, Any]] = []
     notes = list(built["notes"])
     used_scale = None
+    qc: list[dict[str, Any]] = []
     for sheet in spec["sheets"]:
         out_dxf = os.path.join(out_dir, sheet["suffix"] + ".dxf")
         cmd = [_python_exe(), "-E", "-P", "-X", "utf8", tool, case_path,
@@ -720,6 +740,13 @@ def generate(calc_id: str, payload: Mapping[str, Any], *,
             for ext, path in res.items():
                 files.append({"name": os.path.basename(path), "path": path,
                               "kind": ext.strip(".")})
+        # 品管閘門（E1~E18）：比例用這張圖自己的（見 _qc 說明）
+        qc_code, qc_log = _qc(out_dxf, used_scale or 20)
+        qc.append({"file": os.path.basename(out_dxf), "exit": qc_code,
+                   "passed": qc_code == 0, "tail": qc_log})
+        if qc_code != 0:
+            notes.append("品管未通過（check_delivery E1~E18 exit %d）：%s"
+                         % (qc_code, sheet["suffix"]))
 
     # 給前端下載用的相對路徑（相對 out/design_sections，避免外洩絕對路徑）
     root = os.path.abspath(_out_root())
@@ -738,13 +765,14 @@ def generate(calc_id: str, payload: Mapping[str, Any], *,
         "files": [f["path"] for f in files],
         "case": case,
         "notes": notes,
+        "qc": qc,
     }
     with open(os.path.join(out_dir, "_drawing_meta.json"), "w",
               encoding="utf-8") as fh:
         json.dump(meta, fh, ensure_ascii=False, indent=2)
 
     return {
-        "ok": True,
+        "ok": all(c["passed"] for c in qc) if qc else True,
         "calculator": calc_id,
         "title": spec["title"],
         "unit": unit,
@@ -753,6 +781,7 @@ def generate(calc_id: str, payload: Mapping[str, Any], *,
         "case_path": case_path,
         "files": files,
         "notes": notes,
+        "qc": qc,
         "defaults_used": built["defaults_used"],
     }
 

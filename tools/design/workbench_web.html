@@ -3237,10 +3237,18 @@ function renderResult(d) {
     { value: "auto", label: "自動" },
     ...[10, 20, 25, 30, 40, 50, 60, 75, 100, 200].map(s => ({ value: s, label: `1:${s}` }))
   ];
+  // 三態：supported 可出圖／not_applicable 不適用（附理由）／not_implemented 尚未提供；
+  // 只有真的拿不到 capabilities（雲端／靜態版）才說「沒有出圖後端」。
+  const sectionStatus = sectionCap ? (sectionCap.status || (sectionCap.supported ? "supported" : "not_implemented")) : "no_backend";
+  const sectionMsg = {
+    no_backend: `此版本（雲端／靜態）沒有出圖後端；請於本機工作台（<code>./web.sh design</code>）執行同一組參數。`,
+    not_implemented: `此計算器尚未提供設計圖。`,
+    not_applicable: `此計算器不適用設計圖：${esc((sectionCap && sectionCap.reason) || "沒有可繪製的幾何。")}`
+  }[sectionStatus] || "";
   const sectionPanelHtml = !sectionSupported
     ? `<div class="drawing-panel" id="drawingpanel">
          <div class="case-panel-head"><span>🖼️ 設計圖</span></div>
-         <div class="case-panel-body"><p class="hint">此版本（雲端／靜態）沒有出圖後端；請於本機工作台（<code>設計工作台.bat</code>）執行同一組參數，即可產出 S-01 斷面圖與 S-02 配筋圖。</p></div>
+         <div class="case-panel-body"><p class="hint">${sectionMsg}</p></div>
        </div>`
     : `<div class="drawing-panel" id="drawingpanel">
          <div class="case-panel-head">

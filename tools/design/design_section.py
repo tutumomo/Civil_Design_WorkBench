@@ -148,13 +148,36 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
 }
 
 
+# 明確表態「不適用」：計算器沒有任何幾何可畫，不是漏做。附理由，會顯示在前端。
+NOT_APPLICABLE: dict[str, str] = {
+    "hydrology": "水文分析的輸入與輸出沒有幾何（只有降雨強度、逕流係數、流量），沒有東西可畫成設計圖。",
+}
+
+# 三態：supported（可出圖）／not_applicable（不適用，附理由）／not_implemented（尚未提供）
+STATUSES = ("supported", "not_applicable", "not_implemented")
+
+
+def status_of(calc_id: str) -> str:
+    if calc_id in CAPABILITIES:
+        return "supported"
+    if calc_id in NOT_APPLICABLE:
+        return "not_applicable"
+    return "not_implemented"
+
+
 def capability(calc_id: str) -> dict[str, Any]:
-    """回報某計算器能否出圖，以及可選的圖面單位與比例。"""
+    """回報某計算器能否出圖，以及可選的圖面單位與比例。
+
+    `status` 為三態之一；`supported` 保留給舊前端（等同 status == "supported"）。
+    """
     spec = CAPABILITIES.get(calc_id)
     scales = [s for s in DR.STANDARD_SCALES if s <= 250]
+    status = status_of(calc_id)
     return {
         "calculator": calc_id,
-        "supported": spec is not None,
+        "status": status,
+        "reason": NOT_APPLICABLE.get(calc_id, ""),
+        "supported": status == "supported",
         "title": (spec or {}).get("title", ""),
         "sheets": [s["suffix"] for s in (spec or {}).get("sheets", [])],
         "units": [
@@ -168,8 +191,10 @@ def capability(calc_id: str) -> dict[str, Any]:
     }
 
 
-def capability_map() -> dict[str, Any]:
-    return {cid: capability(cid) for cid in CAPABILITIES}
+def capability_map(calc_ids: list[str] | None = None) -> dict[str, Any]:
+    """所有計算器的出圖能力。`calc_ids` 給定時涵蓋整份目錄（含未實作與不適用）。"""
+    ids = list(calc_ids) if calc_ids is not None else list(CAPABILITIES)
+    return {cid: capability(cid) for cid in ids}
 
 
 # --------------------------------------------------------------------------- #
@@ -477,19 +502,20 @@ def _resolve_scale(log: str, fallback: int = 20) -> int:
 
 
 def _publish(dxf: str) -> tuple[dict[str, str], str]:
-    """DXF → DWG＋PDF（走 accoreconsole）。失敗不致命，只回報。"""
+    """DXF → DWG＋PDF（經 tools/acad/acc.py，預設後端 OpenCADStudio，退路 accoreconsole／CADCraft）。失敗不致命，只回報。"""
     try:
         sys.path.insert(0, os.path.join(ROOT, "tools", "acad"))
         from acc import publish
 
         return publish(dxf, pdf=True), ""
     except Exception as ex:
-        return {}, "AutoCAD 出圖（DWG／PDF）未完成：%s" % ex
+        return {}, "DWG／PDF 轉檔未完成：%s" % ex
 
 
 def generate(calc_id: str, payload: Mapping[str, Any], *,
              unit: str = "m", scale: str | int = "auto",
-             project: str = "", publish: bool = True) -> dict[str, Any]:
+             project: str = "", drafter: str = "",
+             publish: bool = True) -> dict[str, Any]:
     """出圖並回傳檔案清單。
 
     回傳 `{"ok": bool, "files": [...], "case_path": ..., "out_dir": ...,
@@ -522,6 +548,8 @@ def generate(calc_id: str, payload: Mapping[str, Any], *,
         out_dxf = os.path.join(out_dir, sheet["suffix"] + ".dxf")
         cmd = [_python_exe(), "-E", "-P", "-X", "utf8", tool, case_path,
                "--scale", str(scale), "--unit", unit, "--out", out_dxf]
+        if drafter:
+            cmd += ["--drafter", str(drafter)]
         if sheet.get("rebar"):
             cmd.append("--rebar")
         code, log = _run(cmd, os.path.join(temp_dir,
@@ -587,13 +615,15 @@ def main() -> int:
     ap.add_argument("--unit", default="m", choices=["m", "cm"])
     ap.add_argument("--scale", default="auto")
     ap.add_argument("--project", default="")
+    ap.add_argument("--drafter", default="", help="標題欄繪圖者（預設 Claude（AI））")
     ap.add_argument("--no-publish", action="store_true")
     a = ap.parse_args()
     with open(a.payload, "r", encoding="utf-8") as fh:
         payload = json.load(fh)
     try:
         res = generate(a.calculator, payload, unit=a.unit, scale=a.scale,
-                       project=a.project, publish=not a.no_publish)
+                       project=a.project, drafter=a.drafter,
+                       publish=not a.no_publish)
     except SectionError as ex:
         print("NG %s" % ex)
         return 1

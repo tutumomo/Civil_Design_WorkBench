@@ -753,7 +753,7 @@ def _unit_weight(bar):
 # 圖紙空間：視口、比例尺、右欄表格、標題欄
 # --------------------------------------------------------------------------- #
 def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
-                drawing_no, unit="m"):
+                drawing_no, unit="m", drafter="Claude（AI）"):
     msp = doc.modelspace()
     from ezdxf import bbox as _bbox
     box = _bbox.extents(msp)
@@ -815,7 +815,7 @@ def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
                             align=TextEntityAlignment.BOTTOM_LEFT)
 
     fill("設計", "Claude（AI）")
-    fill("繪圖", "Claude（AI）")
+    fill("繪圖", drafter or "Claude（AI）")
     fill("日期", time.strftime("%Y.%m.%d"))
     fill("比例尺", "1:%d" % scale, dx=15.0)
     fill("圖序", sheet_no, dx=14.0)
@@ -1027,6 +1027,7 @@ def main():
     ap.add_argument("--unit", default="m", choices=["m", "cm"],
                     help="圖面尺寸標註單位（m／cm）；模型空間一律為公尺")
     ap.add_argument("--project", default=None)
+    ap.add_argument("--drafter", default="Claude（AI）", help="標題欄繪圖者")
     ap.add_argument("--sheet-no", default=None)
     ap.add_argument("--template", default=TEMPLATE)
     a = ap.parse_args()
@@ -1101,7 +1102,7 @@ def main():
                 {"rebar_rows": table if a.rebar else [],
                  "qty_rows": qty_table if a.rebar else [],
                  "notes": notes},
-                title_note, drawing_no, unit=a.unit)
+                title_note, drawing_no, unit=a.unit, drafter=a.drafter)
 
     doc.layouts.set_active_layout(LAYOUT_NAME)
     out = os.path.abspath(a.out)

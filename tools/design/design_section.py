@@ -98,6 +98,22 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
             {"suffix": "S-02_擋土牆配筋圖", "rebar": True},
         ],
     },
+    "rc_beam": {
+        "title": "RC 梁斷面配筋圖（B-01）",
+        "tool": "rc_section",
+        "model": "rc_beam",
+        "sheets": [
+            {"suffix": "B-01_RC梁斷面配筋圖", "rebar": False},
+        ],
+    },
+    "rc_column": {
+        "title": "RC 柱斷面配筋圖（CL-1）",
+        "tool": "rc_section",
+        "model": "rc_column",
+        "sheets": [
+            {"suffix": "CL-1_RC柱斷面配筋圖", "rebar": False},
+        ],
+    },
     "channel_cover": {
         "title": "溝蓋版斷面＋配筋／植筋詳圖（C-01）",
         "tool": "channel_cover",
@@ -426,6 +442,8 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         values, missing = _slope_values(payload)
     elif model == "block_wall":
         values, missing = _block_values(payload)
+    elif model in ("rc_beam", "rc_column"):
+        values, missing = dict(payload), []
     elif model == "channel_cover":
         values, missing = dict(payload), []     # 整份計算器輸入原樣交給引擎，圖上數值取自結果
     else:                                          # pragma: no cover - 防呆
@@ -512,6 +530,8 @@ def _python_exe() -> str:
 
 
 def _tool_path(tool: str) -> str:
+    if tool == "rc_section":
+        return os.path.join(ROOT, "tools", "rc_section", "make_rc_section.py")
     if tool == "channel_cover":
         return os.path.join(ROOT, "tools", "channel_cover", "make_channel_cover.py")
     if tool == "box_section":

@@ -1,0 +1,308 @@
+{
+  "templateId": "tw-rc-beam",
+  "module": "鋼筋混凝土矩形梁（rc112）",
+  "title": "鋼筋混凝土矩形梁設計與檢核（rc112）",
+  "input_style": "prompt",
+  "status": "draft-輸入欄位對應待人工核對",
+  "calculator": "rc_beam",
+  "checks": [
+    {
+      "file": "rc_beam_template.json",
+      "name": "RC 梁撓曲與剪力（本專案 rc_beam ↔ tw-rc-beam）"
+    }
+  ],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "f_c",
+      "unit": "",
+      "default": "28",
+      "candidates": [
+        "fc_mpa"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_y",
+      "unit": "",
+      "default": "420",
+      "candidates": [
+        "fy_mpa"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_yt",
+      "unit": "",
+      "default": "420",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "b",
+      "unit": "",
+      "default": "300",
+      "candidates": [
+        "b_mm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "h",
+      "unit": "",
+      "default": "600",
+      "candidates": [
+        "h_mm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L",
+      "unit": "",
+      "default": "6.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "c_c",
+      "unit": "",
+      "default": "40",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "support_type",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "bar_t",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_t",
+      "unit": "",
+      "default": "4",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "rebar_layers",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "has_top",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "bar_c",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_c",
+      "unit": "",
+      "default": "0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "bar_v",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_legs",
+      "unit": "",
+      "default": "2",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "s_v",
+      "unit": "",
+      "default": "150",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_u",
+      "unit": "",
+      "default": "200",
+      "candidates": [
+        "Mu_kNm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "V_u",
+      "unit": "",
+      "default": "120",
+      "candidates": [
+        "Vu_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_D",
+      "unit": "",
+      "default": "60",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_L",
+      "unit": "",
+      "default": "40",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "q_sus",
+      "unit": "",
+      "default": "0.2",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [
+    {
+      "case": "RC 梁撓曲與剪力（本專案 rc_beam ↔ tw-rc-beam）",
+      "name": "主筋量 A_s（本專案每米／模板 5 支 D16）",
+      "ours": "result.flexure.As_prov_mm2",
+      "ocss": "var:A_s",
+      "verified": true
+    },
+    {
+      "case": "RC 梁撓曲與剪力（本專案 rc_beam ↔ tw-rc-beam）",
+      "name": "混凝土剪力 V_c",
+      "ours": "result.shear.Vc_kN",
+      "ocss": "var:V_c",
+      "verified": true
+    },
+    {
+      "case": "RC 梁撓曲與剪力（本專案 rc_beam ↔ tw-rc-beam）",
+      "name": "最小鋼筋量 A_s,min",
+      "ours": "result.flexure.As_min_mm2",
+      "ocss": "var:A_smin",
+      "verified": true
+    },
+    {
+      "case": "RC 梁撓曲與剪力（本專案 rc_beam ↔ tw-rc-beam）",
+      "name": "撓曲設計強度 φM_n",
+      "ours": "result.flexure.phiMn_kNm",
+      "ocss": "var:ϕM_n",
+      "verified": true
+    }
+  ],
+  "case_inputs": [
+    {
+      "case": "RC 梁撓曲與剪力（本專案 rc_beam ↔ tw-rc-beam）",
+      "ocss_inputs": [
+        "L",
+        "M_D",
+        "M_L",
+        "M_u",
+        "V_u",
+        "b",
+        "bar_c",
+        "bar_t",
+        "bar_v",
+        "c_c",
+        "f_c",
+        "f_y",
+        "f_yt",
+        "h",
+        "has_top",
+        "n_c",
+        "n_legs",
+        "n_t",
+        "q_sus",
+        "rebar_layers",
+        "s_v",
+        "support_type"
+      ],
+      "payload": [
+        "Mu_kNm",
+        "Vu_kN",
+        "b_mm",
+        "fc_mpa",
+        "fy_mpa",
+        "h_mm"
+      ]
+    }
+  ],
+  "ocss_outputs": [
+    "E_c",
+    "f_r",
+    "A_s",
+    "A_sp",
+    "A_v",
+    "d",
+    "d_t",
+    "β_1",
+    "c",
+    "a",
+    "ε_t",
+    "ε_ty",
+    "ϕ_m",
+    "M_n",
+    "ϕM_n",
+    "UC_M",
+    "A_smin",
+    "UC_Asmin",
+    "UC_et",
+    "V_c",
+    "V_s",
+    "V_smax",
+    "UC_Vsmax",
+    "ϕV_n",
+    "UC_V",
+    "A_vs_prov",
+    "A_vs_min",
+    "UC_Avmin",
+    "s_max",
+    "UC_s",
+    "s_bar",
+    "s_crack_lim",
+    "UC_crack",
+    "h_min",
+    "UC_hmin",
+    "M_cr",
+    "M_a",
+    "I_g",
+    "I_cr",
+    "I_e",
+    "Δ_L",
+    "Δ_L_lim",
+    "UC_def_L",
+    "Δ_lt",
+    "Δ_lt_lim",
+    "UC_def_tot",
+    "UC_max"
+  ],
+  "ours_only": [
+    "flexure",
+    "shear"
+  ],
+  "blockers": [
+    "本專案對應計算器：rc_beam。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

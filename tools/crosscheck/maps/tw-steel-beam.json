@@ -1,0 +1,140 @@
+{
+  "templateId": "tw-steel-beam",
+  "module": "鋼結構 H 型鋼梁（steel99 LRFD）",
+  "title": "鋼結構熱軋 H 型鋼梁設計與檢核（steel99 LRFD／ASD）",
+  "input_style": "prompt",
+  "status": "draft-本專案無對照案例",
+  "calculator": null,
+  "checks": [],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "design_method",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_y_in",
+      "unit": "",
+      "default": "325",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_span",
+      "unit": "",
+      "default": "6.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "L_b",
+      "unit": "",
+      "default": "3.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "C_b",
+      "unit": "",
+      "default": "1.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_delta",
+      "unit": "",
+      "default": "360",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_u",
+      "unit": "",
+      "default": "220",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "V_u",
+      "unit": "",
+      "default": "150",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "w_L",
+      "unit": "",
+      "default": "15",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "section_id",
+      "unit": "",
+      "default": "14",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [],
+  "case_inputs": [],
+  "ocss_outputs": [
+    "f_y",
+    "E_s",
+    "G_s",
+    "F_L",
+    "h",
+    "b",
+    "t_w",
+    "t_f",
+    "A",
+    "I_x",
+    "W_x",
+    "Z_x",
+    "i_x",
+    "I_y",
+    "W_y",
+    "Z_y",
+    "i_y",
+    "J",
+    "C_w",
+    "w",
+    "lambda_f",
+    "lambda_pf",
+    "lambda_rf",
+    "UC_lambda_f",
+    "lambda_w",
+    "lambda_pw",
+    "lambda_rw",
+    "UC_lambda_w",
+    "is_compact",
+    "M_p",
+    "M_r",
+    "L_p",
+    "L_r",
+    "L_b",
+    "M_n",
+    "phiM_n",
+    "UC_M",
+    "A_w",
+    "htw_ratio",
+    "lim_v1",
+    "lim_v2",
+    "V_n",
+    "phiV_n",
+    "UC_V",
+    "Delta",
+    "Delta_lim",
+    "UC_delta",
+    "UC_max"
+  ],
+  "ours_only": [],
+  "blockers": [
+    "本專案沒有對應計算器，也沒有對照案例——本模板不列入交叉驗算範圍。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

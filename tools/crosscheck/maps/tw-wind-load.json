@@ -1,0 +1,38 @@
+{
+  "templateId": "tw-wind-load",
+  "module": "建築物風速壓與各層風力（wind103full）",
+  "title": "建築物風速壓與各層風力（wind103full）",
+  "input_style": "prompt",
+  "status": "draft-本專案無對照案例",
+  "calculator": null,
+  "checks": [],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "V_10",
+      "unit": "m/s；wind103full 2.4，依工址查表；視圖可依行政區帶入建議值",
+      "default": "40.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [],
+  "case_inputs": [],
+  "ocss_outputs": [
+    "I_w",
+    "alpha_w",
+    "z_g",
+    "H",
+    "K_h",
+    "q_h",
+    "F_1",
+    "V_w",
+    "M_w"
+  ],
+  "ours_only": [],
+  "blockers": [
+    "本專案沒有對應計算器，也沒有對照案例——本模板不列入交叉驗算範圍。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

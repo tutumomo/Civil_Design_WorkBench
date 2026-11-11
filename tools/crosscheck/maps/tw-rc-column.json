@@ -1,0 +1,274 @@
+{
+  "templateId": "tw-rc-column",
+  "module": "鋼筋混凝土矩形柱（rc112）",
+  "title": "鋼筋混凝土矩形柱設計與檢核（rc112）",
+  "input_style": "prompt",
+  "status": "draft-輸入欄位對應待人工核對",
+  "calculator": "rc_column",
+  "checks": [
+    {
+      "file": "rc_column_template.json",
+      "name": "RC 柱軸彎互制（本專案 rc_column ↔ tw-rc-column）"
+    }
+  ],
+  "inputs": [],
+  "unmapped": [
+    {
+      "ocss": "f_c",
+      "unit": "",
+      "default": "28",
+      "candidates": [
+        "fc_mpa"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_y",
+      "unit": "",
+      "default": "420",
+      "candidates": [
+        "fy_mpa"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "f_yt",
+      "unit": "",
+      "default": "280",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "b",
+      "unit": "",
+      "default": "500",
+      "candidates": [
+        "b_mm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "h",
+      "unit": "",
+      "default": "500",
+      "candidates": [
+        "h_mm"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "l_u",
+      "unit": "",
+      "default": "3.5",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "k_factor",
+      "unit": "",
+      "default": "1.0",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "c_c",
+      "unit": "",
+      "default": "40",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "beta_dns",
+      "unit": "",
+      "default": "0.6",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "P_u",
+      "unit": "",
+      "default": "1800",
+      "candidates": [
+        "Pu_kN"
+      ],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_1",
+      "unit": "",
+      "default": "80",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "M_2",
+      "unit": "",
+      "default": "120",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "V_u",
+      "unit": "",
+      "default": "150",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "main_bar",
+      "unit": "",
+      "default": "4",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "tie_bar",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_face",
+      "unit": "",
+      "default": "3",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_side",
+      "unit": "",
+      "default": "1",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "n_legs",
+      "unit": "",
+      "default": "4",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    },
+    {
+      "ocss": "s_tie",
+      "unit": "",
+      "default": "150",
+      "candidates": [],
+      "note": "本專案無對應欄位或尚未核實——待人工核對"
+    }
+  ],
+  "compare": [
+    {
+      "case": "RC 柱軸彎互制（本專案 rc_column ↔ tw-rc-column）",
+      "name": "縱向鋼筋量 A_st（cm²，本專案 mm²×0.01）",
+      "ours": "result.chosen.As_mm2",
+      "ocss": "var:A_st",
+      "verified": true
+    },
+    {
+      "case": "RC 柱軸彎互制（本專案 rc_column ↔ tw-rc-column）",
+      "name": "柱編號（D16，支數）",
+      "ours": "result.chosen.bars_total",
+      "ocss": "var:n_b",
+      "verified": true
+    },
+    {
+      "case": "RC 柱軸彎互制（本專案 rc_column ↔ tw-rc-column）",
+      "name": "軸彎互制容量 φM_n（Pu = 1600 kN）",
+      "ours": "result.chosen.phiMn_available_kNm",
+      "ocss": "var:phiMn_cap",
+      "verified": true
+    }
+  ],
+  "case_inputs": [
+    {
+      "case": "RC 柱軸彎互制（本專案 rc_column ↔ tw-rc-column）",
+      "ocss_inputs": [
+        "M_1",
+        "M_2",
+        "P_u",
+        "V_u",
+        "b",
+        "beta_dns",
+        "c_c",
+        "f_c",
+        "f_y",
+        "f_yt",
+        "h",
+        "k_factor",
+        "l_u",
+        "main_bar",
+        "n_face",
+        "n_legs",
+        "n_side",
+        "s_tie",
+        "tie_bar"
+      ],
+      "payload": [
+        "Mu_kNm",
+        "Pu_kN",
+        "b_mm",
+        "fc_mpa",
+        "fy_mpa",
+        "h_mm"
+      ]
+    }
+  ],
+  "ocss_outputs": [
+    "E_c",
+    "d_b",
+    "A_b",
+    "d_tie",
+    "n_b",
+    "A_g",
+    "I_g",
+    "A_st",
+    "rho_g",
+    "UC_rho_min",
+    "UC_rho_max",
+    "s_clear_b",
+    "s_clear_min",
+    "UC_sclear",
+    "r_gyr",
+    "slenderness",
+    "slender_limit",
+    "is_short",
+    "M2_min",
+    "M2_eff",
+    "C_m",
+    "P_c",
+    "delta_ns",
+    "M_c",
+    "P_0",
+    "Pn_max",
+    "phiPn_max",
+    "UC_axial",
+    "d_depth",
+    "c_b",
+    "P_bal",
+    "M_bal",
+    "phiP_bal",
+    "phiM_bal",
+    "phiMn_0",
+    "phiMn_cap",
+    "UC_PM",
+    "V_c",
+    "V_s",
+    "Vs_max",
+    "phiV_n",
+    "UC_shear",
+    "dtie_min",
+    "UC_dtie",
+    "s_max",
+    "UC_tie",
+    "UC_max"
+  ],
+  "ours_only": [
+    "chosen"
+  ],
+  "blockers": [
+    "本專案對應計算器：rc_column。"
+  ],
+  "_generated": true,
+  "_note": "本表由 tools/crosscheck/ocss_map_gen.py 產生：OCSS 側取自盤點原始資料，本專案側取自既有對照案例實際使用的欄位。`inputs` 只放人工維護表已核實的對應；`compare` 是**實際驗過**的輸出對應（案例跑過、差異在容差內或已處置）；未列入 `inputs` 的 OCSS 欄位一律標為待人工核對，不臆測對應。"
+}

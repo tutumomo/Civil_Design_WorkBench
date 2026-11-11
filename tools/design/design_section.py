@@ -126,6 +126,18 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
         "model": "foundation_combined",
         "sheets": [{"suffix": "F-2_聯合基腳配筋圖", "rebar": False}],
     },
+    "detention_basin": {
+        "title": "滯洪池平面＋縱剖面圖（P-1）",
+        "tool": "basin_section",
+        "model": "detention_basin",
+        "sheets": [{"suffix": "P-1_滯洪池平面剖面圖", "rebar": False}],
+    },
+    "sediment_basin": {
+        "title": "沉砂池平面＋縱剖面圖（P-2）",
+        "tool": "basin_section",
+        "model": "sediment_basin",
+        "sheets": [{"suffix": "P-2_沉砂池平面剖面圖", "rebar": False}],
+    },
     "channel_cover": {
         "title": "溝蓋版斷面＋配筋／植筋詳圖（C-01）",
         "tool": "channel_cover",
@@ -454,7 +466,8 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         values, missing = _slope_values(payload)
     elif model == "block_wall":
         values, missing = _block_values(payload)
-    elif model in ("rc_beam", "rc_column", "foundation_isolated", "foundation_combined"):
+    elif model in ("rc_beam", "rc_column", "foundation_isolated", "foundation_combined",
+                   "detention_basin", "sediment_basin"):
         values, missing = dict(payload), []
     elif model == "channel_cover":
         values, missing = dict(payload), []     # 整份計算器輸入原樣交給引擎，圖上數值取自結果
@@ -542,6 +555,8 @@ def _python_exe() -> str:
 
 
 def _tool_path(tool: str) -> str:
+    if tool == "basin_section":
+        return os.path.join(ROOT, "tools", "basin_section", "make_basin.py")
     if tool == "foundation_section":
         return os.path.join(ROOT, "tools", "foundation_section", "make_foundation.py")
     if tool == "rc_section":

@@ -42,7 +42,7 @@ FAILS: list[str] = []
 
 EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
-        "foundation_isolated", "foundation_combined",
+        "foundation_isolated", "foundation_combined", "detention_basin", "sediment_basin",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -293,6 +293,42 @@ def main() -> int:
                               if abs(e.dxf.radius * 2000 - db) < 1e-6)
                 gaps = {round((b - a) * 1000) for a, b in zip(dots, dots[1:])}
                 check("%s 剖面點間距＝結果間距" % cid, gaps == {round(fl["spacing_mm"])}, str(gaps))
+
+        print("[2g] 滯洪池／沉砂池圖：圖上數字＝計算結果（D6，DG2）")
+        if "detention_basin" in DS.CAPABILITIES:
+            sys.path.insert(0, str(ROOT / "tools" / "basin_section"))
+            import make_basin as MB
+            ex = rows["detention_basin"]["example"]
+            res = DS.generate("detention_basin", ex, publish=False)
+            run = API.run_calculation("detention_basin", ex)["result"]
+            txt = _texts(res)
+            doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+            lay_ = MB.layout("detention_basin", run, ex)
+            for t_, _e in MB.levels(lay_):
+                check("滯洪池圖含高程標註「%s」" % t_.replace("%%c", "Ø"), t_ in txt or t_.replace("%%c", "Ø") in txt)
+            check("計算最高水位＝結果 %.2f" % run["max_stage_m"], ("%+.2f" % run["max_stage_m"]) in txt)
+            ys = sorted({round(v[1], 6) for e in doc.modelspace().query('LWPOLYLINE[layer=="30_池體輪廓"]')
+                         for v in e.vertices_in_wcs()})
+            sb = min(ys)
+            check("剖面壩頂高＝輸入 %.2f" % lay_["crest"],
+                  any(abs((y - sb) - lay_["crest"]) < 1e-6 for y in ys))
+            wl = [e for e in doc.modelspace().query('LINE[layer=="33_水位"]')]
+            check("水位線高＝結果最高水位", len(wl) == 1 and abs(wl[0].dxf.start.y - sb - run["max_stage_m"]) < 1e-6)
+            Wp = lay_["Lb"] + 2 * lay_["z"] * lay_["crest"]
+            xs = [v[0] for e in doc.modelspace().query('LWPOLYLINE[layer=="30_池體輪廓"]') for v in e.vertices_in_wcs()]
+            check("池頂寬＝池底＋2·z·壩高", abs(max(xs) - Wp) < 1e-6 or abs((max(xs) - min(xs)) - Wp) < 1e-6)
+        if "sediment_basin" in DS.CAPABILITIES:
+            ex = rows["sediment_basin"]["example"]
+            res = DS.generate("sediment_basin", ex, publish=False)
+            run = API.run_calculation("sediment_basin", ex)["result"]
+            txt = _texts(res)
+            doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+            check("沉砂池圖含「容量 %d m3」" % round(run["capacity_m3"]), "容量 %d m3" % round(run["capacity_m3"]) in txt)
+            check("沉砂池圖註明池壁結構另行設計", "池壁結構另行設計" in txt)
+            plan = [e for e in doc.modelspace().query('LWPOLYLINE[layer=="30_池體輪廓"]') if e.closed]
+            a_ = abs(_area(list(plan[0].vertices_in_wcs())))
+            check("平面面積＝長×寬＝引擎池底面積",
+                  abs(a_ - run["length_m"] * run["width_m"]) < 1e-6 and abs(a_ - run["footprint_m2"]) < 1e-3)
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

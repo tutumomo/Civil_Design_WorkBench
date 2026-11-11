@@ -153,7 +153,7 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp    # 預覽 .mcp.json �
 
 **template／formula 型案例**（X1 起）：`{"type": "template", "calculator": ..., "payload": ..., "template": "tw-*", "ocss_inputs": {...}, "compare": [...]}`；無模板者用 `"type": "formula"` 改寫 `"source"`（逐行手寫公式鏈，一律無因次化）。比較項可用 `reciprocal`（UC→FS）與 `scale`（兩邊單位不同，例 m→mm）。差異超過容差時必須寫 `disposition`（`engine_fixed`／`template_issue`／`explained`＋理由），沒有處置的差異視為失敗。
 
-現有案例（2026-11-11，13 項；12 過、1 項刻意維持未處置＝懸臂牆 M_over）：
+現有案例（2026-11-11，14 項；13 過、1 項刻意維持未處置＝懸臂牆 M_over）：
 
 | 案例檔 | 對象 | 結果 |
 |---|---|---|
@@ -166,11 +166,14 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp    # 預覽 .mcp.json �
 | `rc_column_template.json` | RC 柱 ↔ `tw-rc-column` | A_st 差 0.2%；φM_n 差 6.3%，處置為「120 點應變相容曲線 vs 三點簡化折線」 |
 | `steel_column_template.json` | 鋼柱柱腳 ↔ `tw-steel-column` | 7 項全過（錨栓改 4 支以對齊模板假設）；**查出並修正兩個引擎錯誤**（見下） |
 | `foundation_pile_formula.json` | 樁群 ↔ 手寫公式鏈 | R_max／R_min 全等（`tw-pile-cap` 無單樁反力輸出，R_out 是幾何距離） |
+| `channel_profile_template.json` | 水面線 ↔ `tw-backwater-profile` | 5 項全過（y_n／y_c／y_max／V_max／V_min，差 <1e-4%） |
 | `hydrology_formula.json`／`channel_cover_formula.json`／`foundation_combined_formula.json` | X4 公式鏈 | 全過（最大差 0.005%） |
 
 **X3 查出的引擎錯誤（2026-11-11 已修）**：
 1. `steel_column._contact_pressure()` 基板接觸壓力寫成 `M×(L/2)/S`（多乘 L/2）且 x／y 向邊長互換 → q_max 低估 (L/2) 倍（例 0.5×0.55 m 基板、P=700 kN、M=280 kN·m：應 13,653 kPa，原式只給 5,600 kPa），連帶基板厚度與揚起判定偏不安全。
 2. `steel_column.base_plate_bearing()` 規範式回傳 kgf，卻以 `/100` 換算 tf（應 `/1000`）→ 混凝土承壓設計強度 φPp 高估 **10 倍**（61,752 kN vs 正確 6,175 kN）。
+
+**不可比（已查明，不是沒做）**：滯洪池 `tw-detention-basin` 用水保 §35 合理化公式＋體積法（無演算），本專案 `detention_basin` 用 Modified Puls 入流歷線演算，唯一共有的孔口式 Q = Cd·A·√(2gh) 兩邊一致（h = 1.8 m、D = 0.2 m 時 0.1158 m³/s），但沒有共同的情境輸出；沉砂池 `tw-sediment-basin` 用 §35 Rm·Km 表法，本專案用一般 USLE 產量，基準不同。砌石／蛇籠牆（`block_wall`）無對應模板（`tw-gravity-retaining-wall` 是有筋重力式，另案比過）。三者以 `design_core_selftest.py` 的手算對照為準。
 
 **尚未處置、待技師決定**：`rc_column` 的互制曲線未套 rc112 10.3.6.2 拴柱 `0.80P0` 軸壓上限（近純軸壓時偏高）；`retaining_wall.analyse()` 不計超載、土壓高度不含底板厚（X2 已知）；`foundation_isolated` 的壓力只吃柱載重 P／M，不含基腳自重與覆土（模板含）。三者都會改動設計結果與回歸基準，屬設計變更。
 

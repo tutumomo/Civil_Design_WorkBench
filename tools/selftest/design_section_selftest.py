@@ -42,6 +42,7 @@ FAILS: list[str] = []
 
 EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
+        "foundation_isolated", "foundation_combined",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -255,6 +256,43 @@ def main() -> int:
                     gaps = {round(b - a, 1) for a, b in zip(xs, xs[1:])}
                     check("rc_column 主筋橫向間距＝引擎 centre_spacing",
                           gaps == {round(run["chosen"]["centre_spacing_mm"], 1)}, str(gaps))
+
+        print("[2f] 基腳圖：圖上數字＝計算結果（D5，DG2）")
+        if "foundation_isolated" in DS.CAPABILITIES:
+            import re as _re3
+            sys.path.insert(0, str(ROOT / "tools" / "foundation_section"))
+            import make_foundation as MF
+            for cid in ("foundation_isolated", "foundation_combined"):
+                ex = rows[cid]["example"]
+                res = DS.generate(cid, ex, publish=False)
+                run = API.run_calculation(cid, ex)["result"]
+                txt = _texts(res)
+                doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+                fl = run["concrete"]["flexure"]
+                want = "%s@%d" % (fl["bar"], round(fl["spacing_mm"]))
+                check("%s 圖上含底筋標註「%s」" % (cid, want), want in txt)
+                allowed = {want}
+                if cid == "foundation_combined":
+                    bf = run["beam_design"]["flexure"]
+                    lw = "%s@%d" % (bf["bar"], round(bf["spacing_mm"]))
+                    allowed.add(lw)
+                    st = run["beam_design"]["shear"]["stirrup"]
+                    allowed.add("%s@%d" % (st["bar"], round(st["spacing_mm"])))
+                    check("%s 圖上含縱向底筋「%s」" % (cid, lw), lw in txt)
+                seen = set(_re3.findall(r"D\d+@\d+", txt))
+                check("%s 配筋標註皆可追溯到結果" % cid, seen <= allowed, str(seen - allowed))
+                check("%s 保護層預設標「假設值」" % cid, "假設值" in txt)
+                gm = run["geometry"]
+                conc = sum(abs(_area(list(e.vertices_in_wcs()))) for e in
+                           doc.modelspace().query('LWPOLYLINE[layer=="30_基腳混凝土"]'))
+                want_a = gm["B_m"] * gm["L_m"] + (gm["B_m"] if cid == "foundation_isolated" else gm["B_m"]) * 0 \
+                    + (gm["B_m"] if cid == "foundation_isolated" else gm["L_m"]) * gm["thickness_m"]
+                check("%s 平面＋剖面混凝土面積 %.4f＝%.4f" % (cid, conc, want_a), abs(conc - want_a) < 1e-6)
+                db = MF.BAR_DIA[fl["bar"]]
+                dots = sorted(e.dxf.center.x for e in doc.modelspace().query('CIRCLE[layer=="40_鋼筋"]')
+                              if abs(e.dxf.radius * 2000 - db) < 1e-6)
+                gaps = {round((b - a) * 1000) for a, b in zip(dots, dots[1:])}
+                check("%s 剖面點間距＝結果間距" % cid, gaps == {round(fl["spacing_mm"])}, str(gaps))
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

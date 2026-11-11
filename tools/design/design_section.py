@@ -114,6 +114,18 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
             {"suffix": "CL-1_RC柱斷面配筋圖", "rebar": False},
         ],
     },
+    "foundation_isolated": {
+        "title": "獨立基腳平面＋剖面配筋圖（F-1）",
+        "tool": "foundation_section",
+        "model": "foundation_isolated",
+        "sheets": [{"suffix": "F-1_獨立基腳配筋圖", "rebar": False}],
+    },
+    "foundation_combined": {
+        "title": "聯合基腳平面＋剖面配筋圖（F-2）",
+        "tool": "foundation_section",
+        "model": "foundation_combined",
+        "sheets": [{"suffix": "F-2_聯合基腳配筋圖", "rebar": False}],
+    },
     "channel_cover": {
         "title": "溝蓋版斷面＋配筋／植筋詳圖（C-01）",
         "tool": "channel_cover",
@@ -442,7 +454,7 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         values, missing = _slope_values(payload)
     elif model == "block_wall":
         values, missing = _block_values(payload)
-    elif model in ("rc_beam", "rc_column"):
+    elif model in ("rc_beam", "rc_column", "foundation_isolated", "foundation_combined"):
         values, missing = dict(payload), []
     elif model == "channel_cover":
         values, missing = dict(payload), []     # 整份計算器輸入原樣交給引擎，圖上數值取自結果
@@ -530,6 +542,8 @@ def _python_exe() -> str:
 
 
 def _tool_path(tool: str) -> str:
+    if tool == "foundation_section":
+        return os.path.join(ROOT, "tools", "foundation_section", "make_foundation.py")
     if tool == "rc_section":
         return os.path.join(ROOT, "tools", "rc_section", "make_rc_section.py")
     if tool == "channel_cover":

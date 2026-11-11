@@ -1,0 +1,115 @@
+{
+ "templateId": "tw-dead-live-loads",
+ "module": "樓版與屋頂靜載重與活載重彙整（btr_struct）",
+ "title": "樓版與屋頂單位面積靜載重與活載重彙整（btr_struct）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "t_s",
+   "default": "0.15",
+   "unit": "m",
+   "label": "樓版厚度 t_s"
+  },
+  {
+   "name": "gam_c",
+   "default": "2400",
+   "unit": "kgf/m^3",
+   "label": "鋼筋混凝土單位體積重量（第 11 條，使用者核對）"
+  },
+  {
+   "name": "w_fin",
+   "default": "100",
+   "unit": "kgf/m^2",
+   "label": "面層、粉刷、地坪（第 14、15 條或使用者實量）"
+  },
+  {
+   "name": "w_oth",
+   "default": "60",
+   "unit": "kgf/m^2",
+   "label": "天花板、管線、固定設備與活動隔間（≥ 75 kgf/m² 之隔間另計入此項）"
+  },
+  {
+   "name": "cat",
+   "default": "1",
+   "unit": "-",
+   "label": "活載重類別：1 = 一般樓地板（L 由使用者輸入）；2 = 車庫及停車場；3 = 人群聚集之公共走廊、樓梯；4 = 屋頂（第 26 條）"
+  },
+  {
+   "name": "L_in",
+   "default": "200",
+   "unit": "kgf/m^2",
+   "label": "使用者依第 17 條表輸入之活載重 L（類別 1 必填；其餘取與規範最小值之較大者）"
+  },
+  {
+   "name": "roof",
+   "default": "1",
+   "unit": "-",
+   "label": "屋頂形式（類別 4）：1 = 平頂或 1/8 以上拱頂；2 = 1/6～1/2 坡頂或 1/8～3/8 拱頂；3 = 1/2 以上披頂或 3/8 以上拱頂"
+  },
+  {
+   "name": "A_t",
+   "default": "30",
+   "unit": "m^2",
+   "label": "構材載重面積 A"
+  },
+  {
+   "name": "crowd",
+   "default": "0",
+   "unit": "-",
+   "label": "人群聚集場所（第 17 條 A、B-2、B-3、D、E、F、G-1、G-3 等）：1 = 是（不得折減）；0 = 否"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "D_slab",
+   "unit": "",
+   "value_at_default": 360
+  },
+  {
+   "name": "D",
+   "unit": "",
+   "value_at_default": 520
+  },
+  {
+   "name": "L",
+   "unit": "",
+   "value_at_default": 200
+  },
+  {
+   "name": "R_pct",
+   "unit": "",
+   "value_at_default": 13.6
+  },
+  {
+   "name": "L_red",
+   "unit": "",
+   "value_at_default": 172.8
+  },
+  {
+   "name": "L_col",
+   "unit": "",
+   "value_at_default": 172.8
+  },
+  {
+   "name": "w_u1",
+   "unit": "",
+   "value_at_default": 728
+  },
+  {
+   "name": "w_u2",
+   "unit": "",
+   "value_at_default": 900.48
+  },
+  {
+   "name": "w_u2c",
+   "unit": "",
+   "value_at_default": 900.48
+  }
+ ],
+ "ucValues_at_default": {},
+ "uc_at_default": null,
+ "passes_at_default": null,
+ "errorLines": 0,
+ "unit_warnings": []
+}

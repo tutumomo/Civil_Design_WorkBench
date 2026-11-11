@@ -1,0 +1,58 @@
+{
+ "templateId": "tw-gravity-retaining-wall",
+ "calculator": "wall_stability（wall_type=gravity）",
+ "status": "draft-未經試算驗證",
+ "input_style": "literal（須改寫 source 的 `name = 值` 行；values 無效）",
+ "inputs": [
+  {
+   "ocss": "H",
+   "ours": "height_m"
+  },
+  {
+   "ocss": "t_top",
+   "ours": "（需查重力式幾何輸入）"
+  },
+  {
+   "ocss": "B",
+   "ours": "base_width_m"
+  },
+  {
+   "ocss": "g_w",
+   "ours": "（混凝土單位重，引擎常數待查）",
+   "unit": "kN/m3"
+  },
+  {
+   "ocss": "g_s",
+   "ours": "soil.gamma"
+  },
+  {
+   "ocss": "phi_s",
+   "ours": "soil.phi_deg"
+  },
+  {
+   "ocss": "q_sur",
+   "ours": "soil.surcharge_kpa"
+  },
+  {
+   "ocss": "mu_b",
+   "ours": "（待查）"
+  },
+  {
+   "ocss": "q_a",
+   "ours": "soil.allowable_bearing_kpa"
+  }
+ ],
+ "ocss_only": [
+  "mat（1 混凝土／2 砌石）",
+  "f_c、ft_a、fc_a、fv_a（容許應力）",
+  "base（基底型式）"
+ ],
+ "ours_only": [
+  "被動土壓"
+ ],
+ "compare": [],
+ "blockers": [
+  "輸入單位在 OCSS 標「-」，需讀 source 說明確認",
+  "UC 只有 UC_max 一項，無法逐項（滑動／傾倒／承載）比，需改讀輸出變數"
+ ]
+}

@@ -1,0 +1,178 @@
+{
+ "templateId": "tw-gravity-retaining-wall",
+ "module": "重力式擋土牆（無筋混凝土／砌石；found112 / swc_tech）",
+ "title": "重力式擋土牆穩定與牆體應力檢核（無筋混凝土／砌石）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "H",
+   "default": "3.0",
+   "unit": "-",
+   "label": "牆身高度 H（m；水保技術規範第 118 條重力式有效高以 4 m 以下為原則）"
+  },
+  {
+   "name": "t_top",
+   "default": "0.8",
+   "unit": "-",
+   "label": "牆頂寬 t（m）"
+  },
+  {
+   "name": "B",
+   "default": "2.6",
+   "unit": "-",
+   "label": "牆底寬 B（m；背面垂直，正面斜坡）"
+  },
+  {
+   "name": "g_w",
+   "default": "24",
+   "unit": "-",
+   "label": "牆身單位重 γ_w（kN/m³）"
+  },
+  {
+   "name": "mat",
+   "default": "1",
+   "unit": "-",
+   "label": "牆身材料：1 = 無筋混凝土（rc112 第 14 章）；2 = 砌石（使用者輸入容許應力）"
+  },
+  {
+   "name": "f_c",
+   "default": "21",
+   "unit": "-",
+   "label": "混凝土規定抗壓強度 f'c（MPa；mat = 1 用）"
+  },
+  {
+   "name": "ft_a",
+   "default": "0",
+   "unit": "-",
+   "label": "砌石容許拉應力（kN/m²；mat = 2 用，0 表示不容許受拉）"
+  },
+  {
+   "name": "fc_a",
+   "default": "1000",
+   "unit": "-",
+   "label": "砌石容許壓應力（kN/m²；mat = 2 用）"
+  },
+  {
+   "name": "fv_a",
+   "default": "150",
+   "unit": "-",
+   "label": "砌石容許平均剪應力（kN/m²；mat = 2 用）"
+  },
+  {
+   "name": "g_s",
+   "default": "18",
+   "unit": "-",
+   "label": "回填土單位重 γ_s（kN/m³）"
+  },
+  {
+   "name": "phi_s",
+   "default": "30",
+   "unit": "-",
+   "label": "回填土有效內摩擦角 φ（度）"
+  },
+  {
+   "name": "q_sur",
+   "default": "10",
+   "unit": "-",
+   "label": "牆頂地表均布超載 q（kN/m²）"
+  },
+  {
+   "name": "mu_b",
+   "default": "0.5",
+   "unit": "-",
+   "label": "基底與地盤摩擦係數 μ"
+  },
+  {
+   "name": "q_a",
+   "default": "200",
+   "unit": "-",
+   "label": "地盤容許承載力 q_a（kN/m²；已含長期安全係數 ≥ 3）"
+  },
+  {
+   "name": "base",
+   "default": "1",
+   "unit": "-",
+   "label": "基礎地盤：1 = 土層（合力在底寬中間三分之一）；2 = 岩盤（合力在底寬中間二分之一）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Ka_out",
+   "unit": "",
+   "value_at_default": 0.3333333333333333
+  },
+  {
+   "name": "Pa_out",
+   "unit": "",
+   "value_at_default": 37
+  },
+  {
+   "name": "Mo_out",
+   "unit": "",
+   "value_at_default": 42
+  },
+  {
+   "name": "Wt_out",
+   "unit": "",
+   "value_at_default": 122.40000000000002
+  },
+  {
+   "name": "Mr_out",
+   "unit": "",
+   "value_at_default": 204.48000000000002
+  },
+  {
+   "name": "FSot_out",
+   "unit": "",
+   "value_at_default": 4.868571428571429
+  },
+  {
+   "name": "FSsl_out",
+   "unit": "",
+   "value_at_default": 1.6540540540540543
+  },
+  {
+   "name": "e_out",
+   "unit": "",
+   "value_at_default": -0.027450980392156765
+  },
+  {
+   "name": "qmax_out",
+   "unit": "",
+   "value_at_default": 50.05917159763313
+  },
+  {
+   "name": "st1_out",
+   "unit": "",
+   "value_at_default": 0
+  },
+  {
+   "name": "sc1_out",
+   "unit": "",
+   "value_at_default": 122.27218934911242
+  },
+  {
+   "name": "st2_out",
+   "unit": "",
+   "value_at_default": 0
+  },
+  {
+   "name": "sc2_out",
+   "unit": "",
+   "value_at_default": 62.95640138408305
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.91
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_max": 0.91
+ },
+ "uc_at_default": 0.91,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

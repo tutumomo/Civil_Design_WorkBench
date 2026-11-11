@@ -1,0 +1,66 @@
+{
+ "templateId": "tw-drainage-channel",
+ "calculator": "channel_hydraulics",
+ "status": "draft-未經試算驗證",
+ "input_style": "literal（須改寫 source；values 無效）",
+ "inputs": [
+  {
+   "ocss": "use_rational",
+   "ours": null,
+   "set": 0,
+   "note": "設 0 才採 Q_direct"
+  },
+  {
+   "ocss": "Q_direct",
+   "ours": "design_flow_m3s",
+   "unit": "m3/s"
+  },
+  {
+   "ocss": "B_chan",
+   "ours": "inner_width_m",
+   "unit": "m"
+  },
+  {
+   "ocss": "H_chan",
+   "ours": "depth_m",
+   "unit": "m"
+  },
+  {
+   "ocss": "z_side",
+   "ours": null,
+   "set": 0,
+   "note": "本專案只有矩形 U 型溝"
+  },
+  {
+   "ocss": "S_chan",
+   "ours": "slope"
+  },
+  {
+   "ocss": "n_manning",
+   "ours": "manning_n"
+  }
+ ],
+ "ocss_only": [
+  "C_runoff／I_rain／A_catch（合理化公式，本專案由 hydrology 另算）",
+  "V_min_req／V_max_req／sf_cap_req／fb_min（OCSS 為輸入，本專案為 DEFAULTS）",
+  "壁厚、配筋、土壓（結構檢核，本專案走 rc_design 另一條）"
+ ],
+ "ours_only": [],
+ "compare": [
+  {
+   "ours": "capacity 的 Q_cap",
+   "ocss": "輸出變數待查（UC_cap＝需求／容量）"
+  },
+  {
+   "ours": "normal_depth 的 h_n",
+   "ocss": "輸出變數待查"
+  },
+  {
+   "ours": "V_full 流速",
+   "ocss": "輸出變數待查"
+  }
+ ],
+ "blockers": [
+  "OCSS 與本專案的容量安全係數與出水高預設值需對齊（sf_cap_req=1.2 對 DEFAULTS.capacity_sf；fb_min=0.20 對 freeboard_min_m）"
+ ]
+}

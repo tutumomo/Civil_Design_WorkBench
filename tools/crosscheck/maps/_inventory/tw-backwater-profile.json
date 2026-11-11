@@ -1,0 +1,128 @@
+{
+ "templateId": "tw-backwater-profile",
+ "module": "明渠水面線標準步進法（swc_tech）",
+ "title": "明渠水面線標準步進法（swc_tech / 曼寧公式）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "Q_d",
+   "default": "10",
+   "unit": "-",
+   "label": "設計流量 Q（m³/s）"
+  },
+  {
+   "name": "b_w",
+   "default": "3",
+   "unit": "-",
+   "label": "渠底寬 b（m）"
+  },
+  {
+   "name": "m_s",
+   "default": "1",
+   "unit": "-",
+   "label": "邊坡 m（水平:垂直 = m:1；0 為矩形）"
+  },
+  {
+   "name": "n_m",
+   "default": "0.015",
+   "unit": "-",
+   "label": "曼寧粗糙係數 n（swc_tech 第 84 條；混凝土 0.013～0.015）"
+  },
+  {
+   "name": "S_0",
+   "default": "0.001",
+   "unit": "-",
+   "label": "渠底坡降 S0（正坡）"
+  },
+  {
+   "name": "y_0",
+   "default": "1.8",
+   "unit": "-",
+   "label": "控制斷面水深 y_0（m；高於臨界水深＝下游控制，低於臨界水深＝上游控制）"
+  },
+  {
+   "name": "L_r",
+   "default": "400",
+   "unit": "-",
+   "label": "推算渠段長度 L（m）"
+  },
+  {
+   "name": "N_s",
+   "default": "20",
+   "unit": "-",
+   "label": "推算步數 N（1～100）"
+  },
+  {
+   "name": "H_ch",
+   "default": "3.0",
+   "unit": "-",
+   "label": "渠道深度 H（m）"
+  },
+  {
+   "name": "V_allow",
+   "default": "4.57",
+   "unit": "-",
+   "label": "最大容許流速（m/s；swc_tech 第 85 條二(一)混凝土常流水 4.57～6.10，取保守下限）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "y_n_out",
+   "unit": "",
+   "value_at_default": 1.267382090892672
+  },
+  {
+   "name": "y_c_out",
+   "unit": "",
+   "value_at_default": 0.9340890765374419
+  },
+  {
+   "name": "dx_out",
+   "unit": "",
+   "value_at_default": 20
+  },
+  {
+   "name": "y_end_out",
+   "unit": "",
+   "value_at_default": 1.5152568524088896
+  },
+  {
+   "name": "y_mid_out",
+   "unit": "",
+   "value_at_default": 1.6467921501301088
+  },
+  {
+   "name": "ymax_out",
+   "unit": "",
+   "value_at_default": 1.8
+  },
+  {
+   "name": "Vmax_out",
+   "unit": "",
+   "value_at_default": 1.4616092502653932
+  },
+  {
+   "name": "Vmin_out",
+   "unit": "",
+   "value_at_default": 1.1574074074074074
+  },
+  {
+   "name": "fb_out",
+   "unit": "",
+   "value_at_default": 0.45
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.75
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_max": 0.75
+ },
+ "uc_at_default": 0.75,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

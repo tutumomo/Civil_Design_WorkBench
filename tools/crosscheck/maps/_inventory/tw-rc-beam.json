@@ -1,0 +1,538 @@
+{
+ "templateId": "tw-rc-beam",
+ "module": "鋼筋混凝土矩形梁（rc112）",
+ "title": "鋼筋混凝土矩形梁設計與檢核（rc112）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "f_c",
+   "label": "混凝土規定抗壓強度 f'c<span class=\"alleen-scherm\">（rc112 19.2.1，一般構造物 ≥ 21 MPa）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "28",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "f_y",
+   "label": "主鋼筋規定降伏強度 fy<span class=\"alleen-scherm\">（rc112 20.2.2，SD420 為 420 MPa）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "420",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "f_yt",
+   "label": "剪力箍筋規定降伏強度 fyt<span class=\"alleen-scherm\">（rc112 20.2.2.4，不得大於 420 MPa）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "420",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "b",
+   "label": "梁寬 b<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "300",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "h",
+   "label": "梁深 h<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "600",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "L",
+   "label": "梁計算跨度 L<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "6.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "c_c",
+   "label": "淨保護層厚度 cc<span class=\"alleen-scherm\">（表 20.5.1.3.1，梁暴露環境 40～50 mm）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "40",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "support_type",
+   "label": "support_type",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "簡支梁（L/16）"
+    },
+    {
+     "value": "2",
+     "text": "一端連續（L/18.5）"
+    },
+    {
+     "value": "3",
+     "text": "兩端連續（L/21）"
+    },
+    {
+     "value": "4",
+     "text": "懸臂梁（L/8）"
+    }
+   ]
+  },
+  {
+   "name": "bar_t",
+   "label": "bar_t",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "D16（直徑 15.9 mm，單根 198.6 mm²）"
+    },
+    {
+     "value": "2",
+     "text": "D19（直徑 19.1 mm，單根 286.5 mm²）"
+    },
+    {
+     "value": "3",
+     "text": "D22（直徑 22.2 mm，單根 387.1 mm²）"
+    },
+    {
+     "value": "4",
+     "text": "D25（直徑 25.4 mm，單根 506.7 mm²）"
+    },
+    {
+     "value": "5",
+     "text": "D29（直徑 28.7 mm，單根 646.9 mm²）"
+    },
+    {
+     "value": "6",
+     "text": "D32（直徑 32.2 mm，單根 814.3 mm²）"
+    },
+    {
+     "value": "7",
+     "text": "D36（直徑 35.8 mm，單根 1007.0 mm²）"
+    }
+   ]
+  },
+  {
+   "name": "n_t",
+   "label": "主拉力鋼筋根數<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "4",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "rebar_layers",
+   "label": "rebar_layers",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "單排配置"
+    },
+    {
+     "value": "2",
+     "text": "雙排配置"
+    }
+   ]
+  },
+  {
+   "name": "has_top",
+   "label": "has_top",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "無受壓筋（單筋矩形梁）"
+    },
+    {
+     "value": "2",
+     "text": "配置受壓筋（雙筋矩形梁）"
+    }
+   ]
+  },
+  {
+   "name": "bar_c",
+   "label": "bar_c",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "D16（直徑 15.9 mm）"
+    },
+    {
+     "value": "2",
+     "text": "D19（直徑 19.1 mm）"
+    },
+    {
+     "value": "3",
+     "text": "D22（直徑 22.2 mm）"
+    },
+    {
+     "value": "4",
+     "text": "D25（直徑 25.4 mm）"
+    },
+    {
+     "value": "5",
+     "text": "D29（直徑 28.7 mm）"
+    }
+   ]
+  },
+  {
+   "name": "n_c",
+   "label": "受壓鋼筋根數<span class=\"alleen-scherm\">（單筋梁填 0）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "bar_v",
+   "label": "bar_v",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "choice",
+   "options": [
+    {
+     "value": "1",
+     "text": "D10（直徑 9.53 mm，單肢 71.33 mm²）"
+    },
+    {
+     "value": "2",
+     "text": "D13（直徑 12.7 mm，單肢 126.7 mm²）"
+    },
+    {
+     "value": "3",
+     "text": "D16（直徑 15.9 mm，單肢 198.6 mm²）"
+    }
+   ]
+  },
+  {
+   "name": "n_legs",
+   "label": "箍筋肢數<span class=\"alleen-scherm\">（標準雙肢箍填 2）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "2",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "s_v",
+   "label": "箍筋沿梁長之間距 s<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "150",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_u",
+   "label": "臨界斷面之設計彎矩 Mu<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "200",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "V_u",
+   "label": "臨界斷面（距支承面 d 處）之設計剪力 Vu<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "120",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_D",
+   "label": "服務載重：靜載重彎矩 MD<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "60",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "M_L",
+   "label": "服務載重：活載重彎矩 ML<span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "40",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "q_sus",
+   "label": "持續活載重比例<span class=\"alleen-scherm\">（長期撓度計算，通常取 0.2～0.3）</span><span class=\"kolom-3\"></span>",
+   "unit_in_label": "",
+   "default": "0.2",
+   "kind": "input",
+   "options": null
+  }
+ ],
+ "literal_inputs": [],
+ "outputs": [
+  {
+   "name": "E_c",
+   "unit": "MPa",
+   "value_at_default": 19843.13483298443
+  },
+  {
+   "name": "f_r",
+   "unit": "MPa",
+   "value_at_default": 3.2807316257200925
+  },
+  {
+   "name": "A_s",
+   "unit": "mm^2",
+   "value_at_default": 794.4
+  },
+  {
+   "name": "A_sp",
+   "unit": "mm^2",
+   "value_at_default": 0
+  },
+  {
+   "name": "A_v",
+   "unit": "mm^2",
+   "value_at_default": 142.66
+  },
+  {
+   "name": "d",
+   "unit": "mm",
+   "value_at_default": 542.5199999999999
+  },
+  {
+   "name": "d_t",
+   "unit": "mm",
+   "value_at_default": 542.5199999999999
+  },
+  {
+   "name": "β_1",
+   "unit": "",
+   "value_at_default": 0.85
+  },
+  {
+   "name": "c",
+   "unit": "mm",
+   "value_at_default": 54.9757785467128
+  },
+  {
+   "name": "a",
+   "unit": "mm",
+   "value_at_default": 46.72941176470588
+  },
+  {
+   "name": "ε_t",
+   "unit": "",
+   "value_at_default": 0.026605037764350442
+  },
+  {
+   "name": "ε_ty",
+   "unit": "",
+   "value_at_default": 0.0021
+  },
+  {
+   "name": "ϕ_m",
+   "unit": "",
+   "value_at_default": 0.9
+  },
+  {
+   "name": "M_n",
+   "unit": "kN m",
+   "value_at_default": 173.21512557176464
+  },
+  {
+   "name": "ϕM_n",
+   "unit": "kN m",
+   "value_at_default": 155.8936130145882
+  },
+  {
+   "name": "UC_M",
+   "unit": "",
+   "value_at_default": 1.2829261964778789
+  },
+  {
+   "name": "A_smin",
+   "unit": "mm^2",
+   "value_at_default": 542.5199999999998
+  },
+  {
+   "name": "UC_Asmin",
+   "unit": "",
+   "value_at_default": 0.6829305135951659
+  },
+  {
+   "name": "UC_et",
+   "unit": "",
+   "value_at_default": 0.1916930186370106
+  },
+  {
+   "name": "V_c",
+   "unit": "kN",
+   "value_at_default": 146.4080461304337
+  },
+  {
+   "name": "V_s",
+   "unit": "kN",
+   "value_at_default": 216.70852895999994
+  },
+  {
+   "name": "V_smax",
+   "unit": "kN",
+   "value_at_default": 568.4077085063896
+  },
+  {
+   "name": "UC_Vsmax",
+   "unit": "",
+   "value_at_default": 0.38125543640047926
+  },
+  {
+   "name": "ϕV_n",
+   "unit": "kN",
+   "value_at_default": 272.33743131782524
+  },
+  {
+   "name": "UC_V",
+   "unit": "",
+   "value_at_default": 0.4406298444518878
+  },
+  {
+   "name": "A_vs_prov",
+   "unit": "mm",
+   "value_at_default": 0.9510666666666666
+  },
+  {
+   "name": "A_vs_min",
+   "unit": "mm",
+   "value_at_default": 0.25
+  },
+  {
+   "name": "UC_Avmin",
+   "unit": "",
+   "value_at_default": 0.26286275059582226
+  },
+  {
+   "name": "s_max",
+   "unit": "mm",
+   "value_at_default": 271.25999999999993
+  },
+  {
+   "name": "UC_s",
+   "unit": "",
+   "value_at_default": 0.5529750055297501
+  },
+  {
+   "name": "s_bar",
+   "unit": "mm",
+   "value_at_default": 61.67999999999999
+  },
+  {
+   "name": "s_crack_lim",
+   "unit": "mm",
+   "value_at_default": 280
+  },
+  {
+   "name": "UC_crack",
+   "unit": "",
+   "value_at_default": 0.22028571428571422
+  },
+  {
+   "name": "h_min",
+   "unit": "mm",
+   "value_at_default": 378.2608695652174
+  },
+  {
+   "name": "UC_hmin",
+   "unit": "",
+   "value_at_default": 0.6304347826086957
+  },
+  {
+   "name": "M_cr",
+   "unit": "kN m",
+   "value_at_default": 59.053169262961674
+  },
+  {
+   "name": "M_a",
+   "unit": "kN m",
+   "value_at_default": 100
+  },
+  {
+   "name": "I_g",
+   "unit": "mm^4",
+   "value_at_default": 5400000000
+  },
+  {
+   "name": "I_cr",
+   "unit": "mm^4",
+   "value_at_default": 1560190128.2292032
+  },
+  {
+   "name": "I_e",
+   "unit": "mm^4",
+   "value_at_default": 2074643253.1106339
+  },
+  {
+   "name": "Δ_L",
+   "unit": "mm",
+   "value_at_default": 3.643657505380966
+  },
+  {
+   "name": "Δ_L_lim",
+   "unit": "mm",
+   "value_at_default": 16.666666666666668
+  },
+  {
+   "name": "UC_def_L",
+   "unit": "",
+   "value_at_default": 0.21861945032285796
+  },
+  {
+   "name": "Δ_lt",
+   "unit": "mm",
+   "value_at_default": 16.032093023676254
+  },
+  {
+   "name": "Δ_lt_lim",
+   "unit": "mm",
+   "value_at_default": 25
+  },
+  {
+   "name": "UC_def_tot",
+   "unit": "",
+   "value_at_default": 0.6412837209470501
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 1.29
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_M": 1.2829261964778789,
+  "UC_Asmin": 0.6829305135951659,
+  "UC_et": 0.1916930186370106,
+  "UC_Vsmax": 0.38125543640047926,
+  "UC_V": 0.4406298444518878,
+  "UC_Avmin": 0.26286275059582226,
+  "UC_s": 0.5529750055297501,
+  "UC_crack": 0.22028571428571422,
+  "UC_hmin": 0.6304347826086957,
+  "UC_def_L": 0.21861945032285796,
+  "UC_def_tot": 0.6412837209470501,
+  "UC_max": 1.29
+ },
+ "uc_at_default": 1.29,
+ "passes_at_default": false,
+ "errorLines": 0,
+ "unit_warnings": []
+}

@@ -1,0 +1,150 @@
+{
+ "templateId": "tw-seismic-load",
+ "module": "建築物靜力分析法地震力計算（seis113）",
+ "title": "建築物靜力分析法地震力計算（seis113）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "S_DS",
+   "label": "工址短週期設計水平譜加速度係數 S_DS（seis113 2.5，視圖可依行政區、地盤與近斷層距離一鍵帶入）",
+   "unit_in_label": "seis113 2.5，視圖可依行政區、地盤與近斷層距離一鍵帶入",
+   "default": "0.80",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "S_D1",
+   "label": "工址一秒週期設計水平譜加速度係數 S_D1（seis113 2.5，視圖可依行政區、地盤與近斷層距離一鍵帶入）",
+   "unit_in_label": "seis113 2.5，視圖可依行政區、地盤與近斷層距離一鍵帶入",
+   "default": "0.45",
+   "kind": "input",
+   "options": null
+  }
+ ],
+ "literal_inputs": [
+  {
+   "name": "sys",
+   "default": "2",
+   "unit": "-",
+   "label": "結構系統（週期經驗式 Ct）：1 = 鋼構造剛構架；2 = RC／SRC／鋼造偏心斜撐剛構架；3 = 其他"
+  },
+  {
+   "name": "R_duct",
+   "default": "4.8",
+   "unit": "-",
+   "label": "結構系統韌性容量 R（seis113 表 1-3，依結構系統查表）"
+  },
+  {
+   "name": "alpha_y",
+   "default": "1.5",
+   "unit": "-",
+   "label": "起始降伏地震力放大倍數 α_y（2.9：RC 強度設計法 1.5、鋼構極限設計 1.0、鋼構 ASD 1.2）"
+  },
+  {
+   "name": "taipei",
+   "default": "0",
+   "unit": "-",
+   "label": "臺北盆地工址：0 = 否；1 = 是（本模組不支援，填 1 即拒算）"
+  },
+  {
+   "name": "n_st",
+   "default": "8",
+   "unit": "-",
+   "label": "樓層數 n（各層等重等高）"
+  },
+  {
+   "name": "h_st",
+   "default": "3.5",
+   "unit": "m",
+   "label": "各層樓高 h（m）"
+  },
+  {
+   "name": "W_st",
+   "default": "450",
+   "unit": "tf",
+   "label": "各層地震有效重量 w（tf；含靜載重、活動隔間 ≥ 75 kg/m²，倉庫書庫加 1/4 活載重）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "I_eq",
+   "unit": "",
+   "value_at_default": 1
+  },
+  {
+   "name": "h_n",
+   "unit": "",
+   "value_at_default": 28
+  },
+  {
+   "name": "C_t",
+   "unit": "",
+   "value_at_default": 0.07
+  },
+  {
+   "name": "T_a",
+   "unit": "",
+   "value_at_default": 0.8520529090121832
+  },
+  {
+   "name": "T_0D",
+   "unit": "",
+   "value_at_default": 0.5625
+  },
+  {
+   "name": "S_aD",
+   "unit": "",
+   "value_at_default": 0.5281362169418585
+  },
+  {
+   "name": "R_a",
+   "unit": "",
+   "value_at_default": 3.533333333333333
+  },
+  {
+   "name": "F_u",
+   "unit": "",
+   "value_at_default": 3.533333333333333
+  },
+  {
+   "name": "SaD_Fu",
+   "unit": "",
+   "value_at_default": 0.1494725142288279
+  },
+  {
+   "name": "W_tot",
+   "unit": "",
+   "value_at_default": 3600
+  },
+  {
+   "name": "V",
+   "unit": "",
+   "value_at_default": 256.2385958208479
+  },
+  {
+   "name": "V_W",
+   "unit": "",
+   "value_at_default": 0.0711773877280133
+  },
+  {
+   "name": "F_t",
+   "unit": "",
+   "value_at_default": 15.283018867924536
+  },
+  {
+   "name": "F_top",
+   "unit": "",
+   "value_at_default": 68.82870263524083
+  },
+  {
+   "name": "F_bot",
+   "unit": "",
+   "value_at_default": 6.693210470914537
+  }
+ ],
+ "ucValues_at_default": {},
+ "uc_at_default": null,
+ "passes_at_default": null,
+ "errorLines": 0,
+ "unit_warnings": []
+}

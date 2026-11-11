@@ -1,0 +1,579 @@
+{
+ "templateId": "tw-box-culvert",
+ "module": "鋼筋混凝土箱涵設計與檢核（hwbridge / rc112）",
+ "title": "鋼筋混凝土箱涵設計與檢核（hwbridge / rc112）",
+ "input_style": "literal",
+ "inputs": [],
+ "literal_inputs": [
+  {
+   "name": "B_clear",
+   "default": "3.00",
+   "unit": "m",
+   "label": "涵身內淨寬 B_clear"
+  },
+  {
+   "name": "H_clear",
+   "default": "2.00",
+   "unit": "m",
+   "label": "涵身內淨高 H_clear"
+  },
+  {
+   "name": "t_top",
+   "default": "0.35",
+   "unit": "m",
+   "label": "頂版厚度 t_top"
+  },
+  {
+   "name": "t_bot",
+   "default": "0.40",
+   "unit": "m",
+   "label": "底版厚度 t_bot"
+  },
+  {
+   "name": "t_wall",
+   "default": "0.30",
+   "unit": "m",
+   "label": "側牆厚度 t_wall"
+  },
+  {
+   "name": "c_chamfer",
+   "default": "0.20",
+   "unit": "m",
+   "label": "45° 內角加腋邊長 c_chamfer"
+  },
+  {
+   "name": "H_cover",
+   "default": "1.00",
+   "unit": "m",
+   "label": "頂版土層覆土深度 H_cover"
+  },
+  {
+   "name": "H_gw",
+   "default": "1.50",
+   "unit": "m",
+   "label": "地下水位深度（自地表起算，m；若無地下水請設 ≥ 99 m）"
+  },
+  {
+   "name": "S_slope",
+   "default": "0.005",
+   "unit": "-",
+   "label": "渠道縱向坡度 S_slope（swc_tech §78：排水設施縱坡 ≥ 0.2%）"
+  },
+  {
+   "name": "n_manning",
+   "default": "0.014",
+   "unit": "-",
+   "label": "曼寧粗糙係數 n（設計者輸入；光面混凝土常用 0.013～0.015）"
+  },
+  {
+   "name": "Q_design",
+   "default": "12.00",
+   "unit": "m^3/s",
+   "label": "設計洪峰通水量 Q_design"
+  },
+  {
+   "name": "fc_kpa",
+   "default": "28000",
+   "unit": "kN/m^2",
+   "label": "混凝土規定抗壓強度 f'c（28 MPa = 28000 kN/m²）"
+  },
+  {
+   "name": "fy_kpa",
+   "default": "420000",
+   "unit": "kN/m^2",
+   "label": "鋼筋規定降伏強度 fy（SD420 = 420 MPa = 420000 kN/m²）"
+  },
+  {
+   "name": "gamma_c",
+   "default": "24.0",
+   "unit": "kN/m^3",
+   "label": "鋼筋混凝土單位重 γ_c"
+  },
+  {
+   "name": "gamma_s",
+   "default": "19.0",
+   "unit": "kN/m^3",
+   "label": "回填土單位重 γ_s"
+  },
+  {
+   "name": "gamma_w",
+   "default": "9.81",
+   "unit": "kN/m^3",
+   "label": "水單位重 γ_w"
+  },
+  {
+   "name": "phi_deg",
+   "default": "30",
+   "unit": "deg",
+   "label": "土壤有效內摩擦角 φ"
+  },
+  {
+   "name": "q_surcharge",
+   "default": "10.0",
+   "unit": "kN/m^2",
+   "label": "地表等效均佈活載重超載 q_sur"
+  },
+  {
+   "name": "qa_allow",
+   "default": "220.0",
+   "unit": "kN/m^2",
+   "label": "地盤容許承載力 q_a（工作載重下）"
+  },
+  {
+   "name": "cover_ext",
+   "default": "50",
+   "unit": "mm",
+   "label": "外側接觸土壤面鋼筋淨保護層厚度（rc112 表 20.6.1.3.1）"
+  },
+  {
+   "name": "cover_int",
+   "default": "40",
+   "unit": "mm",
+   "label": "內側通水面鋼筋淨保護層厚度"
+  },
+  {
+   "name": "truck_type",
+   "default": "1",
+   "unit": "-",
+   "label": "車載種類：1 = HS20-44(MS18)（後軸重 144 kN，單輪 72 kN，§3.6）；0 = 無車載"
+  },
+  {
+   "name": "k_truck",
+   "default": "1.00",
+   "unit": "-",
+   "label": "載重等級倍數：一般道路 1.00；省市重要道路、國道取 1.25（§3.6 第 6、7 款）"
+  },
+  {
+   "name": "s_wheel",
+   "default": "1.80",
+   "unit": "m",
+   "label": "同軸左右輪中心距（依 §3.6 圖 3.3 確認）"
+  },
+  {
+   "name": "s_axle",
+   "default": "4.25",
+   "unit": "m",
+   "label": "後軸距（§3.6 圖 3.3：4.25～9.15 m，取最小值產生最大壓力）"
+  },
+  {
+   "name": "db_top",
+   "default": "19.1",
+   "unit": "mm",
+   "label": "（D19 鋼筋，單根面積 286.5 mm²）"
+  },
+  {
+   "name": "Ab_top",
+   "default": "286.5",
+   "unit": "mm^2",
+   "label": ""
+  },
+  {
+   "name": "s_top",
+   "default": "150",
+   "unit": "mm",
+   "label": "頂版受拉主筋間距 s_top"
+  },
+  {
+   "name": "db_bot",
+   "default": "19.1",
+   "unit": "mm",
+   "label": "（D19 鋼筋，單根面積 286.5 mm²）"
+  },
+  {
+   "name": "Ab_bot",
+   "default": "286.5",
+   "unit": "mm^2",
+   "label": ""
+  },
+  {
+   "name": "s_bot",
+   "default": "150",
+   "unit": "mm",
+   "label": "底版受拉主筋間距 s_bot"
+  },
+  {
+   "name": "db_wall",
+   "default": "15.9",
+   "unit": "mm",
+   "label": "（D16 鋼筋，單根面積 198.6 mm²）"
+  },
+  {
+   "name": "Ab_wall",
+   "default": "198.6",
+   "unit": "mm^2",
+   "label": ""
+  },
+  {
+   "name": "s_wall",
+   "default": "150",
+   "unit": "mm",
+   "label": "側牆垂直受拉主筋間距 s_wall"
+  },
+  {
+   "name": "db_corner",
+   "default": "12.7",
+   "unit": "mm",
+   "label": "（D13 鋼筋，單根面積 126.7 mm²）"
+  },
+  {
+   "name": "s_corner",
+   "default": "200",
+   "unit": "mm",
+   "label": "角隅 X 形補強斜筋間距 s_corner"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "B_outer",
+   "unit": "",
+   "value_at_default": 3.6
+  },
+  {
+   "name": "H_outer",
+   "unit": "",
+   "value_at_default": 2.75
+  },
+  {
+   "name": "B_c",
+   "unit": "",
+   "value_at_default": 3.3
+  },
+  {
+   "name": "H_c",
+   "unit": "",
+   "value_at_default": 2.375
+  },
+  {
+   "name": "q_truck",
+   "unit": "",
+   "value_at_default": 23.52
+  },
+  {
+   "name": "K0_soil",
+   "unit": "",
+   "value_at_default": 0.5
+  },
+  {
+   "name": "w_soil",
+   "unit": "",
+   "value_at_default": 19
+  },
+  {
+   "name": "w_top_self",
+   "unit": "",
+   "value_at_default": 8.399999999999999
+  },
+  {
+   "name": "w_bot_self",
+   "unit": "",
+   "value_at_default": 9.600000000000001
+  },
+  {
+   "name": "W_walls_total",
+   "unit": "",
+   "value_at_default": 34.199999999999996
+  },
+  {
+   "name": "q_D_top",
+   "unit": "",
+   "value_at_default": 37.4
+  },
+  {
+   "name": "q_base_service",
+   "unit": "",
+   "value_at_default": 80.87384044526901
+  },
+  {
+   "name": "z_top",
+   "unit": "",
+   "value_at_default": 1.175
+  },
+  {
+   "name": "z_bot",
+   "unit": "",
+   "value_at_default": 3.55
+  },
+  {
+   "name": "p_L_lat",
+   "unit": "",
+   "value_at_default": 5.7
+  },
+  {
+   "name": "p_lat_top",
+   "unit": "",
+   "value_at_default": 21.87
+  },
+  {
+   "name": "p_lat_bot",
+   "unit": "",
+   "value_at_default": 54.49
+  },
+  {
+   "name": "w_u_top",
+   "unit": "",
+   "value_at_default": 99.68192
+  },
+  {
+   "name": "w_u_wall_per_B",
+   "unit": "",
+   "value_at_default": 13.47272727272727
+  },
+  {
+   "name": "w_u_bot",
+   "unit": "",
+   "value_at_default": 113.15464727272727
+  },
+  {
+   "name": "p_u_top",
+   "unit": "",
+   "value_at_default": 33.38595
+  },
+  {
+   "name": "p_u_bot",
+   "unit": "",
+   "value_at_default": 75.789025
+  },
+  {
+   "name": "Mu_top_mid",
+   "unit": "",
+   "value_at_default": 86.05
+  },
+  {
+   "name": "Mu_top_end",
+   "unit": "",
+   "value_at_default": 55.86
+  },
+  {
+   "name": "Vu_top",
+   "unit": "",
+   "value_at_default": 164.48
+  },
+  {
+   "name": "Mu_bot_mid",
+   "unit": "",
+   "value_at_default": 108.7
+  },
+  {
+   "name": "Mu_bot_end",
+   "unit": "",
+   "value_at_default": 54.18
+  },
+  {
+   "name": "Vu_bot",
+   "unit": "",
+   "value_at_default": 186.71
+  },
+  {
+   "name": "Mu_wall_mid",
+   "unit": "",
+   "value_at_default": 23.48
+  },
+  {
+   "name": "Mu_wall_end",
+   "unit": "",
+   "value_at_default": 55.86
+  },
+  {
+   "name": "Vu_wall",
+   "unit": "",
+   "value_at_default": 75.43
+  },
+  {
+   "name": "Pu_wall",
+   "unit": "",
+   "value_at_default": 186.71
+  },
+  {
+   "name": "phi_Mn_top_mid",
+   "unit": "",
+   "value_at_default": 204.76
+  },
+  {
+   "name": "phi_Mn_top_end",
+   "unit": "",
+   "value_at_default": 197.54
+  },
+  {
+   "name": "phi_Vc_top",
+   "unit": "",
+   "value_at_default": 195.96
+  },
+  {
+   "name": "UC_M_top_mid",
+   "unit": "",
+   "value_at_default": 0.42024809533111934
+  },
+  {
+   "name": "UC_M_top_end",
+   "unit": "",
+   "value_at_default": 0.2827781715095677
+  },
+  {
+   "name": "UC_V_top",
+   "unit": "",
+   "value_at_default": 0.8393549704021228
+  },
+  {
+   "name": "UC_As_top",
+   "unit": "",
+   "value_at_default": 0.3298429319371728
+  },
+  {
+   "name": "UC_s_top",
+   "unit": "",
+   "value_at_default": 0.5882352941176471
+  },
+  {
+   "name": "phi_Mn_bot_mid",
+   "unit": "",
+   "value_at_default": 240.86
+  },
+  {
+   "name": "phi_Mn_bot_end",
+   "unit": "",
+   "value_at_default": 233.64
+  },
+  {
+   "name": "phi_Vc_bot",
+   "unit": "",
+   "value_at_default": 229.7
+  },
+  {
+   "name": "UC_M_bot_mid",
+   "unit": "",
+   "value_at_default": 0.4512995100888483
+  },
+  {
+   "name": "UC_M_bot_end",
+   "unit": "",
+   "value_at_default": 0.23189522342064717
+  },
+  {
+   "name": "UC_V_bot",
+   "unit": "",
+   "value_at_default": 0.8128428384849805
+  },
+  {
+   "name": "UC_As_bot",
+   "unit": "",
+   "value_at_default": 0.3769633507853403
+  },
+  {
+   "name": "UC_s_bot",
+   "unit": "",
+   "value_at_default": 0.5882352941176471
+  },
+  {
+   "name": "phi_Mn_wall_mid",
+   "unit": "",
+   "value_at_default": 120.3
+  },
+  {
+   "name": "phi_Mn_wall_end",
+   "unit": "",
+   "value_at_default": 115.3
+  },
+  {
+   "name": "phi_Vc_wall",
+   "unit": "",
+   "value_at_default": 163.31
+  },
+  {
+   "name": "phi_Pn_wall",
+   "unit": "",
+   "value_at_default": 4258.36
+  },
+  {
+   "name": "UC_M_wall_mid",
+   "unit": "",
+   "value_at_default": 0.19517871986699917
+  },
+  {
+   "name": "UC_M_wall_end",
+   "unit": "",
+   "value_at_default": 0.4844752818733738
+  },
+  {
+   "name": "UC_V_wall",
+   "unit": "",
+   "value_at_default": 0.4618823097177148
+  },
+  {
+   "name": "UC_P_wall",
+   "unit": "",
+   "value_at_default": 0.04384551799284232
+  },
+  {
+   "name": "UC_As_wall",
+   "unit": "",
+   "value_at_default": 0.4078549848942598
+  },
+  {
+   "name": "UC_s_wall",
+   "unit": "",
+   "value_at_default": 0.5882352941176471
+  },
+  {
+   "name": "UC_chamfer",
+   "unit": "",
+   "value_at_default": 0.7499999999999999
+  },
+  {
+   "name": "Q_cap",
+   "unit": "",
+   "value_at_default": 21.77
+  },
+  {
+   "name": "UC_Q",
+   "unit": "",
+   "value_at_default": 0.5512172714745062
+  },
+  {
+   "name": "FS_float",
+   "unit": "",
+   "value_at_default": 2.07
+  },
+  {
+   "name": "UC_float",
+   "unit": "",
+   "value_at_default": 0.59
+  },
+  {
+   "name": "UC_bearing",
+   "unit": "",
+   "value_at_default": 0.3676083656603137
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.84
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_M_top_mid": 0.42024809533111934,
+  "UC_M_top_end": 0.2827781715095677,
+  "UC_V_top": 0.8393549704021228,
+  "UC_As_top": 0.3298429319371728,
+  "UC_s_top": 0.5882352941176471,
+  "UC_M_bot_mid": 0.4512995100888483,
+  "UC_M_bot_end": 0.23189522342064717,
+  "UC_V_bot": 0.8128428384849805,
+  "UC_As_bot": 0.3769633507853403,
+  "UC_s_bot": 0.5882352941176471,
+  "UC_M_wall_mid": 0.19517871986699917,
+  "UC_M_wall_end": 0.4844752818733738,
+  "UC_V_wall": 0.4618823097177148,
+  "UC_P_wall": 0.04384551799284232,
+  "UC_As_wall": 0.4078549848942598,
+  "UC_s_wall": 0.5882352941176471,
+  "UC_chamfer": 0.7499999999999999,
+  "UC_Q": 0.5512172714745062,
+  "UC_float": 0.59,
+  "UC_bearing": 0.3676083656603137,
+  "UC_max": 0.84
+ },
+ "uc_at_default": 0.84,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

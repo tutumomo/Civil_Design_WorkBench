@@ -1,0 +1,285 @@
+{
+ "templateId": "tw-detention-basin",
+ "module": "滯洪池設計與檢核（swc_tech）",
+ "title": "滯洪池設計與檢核（swc_tech 第 94～97 條）",
+ "input_style": "prompt",
+ "inputs": [
+  {
+   "name": "L0_pond",
+   "label": "池底長度 L0（m）",
+   "unit_in_label": "m",
+   "default": "30.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "B0_pond",
+   "label": "池底寬度 B0（m）",
+   "unit_in_label": "m",
+   "default": "25.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "z_pond",
+   "label": "池邊坡比 1:z（水平/垂直）",
+   "unit_in_label": "水平/垂直",
+   "default": "2.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "H_w",
+   "label": "設計水位（自池底起算最高蓄洪水深）（m）",
+   "unit_in_label": "m",
+   "default": "2.4",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "z_inv",
+   "label": "孔口底緣高程 z_inv（自池底起算；孔口以下為死水位，不計入有效蓄洪量）（m）",
+   "unit_in_label": "m",
+   "default": "0.10",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "H_crest",
+   "label": "堤頂高程（自池底起算）（m）",
+   "unit_in_label": "m",
+   "default": "3.4",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "D_orf",
+   "label": "孔口直徑 D_o（m）",
+   "unit_in_label": "m",
+   "default": "0.45",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "n_orf",
+   "label": "孔口數量",
+   "unit_in_label": "",
+   "default": "1",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "L_spill",
+   "label": "緊急溢洪口寬度 L_s（m）",
+   "unit_in_label": "m",
+   "default": "8.0",
+   "kind": "input",
+   "options": null
+  },
+  {
+   "name": "h_spill",
+   "label": "溢洪口設計溢流水深 h_s（自設計水位起算）（m）",
+   "unit_in_label": "m",
+   "default": "0.30",
+   "kind": "input",
+   "options": null
+  }
+ ],
+ "literal_inputs": [
+  {
+   "name": "A_catch",
+   "default": "5.0",
+   "unit": "ha",
+   "label": "基地集水面積 A（公頃，ha）"
+  },
+  {
+   "name": "I_pre",
+   "default": "100.0",
+   "unit": "mm/h",
+   "label": "開發前洪峰流量採用之降雨強度 I_pre（swc_tech §95 四：出流歷線為重現期距 25 年以下；實際取值依主管機關審查要求）"
+  },
+  {
+   "name": "I_post",
+   "default": "120.0",
+   "unit": "mm/h",
+   "label": "開發中、開發後洪峰流量採用之降雨強度 I_post（§95 四：入流歷線至少採重現期距 50 年以上；§169：開發建築用地以 50 年降雨強度計算滯洪設施）"
+  },
+  {
+   "name": "C_pre",
+   "default": "0.60",
+   "unit": "-",
+   "label": "開發前逕流係數 C_pre（swc_tech 表 18）"
+  },
+  {
+   "name": "C_mid",
+   "default": "0.95",
+   "unit": "-",
+   "label": "開發中逕流係數 C_mid（整地裸露期，swc_tech 表 18）"
+  },
+  {
+   "name": "C_post",
+   "default": "0.90",
+   "unit": "-",
+   "label": "開發後逕流係數 C_post（swc_tech 表 18）"
+  },
+  {
+   "name": "tb_in",
+   "default": "1.5",
+   "unit": "h",
+   "label": "設計基期 tb'（§96 一：不足 1 小時者仍以 1 小時計算）"
+  },
+  {
+   "name": "is_perm",
+   "default": "1",
+   "unit": "-",
+   "label": "滯洪設施型式：1 = 永久性滯洪設施（Vsd = 1.1·Vs2）；0 = 臨時性滯洪設施（Vsd = 1.3·Vs1）"
+  },
+  {
+   "name": "Q_allow_down",
+   "default": "1.5",
+   "unit": "m^3/s",
+   "label": "下游排水系統之容許排洪量 Q_allow（§95 三；未知時請填大值，但不得省略開發前洪峰條件）"
+  },
+  {
+   "name": "Cd_orf",
+   "default": "0.62",
+   "unit": "-",
+   "label": "孔口流量係數 Cd（工程慣用值，非規範明文）"
+  },
+  {
+   "name": "Cw_spill",
+   "default": "1.84",
+   "unit": "-",
+   "label": "寬頂堰係數 Cw（SI，工程慣用值，非規範明文）"
+  },
+  {
+   "name": "fb_min",
+   "default": "0.50",
+   "unit": "m",
+   "label": "堤頂最小出水高（工程慣例值，非規範明文，由設計者自訂）"
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Q1",
+   "unit": "",
+   "value_at_default": 0.8333333333333334
+  },
+  {
+   "name": "Q2",
+   "unit": "",
+   "value_at_default": 1.5833333333333333
+  },
+  {
+   "name": "Q3",
+   "unit": "",
+   "value_at_default": 1.5
+  },
+  {
+   "name": "tb_eff",
+   "unit": "",
+   "value_at_default": 1.5
+  },
+  {
+   "name": "Vs1",
+   "unit": "",
+   "value_at_default": 2024.9999999999995
+  },
+  {
+   "name": "Vs2",
+   "unit": "",
+   "value_at_default": 1800
+  },
+  {
+   "name": "Vsd",
+   "unit": "",
+   "value_at_default": 1980.0000000000002
+  },
+  {
+   "name": "Q_in_peak",
+   "unit": "",
+   "value_at_default": 1.5
+  },
+  {
+   "name": "Q_out_cap",
+   "unit": "",
+   "value_at_default": 0.8333333333333334
+  },
+  {
+   "name": "V_total",
+   "unit": "",
+   "value_at_default": 2507.328
+  },
+  {
+   "name": "V_dead",
+   "unit": "",
+   "value_at_default": 76.10533333333333
+  },
+  {
+   "name": "V_eff",
+   "unit": "",
+   "value_at_default": 2431.2226666666666
+  },
+  {
+   "name": "A_orf",
+   "unit": "",
+   "value_at_default": 0.15904312808798313
+  },
+  {
+   "name": "h_c",
+   "unit": "",
+   "value_at_default": 2.0749999999999997
+  },
+  {
+   "name": "Q_orf",
+   "unit": "",
+   "value_at_default": 0.6291658624587795
+  },
+  {
+   "name": "Q_spill",
+   "unit": "",
+   "value_at_default": 2.4187428139428135
+  },
+  {
+   "name": "fb_act",
+   "unit": "",
+   "value_at_default": 0.7
+  },
+  {
+   "name": "UC_vol",
+   "unit": "",
+   "value_at_default": 0.8144050428398991
+  },
+  {
+   "name": "UC_out",
+   "unit": "",
+   "value_at_default": 0.7549990349505353
+  },
+  {
+   "name": "UC_spill",
+   "unit": "",
+   "value_at_default": 0.6201568812332043
+  },
+  {
+   "name": "UC_fb",
+   "unit": "",
+   "value_at_default": 0.7142857142857143
+  },
+  {
+   "name": "UC_max",
+   "unit": "",
+   "value_at_default": 0.82
+  }
+ ],
+ "ucValues_at_default": {
+  "UC_vol": 0.8144050428398991,
+  "UC_out": 0.7549990349505353,
+  "UC_spill": 0.6201568812332043,
+  "UC_fb": 0.7142857142857143,
+  "UC_max": 0.82
+ },
+ "uc_at_default": 0.82,
+ "passes_at_default": true,
+ "errorLines": 0,
+ "unit_warnings": []
+}

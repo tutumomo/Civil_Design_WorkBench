@@ -317,7 +317,7 @@ python tools/crosscheck/ocss_crosscheck.py probe                  # 版本、22 
 python tools/crosscheck/ocss_crosscheck.py checks                 # 本專案引擎 vs OCSS 對照案例
 ```
 
-43 個 OCSS 工具的用途／參數／路由見 [`docs/OpenCalcSheetStudio_工具清單.md`](docs/OpenCalcSheetStudio_工具清單.md)。
+49 個 OCSS 工具的用途／參數／路由見 [`docs/OpenCalcSheetStudio_工具清單.md`](docs/OpenCalcSheetStudio_工具清單.md)。
 
 ### 步驟 3.3：MCP 通道（讓 AI 直接呼叫工具，選用但建議）
 

@@ -1,5 +1,6 @@
 {
  "templateId": "tw-steel-column",
+ "source_sha256": "7f81c9b92372275f78f38fceec287d8752174da80a29120888459e4679272af9",
  "module": "鋼結構 H 型鋼柱與柱腳（steel99 LRFD）",
  "title": "鋼結構熱軋 H 型鋼柱與柱腳設計（steel99 LRFD／ASD）",
  "input_style": "prompt",

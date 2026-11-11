@@ -1,5 +1,6 @@
 {
  "templateId": "tw-drainage-channel",
+ "source_sha256": "342325f965d4a952c480e0026b62012bbc82509da0d764fc041cd42aa0113a94",
  "module": "鋼筋混凝土排水溝與明渠水理（swc_tech / rc112）",
  "title": "鋼筋混凝土排水溝與明渠水理設計檢核（swc_tech / rc112）",
  "input_style": "literal",

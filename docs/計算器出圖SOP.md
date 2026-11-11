@@ -153,7 +153,7 @@
 - 兩個不報錯的單位陷阱必查：分數次方污染單位、單位不自動收斂（`ocss_client.unit_warnings()` 已偵測）。
 - **差異要查到原因**：修引擎、回報模板問題、或登錄為可解釋差異並寫理由，三選一。不得為了通過而放寬容差。
 - 不動使用者開著的 OCSS 專案：批次驗算用無狀態的 `calc_evaluate`；要套模板（`sheet_add`）先請使用者開空白專案。
-- 模板對照（非手寫公式）的工具支援待工作計劃書 X1。
+- 模板對照：`checks/*.json` 的 `type: "template"` 案例（2026-11-11 起，格式見 `tools/crosscheck/ocss_template_check.py` 開頭）；差異未處置即失敗，處置須三選一並附理由。對照表草稿在 `tools/crosscheck/maps/`。
 
 ## 6. 邊界測試（DG8 的一部分）
 

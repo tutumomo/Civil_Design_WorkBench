@@ -1,5 +1,6 @@
 {
  "templateId": "tw-steel-beam",
+ "source_sha256": "8c865056cd23e4610d86aa2cc2cd31563c788137e8bf4f1d9ea641da1fade72a",
  "module": "鋼結構 H 型鋼梁（steel99 LRFD）",
  "title": "鋼結構熱軋 H 型鋼梁設計與檢核（steel99 LRFD／ASD）",
  "input_style": "prompt",

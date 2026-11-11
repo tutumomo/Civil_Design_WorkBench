@@ -1,5 +1,6 @@
 {
  "templateId": "tw-rc-column",
+ "source_sha256": "f9b07c8111e3c6d1ba7bd10a4d89560522bd021de4042598dd62fb0a6333c70f",
  "module": "鋼筋混凝土矩形柱（rc112）",
  "title": "鋼筋混凝土矩形柱設計與檢核（rc112）",
  "input_style": "prompt",

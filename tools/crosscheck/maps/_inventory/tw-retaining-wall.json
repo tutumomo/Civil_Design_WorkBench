@@ -1,5 +1,6 @@
 {
  "templateId": "tw-retaining-wall",
+ "source_sha256": "3e6bd9636bd0263617e2645eebd9dd38fb452e662f5648f3026175ca7c94ebba",
  "module": "鋼筋混凝土懸臂式擋土牆（found112 / swc_tech）",
  "title": "鋼筋混凝土懸臂式擋土牆設計與檢核（found112 / swc_tech / rc112）",
  "input_style": "prompt",

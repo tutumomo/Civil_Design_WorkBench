@@ -1,5 +1,6 @@
 {
  "templateId": "tw-gravity-retaining-wall",
+ "source_sha256": "b40851ed9cad1b95be59d6e542471aa38732fcdde7cb1d3bedbc6abe40e20537",
  "module": "重力式擋土牆（無筋混凝土／砌石；found112 / swc_tech）",
  "title": "重力式擋土牆穩定與牆體應力檢核（無筋混凝土／砌石）",
  "input_style": "literal",

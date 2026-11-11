@@ -1,5 +1,6 @@
 {
  "templateId": "tw-detention-basin",
+ "source_sha256": "ee8604941f29818861530c071a56f5e9fadabdf7439cbe03a70019cd4362fc16",
  "module": "滯洪池設計與檢核（swc_tech）",
  "title": "滯洪池設計與檢核（swc_tech 第 94～97 條）",
  "input_style": "prompt",

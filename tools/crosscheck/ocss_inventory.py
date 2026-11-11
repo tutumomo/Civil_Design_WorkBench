@@ -20,6 +20,7 @@ r"""OCSS 模板欄位盤點（X0）：讀出每個 `tw-*` 模板的輸入欄位�
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sys
@@ -77,6 +78,8 @@ def inventory(c: "C.OcssClient", template_id: str) -> dict:
                             "value_at_default": ln.get("value")})
     return {
         "templateId": template_id,
+        "source_sha256": hashlib.sha256(src.encode("utf-8")).hexdigest(),
+        "_source": src,
         "module": sheet.get("module"),
         "title": ev.get("title"),
         "input_style": ("prompt" if inputs else "literal" if literal else "none"),
@@ -108,6 +111,8 @@ def main(argv: list[str]) -> int:
             print("✗ %-28s %s" % (tid, ex))
             bad += 1
             continue
+        # 模板原始碼另存 .cpd，讓 template 型交叉驗算不必動專案就能取得（X1）。
+        (OUT / (tid + ".cpd")).write_text(inv.pop("_source"), encoding="utf-8")
         (OUT / (tid + ".json")).write_text(
             json.dumps(inv, ensure_ascii=False, indent=1), encoding="utf-8")
         print("✓ %-28s %-7s 輸入 %2d／輸出變數 %3d／UC %d%s" % (

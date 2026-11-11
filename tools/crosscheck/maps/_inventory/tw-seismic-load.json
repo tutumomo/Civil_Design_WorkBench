@@ -1,5 +1,6 @@
 {
  "templateId": "tw-seismic-load",
+ "source_sha256": "77d6e95636be15e5ffbb8f780c16f3f640f45bc69c4eeea44919417887b94b6d",
  "module": "建築物靜力分析法地震力計算（seis113）",
  "title": "建築物靜力分析法地震力計算（seis113）",
  "input_style": "prompt",

@@ -50,6 +50,12 @@ TESTS = [
         "what": "設計圖產線：三態表態、出 DXF、繪圖者（不需 CAD）",
     },
     {
+        "id": "ocss-template",
+        "cmd": ["tools/selftest/ocss_template_check_selftest.py"],
+        "globs": ["tools/crosscheck/", "tools/selftest/"],
+        "what": "OCSS template 型交叉驗算框架（假客戶端，不需桌面程式）",
+    },
+    {
         "id": "design-launch",
         "cmd": ["tools/selftest/design_launch_check.py", "--all"],
         "globs": ["tools/design/", "tools/selftest/"],

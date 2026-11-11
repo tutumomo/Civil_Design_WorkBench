@@ -122,7 +122,7 @@ def cmd_checks(c: OcssClient, only: str | None) -> int:
     if not files:
         _out(f"（{CHECKS_DIR} 內沒有對照案例）")
         return 2
-    total = failed = 0
+    total = failed = handled = 0
     for f in files:
         data = json.loads(f.read_text(encoding="utf-8"))
         for chk in data.get("checks", []):
@@ -132,6 +132,18 @@ def cmd_checks(c: OcssClient, only: str | None) -> int:
                 total -= 1
                 continue
             _out(f"\n■ {name}")
+            if chk.get("type") == "template":
+                import ocss_template_check as TC
+                try:
+                    r = TC.run_case(c, chk, emit=_out)
+                except TC.TemplateCheckError as ex:
+                    _out(f"  ✗ 案例本身有問題：{ex}")
+                    failed += 1
+                    continue
+                handled += r["handled"]
+                if r["failed"]:
+                    failed += 1
+                continue
             ref_val, ref_unit = _load_ref(chk["reference"])
             b = c.evaluate(chk["ocss"]["source"])
             got_val, got_unit = result_value(b, chk["ocss"]["result"])
@@ -160,7 +172,8 @@ def cmd_checks(c: OcssClient, only: str | None) -> int:
             else:
                 _out("  ✗ 不通過" + ("" if unit_ok else "（單位）") + ("" if ok else "（數值）"))
                 failed += 1
-    _out(f"\n合計 {total} 項，通過 {total - failed}，失敗 {failed}")
+    _out(f"\n合計 {total} 項，通過 {total - failed}，失敗 {failed}"
+         + (f"（含 {handled} 個已處置的差異）" if handled else ""))
     return 0 if failed == 0 else 1
 
 

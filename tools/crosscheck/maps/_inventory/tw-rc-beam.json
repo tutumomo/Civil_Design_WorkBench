@@ -1,5 +1,6 @@
 {
  "templateId": "tw-rc-beam",
+ "source_sha256": "1b235f88879e49e2c34023c35c5ae5c9ea143ed176aa5544fcf3aa34a3502419",
  "module": "鋼筋混凝土矩形梁（rc112）",
  "title": "鋼筋混凝土矩形梁設計與檢核（rc112）",
  "input_style": "prompt",

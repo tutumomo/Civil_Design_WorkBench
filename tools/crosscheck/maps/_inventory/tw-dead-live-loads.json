@@ -1,5 +1,6 @@
 {
  "templateId": "tw-dead-live-loads",
+ "source_sha256": "1044ddf7ded8fe4f5351299f14308699f880a9375082191d8748d77fea9277e4",
  "module": "樓版與屋頂靜載重與活載重彙整（btr_struct）",
  "title": "樓版與屋頂單位面積靜載重與活載重彙整（btr_struct）",
  "input_style": "literal",

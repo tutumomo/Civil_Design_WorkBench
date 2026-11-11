@@ -42,7 +42,7 @@ FAILS: list[str] = []
 
 EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
-        "foundation_isolated", "foundation_combined", "detention_basin", "sediment_basin",
+        "foundation_isolated", "foundation_combined", "detention_basin", "sediment_basin", "channel_profile",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -329,6 +329,67 @@ def main() -> int:
             a_ = abs(_area(list(plan[0].vertices_in_wcs())))
             check("平面面積＝長×寬＝引擎池底面積",
                   abs(a_ - run["length_m"] * run["width_m"]) < 1e-6 and abs(a_ - run["footprint_m2"]) < 1e-3)
+
+        print("[2h] 水面線縱斷面圖：縱橫異比例、圖上數字＝計算結果（D7，DG2）")
+        if "channel_profile" in DS.CAPABILITIES:
+            sys.path.insert(0, str(ROOT / "tools" / "profile_section"))
+            import make_profile as MP
+            ex = rows["channel_profile"]["example"]
+            res = DS.generate("channel_profile", ex, publish=False)
+            run = API.run_calculation("channel_profile", ex)["result"]
+            doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+            msp = doc.modelspace()
+            crest = MP.channel_depth(ex, run)
+            lines, short, fb = MP.build_lines(run, crest)
+            reach = max(x for x, _ in lines["bed"])
+            lo, hi = MP.elevation_range(lines)
+            H, V = MP.pick_scales(reach, hi - lo)
+            k = H / float(V)
+            check("縱向必須誇大（V < H）且不超過上限",
+                  V < H and k <= MP.MAX_EXAGGERATION + 1e-9, "H=%d V=%d" % (H, V))
+            txt = _texts(res)
+            check("圖上同時標出橫向與縱向比例",
+                  ("橫向 1:%d" % H) in txt and ("縱向 1:%d" % V) in txt)
+            check("垂直誇大倍數寫在圖上", ("垂直誇大 %s 倍" % MP._ktext(k)) in txt)
+            check("圖上沒有 DIMENSION（縱橫異比例自動量測會錯）",
+                  len(msp.query("DIMENSION")) == 0)
+            for key, layer in (("bed", "30_溝底線"), ("top", "31_溝頂線"), ("ws", "33_水面線"),
+                               ("norm", "34_正常水深線"), ("crit", "35_臨界水深線")):
+                pl = msp.query('LWPOLYLINE[layer=="%s"]' % layer)
+                ok = False
+                if len(pl) == 1:
+                    pts = [(p[0], p[1]) for p in pl[0].get_points("xy")]
+                    ok = len(pts) == len(lines[key]) and all(
+                        abs(px - x) < 1e-6 and abs(py - y * k) < 1e-6
+                        for (px, py), (x, y) in zip(pts, lines[key]))
+                check("%s 折點＝結果（高程×%s）" % (layer, MP._ktext(k)), ok)
+            check("溝頂線＝溝底＋溝深",
+                  all(abs((ty - by) - crest) < 1e-9
+                      for (_, by), (_, ty) in zip(lines["bed"], lines["top"])))
+            dy_norm = [ny - by for (_, by), (_, ny) in zip(lines["bed"], lines["norm"])]
+            dy_crit = [cy - by for (_, by), (_, cy) in zip(lines["bed"], lines["crit"])]
+            check("正常／臨界水深線＝結果水深",
+                  all(abs(d - run["normal_depth_m"]) < 1e-9 for d in dy_norm)
+                  and all(abs(d - run["critical_depth_m"]) < 1e-9 for d in dy_crit),
+                  "%.4f/%.4f" % (dy_norm[0], dy_crit[0]))
+            labels = {e.dxf.text for e in msp.query('TEXT[layer=="42_尺寸"]')}
+            check("每個樁號都標在圖上",
+                  all(("%g" % s["chainage_m"]) in labels for s in run["stations"]))
+            step = MP.tick_step(hi - lo, V)
+            ticks = sorted({float(t) for t in labels if t.count(".") == 1 and t.replace(".", "").isdigit()})
+            check("高程刻度皆為 %.2f 的整數倍且落在範圍內" % step,
+                  bool(ticks) and all(abs((t / step) - round(t / step)) < 1e-9 and lo - 1e-9 <= t <= hi + 1e-9
+                                      for t in ticks), str(ticks))
+            # 出水高不足：改淺溝深，必須標出區段且樁號與結果一致
+            ex2 = dict(ex)
+            ex2["channel_depth_m"] = 0.78
+            res2 = DS.generate("channel_profile", ex2, publish=False)
+            run2 = API.run_calculation("channel_profile", ex2)["result"]
+            _l2, short2, _f2 = MP.build_lines(run2, 0.78)
+            txt2 = _texts(res2)
+            check("出水高不足時圖上標「出水高不足區段」", short2 and "出水高不足區段" in txt2)
+            check("出水高不足樁號與結果一致（摘要把樁號列全）",
+                  all(("%g m" % c) in txt2 for c in short2), str(short2))
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

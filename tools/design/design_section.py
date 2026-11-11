@@ -146,6 +146,14 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
             {"suffix": "C-01_溝蓋版詳圖", "rebar": False},
         ],
     },
+    "channel_profile": {
+        "title": "水面線縱斷面圖（L-1，縱橫異比例）",
+        "tool": "profile_section",
+        "model": "channel_profile",
+        "sheets": [
+            {"suffix": "L-1_水面線縱斷面圖", "rebar": False},
+        ],
+    },
     "block_wall": {
         "title": "疊式／砌石擋土牆標準斷面圖（S-01）",
         "tool": "wall_section",
@@ -467,7 +475,7 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
     elif model == "block_wall":
         values, missing = _block_values(payload)
     elif model in ("rc_beam", "rc_column", "foundation_isolated", "foundation_combined",
-                   "detention_basin", "sediment_basin"):
+                   "detention_basin", "sediment_basin", "channel_profile"):
         values, missing = dict(payload), []
     elif model == "channel_cover":
         values, missing = dict(payload), []     # 整份計算器輸入原樣交給引擎，圖上數值取自結果
@@ -555,6 +563,8 @@ def _python_exe() -> str:
 
 
 def _tool_path(tool: str) -> str:
+    if tool == "profile_section":
+        return os.path.join(ROOT, "tools", "profile_section", "make_profile.py")
     if tool == "basin_section":
         return os.path.join(ROOT, "tools", "basin_section", "make_basin.py")
     if tool == "foundation_section":

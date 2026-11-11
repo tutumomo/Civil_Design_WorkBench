@@ -346,7 +346,7 @@ def main():
     if mw * 1000.0 / H > 183.0 or mh * 1000.0 / H > 249.45:
         raise SystemExit("1:%d 版面 %.1f×%.1f mm 超出 A3 可繪區（183×249 mm），請改比例或分張。"
                          % (H, mw * 1000.0 / H, mh * 1000.0 / H))
-    print("橫向 1:%d／縱向 1:%d（誇大 %s 倍）版面 %.1f×%.1f mm"
+    print("比例尺 橫向 1:%d／縱向 1:%d（誇大 %s 倍）版面 %.1f×%.1f mm"
           % (H, V, _ktext(H / float(V)), mw * 1000.0 / H, mh * 1000.0 / H))
 
     doc = ezdxf.readfile(a.template)

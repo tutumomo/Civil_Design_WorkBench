@@ -384,7 +384,7 @@ def main():
     DR.tag_plot_style(doc)
     doc.saveas(out)
     print("DXF OK %s" % out)
-    print("  比例 1:%d、%d 層／%d 跨、構材 %d 支（梁 %d、柱 %d）、版面 %.1f×%.1f mm"
+    print("  比例尺 1:%d、%d 層／%d 跨、構材 %d 支（梁 %d、柱 %d）、版面 %.1f×%.1f mm"
           % (H, len(geo["storey_heights"]), len(geo["grid"]) - 1, len(rows),
              len(geo["beams"]), len(geo["columns"]),
              w * 1000.0 / H, h * 1000.0 / H))

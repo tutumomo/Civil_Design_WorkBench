@@ -1,0 +1,33 @@
+{
+ "_note": "X3／D7：水面線縱斷面。模板 tw-backwater-profile 是 literal 型（輸入寫在 source 的字面常數行），灌值時由 apply_inputs 改寫該行。本案例刻意用與本專案範例相同的斷面與流量，兩邊都從下游控制水深 0.62 m 起算、往上游 5 個間距 × 20 m = 100 m。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "明渠水面線標準步法（本專案 channel_profile ↔ tw-backwater-profile）",
+   "calculator": "channel_profile",
+   "payload": {
+    "example": true
+   },
+   "template": "tw-backwater-profile",
+   "ocss_inputs": {
+    "Q_d": 0.3937,
+    "b_w": 0.4,
+    "m_s": 0,
+    "n_m": 0.014,
+    "S_0": 0.005,
+    "y_0": 0.62,
+    "L_r": 100,
+    "N_s": 5,
+    "H_ch": 0.9,
+    "V_allow": 12
+   },
+   "compare": [
+    {"name": "正常水深 y_n", "ours": "result.normal_depth_m", "ocss": "var:y_n_out", "tol": {"rel": 1e-6}},
+    {"name": "臨界水深 y_c", "ours": "result.critical_depth_m", "ocss": "var:y_c_out", "tol": {"rel": 1e-6}},
+    {"name": "最大水深 y_max", "ours": "result.max_depth_m", "ocss": "var:ymax_out", "tol": {"rel": 1e-6}},
+    {"name": "最大流速 V_max", "ours": "result.max_velocity_m_s", "ocss": "var:Vmax_out", "tol": {"rel": 1e-6}},
+    {"name": "最小流速 V_min", "ours": "result.min_velocity_m_s", "ocss": "var:Vmin_out", "tol": {"rel": 1e-6}}
+   ]
+  }
+ ]
+}

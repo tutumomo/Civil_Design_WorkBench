@@ -98,6 +98,14 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
             {"suffix": "S-02_擋土牆配筋圖", "rebar": True},
         ],
     },
+    "channel_cover": {
+        "title": "溝蓋版斷面＋配筋／植筋詳圖（C-01）",
+        "tool": "channel_cover",
+        "model": "channel_cover",
+        "sheets": [
+            {"suffix": "C-01_溝蓋版詳圖", "rebar": False},
+        ],
+    },
     "block_wall": {
         "title": "疊式／砌石擋土牆標準斷面圖（S-01）",
         "tool": "wall_section",
@@ -418,6 +426,8 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         values, missing = _slope_values(payload)
     elif model == "block_wall":
         values, missing = _block_values(payload)
+    elif model == "channel_cover":
+        values, missing = dict(payload), []     # 整份計算器輸入原樣交給引擎，圖上數值取自結果
     else:                                          # pragma: no cover - 防呆
         raise SectionError("未知的出圖模型 %s。" % model)
 
@@ -434,6 +444,7 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         "quantities": {
             "model": model,
             "values": values,
+            "assumed": list(missing),      # D12：採預設值的出圖尺寸（圖面標「假設值」）
             "notes": ["由工程設計工作台試算結果自動組裝（%s）。" % calc_id],
         },
         "soil": dict(payload.get("soil") or {}),
@@ -501,6 +512,8 @@ def _python_exe() -> str:
 
 
 def _tool_path(tool: str) -> str:
+    if tool == "channel_cover":
+        return os.path.join(ROOT, "tools", "channel_cover", "make_channel_cover.py")
     if tool == "box_section":
         return os.path.join(ROOT, "tools", "box_section", "make_box_section.py")
     return os.path.join(ROOT, "tools", "wall_section", "make_wall_section.py")

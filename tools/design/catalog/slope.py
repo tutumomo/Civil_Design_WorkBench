@@ -53,6 +53,14 @@ def _slope_field_rules() -> dict[str, Any]:
             "step": 0.5,
             "label": "土壤單位重 γ (kN/m³)",
         },
+        "bench_width_m": {
+            "type": "number", "step": 0.5, "label": "平台寬 (m，出圖用)",
+            "hint": "只供「產生設計圖」使用，不影響穩定分析；未填則圖面不畫平台並於說明欄標「假設值」。",
+        },
+        "bench_count": {
+            "type": "number", "step": 1, "label": "平台數 (出圖用)",
+            "hint": "同上；未填視為 0。",
+        },
     }
 
 

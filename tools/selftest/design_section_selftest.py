@@ -41,7 +41,7 @@ import design_section as DS  # noqa: E402
 FAILS: list[str] = []
 
 EXPECTED_SUPPORTED = {
-    "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall",
+    "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -139,6 +139,86 @@ def main() -> int:
                                   )["geometry"]["area_m2_per_m"]
                 check("block_wall[%s] 斷面積 %.4f＝%.4f" % (wt, drawn, want),
                       abs(drawn - want) <= 1e-3 * max(want, 1e-9))
+
+        print("[2c] 排水溝／邊坡尺寸來源（D12）：輸入取代預設；預設者標「假設值」")
+
+        def _texts(res):
+            dxf = next(f["path"] for f in res["files"] if f["kind"] == "dxf")
+            d = ezdxf.readfile(dxf)
+            out = []
+            for lay in d.layouts:
+                out += [getattr(e.dxf, "text", "") for e in lay.query("TEXT")]
+                out += [e.plain_text() for e in lay.query("MTEXT")]
+            return "\n".join(out)
+
+        cx = dict(rows["channel_hydraulics"]["example"])
+        r0 = DS.generate("channel_hydraulics", cx, publish=False)
+        check("channel 未填厚度→說明欄有「假設值」", "假設值" in _texts(r0)
+              and "wall_thickness_m" in _texts(r0))
+        check("channel 未填厚度→defaults_used 列出",
+              any(x.startswith("wall_thickness_m") for x in r0["defaults_used"]))
+        cx.update(wall_thickness_m=0.25, base_thickness_m=0.30)
+        r1 = DS.generate("channel_hydraulics", cx, publish=False)
+        check("channel 填厚度→不再列為假設值",
+              not any(x.startswith(("wall_thickness_m", "base_thickness_m"))
+                      for x in r1["defaults_used"]))
+        q1 = r1["case"] if "case" in r1 else None
+        import json as _j
+        c1 = _j.load(open(r1["case_path"], encoding="utf-8"))["quantities"]["values"]
+        check("channel 厚度原值進案件", c1["wall_thickness_m"] == 0.25
+              and c1["base_thickness_m"] == 0.30)
+        sx = dict(rows["slope_stability"]["example"], bench_width_m=1.5, bench_count=1)
+        r2 = DS.generate("slope_stability", sx, publish=False)
+        c2 = _j.load(open(r2["case_path"], encoding="utf-8"))["quantities"]["values"]
+        check("slope 平台寬／數原值進案件",
+              c2["bench_width_m"] == 1.5 and c2["bench_count"] == 1)
+        check("slope 填平台→defaults_used 不含平台",
+              not any(x.startswith("bench_") for x in r2["defaults_used"]))
+
+        print("[2d] 溝蓋詳圖：圖上數字＝計算結果（D3，DG2）")
+        if "channel_cover" in DS.CAPABILITIES:
+            import re as _re
+            ex = rows["channel_cover"]["example"]
+            res = DS.generate("channel_cover", ex, publish=False)
+            run = API.run_calculation("channel_cover", ex)["result"]
+            txt = _texts(res)
+            dxf = next(f["path"] for f in res["files"] if f["kind"] == "dxf")
+            doc = ezdxf.readfile(dxf)
+            s_, a_ = run["slab"], run["anchors"]
+            g_ = lambda v: "%d" % round(float(v))
+            want = [
+                "%s@%s" % (s_["main"]["bar"], g_(s_["main"]["spacing_mm"])),
+                "%s@%s" % (s_["distribution"]["bar"], g_(s_["distribution"]["spacing_mm"])),
+                "%s@%s" % (s_["top"]["bar"], g_(s_["top"]["spacing_mm"])),
+                "%s@%s" % (a_["bar"], g_(a_["spacing_mm"])),
+                "埋深 %s" % g_(a_["embedment_mm"]),
+                "%%%%c%s" % g_(a_["hole_diameter_mm"]),
+                "邊距 %s" % g_(a_["edge_mm"]),
+                "保護層 %s" % g_(run["geometry"]["cover_mm"]),
+            ]
+            for w in want:
+                check("溝蓋圖含標註「%s」" % w, w in txt)
+            # 圖上所有 Dxx@yyy 標註都必須在計算結果內（不得有結果以外的配筋）
+            allowed = {"%s@%s" % (b["bar"], g_(b["spacing_mm"]))
+                       for b in (s_["main"], s_["distribution"], s_["top"])}
+            allowed.add("%s@%s" % (a_["bar"], g_(a_["spacing_mm"])))
+            seen = set(_re.findall(r"D\d+@\d+", txt))
+            check("圖上配筋標註皆可追溯到結果", seen <= allowed, str(seen - allowed))
+            # 幾何：蓋版面積＝總寬×版厚；植筋中心距溝壁外側面＝結果邊距
+            slab_a = sum(abs(_area(list(e.vertices_in_wcs()))) for e in
+                         doc.modelspace().query('LWPOLYLINE[layer=="30_溝蓋混凝土"]'))
+            want_a = run["geometry"]["total_width_m"] * run["geometry"]["slab_thickness_mm"] / 1000.0
+            check("蓋版斷面積 %.4f＝%.4f" % (slab_a, want_a), abs(slab_a - want_a) < 1e-6)
+            xs = sorted(v[0] for e in doc.modelspace().query('LWPOLYLINE[layer=="41_植筋"]')
+                        for v in e.vertices_in_wcs())
+            check("植筋位置：左壁植筋中心距外側面＝邊距",
+                  abs(min(xs) + (a_["hole_diameter_mm"] / 2000.0) - a_["edge_mm"] / 1000.0) < 1e-6)
+            # 點數：分佈筋圓點間距＝結果間距
+            circles = sorted(e.dxf.center.x for e in
+                             doc.modelspace().query('CIRCLE[layer=="40_鋼筋"]')
+                             if abs(e.dxf.radius * 2000 - s_["distribution"]["db_mm"]) < 1e-6)
+            gaps = {round((b - a) * 1000) for a, b in zip(circles, circles[1:])}
+            check("分佈筋點間距＝結果間距", gaps == {round(s_["distribution"]["spacing_mm"])}, str(gaps))
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

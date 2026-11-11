@@ -130,7 +130,15 @@ def _channel_field_rules() -> dict[str, Any]:
                     "label": "草溝／土溝（常用 0.025～0.080）",
                 },
             ],
-        }
+        },
+        "wall_thickness_m": {
+            "type": "number", "step": 0.05, "label": "溝壁厚 (m，出圖用)",
+            "hint": "只供「產生設計圖」使用，不影響水力計算；未填則圖面採 0.15 m（水保最小構造厚度）並於說明欄標「假設值」。",
+        },
+        "base_thickness_m": {
+            "type": "number", "step": 0.05, "label": "底板厚 (m，出圖用)",
+            "hint": "同上；未填則圖面採 0.15 m 並標「假設值」。",
+        },
     }
 
 

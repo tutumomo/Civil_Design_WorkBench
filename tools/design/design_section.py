@@ -186,6 +186,14 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
             {"suffix": "FS-1_基腳沉陷配置圖", "rebar": False},
         ],
     },
+    "drainage_network": {
+        "title": "排水網路示意圖（NW-1，非比例）",
+        "tool": "network_section",
+        "model": "drainage_network",
+        "sheets": [
+            {"suffix": "NW-1_排水網路示意圖", "rebar": False},
+        ],
+    },
     "block_wall": {
         "title": "疊式／砌石擋土牆標準斷面圖（S-01）",
         "tool": "wall_section",
@@ -508,7 +516,7 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         values, missing = _block_values(payload)
     elif model in ("rc_beam", "rc_column", "foundation_isolated", "foundation_combined",
                    "detention_basin", "sediment_basin", "channel_profile", "steel_column",
-                   "building_frame", "pile_group", "settlement"):
+                   "building_frame", "pile_group", "settlement", "drainage_network"):
         values, missing = dict(payload), []
     elif model == "channel_cover":
         values, missing = dict(payload), []     # 整份計算器輸入原樣交給引擎，圖上數值取自結果
@@ -604,6 +612,8 @@ def _tool_path(tool: str) -> str:
         return os.path.join(ROOT, "tools", "frame_section", "make_frame.py")
     if tool == "foundation_plan":
         return os.path.join(ROOT, "tools", "foundation_plan", "make_foundation_plan.py")
+    if tool == "network_section":
+        return os.path.join(ROOT, "tools", "network_section", "make_network.py")
     if tool == "basin_section":
         return os.path.join(ROOT, "tools", "basin_section", "make_basin.py")
     if tool == "foundation_section":

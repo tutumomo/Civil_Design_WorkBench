@@ -44,7 +44,7 @@ FAILS: list[str] = []
 EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
         "foundation_isolated", "foundation_combined", "detention_basin", "sediment_basin", "channel_profile",
-        "steel_column", "building_frame",
+        "steel_column", "building_frame", "foundation_pile", "settlement_assessment",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -590,6 +590,93 @@ def main() -> int:
                 check("跨數過多時明確拒絕（未實作分張）", False, "竟然挑了比例 %d" % MF.pick_scale(wide))
             except SystemExit as se:
                 check("跨數過多時明確拒絕（未實作分張）", "分張" in str(se), str(se))
+
+        print("[2k] 樁位配置圖／基腳沉陷配置圖：平面位置與圖上數字＝計算結果（D10，DG2）")
+        for cid, mod in (("foundation_pile", "make_foundation_plan"),
+                         ("settlement_assessment", "make_foundation_plan")):
+            if cid not in DS.CAPABILITIES:
+                continue
+            sys.path.insert(0, str(ROOT / "tools" / "foundation_plan"))
+            import importlib
+            FP = importlib.import_module(mod)
+            ex = rows[cid]["example"]
+            res = DS.generate(cid, ex, publish=False)
+            run = API.run_calculation(cid, ex)["result"]
+            doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+            msp = doc.modelspace()
+            txt = _texts(res)
+
+            if cid == "foundation_pile":
+                geo = FP.pile_geo(run)
+                check("FP-1 樁符號數＝結果 n_piles",
+                      len(msp.query('CIRCLE[layer=="30_樁位"]')) == run["n_piles"])
+                centres = {(round(c.dxf.center.x, 6), round(c.dxf.center.y, 6))
+                           for c in msp.query('CIRCLE[layer=="30_樁位"]')}
+                want = {(round(p["x_m"], 6), round(p["y_m"], 6)) for p in run["piles"]}
+                check("FP-1 樁位＝結果 (x_m, y_m)", centres == want, str(centres ^ want))
+                check("FP-1 每樁標號與軸力都在圖上",
+                      all(("P%d %.0f kN" % (p["pile"], p["P_kN"])) in txt for p in run["piles"]))
+                check("FP-1 摘要引用 P／Mx／My／Ix／Iy／Q_allow",
+                      ("%.0f kN" % run["P_kN"]) in txt
+                      and ("%.1f kN" % run["Q_allow_kN"]) in txt
+                      and ("%.3f／%.3f m²" % (run["Ix_m2"], run["Iy_m2"])) in txt)
+                # 說明文字在紙面上會折行，比對前先去掉換行
+                flat = txt.replace("\n", "")
+                check("FP-1 未畫樁徑（圖上只有符號，說明揭露不代表樁徑）",
+                      "圓的大小不代表實際樁徑" in flat and "不得作為樁帽配筋圖使用" in flat)
+                check("FP-1 樁群形心十字在 (0,0)",
+                      any(abs(e.dxf.start.x - e.dxf.end.x) < 1e-9
+                          and abs(e.dxf.start.x) < 1e-9
+                          and abs(e.dxf.start.y + e.dxf.end.y) < 1e-9
+                          for e in msp.query('LINE[layer=="31_標記"]')))
+                # 拉力樁：把 P 改大讓最小樁軸力變負，圖上必須標「拉力」
+                ex2 = json.loads(json.dumps(ex))
+                ex2["P_kN"] = -100.0
+                res2 = DS.generate("foundation_pile", ex2, publish=False)
+                run2 = API.run_calculation("foundation_pile", ex2)["result"]
+                check("FP-1 出現拉力樁時圖上標「拉力」",
+                      any(p["P_kN"] < 0 for p in run2["piles"]) and "拉力" in _texts(res2))
+            else:
+                geo = FP.footing_geo(run)
+                rects = []
+                for e in msp.query('LWPOLYLINE[layer=="30_基腳"]'):
+                    pts = list(e.vertices_in_wcs())
+                    rects.append((round(min(p[0] for p in pts), 6), round(min(p[1] for p in pts), 6),
+                                  round(max(p[0] for p in pts), 6), round(max(p[1] for p in pts), 6)))
+                want = [(round(f["x0"], 6), round(f["y0"], 6),
+                         round(f["x1"], 6), round(f["y1"], 6)) for f in geo["footings"]]
+                check("FS-1 基腳矩形＝結果中心±B/L", sorted(rects) == sorted(want))
+                check("FS-1 每座基腳的編號與總沉陷都在圖上",
+                      all(f["id"] in txt and ("%.1f mm" % f["total_settlement_mm"]) in txt
+                          for f in run["footings"]))
+                ad = run["angular_distortion"]
+                check("FS-1 摘要的最大角變量＝結果（含倒數）",
+                      ("%.6f" % ad["max_angular_distortion"]) in txt
+                      and ("1/%s" % format(int(round(1.0 / ad["max_angular_distortion"])), ",")) in txt)
+                check("FS-1 角變量表列出所有相鄰配對",
+                      all(("%s–%s" % (p["a"], p["b"])) in txt for p in ad["pairs"]),
+                      str([("%s–%s" % (p["a"], p["b"])) for p in ad["pairs"]]))
+                check("FS-1 說明揭露基腳埋深／高程未由計算器決定",
+                      "基腳埋深" in txt and "未由計算器決定" in txt)
+                # 超限：把沉陷放大到超過容許值，圖上必須標「超限」
+                ex2 = json.loads(json.dumps(ex))
+                ex2["footings"][0]["q_kpa"] = 600.0
+                res2 = DS.generate("settlement_assessment", ex2, publish=False)
+                run2 = API.run_calculation("settlement_assessment", ex2)["result"]
+                ng = [f for f in run2["footings"] if not f["ok"]]
+                check("FS-1 總沉陷超限時圖上標「超限」",
+                      bool(ng) and "超限" in _texts(res2), "%d 座" % len(ng))
+            H = FP.pick_scale(geo)
+            w, h = FP.content_size(geo, H)
+            check("%s 自動比例放得進 A3 可繪區（1:%d）" % (cid, H),
+                  H <= FP.MAX_SHEET_SCALE and w * 1000.0 / H <= 183.0
+                  and h * 1000.0 / H <= 249.45)
+            wide = {"bbox": (0.0, 0.0, 400.0, 400.0), "xs": [0.0, 400.0], "ys": [0.0, 400.0]}
+            try:
+                FP.pick_scale(wide)
+                check("%s 範圍過大時明確拒絕（未實作分張）" % cid, False, "竟然挑了比例")
+            except SystemExit as se:
+                check("%s 範圍過大時明確拒絕（未實作分張）" % cid, "分張" in str(se))
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

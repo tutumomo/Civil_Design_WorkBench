@@ -170,6 +170,22 @@ CAPABILITIES: dict[str, dict[str, Any]] = {
             {"suffix": "FR-1_構架立面圖", "rebar": False},
         ],
     },
+    "foundation_pile": {
+        "title": "樁位配置圖（FP-1）",
+        "tool": "foundation_plan",
+        "model": "pile_group",
+        "sheets": [
+            {"suffix": "FP-1_樁位配置圖", "rebar": False},
+        ],
+    },
+    "settlement_assessment": {
+        "title": "基腳沉陷配置圖（FS-1）",
+        "tool": "foundation_plan",
+        "model": "settlement",
+        "sheets": [
+            {"suffix": "FS-1_基腳沉陷配置圖", "rebar": False},
+        ],
+    },
     "block_wall": {
         "title": "疊式／砌石擋土牆標準斷面圖（S-01）",
         "tool": "wall_section",
@@ -492,7 +508,7 @@ def build_case(calc_id: str, payload: Mapping[str, Any],
         values, missing = _block_values(payload)
     elif model in ("rc_beam", "rc_column", "foundation_isolated", "foundation_combined",
                    "detention_basin", "sediment_basin", "channel_profile", "steel_column",
-                   "building_frame"):
+                   "building_frame", "pile_group", "settlement"):
         values, missing = dict(payload), []
     elif model == "channel_cover":
         values, missing = dict(payload), []     # 整份計算器輸入原樣交給引擎，圖上數值取自結果
@@ -586,6 +602,8 @@ def _tool_path(tool: str) -> str:
         return os.path.join(ROOT, "tools", "profile_section", "make_profile.py")
     if tool == "frame_section":
         return os.path.join(ROOT, "tools", "frame_section", "make_frame.py")
+    if tool == "foundation_plan":
+        return os.path.join(ROOT, "tools", "foundation_plan", "make_foundation_plan.py")
     if tool == "basin_section":
         return os.path.join(ROOT, "tools", "basin_section", "make_basin.py")
     if tool == "foundation_section":
@@ -611,7 +629,16 @@ def _run(cmd: list[str], log_path: str) -> tuple[int, str]:
 
 
 def _resolve_scale(log: str, fallback: int = 20) -> int:
-    m = re.search(r"比例尺?\s*[:：]?\s*1\s*[:：/]\s*(\d+)", log or "")
+    """由工具輸出抓實際比例：先找「比例尺 1:NN」，再退回任何獨立的「1:NN」。
+
+    出圖工具的比例訊息格式不一（有的寫「比例尺 1:20」、有的只寫「1:20」），
+    先前只認前者，導致沒有那幾個字的工具在 API／_drawing_meta.json 一律回報 20。
+    """
+    text = log or ""
+    m = re.search(r"比例尺?\s*[:：]?\s*1\s*[:：/]\s*(\d+)", text)
+    if m:
+        return int(m.group(1))
+    m = re.search(r"(?<![\d.])1\s*[:：]\s*(\d{1,5})(?![\d.])", text)
     return int(m.group(1)) if m else fallback
 
 

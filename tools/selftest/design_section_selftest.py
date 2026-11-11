@@ -41,7 +41,7 @@ import design_section as DS  # noqa: E402
 FAILS: list[str] = []
 
 EXPECTED_SUPPORTED = {
-    "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover",
+    "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -219,6 +219,42 @@ def main() -> int:
                              if abs(e.dxf.radius * 2000 - s_["distribution"]["db_mm"]) < 1e-6)
             gaps = {round((b - a) * 1000) for a, b in zip(circles, circles[1:])}
             check("分佈筋點間距＝結果間距", gaps == {round(s_["distribution"]["spacing_mm"])}, str(gaps))
+
+        print("[2e] RC 梁／柱斷面：圖上數字＝計算結果（D4，DG2）")
+        if "rc_beam" in DS.CAPABILITIES and "rc_column" in DS.CAPABILITIES:
+            import re as _re2
+            for cid in ("rc_beam", "rc_column"):
+                ex = rows[cid]["example"]
+                res = DS.generate(cid, ex, publish=False)
+                run = API.run_calculation(cid, ex)["result"]
+                txt = _texts(res)
+                doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+                # 外圈（半徑＝db/2）才算主筋，內圈半徑 0.45× 排除
+                bar = (run["flexure"]["bar"] if cid == "rc_beam" else run["chosen"]["bar"])
+                sys.path.insert(0, str(ROOT / "tools" / "rc_section"))
+                import make_rc_section as RS
+                db = RS.BAR_DIA[bar]
+                outer = [e for e in doc.modelspace().query('CIRCLE[layer=="40_鋼筋"]')
+                         if abs(e.dxf.radius * 2000 - db) < 1e-6]
+                if cid == "rc_beam":
+                    n_want = max(2, -(-int(run["flexure"]["As_design_mm2"] * 1000) // (RS.BAR_AREA[bar] * 1000)))
+                    tie = run["shear"]["stirrup"]
+                    want_tie = "%s@%d" % (tie["bar"], round(tie["spacing_mm"]))
+                else:
+                    n_want = int(run["chosen"]["bars_total"])
+                    tie = run["ties"]
+                    want_tie = "%s@%d" % (tie["bar"], round(tie["spacing_mm"]))
+                check("%s 主筋圓點數＝%d" % (cid, n_want), len(outer) == n_want, str(len(outer)))
+                check("%s 圖上含箍筋標註「%s」" % (cid, want_tie), want_tie in txt)
+                check("%s 圖上含主筋標註「%d-%s」" % (cid, n_want, bar), "%d-%s" % (n_want, bar) in txt)
+                check("%s 保護層採預設時標「假設值」" % cid, "假設值" in txt and "保護層" in txt)
+                seen = set(_re2.findall(r"D\d+@\d+", txt))
+                check("%s 箍筋標註皆可追溯到結果" % cid, seen <= {want_tie}, str(seen))
+                if cid == "rc_column":
+                    xs = sorted({round(e.dxf.center.x * 1000, 3) for e in outer})
+                    gaps = {round(b - a, 1) for a, b in zip(xs, xs[1:])}
+                    check("rc_column 主筋橫向間距＝引擎 centre_spacing",
+                          gaps == {round(run["chosen"]["centre_spacing_mm"], 1)}, str(gaps))
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

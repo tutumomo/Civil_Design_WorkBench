@@ -129,6 +129,14 @@ def build(args) -> int:
     log(f"  案件類別：{project.get('category') or '（未宣告）'}")
     log(f"  範本目錄：{model.template_dir}")
 
+    # ---- 交叉驗算結果（附錄 D；有則排、無則略過）----
+    if getattr(args, "crosscheck", None):
+        n = model.load_crosscheck(args.crosscheck)
+        if n:
+            log(f"  交叉驗算結果：{n} 項（附錄 D）")
+        else:
+            log(f"  ⚠ 交叉驗算結果檔讀不到或為空：{args.crosscheck}（附錄 D 不排）")
+
     # ---- 確認閘門：案名／主辦機關（使用者規範，見專案記憶）----
     missing = project_info_missing(project)
     if missing and not args.allow_placeholder:
@@ -218,6 +226,8 @@ def build(args) -> int:
         "chapter_status": [s.as_dict() for s in builder.chapter_status],
         "placeholders": [p.as_dict() for p in builder.placeholders],
         "consistency": [c.as_dict() for c in model.consistency],
+        "crosscheck": {"meta": model.crosscheck_meta,
+                       "items": model.crosscheck},
         "steps": steps,
         "warnings": warnings,
         "elapsed_sec": elapsed,
@@ -290,6 +300,9 @@ def parse_args(argv: list[str] | None = None):
                     help="仍有『需人工補』項目時以退出碼 1 結束（CI／交件門檻用）")
     ap.add_argument("--allow-placeholder", action="store_true",
                     help="允許案名／主辦機關未確認（內部測試用；交件前不得使用）")
+    ap.add_argument("--crosscheck", default=None,
+                    help="OCSS 交叉驗算結果 JSON（ocss_calcbook.py 產出）；"
+                         "有則於附錄 D 排「計算交叉驗算紀錄」")
     return ap.parse_args(argv)
 
 

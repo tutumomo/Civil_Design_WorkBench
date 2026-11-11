@@ -91,7 +91,7 @@ def main() -> int:
         return TC.run_case(client, dict(base, compare=[cmp_]), emit=out.append)
 
     r = run_one(val)
-    check("相同值通過", r == {"total": 1, "failed": 0, "handled": 0})
+    check("相同值通過", r["total"] == 1 and r["failed"] == 0 and r["handled"] == 0)
     r = run_one(val * 1.005)
     check("容差內通過", r["failed"] == 0)
     r = run_one(val * 1.5)
@@ -118,7 +118,8 @@ def main() -> int:
              "compare": [{"name": "x", "ours": path, "ocss": "var:v", "tol": {"rel": 0.01}}]}
     r = TC.run_case(SpyClient([{"type": "assignment", "name": "v", "value": val}]),
                     fcase, emit=lambda *_: None)
-    check("formula 型不需模板即可比對", r == {"total": 1, "failed": 0, "handled": 0})
+    check("formula 型不需模板即可比對",
+          r["total"] == 1 and r["failed"] == 0 and r["handled"] == 0)
     check("formula 型 source 陣列逐行送出", seen and seen[-1] == "a = 1\nv = 2\n")
     check("formula 型缺 source 報錯", raises(lambda: TC.run_case(
         FakeClient([]), dict(fcase, source=""), emit=lambda *_: None)))

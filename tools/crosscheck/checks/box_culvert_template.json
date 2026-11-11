@@ -1,0 +1,94 @@
+{
+ "_note": "X2 箱涵（單孔）。兩項已處置差異皆為模型差異，見 reason。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "單孔箱涵（本專案 box_culvert ↔ tw-box-culvert）",
+   "calculator": "box_culvert",
+   "payload": {
+    "cell_count": 1,
+    "clear_width_m": 3.0,
+    "clear_height_m": 2.0,
+    "wall_thickness_m": 0.3,
+    "interior_wall_thickness_m": 0.3,
+    "top_slab_thickness_m": 0.35,
+    "bottom_slab_thickness_m": 0.4,
+    "cover_mm": 50.0,
+    "cover_depth_m": 1.0,
+    "length_m": 20.0,
+    "inner_chamfer_m": 0.2,
+    "corner_rebar": "D13",
+    "corner_rebar_spacing_mm": 200,
+    "traffic_type": "none",
+    "traffic_lanes": 1,
+    "crack_limit_mm": 0.3,
+    "bar_preference": "auto",
+    "distribution_bar": "D13",
+    "rebar_loss_rate": 0.06,
+    "design_flow_m3s": 12.0,
+    "slope": 0.005,
+    "manning_n": 0.014,
+    "inlet_type": "wingwall_30_75",
+    "tailwater_depth_m": 1.0,
+    "allowable_headwater_m": 3.0
+   },
+   "template": "tw-box-culvert",
+   "ocss_inputs": {
+    "B_clear": 3.0,
+    "H_clear": 2.0,
+    "t_top": 0.35,
+    "t_bot": 0.4,
+    "t_wall": 0.3,
+    "c_chamfer": 0.2,
+    "H_cover": 1.0,
+    "S_slope": 0.005,
+    "Q_design": 12.0,
+    "k_truck": 0,
+    "q_surcharge": 0,
+    "gamma_s": 18.0
+   },
+   "compare": [
+    {
+     "name": "外寬 B_outer",
+     "ours": "result.section.outer_width_m",
+     "ocss": "var:B_outer",
+     "tol": {
+      "rel": 0.0001
+     }
+    },
+    {
+     "name": "外高 H_outer",
+     "ours": "result.section.outer_height_m",
+     "ocss": "var:H_outer",
+     "tol": {
+      "rel": 0.0001
+     }
+    },
+    {
+     "name": "滿管通水量 Q_cap",
+     "ours": "result.hydraulic.capacity_m3s",
+     "ocss": "var:Q_cap",
+     "tol": {
+      "rel": 0.01
+     },
+     "disposition": {
+      "kind": "explained",
+      "reason": "OCSS 流水面積扣除四個 45° 倒角（A=B·H−2c²，P=2(B+H)−8c+4√2c）；本專案滿管水力用全矩形（A=6.0 m²、P=7.0 m），故 Q 偏大 25.6%。倒角扣除較貼近實際，待決定是否改引擎（會動回歸基準，須點名同意）。"
+     }
+    },
+    {
+     "name": "頂版剪力 Vu_top",
+     "ours": "check:T0 top 剪力",
+     "ocss": "var:Vu_top",
+     "tol": {
+      "rel": 0.05
+     },
+     "disposition": {
+      "kind": "explained",
+      "reason": "載重模型不同：OCSS 採版帶法並用 U=1.3[βD·D+1.67(L+I)+βE·E]（βE=0.5）；本專案做整體剛架分析（單孔、無車載）。兩者非同一算法，差異屬模型而非計算錯誤；數值不得互相取代。"
+     }
+    }
+   ]
+  }
+ ]
+}

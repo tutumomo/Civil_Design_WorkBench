@@ -1,0 +1,71 @@
+{
+ "_note": "X1 template 型案例。對齊假設見 maps/tw-retaining-wall.json；差異未查明前不得放寬容差。",
+ "checks": [
+  {
+   "type": "template",
+   "name": "懸臂牆土壓與傾倒力矩（本專案 wall_stability ↔ tw-retaining-wall）",
+   "calculator": "wall_stability",
+   "payload": {
+    "example": true,
+    "patch": {
+     "height_m": 5.0,
+     "base_width_m": 3.2,
+     "base_thickness_m": 0.5,
+     "stem_thickness_m": 0.5,
+     "toe_soil_depth_m": 0.8,
+     "include_passive": false,
+     "soil": {
+      "gamma": 19.0,
+      "phi_deg": 32.0,
+      "c_kpa": 0.0,
+      "allowable_bearing_kpa": 220.0,
+      "surcharge_kpa": 10.0,
+      "base_friction": 0.55
+     }
+    }
+   },
+   "template": "tw-retaining-wall",
+   "ocss_inputs": {
+    "H_wall": 5.0,
+    "B_base": 3.2,
+    "h_base": 0.5,
+    "L_toe": 0.0,
+    "t_top": 0.5,
+    "t_stem": 0.5,
+    "D_soil_toe": 0.5,
+    "gamma_s": 19.0,
+    "phi_deg": 32,
+    "q_surcharge": 10.0,
+    "qa_allow": 220.0,
+    "mu_base": 0.55
+   },
+   "compare": [
+    {
+     "name": "主動土壓係數 Ka",
+     "ours": "result.Ka",
+     "ocss": "var:Ka",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "土重引致主動力 Pa",
+     "ours": "result.Pa_kN_per_m",
+     "ocss": "var:P_A_soil",
+     "tol": {
+      "rel": 0.001
+     }
+    },
+    {
+     "name": "傾倒力矩 M_over",
+     "ours": "result.M_over_kNm",
+     "ocss": "var:M_O",
+     "tol": {
+      "rel": 0.01
+     },
+     "note": "未處置，保持失敗：本專案 analyse() 的土壓只算到 height_m（不含底版厚）且不計超載，OCSS 對總高含超載。屬引擎範圍問題，需使用者決定是否修正（會改基準），見計劃書 X1 完成紀錄。"
+    }
+   ]
+  }
+ ]
+}

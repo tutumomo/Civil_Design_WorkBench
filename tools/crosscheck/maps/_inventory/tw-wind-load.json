@@ -1,5 +1,6 @@
 {
  "templateId": "tw-wind-load",
+ "source_sha256": "1f0daa2f3cf7d475db6b53672f05671d57dd92f829e15662a74e6a736f87c269",
  "module": "建築物風速壓與各層風力（wind103full）",
  "title": "建築物風速壓與各層風力（wind103full）",
  "input_style": "prompt",

@@ -1,5 +1,6 @@
 {
  "templateId": "tw-sediment-basin",
+ "source_sha256": "cac416fc56cb17e150bab62d00d6fb9afff129258759023922fc4925d03fc63f",
  "module": "沉砂池設計與檢核（swc_tech 第 35、92、93 條）",
  "title": "沉砂池設計與檢核（swc_tech 第 35、92、93 條）",
  "input_style": "literal",

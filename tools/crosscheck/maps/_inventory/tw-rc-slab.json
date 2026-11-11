@@ -1,5 +1,6 @@
 {
  "templateId": "tw-rc-slab",
+ "source_sha256": "a43a76205f952ecdb758dcdd5d88c6d755804e4441448967fe5f45d73ff1e264",
  "module": "鋼筋混凝土單向板（rc112）",
  "title": "鋼筋混凝土單向板設計與檢核（rc112）",
  "input_style": "literal",

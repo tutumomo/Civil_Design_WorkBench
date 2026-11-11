@@ -1,5 +1,6 @@
 {
  "templateId": "tw-backwater-profile",
+ "source_sha256": "1d57d76b3dc996dca0a94f41d98b3374620e432d654b9fd4dded765b4cf4b98a",
  "module": "明渠水面線標準步進法（swc_tech）",
  "title": "明渠水面線標準步進法（swc_tech / 曼寧公式）",
  "input_style": "literal",

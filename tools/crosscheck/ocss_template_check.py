@@ -32,6 +32,11 @@ ocss：
   模板原始碼來自 `maps/_inventory/<模板>.cpd`（盤點時存下），完全不動 OCSS 專案；
   模板升版後請重跑 `ocss_inventory.py` 並檢查 `source_sha256`。
 
+formula 型（X4，無對應模板者）
+  `"type": "formula"`，以 `"source"`（字串或逐行陣列）取代 `template`／`ocss_inputs`；
+  其餘（payload、compare、disposition）與 template 型完全相同。公式一律無因次化書寫，
+  避開分數次方與單位不收斂兩個陷阱。
+
 差異處置（工作計劃書原則 6）
   差異超過容差時，必須在該比較項寫 `disposition`：
   `{"kind": "engine_fixed"|"template_issue"|"explained", "reason": "…"}`，
@@ -169,8 +174,17 @@ def run_case(client, case: dict, emit=print) -> dict:
     import design_api as D
     from ocss_client import unit_warnings
 
-    src, inv = load_template(case["template"])
-    src, values = apply_inputs(src, inv, case.get("ocss_inputs") or {})
+    if case.get("type") == "formula":
+        # X4：無模板者，OCSS 端為手寫公式鏈（inline source），比對與處置規則同 template 型。
+        src = case.get("source")
+        if isinstance(src, list):
+            src = "\n".join(src) + "\n"
+        if not src:
+            raise TemplateCheckError("formula 型案例缺 source")
+        values = dict(case.get("ocss_values") or {})
+    else:
+        src, inv = load_template(case["template"])
+        src, values = apply_inputs(src, inv, case.get("ocss_inputs") or {})
     run = D.run_calculation(case["calculator"], _payload(case))
     ev = client.evaluate(src, values=values or None)
     if ev.get("errorLines"):

@@ -77,6 +77,10 @@ L_DESC = "93_說明"
 def load_case(case_path):
     """載入案件並取數量：支援 wall（擋土牆）與 channel（排水溝）兩種斷面。"""
     case = CC.load(case_path)
+    _qm = (case.get("quantities") or {})
+    if _qm.get("model") == "block_wall":
+        # 疊式／砌石牆（D2）：數量模型尚未納入 case_core，直接取輸入值，幾何由 block_wall 引擎推導。
+        return case, dict(_qm.get("values") or {}), "block_wall"
     model, q, issues = CC.quantity_context(case)
     errs = [i for i in issues if i["level"] == "error"]
     if errs:
@@ -229,6 +233,116 @@ def draw_channel_section(doc, q, scale, dimstyle, rebar=None):
 
     return dict(H=H, B=B, T=t, BT=tb, W=W, wall_type="channel",
                 title_note="排水溝標準斷面圖", drawing_no="D-01")
+
+
+# --------------------------------------------------------------------------- #
+# 疊式／砌石擋土牆（D2）：蛇籠、格籠、漿砌石、乾砌石、三明治式
+# --------------------------------------------------------------------------- #
+_BLOCK_HATCH = {"gabion": "ANSI37", "crib": "ANSI33", "masonry_wet": "ANSI31",
+                "masonry_dry": "ANSI32", "sandwich": "ANSI36"}
+BLOCK_TYPES = tuple(_BLOCK_HATCH)
+
+
+def _block_analysis(q, case):
+    """跑 block_wall.analyse（幾何與數字都以計算結果為準，繪圖端不另算）。"""
+    import block_wall as _BW
+    soil = dict(case.get("soil") or {})
+    seismic = dict(case.get("seismic") or {})
+    res = _BW.analyse(q, soil, seismic)
+    spec = _BW.BLOCK_WALL_SPECS[res["wall_type"]]
+    if spec["layout"] == "layers":
+        segs, _ = _BW._layers_geometry(q)
+    else:
+        segs, _ = _BW._masonry_geometry(q)
+    return res, segs, spec
+
+
+def _auto_block_extent(q, case):
+    _res, segs, _spec = _block_analysis(q, case)
+    xs = [s[k] for s in segs for k in ("xf0", "xf1", "xb0", "xb1")]
+    H = segs[-1]["y1"]
+    return (max(xs) - min(xs) + 2.6, H + 1.0)
+
+
+def draw_block_wall_section(doc, q, case, scale, dimstyle):
+    msp = doc.modelspace()
+    res, segs, spec = _block_analysis(q, case)
+    wt = res["wall_type"]
+    g = res["geometry"]
+    H = segs[-1]["y1"]
+    emb = float(g["embedment_m"])
+    hatch_scale = (1.5 * scale / 1000.0) / 3.175
+    hb = model_h(3.0, scale)
+
+    # 逐段（層）外框與剖面線。每段一個封閉多邊形 → dxf_takeoff 可逐層加總面積。
+    # 砌石牆沒給 stone_courses 時，引擎每 0.5 m 切一段只為了檢核界面，並非實際砌層；
+    # 畫成橫線會被誤讀成施工分層，因此只畫一個外廓。
+    if spec["layout"] == "masonry" and not q.get("stone_courses"):
+        # 前、後緣皆為單一坡度直線，四點即完整外廓。
+        polys = [[(segs[0]["xf0"], segs[0]["y0"]), (segs[0]["xb0"], segs[0]["y0"]),
+                  (segs[-1]["xb1"], segs[-1]["y1"]), (segs[-1]["xf1"], segs[-1]["y1"])]]
+    else:
+        polys = [[(s["xf0"], s["y0"]), (s["xb0"], s["y0"]),
+                  (s["xb1"], s["y1"]), (s["xf1"], s["y1"])] for s in segs]
+    for poly in polys:
+        msp.add_lwpolyline(poly, close=True, dxfattribs={"layer": L_CONC})
+        h = msp.add_hatch(color=256, dxfattribs={"layer": L_HATCH})
+        h.set_pattern_fill(_BLOCK_HATCH[wt], color=256, scale=max(hatch_scale, 1e-4))
+        h.paths.add_polyline_path(poly, is_closed=True)
+
+    def xf_at(y):
+        for s in segs:
+            if s["y0"] - 1e-9 <= y <= s["y1"] + 1e-9:
+                t = (y - s["y0"]) / (s["y1"] - s["y0"])
+                return s["xf0"] + t * (s["xf1"] - s["xf0"])
+        return segs[0]["xf0"]
+
+    x_left = min(min(s["xf0"], s["xf1"]) for s in segs)
+    x_back_top = segs[-1]["xb1"]
+    x_back_base = segs[0]["xb0"]
+
+    # 前方地面線（埋入深度處）、背填面、基礎面
+    gx0 = x_left - 0.9
+    if emb > 1e-9:
+        msp.add_line((gx0, emb), (xf_at(emb), emb), dxfattribs={"layer": L_EXC})
+    msp.add_line((x_back_top, H), (x_back_top + 0.9, H), dxfattribs={"layer": L_EXC})
+    msp.add_line((gx0, 0.0), (x_back_base + 0.5, 0.0), dxfattribs={"layer": L_EXC})
+    msp.add_line((gx0, 0.0), (gx0, emb if emb > 1e-9 else 0.0), dxfattribs={"layer": L_EXC})
+
+    def dim(p1, p2, base, angle=None):
+        if angle is None:
+            angle = 90 if abs(p1[0] - p2[0]) < abs(p1[1] - p2[1]) else 0
+        d = msp.add_linear_dim(base=base, p1=p1, p2=p2, angle=angle,
+                               dimstyle=dimstyle, dxfattribs={"layer": L_DIM})
+        d.render()
+
+    # 尺寸：底寬、頂寬、總高、逐層高、埋入深度
+    dim((segs[0]["xf0"], 0.0), (x_back_base, 0.0), (0.0, -0.30))
+    dim((segs[-1]["xf1"], H), (x_back_top, H), (0.0, H + 0.25))
+    dim((x_back_top, 0.0), (x_back_top, H), (x_back_top + 1.15, 0.0))
+    xl = x_left - 0.35
+    if spec["layout"] == "layers":
+        for s in segs:
+            dim((xl, s["y0"]), (xl, s["y1"]), (xl - 0.30, s["y0"]))
+            w = s["xb0"] - s["xf0"]
+            t = msp.add_text("%d層 W=%.2f" % (s["layer"], w), height=hb,
+                             dxfattribs={"layer": L_NOTE, "style": "TOMO"})
+            t.set_placement(((s["xf0"] + s["xb0"]) / 2.0, (s["y0"] + s["y1"]) / 2.0),
+                            align=TextEntityAlignment.MIDDLE_CENTER)
+    if emb > 1e-9:
+        dim((xl, 0.0), (xl, emb), (xl - 0.65, 0.0))
+
+    return dict(H=H, T=segs[-1]["xb1"] - segs[-1]["xf1"],
+                BL=segs[0]["xb0"] - segs[0]["xf0"], BT=0.0,
+                wall_type="block", block_type=wt, block_label=spec["label"],
+                block_basis=spec["basis"], embedment_m=emb,
+                effective_height_m=g["effective_height_m"],
+                area_m2_per_m=g["area_m2_per_m"], n_seg=len(polys),
+                layout=spec["layout"], materials=res["materials"],
+                stable=bool(res["pass"]),
+                backfill_slope_deg=float((res.get("soil") or {}).get("backfill_slope_deg") or 0.0),
+                title_note="%s標準斷面圖" % spec["label"],
+                drawing_no="S-01")
 
 
 def ensure_layers(doc):
@@ -1381,6 +1495,7 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
     is_chan = geom.get("wall_type") == "channel"
     is_slope = geom.get("slope_deg") is not None
     is_mse = geom.get("wall_type") == "mse"
+    is_block = geom.get("wall_type") == "block"
     # 加勁式只有 RC 面版、沒有底板，保護層依面版取 50 mm；其餘牆型 75 mm。
     _cover_default = 50 if (is_mse or is_chan) else 75
 
@@ -1482,6 +1597,8 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
                ("⑥ 地下水位", "虛線（未調查時以無水計）")]
         for _a, _b in _sl:
             _row(_a, _b, dx=52.0)
+    elif is_block:
+        _title("材料圖例")
     else:
         _title("配筋表" if rebar_schedule else "鋼筋圖例")
 
@@ -1510,6 +1627,13 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
     else:
         if is_slope:
             rows = []
+        elif is_block:
+            _mat = geom["materials"]
+            rows = [("牆體", geom["block_label"]),
+                    ("單位重 γ", "%.1f kN/m3" % _mat["unit_weight_kn_m3"]),
+                    ("層間摩擦 μ", "%.2f" % _mat["interface_friction"]),
+                    ("底面摩擦 μb", "%.2f" % _mat["base_friction"]),
+                    ("鋼筋", "無（不配鋼筋）")]
         elif is_chan:
             _rg = geom.get("rebar_geom") or {}
             _mb = str(_rg.get("stem_bar", "D16"))
@@ -1560,6 +1684,9 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
                  ("4", "坡面排水溝"), ("5", "滑動圓"), ("6", "地下水位")]
     elif is_chan:
         parts = [("1", "溝壁"), ("2", "溝底"), ("3", "通水斷面"), ("4", "基礎開挖線")]
+    elif is_block:
+        parts = [("1", "牆體（逐層／逐段）"), ("2", "前方地面線（埋入深度）"),
+                 ("3", "背填面（水平示意）"), ("4", "基礎面（y=0）")]
     elif geom.get("wall_type") == "gravity":
         parts = [("1", "牆身（梯形斷面）"), ("2", "底寬 BL"), ("3", "背填級配碎石"),
                  ("4", "反濾層"), ("5", "洩水管／排水孔"), ("6", "基礎開挖線")]
@@ -1606,6 +1733,15 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
                 ("地下水位", ("%.2f H" % geom["GW"]) if geom["GW"] > 0 else "無")]
         if geom.get("slip"):
             data.append(("最不利滑動圓", "FS = %.2f" % geom["slip"]["FS"]))
+    elif is_block:
+        data = [("牆高 H", L(geom["H"])),
+                ("有效高", L(geom["effective_height_m"])),
+                ("埋入深度", L(geom["embedment_m"])),
+                ("底寬 BL", L(geom["BL"])),
+                ("頂寬 T", L(geom["T"])),
+                ("層數", ("%d" % geom["n_seg"]) if (geom["layout"] == "layers" or geom["n_seg"] > 1)
+                 else "未指定砌層（整體）"),
+                ("斷面積", "%.3f m2/m" % geom["area_m2_per_m"])]
     elif geom.get("wall_type") == "counterfort":
         heel = geom["BL"] - geom.get("toe_length_m", 0.0) - geom["T"]
         data = [("牆板高 H／有效高", "%s／%s" % (
@@ -1665,6 +1801,16 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
             "4. 坡高超過 5 m 者，依第78條應設計階段式邊坡及縱、橫向排水。",
             "5. 植生須於坡面整地後施作；坡面排水溝應與坡頂、坡腳截水系統銜接。",
             "6. 本圖未含地質鑽探資料；土工參數（γ、φ、c）為假設值，施工前須以實際地探覆核。",
+        ]
+    elif is_block:
+        notes = [
+            "1. 本圖為%s標準斷面圖，尺寸單位為公尺（m），比例 1:%d。" % (geom["block_label"], scale),
+            "2. 適用條件：%s。" % geom["block_basis"],
+            "3. 常時穩定檢核：%s（詳設計計算書）。" % ("全部通過" if geom["stable"] else "有未通過項目，不得施工"),
+            "4. 單位重與摩擦係數為常用假設值，須依材料試驗修正後覆核。",
+            "5. 背填面以水平示意%s；本圖不配鋼筋。" % (
+                ("（計算採坡度 %.1f°）" % geom["backfill_slope_deg"]) if geom["backfill_slope_deg"] else ""),
+            "6. 本圖未含高程與地質資料；施工前須依實際地探與現地測量覆核。",
         ]
     elif is_chan and not rebar_schedule:
         notes = [
@@ -1815,6 +1961,8 @@ def main():
             mw = _H / max(math.tan(_b), 1e-6) + 6.0
             mh = _H + 2.0
             _avail_w_slope = 184.0
+        elif model == "block_wall":
+            mw, mh = _auto_block_extent(q, case)
         elif model == "wall":
             try:
                 mw, mh = _auto_wall_extent(q)
@@ -1945,7 +2093,11 @@ def main():
     ensure_layers(doc)
     ds = ensure_dimstyle(doc, a.scale, a.unit)
 
-    if model == "channel":
+    if model == "block_wall":
+        if a.rebar:
+            raise SystemExit("疊式／砌石牆目前只出 S-01 標準斷面圖（--rebar 不適用）")
+        geom = draw_block_wall_section(doc, q, case, a.scale, ds)
+    elif model == "channel":
         geom = draw_channel_section(doc, q, a.scale, ds, rebar=_rb_geom)
     elif model == "slope":
         geom = draw_slope_section(doc, q, a.scale, ds)      # 邊坡無配筋圖
@@ -1981,6 +2133,9 @@ def main():
         print(f"  斷面 坡高 H={geom['H']:.2f} 坡角 β={geom['slope_deg']:.1f}° "
               f"水平投影={geom['run']:.2f} 坡面斜長={geom['face']:.2f} "
               f"平台 {geom['BN']} 階×{geom['BW']:.2f}  比例 1/{a.scale}")
+    elif model == "block_wall":
+        print(f"  斷面 {geom['block_label']} H={geom['H']:.2f} 頂寬={geom['T']:.2f} "
+              f"底寬={geom['BL']:.2f} 埋入={geom['embedment_m']:.2f} 面積={geom['area_m2_per_m']} m2/m  比例 1/{a.scale}")
     elif model == "channel":
         print(f"  斷面 內寬 B={geom['B']} 溝深 H={geom['H']} 壁厚 t={geom['T']} "
               f"底厚 tb={geom['BT']} 外寬 W={geom['W']}  比例 1/{a.scale}")

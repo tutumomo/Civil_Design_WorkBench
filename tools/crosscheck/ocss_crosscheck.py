@@ -132,7 +132,7 @@ def cmd_checks(c: OcssClient, only: str | None) -> int:
                 total -= 1
                 continue
             _out(f"\n■ {name}")
-            if chk.get("type") == "template":
+            if chk.get("type") in ("template", "formula"):
                 import ocss_template_check as TC
                 try:
                     r = TC.run_case(c, chk, emit=_out)

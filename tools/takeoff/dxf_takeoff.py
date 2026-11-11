@@ -363,7 +363,16 @@ def check_case(case_path, dxf_path, tol_pct=0.5):
     import qty_models as QM
 
     case = CC.load(case_path)
-    model, q, _ = CC.quantity_context(case)
+    if (case.get("quantities") or {}).get("model") == "block_wall":
+        # 疊式／砌石牆（D2）：數量模型未納入 case_core；斷面積以 block_wall 引擎為準。
+        sys.path.insert(0, os.path.join(os.path.dirname(HERE), "design"))
+        import block_wall as _BW
+        model = "block_wall"
+        q = dict(case["quantities"].get("values") or {})
+        q["section_area_m2"] = _BW.analyse(
+            q, case.get("soil") or {}, case.get("seismic") or {})["geometry"]["area_m2_per_m"]
+    else:
+        model, q, _ = CC.quantity_context(case)
     meas = measure(dxf_path)
     gross_layer, void_layers = SECTION_LAYERS.get(
         model, ("30_擋土牆混凝土", ("34_溝內腔",)))

@@ -42,7 +42,7 @@ FAILS: list[str] = []
 
 EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall",
-    "box_culvert", "channel_hydraulics", "slope_stability",
+    "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
 
@@ -112,6 +112,33 @@ def main() -> int:
             for f in dxfs:
                 ok, why = _dxf_ok(f["path"])
                 check("%s %s 合乎 DXF 基本規定" % (cid, f["name"]), ok, why)
+
+        print("[2b] 疊式／砌石牆五型：圖面斷面積＝引擎 area_m2_per_m（D2）")
+        if "block_wall" in DS.CAPABILITIES:
+            import block_wall as BW
+            from catalog.wall import _block_wall_defaults
+            from ezdxf.math import area as _area
+            ex = rows["block_wall"]["example"]
+            geo = ("course_count", "course_height_m", "base_width_m", "width_decrement_m",
+                   "step_side", "height_m", "top_width_m", "front_batter_ratio",
+                   "back_batter_ratio", "stone_length_m", "embedment_m")
+            for wt, d in _block_wall_defaults().items():
+                p = {k: v for k, v in ex.items() if k not in geo}
+                p.update(d, wall_type=wt)
+                try:
+                    res = DS.generate("block_wall", p, publish=False)
+                except Exception:  # noqa: BLE001
+                    check("block_wall[%s] 出圖" % wt, False,
+                          traceback.format_exc().strip().splitlines()[-1])
+                    continue
+                dxf = next(f["path"] for f in res["files"] if f["kind"] == "dxf")
+                doc = ezdxf.readfile(dxf)
+                drawn = sum(abs(_area(list(e.vertices_in_wcs()))) for e in
+                            doc.modelspace().query('LWPOLYLINE[layer=="30_擋土牆混凝土"]'))
+                want = BW.analyse(p, p.get("soil"), {"kh": p.get("kh", 0.0)}
+                                  )["geometry"]["area_m2_per_m"]
+                check("block_wall[%s] 斷面積 %.4f＝%.4f" % (wt, drawn, want),
+                      abs(drawn - want) <= 1e-3 * max(want, 1e-9))
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

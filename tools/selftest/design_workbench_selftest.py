@@ -544,7 +544,7 @@ def main() -> int:
             and (cmap.get("rc_beam") or {}).get("status") == "supported"
             and (cmap.get("rc_column") or {}).get("status") == "supported"
             and (cmap.get("foundation_pile") or {}).get("status") == "supported"
-            and (cmap.get("drainage_network") or {}).get("status") == "not_implemented",
+            and (cmap.get("drainage_network") or {}).get("status") == "supported",
         )
         rc_beam = _request_json(
             base + "/api/design/run",

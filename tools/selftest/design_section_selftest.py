@@ -45,6 +45,7 @@ EXPECTED_SUPPORTED = {
     "wall_stability", "counterfort_wall", "mse_wall", "anchored_wall", "channel_cover", "rc_beam", "rc_column",
         "foundation_isolated", "foundation_combined", "detention_basin", "sediment_basin", "channel_profile",
         "steel_column", "building_frame", "foundation_pile", "settlement_assessment",
+        "drainage_network",
     "box_culvert", "channel_hydraulics", "slope_stability", "block_wall",
 }
 EXPECTED_NOT_APPLICABLE = {"hydrology"}
@@ -677,6 +678,81 @@ def main() -> int:
                 check("%s 範圍過大時明確拒絕（未實作分張）" % cid, False, "竟然挑了比例")
             except SystemExit as se:
                 check("%s 範圍過大時明確拒絕（未實作分張）" % cid, "分張" in str(se))
+
+        print("[2l] 排水網路示意圖：拓撲排版、上游在上、圖上數字＝計算結果（D11，DG2）")
+        if "drainage_network" in DS.CAPABILITIES:
+            sys.path.insert(0, str(ROOT / "tools" / "network_section"))
+            import importlib
+            NW = importlib.import_module("make_network")
+            ex = rows["drainage_network"]["example"]
+            res = DS.generate("drainage_network", ex, publish=False)
+            run = API.run_calculation("drainage_network", ex)["result"]
+            doc = ezdxf.readfile(next(f["path"] for f in res["files"] if f["kind"] == "dxf"))
+            msp = doc.modelspace()
+            txt = _texts(res)
+            geo = NW.network_layout(run)
+
+            circles = msp.query('CIRCLE[layer=="30_節點"]')
+            check("NW-1 節點圓數＝結果 nodes", len(circles) == len(run["nodes"]),
+                  "%d ≠ %d" % (len(circles), len(run["nodes"])))
+            want = {k: NW.to_model(v) for k, v in geo["pos_mm"].items()}
+            got = {(round(c.dxf.center.x, 6), round(c.dxf.center.y, 6)) for c in circles}
+            wantr = {(round(v[0], 6), round(v[1], 6)) for v in want.values()}
+            check("NW-1 節點位置＝拓撲排版（紙面 mm 換算）", got == wantr, str(got ^ wantr))
+            check("NW-1 節點圓半徑＝紙面 %.1f mm（示意圖外觀固定）" % NW.R_MM,
+                  all(abs(c.dxf.radius - NW.R_MM * NW.NOMINAL_SCALE / 1000.0) < 1e-9
+                      for c in circles))
+            check("NW-1 排版間距採預設紙面尺寸（%.0f×%.0f mm）" % (NW.DX_MM, NW.DY_MM),
+                  (geo["dx_mm"], geo["dy_mm"]) == (NW.DX_MM, NW.DY_MM),
+                  "%s" % ((geo["dx_mm"], geo["dy_mm"]),))
+            # 上游在上：每條排水路的來源節點 y 必須高於下游節點
+            lv = {k: -v[1] for k, v in geo["pos_mm"].items()}       # 紙面 y 向下為下游
+            check("NW-1 上游（入流）在上、流向由上向下",
+                  all(lv[lk["from"]] < lv[lk["to"]] for lk in run["links"]))
+            check("NW-1 終端放流口畫雙圈（32_放流口）",
+                  len(msp.query('CIRCLE[layer=="32_放流口"]'))
+                  == sum(1 for n in run["nodes"] if n["terminal_outfall"]))
+            check("NW-1 終端放流量標在圖上",
+                  ("放流口 %.2f m³/s" % run["terminal_outflow_m3s"]) in txt)
+            check("NW-1 每條排水路標「編號 型式」與「Q/Qcap 比值」",
+                  all(("%s %s" % (lk["id"], NW.TYPE_TEXT.get(lk["type"], lk["type"]))) in txt
+                      and ("Q/Qcap %.2f" % lk["capacity_ratio"]) in txt
+                      for lk in run["links"]))
+            check("NW-1 節點標本地入流／出流",
+                  all(("入 %.2f｜出 %.2f" % (n["local_inflow_m3s"], n["outgoing_m3s"])) in txt
+                      for n in run["nodes"] if not n["terminal_outfall"]))
+            flat = txt.replace("\n", "")
+            check("NW-1 明示「示意圖 非比例」且不得量測",
+                  "示意圖 非比例" in txt and "不得量測" in flat)
+            check("NW-1 不做任何線性標註（位置為排版非實距）",
+                  not msp.query("DIMENSION") and "比例尺 1:" not in txt)
+            # 分張守門：層數過多時明確拒絕，不得縮成非標準比例硬塞
+            def _chain(n_lv):
+                nodes = [{"id": "N%d" % i} for i in range(n_lv)]
+                links = [{"id": "X%d" % i, "from": "N%d" % i, "to": "N%d" % (i + 1)}
+                         for i in range(n_lv - 1)]
+                return {"nodes": nodes, "links": links}
+
+            try:
+                NW.network_layout(_chain(14))
+                check("NW-1 層數過多時明確拒絕（未實作分張）", False, "竟然排得下")
+            except SystemExit as se:
+                check("NW-1 層數過多時明確拒絕（未實作分張）", "分張" in str(se), str(se))
+            cyc = {"nodes": [{"id": "A"}, {"id": "B"}],
+                   "links": [{"id": "X1", "from": "A", "to": "B"},
+                             {"id": "X2", "from": "B", "to": "A"}]}
+            try:
+                NW.network_layout(cyc)
+                check("NW-1 有環時明確拒絕排版", False, "竟然排得下")
+            except SystemExit as se:
+                check("NW-1 有環時明確拒絕排版", "環" in str(se), str(se))
+            try:
+                ok_scale = DS.generate("drainage_network", ex, scale=50, publish=False)
+                check("NW-1 指定名目比例 1:%d 可出圖" % NW.NOMINAL_SCALE,
+                      any(f["kind"] == "dxf" for f in ok_scale["files"]))
+            except Exception as ex2:  # noqa: BLE001
+                check("NW-1 指定名目比例 1:%d 可出圖" % NW.NOMINAL_SCALE, False,
+                      traceback.format_exc().strip().splitlines()[-1])
 
         print("[3] 繪圖者可帶入標題欄（D13）")
         for cid in ("wall_stability", "box_culvert"):

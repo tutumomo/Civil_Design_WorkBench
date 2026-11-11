@@ -860,7 +860,22 @@ def build_paper(doc, g, case, scale, project, sheet_no, tables, title_note,
     def _gap(v=GAP_H):
         cur["y"] -= v
 
-    if tables.get("rebar_rows"):
+    if tables.get("blocks"):
+        # 通用表格區塊（溝蓋詳圖等借用同一張圖框）：[{title, header, rows}]，
+        # header／rows 的每格為 (x 偏移 mm, 文字)。
+        for i, blk in enumerate(tables["blocks"]):
+            if i:
+                _gap(4.0)
+            _title(blk["title"])
+            for dx, txt in blk.get("header") or []:
+                put(RX + dx, cur["y"], txt, 3.0, L_LEGEND)
+            if blk.get("header"):
+                cur["y"] -= ROW_H
+            for row in blk["rows"]:
+                for dx, txt in row:
+                    put(RX + dx, cur["y"], txt, 3.0, L_LEGEND)
+                cur["y"] -= ROW_H
+    elif tables.get("rebar_rows"):
         _title("配筋表")
         for dx, txt in [(0.0, "編號"), (9.0, "位置"), (60.0, "筋號"),
                         (72.0, "間距(mm)"), (92.0, "長度(%s)" % us["label"]),

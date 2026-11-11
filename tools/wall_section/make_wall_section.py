@@ -1917,6 +1917,11 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
             "6. 鋼筋尺寸與間距為示意，正式配筋須依結構計算結果調整並經技師核可。",
             "7. 本圖未含高程與地質資料；施工前須依實際地探與現地測量覆核。",
         ]
+    # D12：出圖用的尺寸若計算器沒輸入、採預設值，一律在說明欄標「假設值」。
+    _assumed = list((case.get("quantities") or {}).get("assumed") or [])
+    if _assumed and (is_slope or is_chan):
+        notes.append("%d. 假設值（計算器未輸入、採預設）：%s；須依設計確認。" % (
+            len(notes) + 1, "、".join(_assumed)))
     # 說明文字的長度值一併換成圖面單位（m／cm），與尺寸標註、右欄尺寸表一致。
     notes = notes_in_unit(notes, unit)
     notes = wrap_notes(notes)

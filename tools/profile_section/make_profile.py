@@ -298,7 +298,9 @@ def _redraw_scale(lay, H, V):
         poly = [(x0, sy), (x0 + seg, sy), (x0 + seg, sy + 3.0), (x0, sy + 3.0)]
         lay.add_lwpolyline(poly, close=True, dxfattribs={"layer": MWS.L_SCALE})
         if i == 0:
-            lay.add_solid(poly, dxfattribs={"layer": MWS.L_SCALE})
+            # 實心格：以兩個三角形填滿（4 點 SOLID 的點序在部分出圖器會畫成 X 交叉）
+            lay.add_solid([poly[0], poly[1], poly[2]], dxfattribs={"layer": MWS.L_SCALE})
+            lay.add_solid([poly[0], poly[2], poly[3]], dxfattribs={"layer": MWS.L_SCALE})
     put(vx0 - 0.8, sy - 5.0, "0")
     put(vx0 + seg - 2.4, sy - 5.0, "10")
     put(vx0 + 2 * seg - 3.2, sy - 5.0, "20")

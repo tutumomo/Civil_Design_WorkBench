@@ -43,6 +43,13 @@ TESTS = [
         "what": "設計工作台 API／目錄規則",
     },
     {
+        "id": "design-section",
+        "cmd": ["tools/selftest/design_section_selftest.py"],
+        "globs": ["tools/design/", "tools/wall_section/", "tools/box_section/",
+                  "tools/selftest/"],
+        "what": "設計圖產線：三態表態、出 DXF、繪圖者（不需 CAD）",
+    },
+    {
         "id": "design-launch",
         "cmd": ["tools/selftest/design_launch_check.py", "--all"],
         "globs": ["tools/design/", "tools/selftest/"],

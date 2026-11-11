@@ -1328,7 +1328,7 @@ def _auto_wall_extent(q):
 # 圖紙空間：視口、比例尺、圖例、說明、標題欄
 # --------------------------------------------------------------------------- #
 def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
-                unit="m"):
+                unit="m", drafter="Claude（AI）"):
     msp = doc.modelspace()
     from ezdxf import bbox as _bbox
     box = _bbox.extents(msp)
@@ -1414,7 +1414,7 @@ def build_paper(doc, geom, case, scale, project, sheet_no, rebar_schedule=None,
                             align=TextEntityAlignment.BOTTOM_LEFT)
 
     fill("設計", "Claude（AI）")
-    fill("繪圖", "Claude（AI）")
+    fill("繪圖", drafter or "Claude（AI）")
     fill("日期", time.strftime("%Y.%m.%d"))
     fill("比例尺", "1:%d" % scale, dx=15.0)
     fill("圖序", sheet_no, dx=14.0)
@@ -1968,7 +1968,7 @@ def main():
             case = dict(case)
             case["_cover_mm"] = 50 if q.get("wall_type") == "mse" else 75
     lay, vp = build_paper(doc, geom, case, a.scale, proj, a.sheet_no,
-                          rebar_schedule=rb_schedule, unit=a.unit)
+                          rebar_schedule=rb_schedule, unit=a.unit, drafter=a.drafter)
 
     # 版面自檢：模型文字字高必須等於 3/4/5 mm（換算後）
     doc.layouts.set_active_layout(LAYOUT_NAME)      # publish 以 CTAB 出圖，必須是斷面圖

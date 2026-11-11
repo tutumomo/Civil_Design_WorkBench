@@ -533,6 +533,16 @@ def main() -> int:
             and "cm" in [u.get("value") for u in box_cap.get("units") or []]
             and 60 in [s.get("value") for s in box_cap.get("scales") or []],
         )
+        checks.check(
+            "capabilities 涵蓋整份目錄且皆為三態之一",
+            len(cmap) == len(calculators)
+            and all(c.get("status") in ("supported", "not_applicable",
+                                        "not_implemented")
+                    for c in cmap.values())
+            and (cmap.get("hydrology") or {}).get("status") == "not_applicable"
+            and (cmap.get("hydrology") or {}).get("reason")
+            and (cmap.get("rc_beam") or {}).get("status") == "not_implemented",
+        )
         rc_beam = _request_json(
             base + "/api/design/run",
             {

@@ -527,8 +527,10 @@ class Handler(BaseHTTPRequestHandler):
                 import design_api
                 return self.json({"calculators": design_api.list_calculators()})
             if u.path == "/api/design/section/capabilities":
+                import design_api
                 import design_section
-                return self.json({"capabilities": design_section.capability_map()})
+                ids = [r["id"] for r in design_api.list_calculators()]
+                return self.json({"capabilities": design_section.capability_map(ids)})
             if u.path == "/api/design/section/file":
                 import design_section
                 rel = (q.get("path") or "").strip()
@@ -605,6 +607,7 @@ class Handler(BaseHTTPRequestHandler):
                         unit=str(body.get("unit", "m")),
                         scale=body.get("scale", "auto"),
                         project=str(body.get("project", "") or ""),
+                        drafter=str(body.get("drafter", "") or ""),
                         publish=bool(body.get("publish", True)),
                     )
                 except design_section.SectionError as ex:

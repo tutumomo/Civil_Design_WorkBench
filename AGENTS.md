@@ -201,6 +201,11 @@ python tools/a3_sheet/check_delivery.py <成果.dxf> \
 
 > macOS／Linux 用 `.venv/bin/python tools/a3_sheet/check_delivery.py …`。
 
+> **工作台「設計圖」的檢核比例要另外帶**：`--scale 600` 是 A3 現況平面圖的慣例。
+> 設計圖（`out/design_sections/<計算器>/<時間戳>/`）比例各圖不同（SC-1 1:20、B-01 1:10、
+> 池類 1:200、水面線 1:1000…），**必須從該次出圖的 `_drawing_meta.json` 的 `scale` 欄讀**
+> 再帶入，否則 E6／E15 會誤報。詳見 `docs/踩坑紀錄.md` §AL。
+
 > **版面類錯誤的三個高頻來源**（詳見 `docs/踩坑紀錄.md` §AI.4）：
 > ① **右欄圖例／說明過寬** → E9／E10（寬度估算要比 `est_width()` 再保守一成，SHX 中文寬度會被低估兩成）；
 > ② **匯入的底圖圖層沒有線粗**（DXF 370 = -3） → E17（`make_sheet.py` 已內建 `apply_plot_style()`，勿手動補圖）；

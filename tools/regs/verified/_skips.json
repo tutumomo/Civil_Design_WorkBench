@@ -2682,6 +2682,118 @@
    "legacy_status": "no-content"
   },
   {
+   "src": "rainwater109",
+   "clause": "I-1.1",
+   "status": "qualitative",
+   "reason": "建設概述為建設目的、項目與歷年實施率統計（表1-1 為年度統計資料），非設計用公式或查表值",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "I-2.2",
+   "status": "qualitative",
+   "reason": "資料收集項目及內容列舉 17 類應蒐集資料，屬作業項目清單，無公式或數值表",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "I-5",
+   "status": "covered",
+   "reason": "第五章暗渠工程設計為章標題，內容由 I-5.1~I-5.5 各節條目涵蓋（斷面選用、管渠接合、管材、箱涵結構、擋土工法）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "I-5.1",
+   "status": "qualitative",
+   "reason": "概述僅說明暗渠斷面形狀（圓形、卵形、矩形、馬蹄形）之選用優缺點與尺寸選用依據，無公式或數值表；水力檢核逕用曼寧公式（已入庫）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "I-7.5",
+   "status": "qualitative",
+   "reason": "連接管僅規定管徑>=500mm、坡度>=1%、接管位置在本管上半部及計量方式（B 型管一支 2.4m、設計長度取 1.2m 倍數），無公式或數值表；輸水容量逕以曼寧公式（已入庫）檢核",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "III-6.2.1",
+   "status": "out_of_scope",
+   "reason": "決標方式屬採購行政程序（最有利標、評分及格最低標等），非工程設計公式或數值表",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "III-6.2.2",
+   "status": "out_of_scope",
+   "reason": "廠商資格訂定屬採購行政（財力、人力、實績門檻），非設計公式或數值表",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "IV-1.2",
+   "status": "out_of_scope",
+   "reason": "預算編列原則屬預算書編製行政規定（發包工程費與非發包項目費用之分類），本庫不收錄預算格式；本專案預算由 tools/boq 產線處理",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "IV-3.3",
+   "status": "out_of_scope",
+   "reason": "數量計算應注意事項屬預算編製行政規定，非設計公式或數值表",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "IV-3.4",
+   "status": "out_of_scope",
+   "reason": "單價分析表製作屬預算書格式（PCCES 表單），非設計查詢數值；單價另由 tools/boq/prices 管理",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "IV-3.5",
+   "status": "out_of_scope",
+   "reason": "預算詳細表為 PCCES 空白表單格式，非設計公式或查表值",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "IV-3.6",
+   "status": "out_of_scope",
+   "reason": "工程預算總表為 PCCES 表單格式，非設計公式或查表值",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "IV-3.8",
+   "status": "out_of_scope",
+   "reason": "資源統計表為 PCCES 表單格式，非設計公式或查表值",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "rainwater109",
+   "clause": "IV-4.3",
+   "status": "out_of_scope",
+   "reason": "雨水抽水站工程單價屬物價／單價資料，非設計公式；單價另由 tools/boq/prices 管理",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
    "src": "rc112",
    "clause": "1.3.3",
    "status": "qualitative",

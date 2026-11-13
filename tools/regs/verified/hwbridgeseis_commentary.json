@@ -1,0 +1,1457 @@
+{
+ "formulas": [
+  {
+   "id": "hwbridgeseis_movable_bearing_HA",
+   "title": "活動支承傳遞之水平地震力（公路橋梁耐震解說 C2.5 (C2-9)~(C2-11)）",
+   "src": "hwbridgeseis108",
+   "clause": "C2.5",
+   "page": 87,
+   "keywords": "公路橋梁耐震 活動支承 摩擦係數 傳遞地震力 橋台 水平反力 解說 C2.5",
+   "unit": "kgf",
+   "output": "HA",
+   "latex": "H_A=f_{AL}R_{AL}\\le H_{AL}",
+   "vars": {
+    "f_AL": {
+     "desc": "活動支承 A_L 之摩擦係數 f_AL",
+     "unit": "無因次",
+     "min": 0
+    },
+    "R_AL": {
+     "desc": "靜載重作用下活動支承 A_L 之反力 R_AL",
+     "unit": "kgf",
+     "min": 0
+    },
+    "H_AL": {
+     "desc": "視 A_L、A_R 均為鉸支時結構分析所得支承 A_L 之水平軸向反力 H_AL（上限）",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "expr": "min(f_AL * R_AL, H_AL)",
+   "conditions": [
+    {
+     "expr": "f_AL >= 0 and R_AL >= 0",
+     "msg": "f_AL、R_AL 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "f_AL": 0.05,
+      "R_AL": 800000,
+      "H_AL": 60000.0
+     },
+     "out": 40000.0
+    },
+    {
+     "in": {
+      "f_AL": 0.05,
+      "R_AL": 800000,
+      "H_AL": 30000.0
+     },
+     "out": 30000.0
+    }
+   ],
+   "notes": "解說 C2.5：活動支承雖不傳遞地震力，但摩擦力仍會傳遞，最大值為靜載重反力乘摩擦係數（(C2-10)式），且不必超過視該支承為鉸支所分配之水平力（(C2-11)式）。若 A_L 為固定支承則 H_A = H_Ah（(C2-9)式），即直接取鉸支分析值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.87 解說 C2.5",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_CQC_Sjk",
+   "title": "CQC 法振態相關係數（公路橋梁耐震解說 C3.3 (C3-20)(C3-21)）",
+   "src": "hwbridgeseis108",
+   "clause": "C3.3",
+   "page": 95,
+   "keywords": "公路橋梁耐震 CQC 完全二次組合法 振態相關係數 頻率比 阻尼比 解說 C3.3",
+   "unit": "無因次",
+   "output": "S_jk",
+   "latex": "S_{jk}=\\frac{8\\sqrt{\\zeta_j\\zeta_k}\\left(\\zeta_j+r\\zeta_k\\right)r^{3/2}}{\\left(1-r^2\\right)^2+4\\zeta_j\\zeta_k r\\left(1+r^2\\right)+4\\left(\\zeta_j^2+\\zeta_k^2\\right)r^2},\\quad r=\\frac{\\omega_k}{\\omega_j}",
+   "vars": {
+    "xi_j": {
+     "desc": "第 j 振態之阻尼比 ζj",
+     "unit": "無因次",
+     "min": 0,
+     "max": 1
+    },
+    "xi_k": {
+     "desc": "第 k 振態之阻尼比 ζk",
+     "unit": "無因次",
+     "min": 0,
+     "max": 1
+    },
+    "omega_j": {
+     "desc": "第 j 振態之圓周頻率 ωj",
+     "unit": "rad/s",
+     "min": 0.0001
+    },
+    "omega_k": {
+     "desc": "第 k 振態之圓周頻率 ωk",
+     "unit": "rad/s",
+     "min": 0.0001
+    }
+   },
+   "defs": [
+    [
+     "r",
+     "omega_k / omega_j"
+    ]
+   ],
+   "expr": "8.0 * sqrt(xi_j * xi_k) * (xi_j + r * xi_k) * r ** 1.5 / ((1.0 - r ** 2) ** 2 + 4.0 * xi_j * xi_k * r * (1.0 + r ** 2) + 4.0 * (xi_j ** 2 + xi_k ** 2) * r ** 2)",
+   "conditions": [
+    {
+     "expr": "omega_j > 0 and omega_k > 0 and xi_j > 0 and xi_k > 0",
+     "msg": "頻率與阻尼比須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "r > 1.5 or r < 0.667",
+     "msg": "兩振態頻率相差已大，S_jk 接近 0，可直接用 SRSS 疊加"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "xi_j": 0.05,
+      "xi_k": 0.05,
+      "omega_j": 10.0,
+      "omega_k": 9.0
+     },
+     "out": 0.4730276832384835
+    },
+    {
+     "in": {
+      "xi_j": 0.05,
+      "xi_k": 0.05,
+      "omega_j": 10.0,
+      "omega_k": 5.0
+     },
+     "out": 0.01848645179572674
+    },
+    {
+     "in": {
+      "xi_j": 0.05,
+      "xi_k": 0.05,
+      "omega_j": 10.0,
+      "omega_k": 10.0
+     },
+     "out": 1.0
+    }
+   ],
+   "notes": "解說 C3.3 (C3-20)(C3-21)。CQC 疊加：Z_max = √(ΣΣ S_jk·Z_j·Z_k)（(C3-19)式）；各振態週期分散時可用 SRSS：Z_max = √(Σ Z_i²)（(C3-18)式）。本式僅給相關係數，多振態求和需另以矩陣運算。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.95 解說 C3.3（hb_p92.png、文字層）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_plastic_moment_Mp",
+   "title": "橋柱塑性彎矩強度（公路橋梁耐震解說 C4.2）",
+   "src": "hwbridgeseis108",
+   "clause": "C4.2",
+   "page": 97,
+   "keywords": "公路橋梁耐震 塑性鉸 塑性彎矩強度 標稱彎矩 1.3 倍 解說 C4.2",
+   "unit": "kgf·cm",
+   "output": "Mp",
+   "latex": "M_p=1.3M_n",
+   "vars": {
+    "Mn": {
+     "desc": "柱斷面之標稱彎矩強度 M_n（軸力取靜載重引致之軸力）",
+     "unit": "kgf·cm",
+     "min": 0
+    }
+   },
+   "expr": "1.3 * Mn",
+   "conditions": [
+    {
+     "expr": "Mn >= 0",
+     "msg": "M_n 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Mn": 1200.0
+     },
+     "out": 1560.0
+    }
+   ],
+   "notes": "解說 C4.2：塑性彎矩強度取標稱彎矩強度之 1.3 倍，係考慮實際降伏應力偏高、大應變下應變硬化，以及圍束後混凝土極限抗壓強度與對應應變提高。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.97 解說 C4.2",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_column_design_shear_Vu",
+   "title": "橋柱設計剪力（公路橋梁耐震解說 C4.2）",
+   "src": "hwbridgeseis108",
+   "clause": "C4.2",
+   "page": 98,
+   "keywords": "公路橋梁耐震 橋柱設計剪力 塑鉸 柱頂柱底 淨高 強度折減 0.85 解說 C4.2",
+   "unit": "kgf",
+   "output": "Vu",
+   "latex": "V_u=\\frac{M_{p,top}+M_{p,bot}}{L_n}",
+   "vars": {
+    "Mp_top": {
+     "desc": "柱頂斷面塑性彎矩強度 M_p,top",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "Mp_bot": {
+     "desc": "柱底斷面塑性彎矩強度 M_p,bot",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "Ln": {
+     "desc": "柱淨高 L_n",
+     "unit": "cm",
+     "min": 0.001
+    }
+   },
+   "expr": "(Mp_top + Mp_bot) / Ln",
+   "conditions": [
+    {
+     "expr": "Ln > 0",
+     "msg": "L_n 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Mp_top": 1560.0,
+      "Mp_bot": 1560.0,
+      "Ln": 600.0
+     },
+     "out": 5.2
+    }
+   ],
+   "notes": "解說 C4.2：多跨剛接連續梁橋沿行車向之柱，設計剪力取柱底與柱頂塑性彎矩和除以柱淨高；配置剪力筋時強度折減係數 φ = 0.85。壁式橋墩不產生塑鉸，其剪力筋依彈性分析剪力配置（亦用 φ = 0.85）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.98 解說 C4.2",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_kv0_reference",
+   "title": "地盤反力係數基準值 k_V0 與 k_H0（公路橋梁耐震解說 C4.4 (C4-30)(C4-31)）",
+   "src": "hwbridgeseis108",
+   "clause": "C4.4",
+   "page": 109,
+   "keywords": "公路橋梁耐震 沉箱 地盤反力係數 基準值 變形模數 30 公分平鈑載重試驗 解說 C4.4",
+   "unit": "kgf/cm3",
+   "output": "k0",
+   "latex": "k_{V0}=k_{H0}=\\frac{1}{30}\\alpha E_0",
+   "vars": {
+    "alpha": {
+     "desc": "地盤反力係數推估用係數 α（依表C4-5）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "E0": {
+     "desc": "地盤變形模數 E0（依表C4-5 方法測量或推估）",
+     "unit": "kgf/cm2",
+     "min": 0
+    }
+   },
+   "expr": "1.0 / 30.0 * alpha * E0",
+   "conditions": [
+    {
+     "expr": "alpha >= 0 and E0 >= 0",
+     "msg": "α、E0 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "alpha": 2.0,
+      "E0": 1500.0
+     },
+     "out": 100.0
+    }
+   ],
+   "notes": "解說 C4.4 (C4-30) 垂直向、(C4-31) 水平向：兩式同形，均為直徑 30 cm 平鈑載重試驗對應之地盤反力係數基準值。沉箱底面/側面各係數再依表C4-7 以 (B/30)^(-3/4) 等寬度修正。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.109 解說 C4.4 (C4-30)(C4-31)",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_alpha_P_lateral_cap",
+   "title": "水平地盤反力上限值修正係數（公路橋梁耐震解說 C4.4）",
+   "src": "hwbridgeseis108",
+   "clause": "C4.4",
+   "page": 110,
+   "keywords": "公路橋梁耐震 水平地盤反力上限值 修正係數 alpha_P 軟弱粘土 N值 解說 C4.4",
+   "unit": "無因次",
+   "output": "alpha_P",
+   "latex": "\\alpha_P=1.0+0.5\\frac{x}{B_e}\\le3.0",
+   "vars": {
+    "x": {
+     "desc": "地表面以下深度 x",
+     "unit": "cm",
+     "min": 0
+    },
+    "Be": {
+     "desc": "基礎有效正面寬 B_e",
+     "unit": "cm",
+     "min": 0.001
+    }
+   },
+   "expr": "min(1.0 + 0.5 * x / Be, 3.0)",
+   "conditions": [
+    {
+     "expr": "Be > 0",
+     "msg": "B_e 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "x": 150.0,
+      "Be": 200.0
+     },
+     "out": 1.375
+    },
+    {
+     "in": {
+      "x": 2000.0,
+      "Be": 200.0
+     },
+     "out": 3.0
+    }
+   ],
+   "notes": "解說 C4.4：對 N 值 2 以下之軟弱粘土，α_P 取 1.0；其他情況依本式計算，上限 3.0。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.110 解說 C4.4",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_priestley_Vc_plastic",
+   "title": "塑鉸區混凝土剪力計算強度（公路橋梁耐震解說 C5.3.3 (C5-4b)）",
+   "src": "hwbridgeseis108",
+   "clause": "C5.3.3",
+   "page": 118,
+   "keywords": "公路橋梁耐震 ATC-32 塑鉸區 混凝土剪力強度 Vc 0.53 軸力調整係數 F 解說 C5.3.3",
+   "unit": "kgf",
+   "output": "Vc",
+   "latex": "V_c=0.53\\left(0.5+F\\right)\\sqrt{f_c'}A_e",
+   "vars": {
+    "fc": {
+     "desc": "混凝土規定抗壓強度 f'c",
+     "unit": "kgf/cm2",
+     "min": 1
+    },
+    "F": {
+     "desc": "與軸力有關之調整係數 F = N/(140 A_g)（壓力為正）",
+     "unit": "無因次",
+     "min": -1,
+     "max": 1
+    },
+    "Ae": {
+     "desc": "柱有效斷面積 A_e（可取 0.8A_g）",
+     "unit": "cm2",
+     "min": 0
+    }
+   },
+   "expr": "0.53 * (0.5 + F) * sqrt(fc) * Ae",
+   "conditions": [
+    {
+     "expr": "fc > 0 and Ae >= 0",
+     "msg": "f'c 須為正，A_e 須非負"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result < 0",
+     "msg": "Vc < 0，軸力調整係數 F 過小（拉力過大），依本文 (5-3) 式 Vc 取 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "F": 0.05,
+      "Ae": 2880.0
+     },
+     "out": 14047.856509517744
+    }
+   ],
+   "notes": "解說 C5.3.3 (C5-4b)（ATC-32 建議）。**本文 (5-3) 式之係數為 0.53(0.33+F)，與解說本式之 0.5 不同**，設計時應以本文 (5-3) 式為準（已入庫 hwbridgeseis_column_Vc_plastic）；本條目保留解說原式以供追溯。非塑鉸區依 (C5-4a) 為 0.53(1+F)√f'c·A_e。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.118 解說 C5.3.3 (C5-4b)（hb_p117.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_confinement_pressure_f2",
+   "title": "螺箍／閉合圓箍柱心圍束壓力（公路橋梁耐震解說 C5.3.4 (C5-6)~(C5-8)）",
+   "src": "hwbridgeseis108",
+   "clause": "C5.3.4",
+   "page": 118,
+   "keywords": "公路橋梁耐震 圍束壓力 f2 螺箍 閉合圓箍 體積比 rho_s 解說 C5.3.4",
+   "unit": "kgf/cm2",
+   "output": "f2",
+   "latex": "f_2'=\\frac{2A_hf_{yh}}{SD}=\\frac{\\rho_sf_{yh}}{2}",
+   "vars": {
+    "Ah": {
+     "desc": "螺箍筋或閉合圓箍筋斷面積 A_h",
+     "unit": "cm2",
+     "min": 0
+    },
+    "fyh": {
+     "desc": "箍筋規定降伏強度 f_yh",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "S": {
+     "desc": "螺箍筋或閉合圓箍筋間距 S",
+     "unit": "cm",
+     "min": 0.001
+    },
+    "D": {
+     "desc": "柱心直徑 D",
+     "unit": "cm",
+     "min": 0.001
+    }
+   },
+   "expr": "2.0 * Ah * fyh / (S * D)",
+   "conditions": [
+    {
+     "expr": "S > 0 and D > 0",
+     "msg": "S、D 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Ah": 2.0,
+      "fyh": 4200.0,
+      "S": 10.0,
+      "D": 60.0
+     },
+     "out": 28.0
+    }
+   ],
+   "notes": "解說 C5.3.4 (C5-6)式；代入體積比 ρ_s = 4A_h/(DS)（(C5-7)式）後得 (C5-8)式 f'2 = ρ_s f_yh/2。配合 (C5-5) 式 f*c − 0.85f'c = 4.0 f'2 可檢核圍束後柱心抗壓強度增量。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.118 解說 C5.3.4（hb_p117.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_confinement_required_rho",
+   "title": "所需圍束體積比（公路橋梁耐震解說 C5.3.4 (C5-5)(C5-8)）",
+   "src": "hwbridgeseis108",
+   "clause": "C5.3.4",
+   "page": 118,
+   "keywords": "公路橋梁耐震 圍束 體積比 rho_s 柱心抗壓強度 fc* 0.85 解說 C5.3.4",
+   "unit": "無因次",
+   "output": "rho_s",
+   "latex": "\\rho_s=\\frac{f_c^*-0.85f_c'}{2f_{yh}}",
+   "vars": {
+    "fc_star": {
+     "desc": "圍束後柱心混凝土抗壓強度 f*c",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "fc": {
+     "desc": "混凝土單軸規定抗壓強度 f'c",
+     "unit": "kgf/cm2",
+     "min": 1
+    },
+    "fyh": {
+     "desc": "箍筋規定降伏強度 f_yh",
+     "unit": "kgf/cm2",
+     "min": 0.001
+    }
+   },
+   "expr": "(fc_star - 0.85 * fc) / (2.0 * fyh)",
+   "conditions": [
+    {
+     "expr": "fc_star >= 0.85 * fc",
+     "msg": "f*c 應不小於 0.85f'c（圍束只增不減）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc_star": 350.0,
+      "fc": 280.0,
+      "fyh": 4200.0
+     },
+     "out": 0.013333333333333334
+    }
+   ],
+   "notes": "由解說 C5.3.4 (C5-5) f*c − 0.85f'c = 4.0f'2 與 (C5-8) f'2 = ρ_s f_yh/2 聯立而得。本文 (5-5)(5-6) 式另有以 A_g/A_c 及軸力項計算 ρ_s 之規定（已入庫 hwbridgeseis_rho_s_circular），設計應取兩者較大值。",
+   "status": "verified",
+   "verified": {
+    "method": "由 hwbridgeseis108 p.118 (C5-5)(C5-8) 兩式聯立推導，並以獨立計算核對",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_hollow_rect_Vs_zone",
+   "title": "中空矩形橋墩單一分區剪力鋼筋強度（公路橋梁耐震解說 C5.8.1.1 (C5-10)）",
+   "src": "hwbridgeseis108",
+   "clause": "C5.8.1.1",
+   "page": 121,
+   "keywords": "公路橋梁耐震 中空矩形橋墩 剪力鋼筋 分區 Av fyt d s 解說 C5.8.1.1",
+   "unit": "kgf",
+   "output": "Vs_zone",
+   "latex": "V_{S,i}=\\frac{A_{v,i}f_{yt,i}d_i}{s}",
+   "vars": {
+    "Av": {
+     "desc": "某一分區內剪力鋼筋於 s 距離內之總面積 A_v",
+     "unit": "cm2",
+     "min": 0
+    },
+    "fyt": {
+     "desc": "橫向鋼筋規定降伏強度 f_yt",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "d": {
+     "desc": "該分區內構材受剪力方向之深度 d",
+     "unit": "cm",
+     "min": 0
+    },
+    "s": {
+     "desc": "橫向鋼筋中心距 s",
+     "unit": "cm",
+     "min": 0.001
+    }
+   },
+   "expr": "Av * fyt * d / s",
+   "conditions": [
+    {
+     "expr": "s > 0",
+     "msg": "s 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Av": 5.0,
+      "fyt": 4200.0,
+      "d": 60.0,
+      "s": 10.0
+     },
+     "out": 126000.0
+    }
+   ],
+   "notes": "解說 C5.8.1.1 (C5-10)式為各分區之和 V_S = Σ(A_v f_yt d / s)_i；本式僅計算單一分區，多分區須逐區計算後相加。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.121 解說 C5.8.1.1",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_hollow_circ_Vs",
+   "title": "中空圓形橋墩剪力鋼筋強度（公路橋梁耐震解說 C5.8.2.1 (C5-15)~(C5-18)）",
+   "src": "hwbridgeseis108",
+   "clause": "C5.8.2.1",
+   "page": 123,
+   "keywords": "公路橋梁耐震 中空圓形橋墩 剪力鋼筋 外箍筋 繫筋 開孔率 alpha 解說 C5.8.2.1",
+   "unit": "kgf",
+   "output": "Vs",
+   "latex": "V_s=V_{sh}+V'_{sh};\\ V_{sh}=\\frac{\\pi}{2}\\frac{nA_hf_{yt}D_2}{s};\\ V'_{sh}=\\frac{1}{4}\\frac{A'_hf'_{yt}D_2}{s}(1-\\alpha);\\ \\alpha=\\frac{r_1}{r_2}",
+   "vars": {
+    "n": {
+     "desc": "核心斷面所用之獨立橫向鋼筋根數 n",
+     "unit": "根",
+     "min": 0
+    },
+    "Ah": {
+     "desc": "圓形箍筋單根斷面積 A_h",
+     "unit": "cm2",
+     "min": 0
+    },
+    "fyt": {
+     "desc": "箍筋規定降伏強度 f_yt",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Ah2": {
+     "desc": "繫筋單根斷面積 A'_h",
+     "unit": "cm2",
+     "min": 0
+    },
+    "fyt2": {
+     "desc": "繫筋規定降伏強度 f'_yt",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "D2": {
+     "desc": "外箍筋中心直徑 D_2",
+     "unit": "cm",
+     "min": 0
+    },
+    "s": {
+     "desc": "橫向鋼筋中心距 s",
+     "unit": "cm",
+     "min": 0.001
+    },
+    "r1": {
+     "desc": "內箍筋中心半徑 r_1",
+     "unit": "cm",
+     "min": 0
+    },
+    "r2": {
+     "desc": "外箍筋中心半徑 r_2",
+     "unit": "cm",
+     "min": 0.001
+    }
+   },
+   "expr": "pi / 2.0 * (n * Ah * fyt * D2 / s) + 1.0 / 4.0 * (Ah2 * fyt2 * D2 / s) * (1.0 - r1 / r2)",
+   "conditions": [
+    {
+     "expr": "s > 0 and r2 > 0 and r1 <= r2",
+     "msg": "s、r_2 須為正，且 r_1 不得大於 r_2"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "n": 2,
+      "Ah": 1.27,
+      "fyt": 4200.0,
+      "Ah2": 1.27,
+      "fyt2": 4200.0,
+      "D2": 100.0,
+      "s": 10.0,
+      "r1": 20.0,
+      "r2": 50.0
+     },
+     "out": 175573.55214247957
+    }
+   ],
+   "notes": "解說 C5.8.2.1 (C5-15)~(C5-18)。開孔率 α = r_1/r_2，並可依表C5-1 查徑向與弧向應力比值（供圍束鋼筋量計算）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.123 解說 C5.8.2.1（hb_p122.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_isolator_eff_stiffness_test",
+   "title": "隔震元件試驗迴圈有效勁度（公路橋梁耐震解說 C7.6.2.3 (C7-5)）",
+   "src": "hwbridgeseis108",
+   "clause": "C7.6.2.3",
+   "page": 133,
+   "keywords": "公路橋梁耐震 隔震元件 性能試驗 有效勁度 Keff 遲滯迴圈 解說 C7.6.2.3",
+   "unit": "kgf/cm",
+   "output": "Keff",
+   "latex": "K_{eff}^i=\\frac{F_i^+-F_i^-}{2\\Delta_i}",
+   "vars": {
+    "F_plus": {
+     "desc": "第 i 個循環正向最大水平力 F_i⁺",
+     "unit": "kgf",
+     "min": -10000000
+    },
+    "F_minus": {
+     "desc": "第 i 個循環負向最大水平力 F_i⁻",
+     "unit": "kgf",
+     "min": -10000000
+    },
+    "Delta": {
+     "desc": "第 i 個循環之最大側向位移 Δ_i",
+     "unit": "cm",
+     "min": 0.0001
+    }
+   },
+   "expr": "(F_plus - F_minus) / (2.0 * Delta)",
+   "conditions": [
+    {
+     "expr": "Delta > 0",
+     "msg": "Δ_i 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "F_plus": 250000.0,
+      "F_minus": -200000.0,
+      "Delta": 20.0
+     },
+     "out": 11250.0
+    }
+   ],
+   "notes": "解說 C7.6.2.3 (C7-5)式：由實體試驗遲滯迴圈求各循環之有效勁度；設計用之 K_eff 一般取設計位移對應循環之值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.133 解說 C7.6.2.3（hb_p132.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_isolator_Vb_Qd",
+   "title": "隔震器設計水平力（公路橋梁耐震解說 C7.3 (C7-4)）",
+   "src": "hwbridgeseis108",
+   "clause": "C7.3",
+   "page": 131,
+   "keywords": "公路橋梁耐震 隔震器 設計水平力 Vb 特性強度 Qd 設計位移 遲滯迴圈 解說 C7.3",
+   "unit": "kgf",
+   "output": "Vb",
+   "latex": "V_{b,i}=Q_{d,i}+K_{d,i}D_{d,i}",
+   "vars": {
+    "Qd": {
+     "desc": "隔震器特性強度 Q_d,i",
+     "unit": "kgf",
+     "min": 0
+    },
+    "Kd": {
+     "desc": "隔震器設計勁度 K_d,i",
+     "unit": "kgf/cm",
+     "min": 0
+    },
+    "Dd": {
+     "desc": "隔震器設計位移 D_d,i",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "Qd + Kd * Dd",
+   "conditions": [
+    {
+     "expr": "Qd >= 0 and Kd >= 0 and Dd >= 0",
+     "msg": "Q_d、K_d、D_d 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Qd": 50000.0,
+      "Kd": 2600.0,
+      "Dd": 20.0
+     },
+     "out": 102000.0
+    }
+   ],
+   "notes": "解說 C7.3 (C7-4)式：依設計位移及遲滯迴圈求得之隔震器設計水平力，一般較接近非線性動力分析之最大值；(C7-3)式 V_b,i = K_eff,i·D_d,i 為較簡便（較保守）之算法。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.131 解說 C7.3 (C7-3)(C7-4)",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_upper_inertia_RI",
+   "title": "上部結構慣性力效應（公路橋梁耐震解說 C8.6 (C8-16)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.6",
+   "page": 147,
+   "keywords": "公路橋梁耐震 上部結構慣性力效應 RI 梁端間隙 近似線性靜力分析 解說 C8.6",
+   "unit": "kgf",
+   "output": "RI",
+   "latex": "R_I=\\frac{I}{1.2\\alpha_y}\\left(\\frac{S_{a,II}}{F_{u,II}}\\right)_m W",
+   "vars": {
+    "I": {
+     "desc": "用途係數 I",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "alpha_y": {
+     "desc": "起始降伏地震力放大倍數 αy",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "Sa_II": {
+     "desc": "工址等級II 譜加速度係數 S_a,II(T)",
+     "unit": "無因次",
+     "min": 0
+    },
+    "Fu_II": {
+     "desc": "結構系統地震力折減係數 F_u,II(T)",
+     "unit": "無因次",
+     "min": 0.001
+    },
+    "W": {
+     "desc": "振動單元之靜載重 W",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "r",
+     "Sa_II / Fu_II"
+    ],
+    [
+     "m",
+     "r if r <= 0.3 else ((0.52 * r + 0.144) if r <= 0.8 else 0.70)"
+    ]
+   ],
+   "expr": "I * W / (1.2 * alpha_y) * m",
+   "conditions": [
+    {
+     "expr": "alpha_y > 0 and Fu_II > 0",
+     "msg": "αy、F_u,II 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "I": 1.2,
+      "alpha_y": 1.65,
+      "Sa_II": 0.5,
+      "Fu_II": 1.5,
+      "W": 1000000
+     },
+     "out": 192323.23232323234
+    }
+   ],
+   "notes": "解說 C8.6 (C8-16)式：下標 m 表示以 m 係數修正 S_a,II/F_u,II（分段式見 hwbridgeseis_Fu_ratio）。此慣性力依第2.7 節分佈施加後作靜力線性分析，求彈性變位 u_Se，再依 (C8-17) 求等級II 地震變位 u_S。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.147 解說 C8.6 (C8-16)",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_seismic_disp_Su",
+   "title": "等級II 地震變位 u_S（公路橋梁耐震解說 C8.6 (C8-17)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.6",
+   "page": 147,
+   "keywords": "公路橋梁耐震 等級II 地震變位 uS 彈性變位 uSe 韌性容量 Ra alpha_y 梁端間隙 解說 C8.6",
+   "unit": "cm",
+   "output": "u_S",
+   "latex": "u_S=2.1\\alpha_yR_au_{Se}",
+   "vars": {
+    "alpha_y": {
+     "desc": "起始降伏地震力放大倍數 αy",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "Ra": {
+     "desc": "結構系統容許韌性容量 R_a",
+     "unit": "無因次",
+     "min": 1
+    },
+    "uSe": {
+     "desc": "依 (C8-16) 慣性力作靜力線性分析所得之彈性變位 u_Se",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "2.1 * alpha_y * Ra * uSe",
+   "conditions": [
+    {
+     "expr": "alpha_y > 0 and Ra >= 1",
+     "msg": "αy 須為正，R_a 不得小於 1"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "alpha_y": 1.65,
+      "Ra": 1.2,
+      "uSe": 5.0
+     },
+     "out": 20.79
+    }
+   ],
+   "notes": "解說 C8.6 (C8-17)式（近似線性靜力分析法）。另一途徑為非線性靜力分析（側推分析），直接求得等級II 地震下之上部結構變位 u_S。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.147 解說 C8.6 (C8-17)",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_gap_SB_seismic",
+   "title": "梁端間隙 S_B（公路橋梁耐震 8.6 (8-12a)(8-12b)）",
+   "src": "hwbridgeseis108",
+   "clause": "8.6",
+   "page": 68,
+   "keywords": "公路橋梁耐震 梁端間隙 SB 等級II 地震變位 uS 調整係數 c_phi LA 1.5 (8-12a) (8-12b)",
+   "unit": "cm",
+   "output": "SB",
+   "latex": "S_B\\ge u_S+L_A\\ (主梁與橋台間);\\qquad S_B\\ge c_\\phi u_S+L_A\\ (同一橋墩相鄰兩主梁間)",
+   "vars": {
+    "uS": {
+     "desc": "等級II 地震引致之主梁與橋台間相對位移，或同一橋墩上相鄰兩主梁位移之較大值 u_S",
+     "unit": "cm",
+     "min": 0
+    },
+    "c_phi": {
+     "desc": "調整係數 cφ（依表7-2）",
+     "unit": "無因次",
+     "min": 0.1,
+     "default": 1.0
+    },
+    "LA": {
+     "desc": "施工誤差餘裕量 L_A（可取 1.5 cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 1.5
+    },
+    "is_abutment": {
+     "desc": "1=主梁與橋台間；0=同一橋墩上相鄰兩主梁間",
+     "unit": "型態",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "(uS + LA) if is_abutment > 0.5 else (c_phi * uS + LA)",
+   "conditions": [
+    {
+     "expr": "c_phi > 0",
+     "msg": "cφ 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "uS": 20.0,
+      "c_phi": 1.4,
+      "LA": 1.5,
+      "is_abutment": 1
+     },
+     "out": 21.5
+    },
+    {
+     "in": {
+      "uS": 20.0,
+      "c_phi": 1.4,
+      "LA": 1.5,
+      "is_abutment": 0
+     },
+     "out": 29.5
+    }
+   ],
+   "notes": "本文 8.6 (8-12a)(8-12b)。與隔震橋梁之 (7-7a)(7-7b) 同形，差別在 u_S（等級II 地震變位）取代 D_s（隔震設計位移）。非隔震橋梁在確保耐震性能前提下允許較短間距，但仍須避免等級I 地震下碰撞。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.68 §8.6 (8-12a)(8-12b)",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_joint_LE_seismic",
+   "title": "伸縮裝置設計伸縮量 L_E（公路橋梁耐震 8.7 (8-13a)(8-13b)）",
+   "src": "hwbridgeseis108",
+   "clause": "8.7",
+   "page": 68,
+   "keywords": "公路橋梁耐震 伸縮裝置 設計伸縮量 LE 等級I 地震 uJ 常時伸縮量 (8-13a) (8-13b)",
+   "unit": "cm",
+   "output": "LE",
+   "latex": "L_E\\ge u_J+L_A;\\qquad L_E\\ge c_\\phi u_J+L_A",
+   "vars": {
+    "uJ": {
+     "desc": "等級I 地震引致之主梁與橋台間相對位移，或同一橋墩上相鄰兩主梁位移之較大值 u_J",
+     "unit": "cm",
+     "min": 0
+    },
+    "c_phi": {
+     "desc": "調整係數 cφ（依表7-2）",
+     "unit": "無因次",
+     "min": 0.1,
+     "default": 1.0
+    },
+    "LA": {
+     "desc": "施工誤差餘裕量 L_A（可取 1.5 cm）",
+     "unit": "cm",
+     "min": 0,
+     "default": 1.5
+    },
+    "service_move": {
+     "desc": "常時載重（溫度、乾縮、潛變、載重）下之設計伸縮量",
+     "unit": "cm",
+     "min": 0,
+     "default": 0
+    },
+    "is_abutment": {
+     "desc": "1=主梁與橋台間；0=同一橋墩上相鄰兩主梁間",
+     "unit": "型態",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "defs": [
+    [
+     "q",
+     "(uJ + LA) if is_abutment > 0.5 else (c_phi * uJ + LA)"
+    ]
+   ],
+   "expr": "max(q, service_move)",
+   "conditions": [
+    {
+     "expr": "c_phi > 0",
+     "msg": "cφ 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "uJ": 15.0,
+      "c_phi": 1.4,
+      "LA": 1.5,
+      "service_move": 0,
+      "is_abutment": 1
+     },
+     "out": 16.5
+    },
+    {
+     "in": {
+      "uJ": 15.0,
+      "c_phi": 1.4,
+      "LA": 1.5,
+      "service_move": 0,
+      "is_abutment": 0
+     },
+     "out": 22.5
+    },
+    {
+     "in": {
+      "uJ": 15.0,
+      "c_phi": 1.4,
+      "LA": 1.5,
+      "service_move": 25.0,
+      "is_abutment": 1
+     },
+     "out": 25.0
+    }
+   ],
+   "notes": "本文 8.7 (8-13a)(8-13b)：地震時設計伸縮量須與部頒『公路橋梁設計規範』常時載重下之伸縮量取大值（service_move 參數）。解說 C8.7 另說明 L_E 可用等級I 地震力作靜力線性分析求得。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.68 §8.7 (8-13a)(8-13b) 與解說 C8.7 p.148",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_liq_LS",
+   "title": "地震引致之剪應力比 L_S（公路橋梁耐震解說 C8.1.2 (C8-2)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.2",
+   "page": 139,
+   "keywords": "公路橋梁耐震 液化 剪應力比 LS 折減係數 gamma_d 水平地表加速度係數 覆土壓力 解說 C8.1.2",
+   "unit": "無因次",
+   "output": "LS",
+   "latex": "L_S=\\gamma_dk_h\\frac{\\sigma_0}{\\sigma_0'}",
+   "vars": {
+    "gamma_d": {
+     "desc": "地震時尖峰剪應力比沿深度之折減係數 γd（(C8-3)式）",
+     "unit": "無因次",
+     "min": 0,
+     "default": 0.85
+    },
+    "kh": {
+     "desc": "水平地表加速度係數 kh（水平地表加速度／重力加速度）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "sigma0": {
+     "desc": "總覆土壓力 σ0",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "sigma0_eff": {
+     "desc": "有效覆土壓力 σ'0",
+     "unit": "kgf/cm2",
+     "min": 0.0001
+    }
+   },
+   "expr": "gamma_d * kh * sigma0 / sigma0_eff",
+   "conditions": [
+    {
+     "expr": "sigma0_eff > 0",
+     "msg": "有效覆土壓力須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "gamma_d": 0.85,
+      "kh": 0.2,
+      "sigma0": 1.8,
+      "sigma0_eff": 1.0
+     },
+     "out": 0.30600000000000005
+    }
+   ],
+   "notes": "解說 C8.1.2 (C8-2)式（日本道路協會『道路橋示方書．V 耐震設計編』法）。FL = RS/LS < 1.0 即判定可能液化（本文 (8-1) 式）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.139 解說 C8.1.2（hb_p138.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_liq_gamma_d",
+   "title": "尖峰剪應力比深度折減係數 γd（公路橋梁耐震解說 C8.1.2 (C8-3)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.2",
+   "page": 139,
+   "keywords": "公路橋梁耐震 液化 折減係數 gamma_d 深度 解說 C8.1.2",
+   "unit": "無因次",
+   "output": "gamma_d",
+   "latex": "\\gamma_d=1.0-0.015x",
+   "vars": {
+    "x": {
+     "desc": "受評估土層距地表面之深度 x",
+     "unit": "m",
+     "min": 0
+    }
+   },
+   "expr": "1.0 - 0.015 * x",
+   "conditions": [
+    {
+     "expr": "x >= 0",
+     "msg": "深度須非負"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result < 0",
+     "msg": "γd < 0（深度超過 66.7 m），已超出本式適用範圍"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "x": 10.0
+     },
+     "out": 0.85
+    }
+   ],
+   "notes": "解說 C8.1.2 (C8-3)式。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.139 解說 C8.1.2（hb_p138.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_liq_overburden",
+   "title": "總覆土壓力與有效覆土壓力（公路橋梁耐震解說 C8.1.2 (C8-4)(C8-5)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.2",
+   "page": 139,
+   "keywords": "公路橋梁耐震 液化 總覆土壓力 有效覆土壓力 地下水位 單位體積重 解說 C8.1.2",
+   "unit": "kgf/cm2",
+   "output": "sigma",
+   "latex": "\\sigma_0=\\frac{\\gamma_{t1}h_w+\\gamma_{t2}(x-h_w)}{10};\\qquad \\sigma_0'=\\frac{\\gamma_{t1}h_w+\\gamma_{t2}'(x-h_w)}{10}",
+   "vars": {
+    "gamma_t1": {
+     "desc": "地下水位面上方之土壤單位體積重 γt1",
+     "unit": "tf/m3",
+     "min": 0
+    },
+    "gamma_t2": {
+     "desc": "地下水位面下方之土壤單位體積重 γt2（計算 σ0）或有效單位體積重 γ't2（計算 σ'0）",
+     "unit": "tf/m3",
+     "min": 0
+    },
+    "hw": {
+     "desc": "地下水位深度 hw",
+     "unit": "m",
+     "min": 0
+    },
+    "x": {
+     "desc": "受評估土層距地表面之深度 x",
+     "unit": "m",
+     "min": 0
+    }
+   },
+   "expr": "(gamma_t1 * hw + gamma_t2 * max(x - hw, 0.0)) / 10.0",
+   "conditions": [
+    {
+     "expr": "hw >= 0 and x >= 0",
+     "msg": "hw、x 須非負"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "x < hw",
+     "msg": "評估深度 x 小於地下水位深度 hw，此時僅計地下水位上方土層"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "gamma_t1": 1.8,
+      "gamma_t2": 1.9,
+      "hw": 2.0,
+      "x": 10.0
+     },
+     "out": 1.8800000000000001
+    },
+    {
+     "in": {
+      "gamma_t1": 1.8,
+      "gamma_t2": 1.0,
+      "hw": 2.0,
+      "x": 10.0
+     },
+     "out": 1.16
+    }
+   ],
+   "notes": "解說 C8.1.2 (C8-4) 總覆土壓力、(C8-5) 有效覆土壓力。單位：γ 用 tf/m³ 時除以 10 得 kgf/cm²（原式括號內另列不除 10 之 kPa 版本）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.139 解說 C8.1.2（hb_p138.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_liq_R",
+   "title": "反覆三軸剪力強度比 R（公路橋梁耐震解說 C8.1.2 (C8-6)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.2",
+   "page": 139,
+   "keywords": "公路橋梁耐震 液化 反覆三軸剪力強度比 R 修正N值 Na 解說 C8.1.2",
+   "unit": "無因次",
+   "output": "R",
+   "latex": "R=0.0882\\sqrt{N_a/1.7}\\ (N_a<14);\\quad R=0.0882\\sqrt{N_a/1.7}+1.6\\times10^{-6}(N_a-14)^{4.5}\\ (14\\le N_a)",
+   "vars": {
+    "Na": {
+     "desc": "考慮土壤粒度影響之修正 N 值 Na（(C8-7) 或 (C8-11) 式）",
+     "unit": "—",
+     "min": 0
+    }
+   },
+   "expr": "(0.0882 * sqrt(Na / 1.7) + 1.6e-06 * (Na - 14.0) ** 4.5) if Na >= 14.0 else (0.0882 * sqrt(Na / 1.7))",
+   "conditions": [
+    {
+     "expr": "Na >= 0",
+     "msg": "Na 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Na": 10.0
+     },
+     "out": 0.2139164212820457
+    },
+    {
+     "in": {
+      "Na": 20.0
+     },
+     "out": 0.30760276612202075
+    }
+   ],
+   "notes": "解說 C8.1.2 (C8-6)式：RS 可以反覆三軸試驗之剪力強度比 R 代表之。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.139 解說 C8.1.2（hb_p138.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_liq_N1",
+   "title": "有效覆土壓力正規化 N 值 N1（公路橋梁耐震解說 C8.1.2 (C8-8)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.2",
+   "page": 140,
+   "keywords": "公路橋梁耐震 液化 標準貫入試驗 N值 正規化 N1 有效覆土壓力 解說 C8.1.2",
+   "unit": "—",
+   "output": "N1",
+   "latex": "N_1=1.7\\frac{N}{\\sigma_0'+0.7}\\ (\\mathrm{kgf/cm^2});\\qquad N_1=1.7\\frac{N}{0.01\\sigma_0'+0.7}\\ (\\mathrm{kPa})",
+   "vars": {
+    "N": {
+     "desc": "標準貫入試驗所得 N 值",
+     "unit": "—",
+     "min": 0
+    },
+    "sigma0_eff": {
+     "desc": "有效覆土壓力 σ'0（kgf/cm² 或 kPa，依 unit_mode）",
+     "unit": "kgf/cm2 或 kPa",
+     "min": 0
+    },
+    "unit_mode": {
+     "desc": "0=σ'0 單位 kgf/cm2；1=σ'0 單位 kPa",
+     "unit": "型態",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "1.7 * N / ((0.01 * sigma0_eff + 0.7) if unit_mode > 0.5 else (sigma0_eff + 0.7))",
+   "conditions": [
+    {
+     "expr": "sigma0_eff >= 0 and N >= 0",
+     "msg": "σ'0、N 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N": 15,
+      "sigma0_eff": 1.16,
+      "unit_mode": 0
+     },
+     "out": 13.70967741935484
+    },
+    {
+     "in": {
+      "N": 15,
+      "sigma0_eff": 116.0,
+      "unit_mode": 1
+     },
+     "out": 13.70967741935484
+    }
+   ],
+   "notes": "解說 C8.1.2 (C8-8)式：N1 為以有效覆土壓力 1 kgf/cm²（100 kPa）等值換算之 N 值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.140 解說 C8.1.2（hb_p139.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_liq_Na_sand",
+   "title": "砂質土修正 N 值 Na（公路橋梁耐震解說 C8.1.2 (C8-7)(C8-9)(C8-10)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.2",
+   "page": 140,
+   "keywords": "公路橋梁耐震 液化 砂質土 修正N值 Na 細料含量 FC C1 C2 解說 C8.1.2",
+   "unit": "—",
+   "output": "Na",
+   "latex": "N_a=C_1N_1+C_2;\\ C_1=1\\ (FC<10),\\ \\frac{FC+40}{50}\\ (10\\le FC<60),\\ \\frac{FC}{20}-1\\ (60\\le FC);\\ C_2=0\\ (FC<10),\\ \\frac{FC-10}{18}\\ (10\\le FC)",
+   "vars": {
+    "N1": {
+     "desc": "正規化 N 值 N1（(C8-8)式）",
+     "unit": "—",
+     "min": 0
+    },
+    "FC": {
+     "desc": "細料含量 FC（粒徑 75 μm 以下土粒之通過重量百分率）",
+     "unit": "%",
+     "min": 0,
+     "max": 100
+    }
+   },
+   "defs": [
+    [
+     "C1",
+     "1.0 if FC < 10.0 else (((FC + 40.0) / 50.0) if FC < 60.0 else (FC / 20.0 - 1.0))"
+    ],
+    [
+     "C2",
+     "0.0 if FC < 10.0 else ((FC - 10.0) / 18.0)"
+    ]
+   ],
+   "expr": "C1 * N1 + C2",
+   "conditions": [
+    {
+     "expr": "FC >= 0 and FC <= 100",
+     "msg": "FC 須介於 0~100%"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N1": 13.70967741935484,
+      "FC": 25.0
+     },
+     "out": 18.655913978494624
+    },
+    {
+     "in": {
+      "N1": 13.70967741935484,
+      "FC": 5.0
+     },
+     "out": 13.70967741935484
+    }
+   ],
+   "notes": "解說 C8.1.2 (C8-7)~(C8-10)式（砂質土）。FC 介於 10%~60% 時 C1 = (FC+40)/50；FC ≥ 60% 時 C1 = FC/20 − 1。礫質土改用 (C8-11) 式（hwbridgeseis_liq_Na_gravel）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.140 解說 C8.1.2（hb_p139.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "hwbridgeseis_liq_Na_gravel",
+   "title": "礫質土修正 N 值 Na（公路橋梁耐震解說 C8.1.2 (C8-11)）",
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.2",
+   "page": 140,
+   "keywords": "公路橋梁耐震 液化 礫質土 修正N值 Na 平均粒徑 D50 解說 C8.1.2",
+   "unit": "—",
+   "output": "Na",
+   "latex": "N_a=\\left\\{1-0.36\\log_{10}(D_{50}/2)\\right\\}N_1",
+   "vars": {
+    "N1": {
+     "desc": "正規化 N 值 N1（(C8-8)式）",
+     "unit": "—",
+     "min": 0
+    },
+    "D50": {
+     "desc": "過篩百分率 50% 所對應之土壤粒徑 D50",
+     "unit": "mm",
+     "min": 0.001
+    }
+   },
+   "expr": "(1.0 - 0.36 * log10(D50 / 2.0)) * N1",
+   "conditions": [
+    {
+     "expr": "D50 > 0",
+     "msg": "D50 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N1": 13.70967741935484,
+      "D50": 2.0
+     },
+     "out": 13.70967741935484
+    },
+    {
+     "in": {
+      "N1": 13.70967741935484,
+      "D50": 20.0
+     },
+     "out": 8.774193548387098
+    }
+   ],
+   "notes": "解說 C8.1.2 (C8-11)式（礫質土）。D50 = 2 mm 時括號項為 1，即 Na = N1。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.140 解說 C8.1.2（hb_p139.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  }
+ ],
+ "tables": []
+}

@@ -1340,6 +1340,126 @@
    "legacy_status": "no-content"
   },
   {
+   "src": "hwbridgeseis108",
+   "clause": "0",
+   "status": "out_of_scope",
+   "reason": "PDF p.14 為目錄（續）頁，非條文內容；與 p.1 同屬 clause 標記為 0 之非條文頁，登錄一次即涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "2.3",
+   "status": "covered",
+   "reason": "第2.3 節設計總橫力為 2.3.1（等級I）／2.3.2（等級II）／2.3.3（等級III）三個小節之總稱，其公式已分別入庫：hwbridgeseis_level1_T0、level1_Sa、level1_force、Ra、level2_T0、level2_Sa、Fu_ratio、Fu_T、level2_force、level3_force、level3_Sa",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "3.4.1",
+   "status": "qualitative",
+   "reason": "本條為地震歷時之「與設計反應譜 90% 譜相符性」選波準則與歷時長度規定，屬定性要求，無可轉錄之計算公式",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "7.5.1",
+   "status": "qualitative",
+   "reason": "反應譜分析法之振態疊加為矩陣式（多自由度 Σ 與模態座標），入庫 schema 不支援矩陣／下標運算（ast.Subscript）；CQC 相關係數部分已另入庫 hwbridgeseis_CQC_Sjk",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C2.2",
+   "status": "covered",
+   "reason": "解說 C2.2 之地盤分類（VS30 與 Vs i 平均剪力波速）已以本文 2.2 條文入庫：hwbridgeseis_vs30、hwbridgeseis_vsi_clay、hwbridgeseis_vsi_sand",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C2.3",
+   "status": "covered",
+   "reason": "解說 C2.3 設計總橫力為本文 2.3.1~2.3.3 之逐式說明，公式已入庫於該三小節（hwbridgeseis_level1_*／level2_*／level3_*）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C3.4",
+   "status": "qualitative",
+   "reason": "解說 C3.4 歷時分析法之 (C3-2)~(C3-7) 為多自由度運動方程式與增量式積分之矩陣式，入庫 schema 不支援矩陣運算，屬方法論說明",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C4.6",
+   "status": "covered",
+   "reason": "解說 C4.6 P-Δ 效應已以本文 4.6 條文入庫：hwbridgeseis_stability_index（穩定指數 θ）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C5.6",
+   "status": "covered",
+   "reason": "解說 C5.6 橋墩施工縫之剪力強度已以本文 5.6 條文入庫：hwbridgeseis_construction_joint_Vj",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C7.4.2",
+   "status": "covered",
+   "reason": "解說 C7.4.2 梁端間隙已以本文 7.4.2 條文入庫：hwbridgeseis_isolated_gap（(7-7a)(7-7b) 分支）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.3",
+   "status": "covered",
+   "reason": "解說 C8.1.3 土壤參數折減引用本文表8-1（DE 地震之折減係數），已入庫：hwbridgeseis_table8_1_DE",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C8.1.4",
+   "status": "covered",
+   "reason": "解說 C8.1.4 基礎耐震設計引用解說表C4-1~C4-7（承載力係數、形狀/埋置修正、變形模數、彈簧常數等），已全數入庫於 hwbridgeseis_tablesC.json",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C8.3",
+   "status": "covered",
+   "reason": "解說 C8.3 地震動水壓已以本文 8.3 條文入庫：hwbridgeseis_hydro_one_side（(8-6)(8-7)）、hwbridgeseis_hydro_surround（(8-8a~c)）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "C8.7",
+   "status": "covered",
+   "reason": "解說 C8.7 伸縮裝置設計伸縮量已入庫：hwbridgeseis_joint_LE_seismic（含 S_B 與 max(q, service_move)）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "hwbridgeseis108",
+   "clause": "圖C2-8",
+   "status": "qualitative",
+   "reason": "彈性與彈塑性系統位移之能量相等法則示意圖（等能量法求位移），圖形示意無獨立計算式；其設計應用已含於 hwbridgeseis_level1_force 等條目之說明",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
    "src": "hwconst112",
    "clause": "0",
    "status": "qualitative",
@@ -4255,6 +4375,30 @@
    "date": "2026-11-02",
    "by": "agent",
    "legacy_status": "no-content"
+  },
+  {
+   "src": "wood100",
+   "clause": "5.4.8",
+   "status": "covered",
+   "reason": "變斷面受彎構材無獨立公式，θ 不大時逕用 5.4.3 之 (5.14)~(5.18) 各式（已入庫）；θ 較大時另需檢核垂直纖維受拉，屬定性規定",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "wood100",
+   "clause": "8.1.1",
+   "status": "qualitative",
+   "reason": "耐久計畫基本方針為定性規定（通風、防潮、防腐、維護），無公式或設計數值表",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "wood100",
+   "clause": "9.3",
+   "status": "covered",
+   "reason": "木構造防火設計引用建築技術規則防火構造與 CNS 耐燃試驗，本規範僅作原則性規定，數值表見建築技術規則（已在 regs 庫其他規範收錄）",
+   "date": "2026-11-14",
+   "by": "agent"
   }
  ]
 }

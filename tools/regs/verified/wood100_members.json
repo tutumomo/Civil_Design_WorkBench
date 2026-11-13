@@ -1,0 +1,2323 @@
+{
+ "formulas": [
+  {
+   "id": "wood100_tension_member",
+   "title": "受拉構材容許軸拉力計算（木構造 5.2.1 (5.1)式）",
+   "src": "wood100",
+   "clause": "5.2.1",
+   "page": 51,
+   "keywords": "木構造 受拉構材 容許軸拉力 有效淨斷面積 容許拉應力 (5.1)",
+   "unit": "kgf",
+   "output": "N_allow",
+   "latex": "N \\le A_e f_t",
+   "vars": {
+    "A_e": {
+     "desc": "依 5.2.2 節規定之有效淨斷面積（斷面欠缺總和須在全斷面積 1/4 以下）",
+     "unit": "cm2",
+     "min": 0
+    },
+    "f_t": {
+     "desc": "容許拉應力（長期或短期）",
+     "unit": "kgf/cm2",
+     "min": 0
+    }
+   },
+   "expr": "A_e * f_t",
+   "conditions": [
+    {
+     "expr": "A_e >= 0 and f_t >= 0",
+     "msg": "有效淨斷面積與容許拉應力須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "A_e": 80,
+      "f_t": 55
+     },
+     "out": 4400.0
+    }
+   ],
+   "notes": "木構造 5.2.1 (5.1)式 N <= A_e * f_t；另依 5.2.2(2)，受拉構材斷面欠缺總和應在全斷面積之 1/4 以下。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.51 §5.2.1 (5.1)式（wood100_pt2.txt）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_tension_notch_ae",
+   "title": "受拉構材邊緣切口之有效淨斷面積（木構造 5.2.3 解說 (5.2)式）",
+   "src": "wood100",
+   "clause": "5.2.3",
+   "page": 52,
+   "keywords": "木構造 受拉構材 切口 有效淨斷面積 偏心 (5.2)",
+   "unit": "cm2",
+   "output": "A_e",
+   "latex": "A_e = b(h - h') \\times 0.5",
+   "vars": {
+    "b": {
+     "desc": "構材寬度 b",
+     "unit": "cm",
+     "min": 0
+    },
+    "h": {
+     "desc": "構材全深度 h",
+     "unit": "cm",
+     "min": 0
+    },
+    "h_prime": {
+     "desc": "邊緣切口深度 h'",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "b * (h - h_prime) * 0.5",
+   "conditions": [
+    {
+     "expr": "b >= 0 and h >= h_prime >= 0",
+     "msg": "寬度 b >= 0 且深度 h >= h' >= 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "b": 10,
+      "h": 15,
+      "h_prime": 3
+     },
+     "out": 60.0
+    }
+   ],
+   "notes": "木構造 5.2.3 【解說】(二)(1) (5.2)式（圖5.2-1）：邊緣切口產生應力偏心使軸向拉伸強度顯著降低，故淨斷面再折半。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.52 §5.2.3 (5.2)式（p52.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_tension_hole_ae",
+   "title": "受拉構材中央圓孔之有效淨斷面積（木構造 5.2.3 解說 (5.3)式）",
+   "src": "wood100",
+   "clause": "5.2.3",
+   "page": 52,
+   "keywords": "木構造 受拉構材 圓孔 開孔 有效淨斷面積 (5.3)",
+   "unit": "cm2",
+   "output": "A_e",
+   "latex": "A_e = bh\\left(1 - \\frac{\\phi}{h}\\right)",
+   "vars": {
+    "b": {
+     "desc": "構材寬度 b",
+     "unit": "cm",
+     "min": 0
+    },
+    "h": {
+     "desc": "構材深度 h",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "phi": {
+     "desc": "中央圓孔直徑 φ",
+     "unit": "cm",
+     "min": 0
+    }
+   },
+   "expr": "b * h * (1.0 - phi / h)",
+   "conditions": [
+    {
+     "expr": "b >= 0 and h > 0 and 0 <= phi <= h",
+     "msg": "b >= 0、h > 0 且 0 <= φ <= h"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "b": 10,
+      "h": 15,
+      "phi": 3
+     },
+     "out": 120.0
+    }
+   ],
+   "notes": "木構造 5.2.3 【解說】(二)(2) (5.3)式（圖5.2-2）：圓孔偏離中央往邊緣移動時，有效淨斷面應再予折減。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.52 §5.2.3 (5.3)式（p52.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_compression_buckling",
+   "title": "單一受壓構材容許軸壓力與挫屈折減計算（木構造 5.3.2 (5.4)~(5.6),(5.8)式）",
+   "src": "wood100",
+   "clause": "5.3.2",
+   "page": 53,
+   "keywords": "木構造 受壓構材 挫屈折減係數 細長比 容許挫屈應力 (5.4) (5.5) (5.6) (5.8)",
+   "unit": "kgf",
+   "output": "N_allow",
+   "latex": "\\lambda = \\frac{_kl}{i},\\quad \\eta = \\begin{cases} 1 & \\lambda \\le 30 \\\\ 1.3 - 0.01\\lambda & 30 < \\lambda \\le 100 \\\\ \\frac{3000}{\\lambda^2} & 100 < \\lambda \\le 150 \\end{cases},\\quad f_k = \\eta f_c,\\quad N \\le A_g f_k",
+   "vars": {
+    "A_g": {
+     "desc": "構材全斷面積 A_g",
+     "unit": "cm2",
+     "min": 0
+    },
+    "f_c": {
+     "desc": "容許壓應力 f_c（長期或短期）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "kl": {
+     "desc": "挫屈長度 _kl",
+     "unit": "cm",
+     "min": 0
+    },
+    "i": {
+     "desc": "挫屈方向斷面迴轉半徑 i（矩形 h/3.46，圓形 D/4.0）",
+     "unit": "cm",
+     "min": 0.01
+    }
+   },
+   "defs": [
+    [
+     "lam",
+     "kl / i"
+    ],
+    [
+     "eta",
+     "1.0 if lam <= 30 else (1.3 - 0.01 * lam if lam <= 100 else 3000.0 / (lam ** 2))"
+    ],
+    [
+     "f_k",
+     "eta * f_c"
+    ]
+   ],
+   "expr": "A_g * f_k",
+   "conditions": [
+    {
+     "expr": "A_g >= 0 and f_c >= 0 and kl >= 0 and i > 0",
+     "msg": "斷面積與應力須非負，i > 0"
+    },
+    {
+     "expr": "kl / i <= 150",
+     "msg": "5.3.2(3) 規定受壓構材細長比 λ 須在 150 以下"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "A_g": 100,
+      "f_c": 75,
+      "kl": 120,
+      "i": 4
+     },
+     "out": 7500.0
+    },
+    {
+     "in": {
+      "A_g": 100,
+      "f_c": 75,
+      "kl": 240,
+      "i": 4
+     },
+     "out": 5250.0
+    },
+    {
+     "in": {
+      "A_g": 100,
+      "f_c": 75,
+      "kl": 480,
+      "i": 4
+     },
+     "out": 1562.5
+    }
+   ],
+   "notes": "木構造 5.3.2 (5.4)~(5.6),(5.8)式：細長比上限 λ<=150；矩形斷面 i=h/3.46、圓形斷面 i=D/4.0。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.53-54 §5.3.2 (p54.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_compression_euler_short_allow",
+   "title": "試驗彈性模數細長柱之短期容許挫屈應力（木構造 5.3.2 (5.7)式）",
+   "src": "wood100",
+   "clause": "5.3.2",
+   "page": 54,
+   "keywords": "木構造 短期容許挫屈應力 彈性模數 歐勒挫屈 λ>100 (5.7)",
+   "unit": "kgf/cm2",
+   "output": "Sf_k",
+   "latex": "_{S}f_k = \\frac{\\pi^2 E}{\\lambda^2}",
+   "vars": {
+    "E": {
+     "desc": "設計用彈性模數（個別試驗 E=2/3*E0；抽樣試驗 E=1/2*E0）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "lam": {
+     "desc": "構材細長比 λ（100 < λ <= 150）",
+     "unit": "無因次",
+     "min": 100,
+     "max": 150
+    }
+   },
+   "expr": "(pi ** 2) * E / (lam ** 2)",
+   "conditions": [
+    {
+     "expr": "E >= 0 and 100 <= lam <= 150",
+     "msg": "(5.7) 適用 λ 在 100 以上且不超過 150"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "E": 60000,
+      "lam": 120
+     },
+     "out": 41.12335167120566
+    }
+   ],
+   "notes": "木構造 5.3.2(2)(b) (5.7)式：λ 在 100 以上，由實驗求得彈性模數 E0 時，個別材料試驗取 E=(2/3)E0、抽樣試驗取 E=(1/2)E0。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.54 §5.3.2(2)(b) (p54.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_compression_unequal_kl",
+   "title": "兩端承受不同軸向壓力之受壓構材挫屈長度（木構造 5.3.2 (5.9)式）",
+   "src": "wood100",
+   "clause": "5.3.2",
+   "page": 55,
+   "keywords": "木構造 挫屈長度 不同軸壓力 N1 N2 (5.9)",
+   "unit": "cm",
+   "output": "kl",
+   "latex": "_kl = l\\left(0.75 + 0.25\\frac{N_2}{N_1}\\right)",
+   "vars": {
+    "l": {
+     "desc": "構材實長 l",
+     "unit": "cm",
+     "min": 0
+    },
+    "N1": {
+     "desc": "較大端軸向壓力 N1",
+     "unit": "kgf",
+     "min": 0.001
+    },
+    "N2": {
+     "desc": "較小端軸向壓力 N2（N1 > N2）",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "expr": "l * (0.75 + 0.25 * (N2 / N1))",
+   "conditions": [
+    {
+     "expr": "l >= 0 and N1 > 0 and N1 >= N2 >= 0",
+     "msg": "構材長度 l >= 0 且 N1 >= N2 >= 0（N1 > 0）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "l": 300,
+      "N1": 1000,
+      "N2": 600
+     },
+     "out": 270.0
+    }
+   ],
+   "notes": "木構造 5.3.2(4)(c)(iv) (5.9)式：檢核 (5.4) 式時設計軸壓力 N 取較大之 N1。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.55 §5.3.2 (p55.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_composite_col_ie",
+   "title": "複合受壓構材 y-y 軸有效斷面慣性矩（木構造 5.3.3 (5.10)式）",
+   "src": "wood100",
+   "clause": "5.3.3",
+   "page": 57,
+   "keywords": "木構造 複合受壓構材 有效斷面慣性矩 效率係數 間隔墊塊 (5.10)",
+   "unit": "cm4",
+   "output": "I_e",
+   "latex": "I_e = \\xi \\Sigma I_1",
+   "vars": {
+    "xi": {
+     "desc": "斷面慣性矩之有效率 ξ（依表5.3-5 或表5.3-6；三根以上乘 1.2）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "sum_I1": {
+     "desc": "平行 y-y 軸、相對於各主材重心軸之斷面慣性矩之和 ΣI1",
+     "unit": "cm4",
+     "min": 0
+    }
+   },
+   "expr": "xi * sum_I1",
+   "conditions": [
+    {
+     "expr": "xi >= 0 and sum_I1 >= 0",
+     "msg": "效率 ξ 與斷面慣性矩之和須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "xi": 2.2,
+      "sum_I1": 500
+     },
+     "out": 1100.0
+    }
+   ],
+   "notes": "木構造 5.3.3(1)(b) (5.10)式：個別主材全長細長比<=200，墊塊間個別主材細長比<=60。主材數三根以上且兩端及三分點以上由墊塊分隔時，ξ 取表5.3-6 之 1.2 倍。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.57 §5.3.3 (p57.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_spacer_nail_stiffness_ratio",
+   "title": "複合受壓構材釘接墊塊之剛比 k（木構造 5.3.3 (5.11)式）",
+   "src": "wood100",
+   "clause": "5.3.3",
+   "page": 59,
+   "keywords": "木構造 複合受壓構材 間隔墊塊 剛比 釘接合 (5.11)",
+   "unit": "無因次",
+   "output": "k",
+   "latex": "k = v\\bar{\\alpha}\\cdot \\frac{P\\cdot l}{E A_1},\\quad \\bar{\\alpha} = \\frac{2(\\alpha+1)(1+0.25\\alpha)}{\\alpha+2}",
+   "vars": {
+    "alpha": {
+     "desc": "空腹率 α = a / h",
+     "unit": "無因次",
+     "min": 0
+    },
+    "P": {
+     "desc": "墊塊單面與主材接合之釘的短期容許剪力",
+     "unit": "kgf",
+     "min": 0
+    },
+    "l": {
+     "desc": "主材長度 l",
+     "unit": "cm",
+     "min": 0
+    },
+    "E": {
+     "desc": "主材彈性模數 E",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "A_1": {
+     "desc": "單支主材斷面積 A1",
+     "unit": "cm2",
+     "min": 0.1
+    },
+    "v": {
+     "desc": "釘接合種類係數 v（一般採用 35 cm^-1）",
+     "unit": "1/cm",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "alpha_bar",
+     "2.0 * (alpha + 1.0) * (1.0 + 0.25 * alpha) / (alpha + 2.0)"
+    ]
+   ],
+   "expr": "v * alpha_bar * P * l / (E * A_1)",
+   "conditions": [
+    {
+     "expr": "alpha >= 0 and P >= 0 and l >= 0 and E > 0 and A_1 > 0 and v >= 0",
+     "msg": "參數須滿足 E > 0、A1 > 0 且非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "alpha": 0,
+      "P": 400,
+      "l": 300,
+      "E": 80000,
+      "A_1": 100,
+      "v": 35
+     },
+     "out": 0.525
+    },
+    {
+     "in": {
+      "alpha": 3,
+      "P": 400,
+      "l": 300,
+      "E": 80000,
+      "A_1": 100,
+      "v": 35
+     },
+     "out": 1.47
+    }
+   ],
+   "notes": "木構造 5.3.3(3)(a) (5.11)式：墊塊長度須為 (α+2)h 以上。註：α=1 時算式給出 1.667，表5.3-7 刊載為 1.65。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.59 §5.3.3(3)(a) (p59.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_spacer_glue_stiffness_ratio",
+   "title": "複合受壓構材膠合墊塊之剛比 k（木構造 5.3.3 (5.12)式）",
+   "src": "wood100",
+   "clause": "5.3.3",
+   "page": 59,
+   "keywords": "木構造 複合受壓構材 間隔墊塊 剛比 膠合劑接合 (5.12)",
+   "unit": "無因次",
+   "output": "k",
+   "latex": "k = 0.05\\bar{\\alpha}_g\\cdot \\frac{l}{h},\\quad \\bar{\\alpha}_g = (\\alpha+1)\\left(1 - \\frac{\\alpha}{30}\\right)",
+   "vars": {
+    "alpha": {
+     "desc": "空腹率 α = a / h",
+     "unit": "無因次",
+     "min": 0,
+     "max": 30
+    },
+    "l": {
+     "desc": "主材長度 l",
+     "unit": "cm",
+     "min": 0
+    },
+    "h": {
+     "desc": "主材厚度 h",
+     "unit": "cm",
+     "min": 0.1
+    }
+   },
+   "defs": [
+    [
+     "alpha_g",
+     "(alpha + 1.0) * (1.0 - alpha / 30.0)"
+    ]
+   ],
+   "expr": "0.05 * alpha_g * (l / h)",
+   "conditions": [
+    {
+     "expr": "0 <= alpha <= 30 and l >= 0 and h > 0",
+     "msg": "空腹率 0 <= α <= 30，l >= 0 且 h > 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "alpha": 0,
+      "l": 300,
+      "h": 6
+     },
+     "out": 2.5
+    },
+    {
+     "in": {
+      "alpha": 2,
+      "l": 300,
+      "h": 6
+     },
+     "out": 7.0
+    }
+   ],
+   "notes": "木構造 5.3.3(3)(b) (5.12)式：墊塊與主材應為相同材質及寬度，長度應為 (α+1)h 以上。註：α=1 時算式給出 1.933，表5.3-8 刊載為 2.00。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.59 §5.3.3(3)(b) (p59.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_contact_bearing_check",
+   "title": "受壓構材接觸面容許部分受壓（壓陷）承載力（木構造 5.3.4 (5.13)式）",
+   "src": "wood100",
+   "clause": "5.3.4",
+   "page": 60,
+   "keywords": "木構造 構材接觸面 部分受壓 壓陷 (5.13)",
+   "unit": "kgf",
+   "output": "N_allow",
+   "latex": "N \\le A f_{c\\theta}",
+   "vars": {
+    "A": {
+     "desc": "接觸面積 A",
+     "unit": "cm2",
+     "min": 0
+    },
+    "f_c_theta": {
+     "desc": "與纖維成 θ 角方向之容許部分壓（壓陷）應力",
+     "unit": "kgf/cm2",
+     "min": 0
+    }
+   },
+   "expr": "A * f_c_theta",
+   "conditions": [
+    {
+     "expr": "A >= 0 and f_c_theta >= 0",
+     "msg": "面積與應力須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "A": 50,
+      "f_c_theta": 25
+     },
+     "out": 1250.0
+    }
+   ],
+   "notes": "木構造 5.3.4 (5.13)式 N/A <= f_{cθ}，式中 N 為設計用軸壓力在接觸面垂直方向之分力。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.60 §5.3.4 (p60.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_bending_moment_allow",
+   "title": "單一受彎構材容許彎矩（木構造 5.4.3 (5.14)式）",
+   "src": "wood100",
+   "clause": "5.4.3",
+   "page": 62,
+   "keywords": "木構造 受彎構材 撓曲應力 有效斷面模數 尺寸調整係數 (5.14)",
+   "unit": "kgf-cm",
+   "output": "M_allow",
+   "latex": "\\frac{M}{Z_e} \\times C_f \\le f_b \\iff M \\le \\frac{f_b Z_e}{C_f}",
+   "vars": {
+    "f_b": {
+     "desc": "容許撓曲應力 f_b（若需考慮橫向挫屈，取折減後 fb' = Cb*fb）",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Z_e": {
+     "desc": "有效斷面模數 Z_e（依 (5.15) 式）",
+     "unit": "cm3",
+     "min": 0
+    },
+    "C_f": {
+     "desc": "尺寸調整係數 C_f（梁深 30cm 以下取 1.00；超過 30cm 依 (5.16) 式）",
+     "unit": "無因次",
+     "min": 0.1
+    }
+   },
+   "expr": "f_b * Z_e / C_f",
+   "conditions": [
+    {
+     "expr": "f_b >= 0 and Z_e >= 0 and C_f > 0",
+     "msg": "f_b >= 0、Z_e >= 0 且 C_f > 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "f_b": 95,
+      "Z_e": 1200,
+      "C_f": 1.0
+     },
+     "out": 114000.0
+    }
+   ],
+   "notes": "木構造 5.4.3(1) (5.14)式（p.62-63）：注意 C_f 在應力側為乘項 (M/Z_e)*C_f <= f_b，換算容許彎矩為 f_b * Z_e / C_f（因大深度梁 (30/h)^(1/9) < 1，但實際工程亦須確認製材或集成材之折減方向，見 5.4.3(1)(b) 與表4.5-4~6）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.62-63 §5.4.3 (p62.png/p63.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_bending_effective_ze",
+   "title": "受彎構材有效斷面模數（木構造 5.4.3 (5.15)式）",
+   "src": "wood100",
+   "clause": "5.4.3",
+   "page": 63,
+   "keywords": "木構造 受彎構材 有效斷面模數 切口 受壓側 受拉側 (5.15)",
+   "unit": "cm3",
+   "output": "Z_e",
+   "latex": "Z_e = \\begin{cases} Z & \\text{無缺口} \\\\ Z_0 & \\text{受壓側有切口} \\\\ 0.6 Z_0 & \\text{受拉側有切口}(h' > \\frac{3}{4}h) \\end{cases}",
+   "vars": {
+    "b": {
+     "desc": "矩形斷面寬度 b",
+     "unit": "cm",
+     "min": 0
+    },
+    "h": {
+     "desc": "全斷面深度 h",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "h_rem": {
+     "desc": "切口處殘存淨深度 h'（無缺口時填 h）",
+     "unit": "cm",
+     "min": 0
+    },
+    "notch_type": {
+     "desc": "缺口型態：0=無缺口，1=受壓側有切口，2=受拉側有切口",
+     "unit": "型態",
+     "min": 0,
+     "max": 2
+    }
+   },
+   "defs": [
+    [
+     "Z_full",
+     "b * (h ** 2) / 6.0"
+    ],
+    [
+     "Z_net",
+     "b * (h_rem ** 2) / 6.0"
+    ]
+   ],
+   "expr": "Z_full if notch_type < 0.5 else (Z_net if notch_type < 1.5 else 0.6 * Z_net)",
+   "conditions": [
+    {
+     "expr": "b >= 0 and h > 0 and 0 <= h_rem <= h",
+     "msg": "b >= 0、h > 0 且 0 <= h' <= h"
+    },
+    {
+     "expr": "notch_type < 1.5 or h_rem > 0.75 * h",
+     "msg": "受拉側之切口不得大於受彎構材深度之 1/4（須滿足 h' > 3/4 h）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "b": 10,
+      "h": 20,
+      "h_rem": 20,
+      "notch_type": 0
+     },
+     "out": 666.6666666666666
+    },
+    {
+     "in": {
+      "b": 10,
+      "h": 20,
+      "h_rem": 16,
+      "notch_type": 1
+     },
+     "out": 426.6666666666667
+    },
+    {
+     "in": {
+      "b": 10,
+      "h": 20,
+      "h_rem": 16,
+      "notch_type": 2
+     },
+     "out": 256.0
+    }
+   ],
+   "notes": "木構造 5.4.3(1)(a) (5.15)式（圖5.4-2、圖5.4-3）：受拉側切口不得大於梁深之 1/4。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.63 §5.4.3 (p63.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_bending_size_factor",
+   "title": "梁深超過 30cm 之尺寸調整係數 Cf（木構造 5.4.3 (5.16)式）",
+   "src": "wood100",
+   "clause": "5.4.3",
+   "page": 63,
+   "keywords": "木構造 受彎構材 尺寸調整係數 梁深 載重調整係數 跨度梁深比 (5.16)",
+   "unit": "無因次",
+   "output": "C_f",
+   "latex": "C_f = C_l \\times C_h \\times \\left(\\frac{30}{h}\\right)^{1/9}",
+   "vars": {
+    "h": {
+     "desc": "受彎構材（梁）深 h（<=30cm 時 Cf=1.00）",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "C_l": {
+     "desc": "載重調整係數（一點集中 1.08、等均布 1.0、三分點 0.97）",
+     "unit": "無因次",
+     "min": 0.5
+    },
+    "C_h": {
+     "desc": "跨度/梁深調整係數（依表5.4-3：7→1.06, 14→1.02, 21→1.00, 28~35→0.98）",
+     "unit": "無因次",
+     "min": 0.5
+    }
+   },
+   "expr": "1.0 if h <= 30 else C_l * C_h * ((30.0 / h) ** (1.0 / 9.0))",
+   "conditions": [
+    {
+     "expr": "h > 0 and C_l > 0 and C_h > 0",
+     "msg": "h、C_l、C_h 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "h": 25,
+      "C_l": 1.0,
+      "C_h": 1.0
+     },
+     "out": 1.0
+    },
+    {
+     "in": {
+      "h": 60,
+      "C_l": 1.0,
+      "C_h": 1.0
+     },
+     "out": 0.9258747122872905
+    }
+   ],
+   "notes": "木構造 5.4.3(1)(b) (5.16)式及表5.4-3（p.62-63）：梁深 30cm 以下 C_f 取 1.00。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.63 §5.4.3 (p63.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_bending_shear_allow",
+   "title": "單一受彎構材容許剪力與支點有效斷面積（木構造 5.4.3 (5.17)(5.18)式）",
+   "src": "wood100",
+   "clause": "5.4.3",
+   "page": 63,
+   "keywords": "木構造 受彎構材 剪應力 有效斷面積 支點 切口 (5.17) (5.18)",
+   "unit": "kgf",
+   "output": "Q_allow",
+   "latex": "\\alpha \\frac{Q}{A_e} \\le f_s,\\quad A_e = \\begin{cases} A & \\text{無缺口} \\\\ A_0 & \\text{受壓側切口} \\\\ A_0^2 / A & \\text{受拉側切口}(h' > \\frac{2}{3}h) \\end{cases}",
+   "vars": {
+    "b": {
+     "desc": "矩形斷面寬度 b（或圓形有效寬度換算）",
+     "unit": "cm",
+     "min": 0
+    },
+    "h": {
+     "desc": "全斷面深度 h",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "h_rem": {
+     "desc": "支點切口處殘存淨深度 h'（無缺口時填 h）",
+     "unit": "cm",
+     "min": 0
+    },
+    "notch_type": {
+     "desc": "缺口型態：0=無缺口，1=受壓側切口，2=受拉側切口",
+     "unit": "型態",
+     "min": 0,
+     "max": 2
+    },
+    "alpha": {
+     "desc": "形狀係數 α（矩形 1.5、圓形 4/3）",
+     "unit": "無因次",
+     "min": 1.0
+    },
+    "f_s": {
+     "desc": "容許剪應力 f_s（無切口且不會劈裂時可採用 1.5 倍）",
+     "unit": "kgf/cm2",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "A_full",
+     "b * h"
+    ],
+    [
+     "A_net",
+     "b * h_rem"
+    ],
+    [
+     "A_e",
+     "A_full if notch_type < 0.5 else (A_net if notch_type < 1.5 else (A_net ** 2) / A_full)"
+    ]
+   ],
+   "expr": "A_e * f_s / alpha",
+   "conditions": [
+    {
+     "expr": "b >= 0 and h > 0 and 0 <= h_rem <= h and alpha > 0 and f_s >= 0",
+     "msg": "幾何與應力參數須有效"
+    },
+    {
+     "expr": "notch_type < 1.5 or h_rem > (2.0 / 3.0) * h",
+     "msg": "受拉側之切口不得大於受彎構材深度之 1/3（須滿足 h' > 2/3 h）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "b": 10,
+      "h": 20,
+      "h_rem": 20,
+      "notch_type": 0,
+      "alpha": 1.5,
+      "f_s": 8
+     },
+     "out": 1066.6666666666667
+    },
+    {
+     "in": {
+      "b": 10,
+      "h": 20,
+      "h_rem": 15,
+      "notch_type": 2,
+      "alpha": 1.5,
+      "f_s": 8
+     },
+     "out": 600.0
+    }
+   ],
+   "notes": "木構造 5.4.3(2) (5.17)(5.18)式（p.63-64）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.63-64 §5.4.3(2) (p63.png/p64.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_lateral_buckling_stress",
+   "title": "受彎構材橫向挫屈折減後容許撓曲應力（木構造 5.4.3 (5.19)~(5.21)式）",
+   "src": "wood100",
+   "clause": "5.4.3",
+   "page": 64,
+   "keywords": "木構造 橫向挫屈 細長比 Cs Ck Cb 折減容許撓曲應力 (5.19) (5.20) (5.21)",
+   "unit": "kgf/cm2",
+   "output": "f_b_prime",
+   "latex": "C_s = \\sqrt{\\frac{_el \\cdot h}{b^2}},\\quad C_k = 0.8\\sqrt{\\frac{E_{//y-y}}{_{L}f_{bx-x}}},\\quad f_b' = C_b f_b",
+   "vars": {
+    "l_e": {
+     "desc": "有效橫向挫屈長度 _el（依表5.4-6）",
+     "unit": "cm",
+     "min": 0
+    },
+    "h": {
+     "desc": "受彎構材深度 h",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "b": {
+     "desc": "受彎構材寬度 b",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "E_yy": {
+     "desc": "y-y 軸彈性模數 E//y-y",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "L_f_bxx": {
+     "desc": "x-x 軸長期容許撓曲應力 Lfbx-x",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "f_b": {
+     "desc": "未折減之容許撓曲應力 f_b（長期或短期）",
+     "unit": "kgf/cm2",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "C_s",
+     "sqrt(l_e * h / (b ** 2))"
+    ],
+    [
+     "C_k",
+     "0.8 * sqrt(E_yy / L_f_bxx)"
+    ],
+    [
+     "C_b",
+     "1.0 if C_s <= 10.0 else ((1.0 - (1.0 / 3.0) * ((C_s / C_k) ** 4)) if C_s <= C_k else (0.4 * E_yy / ((C_s ** 2) * L_f_bxx)))"
+    ]
+   ],
+   "expr": "C_b * f_b",
+   "conditions": [
+    {
+     "expr": "l_e >= 0 and h > 0 and b > 0 and E_yy > 0 and L_f_bxx > 0 and f_b >= 0",
+     "msg": "幾何與材料參數須有效"
+    },
+    {
+     "expr": "sqrt(l_e * h / (b ** 2)) <= 50.0",
+     "msg": "表5.4-5 規定 C_s > 50 不容許"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "l_e": 300,
+      "h": 30,
+      "b": 10,
+      "E_yy": 120000,
+      "L_f_bxx": 110,
+      "f_b": 110
+     },
+     "out": 110.0
+    },
+    {
+     "in": {
+      "l_e": 1200,
+      "h": 40,
+      "b": 8,
+      "E_yy": 120000,
+      "L_f_bxx": 110,
+      "f_b": 110
+     },
+     "out": 64.0
+    }
+   ],
+   "notes": "木構造 5.4.3(5) (5.19)~(5.21)式及表5.4-5（p.64-65）：注意表5.4-5 中 C_k < C_s <= 50 段為 C_b = 0.4 E//y-y / (C_s^2 * Lfbx-x)，與 C_k = 0.8*sqrt(E/f) 之銜接點在 C_s = C_k 處：左側 1 - 1/3 = 0.667，右側 0.4 / 0.64 = 0.625。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.64-65 §5.4.3(5) (p64.png/p65.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_biaxial_bending_ratio",
+   "title": "雙向彎曲受彎構材應力檢核比（木構造 5.4.3 (5.22)式）",
+   "src": "wood100",
+   "clause": "5.4.3",
+   "page": 66,
+   "keywords": "木構造 雙向彎曲 傾斜外力 應力比 (5.22)",
+   "unit": "無因次",
+   "output": "ratio",
+   "latex": "\\frac{M_x / Z_{ex} + M_y / Z_{ey}}{f_b} \\le 1.0",
+   "vars": {
+    "M_x": {
+     "desc": "y 向分力 Py 所引起之彎矩 Mx",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "M_y": {
+     "desc": "x 向分力 Px 所引起之彎矩 My",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "Z_ex": {
+     "desc": "X 軸有效斷面模數 Z_ex",
+     "unit": "cm3",
+     "min": 0.1
+    },
+    "Z_ey": {
+     "desc": "Y 軸有效斷面模數 Z_ey",
+     "unit": "cm3",
+     "min": 0.1
+    },
+    "f_b": {
+     "desc": "容許撓曲應力 f_b",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    }
+   },
+   "expr": "(abs(M_x) / Z_ex + abs(M_y) / Z_ey) / f_b",
+   "conditions": [
+    {
+     "expr": "Z_ex > 0 and Z_ey > 0 and f_b > 0",
+     "msg": "斷面模數與容許應力須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result > 1.0",
+     "msg": "複合應力檢核比超過 1.0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "M_x": 30000,
+      "M_y": 10000,
+      "Z_ex": 1000,
+      "Z_ey": 400,
+      "f_b": 95
+     },
+     "out": 0.5789473684210527
+    }
+   ],
+   "notes": "木構造 5.4.3(6) (5.22)式（p.65-66）：檢核比須 <= 1.0。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.66 §5.4.3(6) (p66.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_builtup_beam_min_bh2",
+   "title": "壓入式抗剪扣件重疊梁主構材所需最小斷面（木構造 5.4.4 (5.23)~(5.26)式）",
+   "src": "wood100",
+   "clause": "5.4.4",
+   "page": 66,
+   "keywords": "木構造 重疊梁 壓入式抗剪扣件 主構材 斷面 撓度 (5.23) (5.24) (5.25) (5.26)",
+   "unit": "cm3",
+   "output": "min_bh2_for_strength",
+   "latex": "n=2:\\; bh^2 \\ge \\frac{0.25wl^2}{f_b},\\; bh^3 \\ge \\frac{8.4wl^3}{E};\\quad n=3:\\; bh^2 \\ge \\frac{0.14wl^2}{f_b},\\; bh^3 \\ge \\frac{2.3wl^3}{E}",
+   "vars": {
+    "w": {
+     "desc": "等均布載重 w",
+     "unit": "kgf/cm",
+     "min": 0
+    },
+    "l": {
+     "desc": "跨度 l",
+     "unit": "cm",
+     "min": 0
+    },
+    "f_b": {
+     "desc": "長期容許撓曲應力 f_b",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "n_members": {
+     "desc": "主材支數（2 或 3）",
+     "unit": "支",
+     "min": 2,
+     "max": 3
+    }
+   },
+   "expr": "(0.25 if n_members < 2.5 else 0.14) * w * (l ** 2) / f_b",
+   "conditions": [
+    {
+     "expr": "w >= 0 and l >= 0 and f_b > 0 and (n_members == 2 or n_members == 3)",
+     "msg": "主材支數須為 2 或 3，w,l >= 0 且 f_b > 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "w": 5,
+      "l": 400,
+      "f_b": 100,
+      "n_members": 2
+     },
+     "out": 2000.0
+    },
+    {
+     "in": {
+      "w": 5,
+      "l": 400,
+      "f_b": 100,
+      "n_members": 3
+     },
+     "out": 1120.0
+    }
+   ],
+   "notes": "木構造 5.4.4(2)(a) (5.23)~(5.26)式：另有剛性條件 (5.24) bh^3 >= 8.4*w*l^3/E（2支）與 (5.26) bh^3 >= 2.3*w*l^3/E（3支）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.66 §5.4.4 (p66.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_builtup_beam_fastener_count",
+   "title": "重疊梁半跨每一接合面所需扣件數（木構造 5.4.4 (5.27)(5.28)式）",
+   "src": "wood100",
+   "clause": "5.4.4",
+   "page": 67,
+   "keywords": "木構造 重疊梁 扣件數 抗剪扣件 (5.27) (5.28)",
+   "unit": "個",
+   "output": "m_min",
+   "latex": "n=2:\\; m \\ge \\frac{wl^2}{14 P_c h},\\qquad n=3:\\; m \\ge \\frac{wl^2}{24 P_c h}",
+   "vars": {
+    "w": {
+     "desc": "等均布載重 w",
+     "unit": "kgf/cm",
+     "min": 0
+    },
+    "l": {
+     "desc": "跨度 l",
+     "unit": "cm",
+     "min": 0
+    },
+    "P_c": {
+     "desc": "每一個接合扣件之長期容許剪力 Pc",
+     "unit": "kgf",
+     "min": 0.1
+    },
+    "h": {
+     "desc": "單支主材厚度 h",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "n_members": {
+     "desc": "主材支數（2 或 3）",
+     "unit": "支",
+     "min": 2,
+     "max": 3
+    }
+   },
+   "expr": "w * (l ** 2) / ((14.0 if n_members < 2.5 else 24.0) * P_c * h)",
+   "conditions": [
+    {
+     "expr": "w >= 0 and l >= 0 and P_c > 0 and h > 0 and (n_members == 2 or n_members == 3)",
+     "msg": "n_members 須為 2 或 3，P_c, h > 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "w": 5,
+      "l": 400,
+      "P_c": 500,
+      "h": 20,
+      "n_members": 2
+     },
+     "out": 5.714285714285714
+    },
+    {
+     "in": {
+      "w": 5,
+      "l": 400,
+      "P_c": 500,
+      "h": 20,
+      "n_members": 3
+     },
+     "out": 3.3333333333333335
+    }
+   ],
+   "notes": "木構造 5.4.4(2)(b) (5.27)(5.28)式（p.67）：扣件應等間隔配置在梁之支點至跨度 1/4 之間（圖5.4-7）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.67 §5.4.4 (p67.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_truss_chord_combined_stress",
+   "title": "桁架梁弦材複合應力檢核比（木構造 5.4.5 (5.29)式）",
+   "src": "wood100",
+   "clause": "5.4.5",
+   "page": 68,
+   "keywords": "木構造 桁架梁 弦材 二次撓曲應力 複合應力 (5.29)",
+   "unit": "無因次",
+   "output": "ratio",
+   "latex": "\\frac{N_e}{A_e \\eta f_c} + \\frac{M_1}{Z_{e1} f_b} \\le 1.0 \\;\\text{(受壓弦材)};\\quad \\frac{N_e}{A_e f_t} + \\frac{M_1}{Z_{e1} f_b} \\le 1.0 \\;\\text{(受拉弦材)}",
+   "vars": {
+    "N_e": {
+     "desc": "純桁架（節點鉸接）所產生之軸向力 Ne",
+     "unit": "kgf",
+     "min": 0
+    },
+    "A_e": {
+     "desc": "弦材有效斷面積 Ae（受壓取全斷面；受拉依 5.2.2）",
+     "unit": "cm2",
+     "min": 0.1
+    },
+    "M_1": {
+     "desc": "弦材視為單一受彎構材承受分擔載重所產生彎矩 M1",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "Z_e1": {
+     "desc": "弦材之有效斷面模數 Ze1",
+     "unit": "cm3",
+     "min": 0.1
+    },
+    "f_axial": {
+     "desc": "軸向容許應力（受壓取 fc；受拉取 ft）",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "f_b": {
+     "desc": "容許撓曲應力 fb",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "eta": {
+     "desc": "受壓弦材節點間細長比挫屈折減係數 η（受拉弦材填 1.0）",
+     "unit": "無因次",
+     "min": 0.01,
+     "max": 1.0
+    }
+   },
+   "expr": "N_e / (A_e * eta * f_axial) + abs(M_1) / (Z_e1 * f_b)",
+   "conditions": [
+    {
+     "expr": "N_e >= 0 and A_e > 0 and Z_e1 > 0 and f_axial > 0 and f_b > 0 and 0 < eta <= 1.0",
+     "msg": "斷面性質、容許應力與 η 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result > 1.0",
+     "msg": "複合應力檢核比超過 1.0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N_e": 3000,
+      "A_e": 100,
+      "M_1": 15000,
+      "Z_e1": 500,
+      "f_axial": 75,
+      "f_b": 95,
+      "eta": 0.9
+     },
+     "out": 0.760233918128655
+    }
+   ],
+   "notes": "木構造 5.4.5(2) (5.29)式（p.68）：原式寫為 σ_c = (N_e/A_e ± M_1*f_c/(Z_e1*f_b)) <= η*f_c，無因次化檢核比即 N_e/(A_e*η*f_c) + |M_1|/(Z_e1*f_b) <= 1.0（註：原文僅漏乘外緣 η 於分母或 M1 項；嚴格依原式可對照 (5.37)）。另桁架撓度 (5.30) 式為 δ = Σ(N_e*N*l/(E*A)) + Σ(N*Δ)。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.68 §5.4.5 (p68.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_curved_glulam_fb",
+   "title": "局部彎曲集成材構材之容許撓曲應力（木構造 5.4.9 (5.31)(5.32)式）",
+   "src": "wood100",
+   "clause": "5.4.9",
+   "page": 71,
+   "keywords": "木構造 局部彎曲構材 集成材 曲率半徑 集成元厚度 (5.31) (5.32)",
+   "unit": "kgf/cm2",
+   "output": "f_b_prime",
+   "latex": "f_b' = k f_b,\\qquad k = 1 - 2000\\left(\\frac{t}{\\rho}\\right)^2",
+   "vars": {
+    "f_b": {
+     "desc": "未折減之容許撓曲應力 f_b",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "t": {
+     "desc": "集成材之集成元厚度 t",
+     "unit": "cm",
+     "min": 0
+    },
+    "rho": {
+     "desc": "彎曲中心線之曲率半徑 ρ",
+     "unit": "cm",
+     "min": 0.1
+    }
+   },
+   "defs": [
+    [
+     "k",
+     "1.0 - 2000.0 * ((t / rho) ** 2)"
+    ]
+   ],
+   "expr": "k * f_b",
+   "conditions": [
+    {
+     "expr": "f_b >= 0 and t >= 0 and rho > 0",
+     "msg": "參數須非負且曲率半徑 ρ > 0"
+    },
+    {
+     "expr": "1.0 - 2000.0 * ((t / rho) ** 2) > 0",
+     "msg": "t/ρ 過大導致曲率折減係數 k <= 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "f_b": 145,
+      "t": 2,
+      "rho": 400
+     },
+     "out": 137.75
+    }
+   ],
+   "notes": "木構造 5.4.9(1) (5.31)(5.32)式（p.71-72）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.71-72 §5.4.9(1) (p72.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_curved_beam_radial_stress",
+   "title": "梁深固定彎曲矩形斷面之最大半徑方向應力（木構造 5.4.9 (5.33)式）",
+   "src": "wood100",
+   "clause": "5.4.9",
+   "page": 72,
+   "keywords": "木構造 局部彎曲構材 半徑方向應力 曲率半徑 (5.33)",
+   "unit": "kgf/cm2",
+   "output": "sigma_R",
+   "latex": "\\sigma_R = \\frac{3M}{2\\rho b h}",
+   "vars": {
+    "M": {
+     "desc": "設計彎矩 M",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "rho": {
+     "desc": "彎曲材中心線曲率半徑 ρ",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "b": {
+     "desc": "構材寬度 b",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "h": {
+     "desc": "構材斷面深 h",
+     "unit": "cm",
+     "min": 0.1
+    }
+   },
+   "expr": "3.0 * M / (2.0 * rho * b * h)",
+   "conditions": [
+    {
+     "expr": "M >= 0 and rho > 0 and b > 0 and h > 0",
+     "msg": "M >= 0 且 ρ, b, h > 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "M": 500000,
+      "rho": 400,
+      "b": 15,
+      "h": 50
+     },
+     "out": 2.5
+    }
+   ],
+   "notes": "木構造 5.4.9(2) (5.33)式（p.72）：使彎曲度減少（σ_R 受拉）時應 <= 集成材容許剪應力之 1/3；使彎曲度增大（σ_R 受壓）時應 <= 垂直纖維容許壓縮應力。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.72 §5.4.9(2) (p72.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_tapered_curved_radial_stress",
+   "title": "矩形變斷面彎曲構材之最大半徑方向應力（木構造 5.4.9 (5.34)(5.35)式）",
+   "src": "wood100",
+   "clause": "5.4.9",
+   "page": 72,
+   "keywords": "木構造 變斷面局部彎曲構材 半徑方向應力 係數kρ (5.34) (5.35)",
+   "unit": "kgf/cm2",
+   "output": "sigma_R",
+   "latex": "\\sigma_R = k_\\rho \\frac{6M}{bh^2},\\qquad k_\\rho = A + B\\left(\\frac{h}{\\rho_m}\\right) + C\\left(\\frac{h}{\\rho_m}\\right)^2",
+   "vars": {
+    "M": {
+     "desc": "設計彎矩 M",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "b": {
+     "desc": "構材寬度 b",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "h": {
+     "desc": "中央斷面深 h",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "rho_m": {
+     "desc": "彎曲部分中央之曲率半徑 ρ_m",
+     "unit": "cm",
+     "min": 0.1
+    },
+    "theta_deg": {
+     "desc": "彎曲構材與水平夾角 θ（0°~30°，依表5.4-7 內插 A, B, C）",
+     "unit": "度",
+     "min": 0,
+     "max": 30
+    }
+   },
+   "defs": [
+    [
+     "A",
+     "interp(theta_deg, [0.0, 2.5, 5.0, 7.5, 10.0, 15.0, 20.0, 25.0, 30.0], [0.0, 0.0079, 0.0174, 0.0279, 0.0391, 0.0629, 0.0893, 0.1214, 0.1649])"
+    ],
+    [
+     "B",
+     "interp(theta_deg, [0.0, 2.5, 5.0, 7.5, 10.0, 15.0, 20.0, 25.0, 30.0], [0.25, 0.1747, 0.1251, 0.0937, 0.0754, 0.0619, 0.0608, 0.0605, 0.0603])"
+    ],
+    [
+     "C",
+     "interp(theta_deg, [0.0, 2.5, 5.0, 7.5, 10.0, 15.0, 20.0, 25.0, 30.0], [0.0, 0.1284, 0.1939, 0.2162, 0.2119, 0.1722, 0.1393, 0.1238, 0.1115])"
+    ],
+    [
+     "k_rho",
+     "A + B * (h / rho_m) + C * ((h / rho_m) ** 2)"
+    ]
+   ],
+   "expr": "k_rho * 6.0 * M / (b * (h ** 2))",
+   "conditions": [
+    {
+     "expr": "M >= 0 and b > 0 and h > 0 and rho_m > 0 and 0 <= theta_deg <= 30",
+     "msg": "M >= 0、b,h,ρm > 0 且 0° <= θ <= 30°"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "M": 500000,
+      "b": 15,
+      "h": 60,
+      "rho_m": 400,
+      "theta_deg": 0
+     },
+     "out": 2.0833333333333335
+    },
+    {
+     "in": {
+      "M": 500000,
+      "b": 15,
+      "h": 60,
+      "rho_m": 400,
+      "theta_deg": 10
+     },
+     "out": 3.065430555555556
+    }
+   ],
+   "notes": "木構造 5.4.9(3) (5.34)(5.35)式及表5.4-7（p.72-73）。特別注意：p.72 原文 (5.34) 式分母將 h^2 漏印平方作 bh（見 θ=0° 時 k_ρ = 0.25*(h/ρm)，代入 6M/(bh^2) 方能還原 (5.33) 式 3M/(2ρbh)）；本驗證式依力學因次與 (5.33) 致性採用 6M/(b*h^2) 並於備註明載原文漏印平方。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.72-73 §5.4.9(3) 與表5.4-7（p72.png/p73.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_bending_tension_ratio",
+   "title": "受彎拉構材複合應力檢核比（木構造 5.5.1 (5.36)式）",
+   "src": "wood100",
+   "clause": "5.5.1",
+   "page": 73,
+   "keywords": "木構造 受彎拉構材 複合應力 (5.36)",
+   "unit": "無因次",
+   "output": "ratio",
+   "latex": "\\frac{N}{A_e f_t} + \\frac{M}{Z_e C_f f_b} \\le 1.0",
+   "vars": {
+    "N": {
+     "desc": "設計用軸向拉力 N",
+     "unit": "kgf",
+     "min": 0
+    },
+    "M": {
+     "desc": "設計用彎矩 M",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "A_e": {
+     "desc": "有效斷面積 Ae",
+     "unit": "cm2",
+     "min": 0.1
+    },
+    "Z_e": {
+     "desc": "有效斷面模數 Ze",
+     "unit": "cm3",
+     "min": 0.1
+    },
+    "C_f": {
+     "desc": "尺寸調整係數 Cf（梁深<=30cm 取 1.0）",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "f_t": {
+     "desc": "容許拉應力 ft",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "f_b": {
+     "desc": "容許撓曲應力 fb",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    }
+   },
+   "expr": "N / (A_e * f_t) + abs(M) / (Z_e * C_f * f_b)",
+   "conditions": [
+    {
+     "expr": "N >= 0 and A_e > 0 and Z_e > 0 and C_f > 0 and f_t > 0 and f_b > 0",
+     "msg": "參數須有效且分母項為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result > 1.0",
+     "msg": "複合應力檢核比超過 1.0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N": 2000,
+      "M": 30000,
+      "A_e": 100,
+      "Z_e": 800,
+      "C_f": 1.0,
+      "f_t": 55,
+      "f_b": 95
+     },
+     "out": 0.7583732057416268
+    }
+   ],
+   "notes": "木構造 5.5.1 (5.36)式 N/A_e + (f_t/f_b)*(M/(Z_e*C_f)) <= f_t，無因次檢核比 <= 1.0。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.73 §5.5.1 (p73.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_bending_compression_ratio",
+   "title": "受彎壓構材複合應力檢核比（木構造 5.5.2 (5.37)式）",
+   "src": "wood100",
+   "clause": "5.5.2",
+   "page": 73,
+   "keywords": "木構造 受彎壓構材 複合應力 挫屈折減係數 (5.37)",
+   "unit": "無因次",
+   "output": "ratio",
+   "latex": "\\frac{N}{A_e \\eta f_c} + \\frac{M}{Z_e C_f f_b} \\le 1.0",
+   "vars": {
+    "N": {
+     "desc": "設計用軸向壓力 N",
+     "unit": "kgf",
+     "min": 0
+    },
+    "M": {
+     "desc": "設計用彎矩 M",
+     "unit": "kgf-cm",
+     "min": 0
+    },
+    "A_e": {
+     "desc": "淨斷面積 Ae",
+     "unit": "cm2",
+     "min": 0.1
+    },
+    "Z_e": {
+     "desc": "有效斷面模數 Ze",
+     "unit": "cm3",
+     "min": 0.1
+    },
+    "C_f": {
+     "desc": "尺寸調整係數 Cf（梁深<=30cm 取 1.0）",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "eta": {
+     "desc": "挫屈折減係數 η（依 5.3.2(2)）",
+     "unit": "無因次",
+     "min": 0.01,
+     "max": 1.0
+    },
+    "f_c": {
+     "desc": "容許壓應力 fc",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    },
+    "f_b": {
+     "desc": "容許撓曲應力 fb",
+     "unit": "kgf/cm2",
+     "min": 0.1
+    }
+   },
+   "expr": "N / (A_e * eta * f_c) + abs(M) / (Z_e * C_f * f_b)",
+   "conditions": [
+    {
+     "expr": "N >= 0 and A_e > 0 and Z_e > 0 and C_f > 0 and 0 < eta <= 1.0 and f_c > 0 and f_b > 0",
+     "msg": "參數須有效且分母項為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result > 1.0",
+     "msg": "複合應力檢核比超過 1.0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N": 3000,
+      "M": 30000,
+      "A_e": 100,
+      "Z_e": 800,
+      "C_f": 1.0,
+      "eta": 0.85,
+      "f_c": 75,
+      "f_b": 95
+     },
+     "out": 0.8653250773993808
+    }
+   ],
+   "notes": "木構造 5.5.2 (5.37)式 N/A_e + (η*f_c/f_b)*(M/(Z_e*C_f)) <= η*f_c，無因次檢核比 <= 1.0。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 wood100 PDF p.73 §5.5.2 (p73.png)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  }
+ ],
+ "tables": [
+  {
+   "id": "wood100_notched_col_buckling_ratio",
+   "title": "含切口受壓構材之挫屈載重比（木構造 5.3.2 解說 表5.3-1）",
+   "src": "wood100",
+   "clause": "5.3.2",
+   "page": 55,
+   "keywords": "木構造 受壓構材 切口 挫屈載重比 表5.3-1",
+   "kind": "lookup",
+   "unit": "無因次",
+   "columns": [
+    "切口欠損率",
+    "雙側切口_垂直年輪",
+    "雙側切口_平行年輪",
+    "單側切口_垂直年輪",
+    "單側切口_平行年輪"
+   ],
+   "rows": [
+    {
+     "key": "0",
+     "values": {
+      "切口欠損率": "0",
+      "雙側切口_垂直年輪": "0.57",
+      "雙側切口_平行年輪": "0.46",
+      "單側切口_垂直年輪": "0.57",
+      "單側切口_平行年輪": "0.46"
+     }
+    },
+    {
+     "key": "1/4",
+     "values": {
+      "切口欠損率": "1/4",
+      "雙側切口_垂直年輪": "1.28 (0.53)",
+      "雙側切口_平行年輪": "1.02 (0.42)",
+      "單側切口_垂直年輪": "1.03 (0.43)",
+      "單側切口_平行年輪": "1.21 (0.50)"
+     }
+    },
+    {
+     "key": "1/3",
+     "values": {
+      "切口欠損率": "1/3",
+      "雙側切口_垂直年輪": "1.58 (0.47)",
+      "雙側切口_平行年輪": "1.66 (0.49)",
+      "單側切口_垂直年輪": "1.27 (0.38)",
+      "單側切口_平行年輪": "1.28 (0.38)"
+     }
+    },
+    {
+     "key": "2/5",
+     "values": {
+      "切口欠損率": "2/5",
+      "雙側切口_垂直年輪": "2.07 (0.45)",
+      "雙側切口_平行年輪": "2.32 (0.50)",
+      "單側切口_垂直年輪": "1.43 (0.31)",
+      "單側切口_平行年輪": "1.54 (0.33)"
+     }
+    }
+   ],
+   "notes": "表5.3-1（試體 3cm×3cm×80cm，單側挫屈變形 λ=100）：() 內為實驗挫屈載重與無切口歐勒挫屈載重之比值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格目視對照 wood100 PDF p.55 表5.3-1（p55.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_buckling_length_coeff",
+   "title": "柱端支持狀況與挫屈長度（木構造 5.3.2 解說 表5.3-2）",
+   "src": "wood100",
+   "clause": "5.3.2",
+   "page": 56,
+   "keywords": "木構造 挫屈長度 柱端支持 表5.3-2",
+   "kind": "lookup",
+   "unit": "無因次",
+   "columns": [
+    "支承狀況",
+    "挫屈長lk",
+    "係數c"
+   ],
+   "rows": [
+    {
+     "key": "兩端鉸支",
+     "values": {
+      "支承狀況": "兩端鉸支（無側移）",
+      "挫屈長lk": "l",
+      "係數c": "1"
+     }
+    },
+    {
+     "key": "兩端固定",
+     "values": {
+      "支承狀況": "兩端固定（無側移）",
+      "挫屈長lk": "0.5l",
+      "係數c": "4"
+     }
+    },
+    {
+     "key": "一端固定一端鉸支",
+     "values": {
+      "支承狀況": "一端固定、一端鉸支（無側移）",
+      "挫屈長lk": "0.7l",
+      "係數c": "1/2"
+     }
+    },
+    {
+     "key": "一端固定一端自由",
+     "values": {
+      "支承狀況": "一端固定、一端自由（懸臂）",
+      "挫屈長lk": "2l",
+      "係數c": "1/4"
+     }
+    }
+   ],
+   "notes": "表5.3-2：lk = l / sqrt(c)（註：一端固定一端鉸支實務歐勒 c 約 2，表中原印為 1/2，依圖面 lk=0.7l 為準）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格目視對照 wood100 PDF p.56 表5.3-2（p56.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_knee_brace_col_q",
+   "title": "含隅撐柱構材之挫屈長度係數 q 與角變率 α（木構造 5.3.2 解說 表5.3-3、表5.3-4）",
+   "src": "wood100",
+   "clause": "5.3.2",
+   "page": 56,
+   "keywords": "木構造 隅撐 挫屈長度 q值 剛比 角變率 表5.3-3 表5.3-4",
+   "kind": "lookup",
+   "unit": "無因次",
+   "columns": [
+    "柱頭側移條件",
+    "k=0",
+    "k=0.5",
+    "k=1.0",
+    "k=1.5",
+    "k=2.0",
+    "k=2.5",
+    "k=3.0",
+    "k=4.0",
+    "k=∞"
+   ],
+   "rows": [
+    {
+     "key": "I-柱頭可水平位移",
+     "values": {
+      "柱頭側移條件": "I 柱頭可水平位移",
+      "k=0": "∞",
+      "k=0.5": 2.64,
+      "k=1.0": 2.33,
+      "k=1.5": 2.22,
+      "k=2.0": 2.17,
+      "k=2.5": 2.13,
+      "k=3.0": 2.11,
+      "k=4.0": 2.08,
+      "k=∞": 2.0
+     }
+    },
+    {
+     "key": "II-柱頭無水平位移",
+     "values": {
+      "柱頭側移條件": "II 柱頭無水平位移",
+      "k=0": "1.00",
+      "k=0.5": 0.92,
+      "k=1.0": 0.88,
+      "k=1.5": 0.84,
+      "k=2.0": 0.82,
+      "k=2.5": 0.8,
+      "k=3.0": 0.79,
+      "k=4.0": 0.78,
+      "k=∞": 0.7
+     }
+    }
+   ],
+   "notes": "表5.3-3：lk = q*(h - h'/2)，剛比 k = K_bc / K_c；K_c = I_c/h，K_bc = s*c*K_b，s = 1/(1+4*E_b*K_b*α*c)。表5.3-4 角變率 α (1/kgf·cm)：平頭式接合 (2.5~1.7)×10^-7*(h'/50cm)；雙夾式接合 (2.9~2.0)×10^-7*(h'/50cm)。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格目視對照 wood100 PDF p.56-57 表5.3-3、表5.3-4（p56.png/p57.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_composite_col_xi_3pt",
+   "title": "複合受壓構材墊塊分隔之斷面慣性矩有效率 ξ（木構造 5.3.3 表5.3-5、表5.3-6）",
+   "src": "wood100",
+   "clause": "5.3.3",
+   "page": 58,
+   "keywords": "木構造 複合受壓構材 有效率 墊塊 表5.3-5 表5.3-6",
+   "kind": "lookup",
+   "unit": "無因次",
+   "columns": [
+    "墊塊配置",
+    "剛比k",
+    "α=0",
+    "α=1",
+    "α=2",
+    "α=3"
+   ],
+   "rows": [
+    {
+     "key": "兩端或兩端及中央-k=0.5",
+     "values": {
+      "墊塊配置": "兩端或兩端及中央(表5.3-5, α<=1)",
+      "剛比k": "0.5",
+      "α=0": 1.5,
+      "α=1": 1.7,
+      "α=2": "-",
+      "α=3": "-"
+     }
+    },
+    {
+     "key": "兩端或兩端及中央-k=1",
+     "values": {
+      "墊塊配置": "兩端或兩端及中央(表5.3-5, α<=1)",
+      "剛比k": "1",
+      "α=0": 1.8,
+      "α=1": 2.2,
+      "α=2": "-",
+      "α=3": "-"
+     }
+    },
+    {
+     "key": "兩端或兩端及中央-k=2",
+     "values": {
+      "墊塊配置": "兩端或兩端及中央(表5.3-5, α<=1)",
+      "剛比k": "2",
+      "α=0": 2.0,
+      "α=1": 2.6,
+      "α=2": "-",
+      "α=3": "-"
+     }
+    },
+    {
+     "key": "兩端或兩端及中央-k=3",
+     "values": {
+      "墊塊配置": "兩端或兩端及中央(表5.3-5, α<=1)",
+      "剛比k": "3",
+      "α=0": 2.1,
+      "α=1": 2.8,
+      "α=2": "-",
+      "α=3": "-"
+     }
+    },
+    {
+     "key": "兩端或兩端及中央-k=5",
+     "values": {
+      "墊塊配置": "兩端或兩端及中央(表5.3-5, α<=1)",
+      "剛比k": "5",
+      "α=0": 2.2,
+      "α=1": 3.1,
+      "α=2": "-",
+      "α=3": "-"
+     }
+    },
+    {
+     "key": "兩端或兩端及中央-k>=10",
+     "values": {
+      "墊塊配置": "兩端或兩端及中央(表5.3-5, α<=1)",
+      "剛比k": "10以上",
+      "α=0": 2.3,
+      "α=1": 3.4,
+      "α=2": "-",
+      "α=3": "-"
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=0.5",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "0.5",
+      "α=0": 1.7,
+      "α=1": 2.2,
+      "α=2": 2.4,
+      "α=3": 2.5
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=1",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "1",
+      "α=0": 2.0,
+      "α=1": 3.0,
+      "α=2": 3.3,
+      "α=3": 3.5
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=2",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "2",
+      "α=0": 2.4,
+      "α=1": 3.9,
+      "α=2": 4.7,
+      "α=3": 5.0
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=3",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "3",
+      "α=0": 2.6,
+      "α=1": 4.5,
+      "α=2": 5.7,
+      "α=3": 6.3
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=5",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "5",
+      "α=0": 2.8,
+      "α=1": 5.2,
+      "α=2": 6.8,
+      "α=3": 7.8
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=10",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "10",
+      "α=0": 3.0,
+      "α=1": 6.0,
+      "α=2": 8.1,
+      "α=3": 9.8
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=20",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "20",
+      "α=0": 3.1,
+      "α=1": 6.7,
+      "α=2": 9.2,
+      "α=3": 11.4
+     }
+    },
+    {
+     "key": "兩端及三分點以上-k=30",
+     "values": {
+      "墊塊配置": "兩端及其間三分點以上(表5.3-6)",
+      "剛比k": "30",
+      "α=0": 3.1,
+      "α=1": 7.0,
+      "α=2": 9.7,
+      "α=3": 12.3
+     }
+    }
+   ],
+   "notes": "彙整表5.3-5 及表5.3-6（p.58）：主材數三根以上且兩端及三分點以上由墊塊分隔時取表5.3-6 值之 1.2 倍。表5.3-7 α_bar={0:1.00, 1:1.65, 2:2.25, 3:2.80}；表5.3-8 α_g={0:1.00, 1:2.00, 2:2.80, 3:3.60}。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格目視對照 wood100 PDF p.58-59 表5.3-5~5.3-8（p58.png/p59.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_beam_stiffness_limits",
+   "title": "受彎構材之剛性與撓度限制（木構造 5.4.2 表5.4-1、表5.4-2）",
+   "src": "wood100",
+   "clause": "5.4.2",
+   "page": 61,
+   "keywords": "木構造 受彎構材 剛性 撓度限制 IBC2000 表5.4-1 表5.4-2",
+   "kind": "lookup",
+   "unit": "跨度比",
+   "columns": [
+    "依據表別",
+    "構材種類",
+    "荷載條件",
+    "撓度限制"
+   ],
+   "rows": [
+    {
+     "key": "表5.4-1-梁一般",
+     "values": {
+      "依據表別": "表5.4-1",
+      "構材種類": "梁(一般狀況)",
+      "荷載條件": "一般載重或短期雪載重",
+      "撓度限制": "初期變形 <= l/300 且 <= 2cm"
+     }
+    },
+    {
+     "key": "表5.4-1-桁條類",
+     "values": {
+      "依據表別": "表5.4-1",
+      "構材種類": "桁條類(一般狀況)",
+      "荷載條件": "一般載重或短期雪載重",
+      "撓度限制": "初期變形 <= l/200"
+     }
+    },
+    {
+     "key": "表5.4-1-長期全載重梁",
+     "values": {
+      "依據表別": "表5.4-1",
+      "構材種類": "長期承載全載重之梁",
+      "荷載條件": "潛變後",
+      "撓度限制": "潛變後最大撓度 <= l/300"
+     }
+    },
+    {
+     "key": "表5.4-2-屋頂石膏天花板",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "屋頂構件(支撐石膏材質天花板)",
+      "荷載條件": "L / S或W / D+L",
+      "撓度限制": "l/360 / l/360 / l/240"
+     }
+    },
+    {
+     "key": "表5.4-2-屋頂非石膏天花板",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "屋頂構件(支撐非石膏天花板)",
+      "荷載條件": "L / S或W / D+L",
+      "撓度限制": "l/240 / l/240 / l/180"
+     }
+    },
+    {
+     "key": "表5.4-2-屋頂無天花板",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "屋頂構件(無天花板)",
+      "荷載條件": "L / S或W / D+L",
+      "撓度限制": "l/180 / l/180 / l/120"
+     }
+    },
+    {
+     "key": "表5.4-2-樓板構件",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "樓板構件",
+      "荷載條件": "L / D+L",
+      "撓度限制": "l/360 / l/240"
+     }
+    },
+    {
+     "key": "表5.4-2-外牆隔間脆性",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "外牆及內部隔間(有脆性飾面)",
+      "荷載條件": "S或W",
+      "撓度限制": "l/240"
+     }
+    },
+    {
+     "key": "表5.4-2-外牆隔間無脆性",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "外牆及內部隔間(無脆性飾面)",
+      "荷載條件": "S或W",
+      "撓度限制": "l/120"
+     }
+    },
+    {
+     "key": "表5.4-2-農舍",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "農舍(農業建築)",
+      "荷載條件": "D+L",
+      "撓度限制": "l/180"
+     }
+    },
+    {
+     "key": "表5.4-2-溫室",
+     "values": {
+      "依據表別": "表5.4-2(IBC)",
+      "構材種類": "溫室(花房)",
+      "荷載條件": "D+L",
+      "撓度限制": "l/120"
+     }
+    }
+   ],
+   "notes": "表5.4-1（p.61）與表5.4-2（p.62）：含水率 <16% 且乾燥環境下，木結構構件得用 L+0.5D 取代 L+D。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格目視對照 wood100 PDF p.61-62 表5.4-1、表5.4-2（p61.png/p62.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  },
+  {
+   "id": "wood100_beam_lateral_bracing",
+   "title": "受彎構材側撐材之設置與有效橫向挫屈長度（木構造 5.4.3 表5.4-4、表5.4-6）",
+   "src": "wood100",
+   "clause": "5.4.3",
+   "page": 64,
+   "keywords": "木構造 側撐材 厚寬比 有效橫向挫屈長度 表5.4-4 表5.4-6",
+   "kind": "lookup",
+   "unit": "無因次 / 倍數",
+   "columns": [
+    "表別",
+    "條件",
+    "規定或係數"
+   ],
+   "rows": [
+    {
+     "key": "表5.4-4-h/b<2.5",
+     "values": {
+      "表別": "表5.4-4(側撐材)",
+      "條件": "構材厚度/寬度 未滿 2.5",
+      "規定或係數": "不需要"
+     }
+    },
+    {
+     "key": "表5.4-4-2.5~4.0",
+     "values": {
+      "表別": "表5.4-4(側撐材)",
+      "條件": "構材厚度/寬度 2.5 至 4.0",
+      "規定或係數": "束制兩端支承之側向移動及迴轉"
+     }
+    },
+    {
+     "key": "表5.4-4-4.0~5.0",
+     "values": {
+      "表別": "表5.4-4(側撐材)",
+      "條件": "構材厚度/寬度 4.0 至 5.0",
+      "規定或係數": "在支點間至少一處設置椽條或鋼棒之側撐材"
+     }
+    },
+    {
+     "key": "表5.4-4-5.0~6.5",
+     "values": {
+      "表別": "表5.4-4(側撐材)",
+      "條件": "構材厚度/寬度 5.0 至 6.5",
+      "規定或係數": "束制兩端支承側移及迴轉，且受壓側以地板材或地板擱柵材聯結"
+     }
+    },
+    {
+     "key": "表5.4-4-6.5~7.5",
+     "values": {
+      "表別": "表5.4-4(側撐材)",
+      "條件": "構材厚度/寬度 6.5 至 7.5",
+      "規定或係數": "在支點間設置繫材或側撐材，間距不得大於梁深之 8 倍"
+     }
+    },
+    {
+     "key": "表5.4-4-7.5~9.0",
+     "values": {
+      "表別": "表5.4-4(側撐材)",
+      "條件": "構材厚度/寬度 7.5 至 9.0",
+      "規定或係數": "束制兩端支承側移及迴轉，且受壓側及受拉側以板或地板擱柵材聯結"
+     }
+    },
+    {
+     "key": "表5.4-6-簡支中央集中",
+     "values": {
+      "表別": "表5.4-6(有效橫向挫屈長le)",
+      "條件": "簡支梁・中央集中載重（lo=側撐材間距）",
+      "規定或係數": "1.6 lo"
+     }
+    },
+    {
+     "key": "表5.4-6-簡支兩端等彎矩",
+     "values": {
+      "表別": "表5.4-6(有效橫向挫屈長le)",
+      "條件": "簡支梁・兩端等彎矩（lo=側撐材間距）",
+      "規定或係數": "1.85 lo"
+     }
+    },
+    {
+     "key": "表5.4-6-簡支等均布",
+     "values": {
+      "表別": "表5.4-6(有效橫向挫屈長le)",
+      "條件": "簡支梁・等均布（lo=側撐材間距）",
+      "規定或係數": "1.9 lo"
+     }
+    },
+    {
+     "key": "表5.4-6-簡支任意",
+     "values": {
+      "表別": "表5.4-6(有效橫向挫屈長le)",
+      "條件": "簡支梁・任意載重（lo=側撐材間距）",
+      "規定或係數": "1.9 lo"
+     }
+    },
+    {
+     "key": "表5.4-6-懸臂等均布",
+     "values": {
+      "表別": "表5.4-6(有效橫向挫屈長le)",
+      "條件": "懸臂梁・等均布（lo=懸臂段長度）",
+      "規定或係數": "1.25 lo"
+     }
+    },
+    {
+     "key": "表5.4-6-懸臂集中自由端",
+     "values": {
+      "表別": "表5.4-6(有效橫向挫屈長le)",
+      "條件": "懸臂梁・集中自由端（lo=懸臂段長度）",
+      "規定或係數": "1.7 lo"
+     }
+    },
+    {
+     "key": "表5.4-6-懸臂任意",
+     "values": {
+      "表別": "表5.4-6(有效橫向挫屈長le)",
+      "條件": "懸臂梁・任意載重（lo=懸臂段長度）",
+      "規定或係數": "1.9 lo"
+     }
+    }
+   ],
+   "notes": "表5.4-4（p.64）及表5.4-6（p.65）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐格目視對照 wood100 PDF p.64-65 表5.4-4、表5.4-6（p64.png/p65.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "wood100_p2_members.json"
+  }
+ ]
+}

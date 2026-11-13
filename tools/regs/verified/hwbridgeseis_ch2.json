@@ -1,0 +1,1116 @@
+{
+ "formulas": [
+  {
+   "id": "hwbridgeseis_vs30",
+   "title": "地表面下 30 公尺土層平均剪力波速 VS30（公路橋梁耐震 2.2 (2-1)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.2",
+   "page": 29,
+   "keywords": "公路橋梁耐震 地盤分類 VS30 平均剪力波速 土層厚度 (2-1)",
+   "unit": "m/s",
+   "output": "VS30",
+   "latex": "V_{S30} = \\frac{\\sum_{i=1}^{n} d_i}{\\sum_{i=1}^{n} \\frac{d_i}{V_{si}}}",
+   "vars": {
+    "sum_d": {
+     "desc": "地表面下 30m 內各土層厚度之和 Σdi（輸入 30m 或實際鑽探深度）",
+     "unit": "m",
+     "min": 0.1
+    },
+    "sum_d_over_v": {
+     "desc": "各土層 Σ(di/Vsi)（每層厚度除以該層平均剪力波速後累加）",
+     "unit": "s",
+     "min": 0.0001
+    }
+   },
+   "expr": "sum_d / sum_d_over_v",
+   "conditions": [
+    {
+     "expr": "sum_d > 0 and sum_d_over_v > 0",
+     "msg": "厚度和與 Σ(di/Vsi) 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "sum_d": 30,
+      "sum_d_over_v": 0.15
+     },
+     "out": 200.0
+    }
+   ],
+   "notes": "公路橋梁耐震設計規範 2.2 (2-1)式：VS30 ≥ 270 m/s 為第一類地盤；180 ≤ VS30 < 270 為第二類；VS30 < 180 為第三類（臺北盆地區域另有規定，依表2-5(a) 分區）。本式以 Σdi 與 Σ(di/Vsi) 為輸入，逐層 Vsi 可由 (2-2)、(2-3) 式估算。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.29 §2.2 (2-1)式（排序文字層 + p30 影像核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_vsi_clay",
+   "title": "黏性土層平均剪力波速經驗式（公路橋梁耐震 2.2 (2-2)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.2",
+   "page": 29,
+   "keywords": "公路橋梁耐震 剪力波速 N值 黏性土層 (2-2)",
+   "unit": "m/s",
+   "output": "Vsi",
+   "latex": "V_{si} = 100\\,N_i^{1/3},\\quad 1 \\le N_i \\le 25",
+   "vars": {
+    "N_i": {
+     "desc": "第 i 層黏性土層之平均標準貫入 N 值",
+     "unit": "擊",
+     "min": 1,
+     "max": 25
+    }
+   },
+   "expr": "100.0 * (N_i ** (1.0 / 3.0))",
+   "conditions": [
+    {
+     "expr": "1 <= N_i <= 25",
+     "msg": "(2-2) 式適用 1 ≦ Ni ≦ 25"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N_i": 8
+     },
+     "out": 200.0
+    }
+   ],
+   "notes": "公路橋梁耐震 2.2 (2-2)式：黏性土層剪力波速經驗式；亦可採用實際量測值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.29 §2.2 (2-2)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_vsi_sand",
+   "title": "砂質土層平均剪力波速經驗式（公路橋梁耐震 2.2 (2-3)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.2",
+   "page": 29,
+   "keywords": "公路橋梁耐震 剪力波速 N值 砂質土層 (2-3)",
+   "unit": "m/s",
+   "output": "Vsi",
+   "latex": "V_{si} = 80\\,N_i^{1/3},\\quad 1 \\le N_i \\le 50",
+   "vars": {
+    "N_i": {
+     "desc": "第 i 層砂質土層之平均標準貫入 N 值",
+     "unit": "擊",
+     "min": 1,
+     "max": 50
+    }
+   },
+   "expr": "80.0 * (N_i ** (1.0 / 3.0))",
+   "conditions": [
+    {
+     "expr": "1 <= N_i <= 50",
+     "msg": "(2-3) 式適用 1 ≦ Ni ≦ 50"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "N_i": 27
+     },
+     "out": 240.0
+    }
+   ],
+   "notes": "公路橋梁耐震 2.2 (2-3)式：砂質土層剪力波速經驗式。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.29 §2.2 (2-3)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level1_T0",
+   "title": "等級 I 地震工址譜加速度係數與 T0（公路橋梁耐震 2.3.1 (2-7)(2-8)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.1",
+   "page": 31,
+   "keywords": "公路橋梁耐震 等級I 譜加速度係數 Fa Fv T0 一般工址 (2-7) (2-8)",
+   "unit": "秒",
+   "output": "T0_I",
+   "latex": "S_{I,S}=F_a S_S^{I}=F_a\\frac{S_S^{II}}{3.25},\\quad S_{I,1}=F_v S_1^{I}=F_v\\frac{S_1^{II}}{3.25},\\quad T_0^{I}=\\frac{S_{I,1}}{S_{I,S}}",
+   "vars": {
+    "Fa": {
+     "desc": "反應譜等加速度段之工址地盤放大係數（表2-3(a)）",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "Fv": {
+     "desc": "反應譜等速度段之工址地盤放大係數（表2-3(b)）",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_SII": {
+     "desc": "工址堅實地盤短週期之等級II 地震水平譜加速度係數（表2-4）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "S_1II": {
+     "desc": "工址堅實地盤一秒週期之等級II 地震水平譜加速度係數（表2-4）",
+     "unit": "無因次",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "S_IS",
+     "Fa * S_SII / 3.25"
+    ],
+    [
+     "S_I1",
+     "Fv * S_1II / 3.25"
+    ]
+   ],
+   "expr": "S_I1 / S_IS",
+   "conditions": [
+    {
+     "expr": "Fa > 0 and Fv > 0 and S_SII > 0 and S_1II >= 0",
+     "msg": "Fa、Fv 須為正且 S_SII > 0（S_IS 不可為 0）"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fa": 1.2,
+      "Fv": 1.5,
+      "S_SII": 0.6,
+      "S_1II": 0.35
+     },
+     "out": 0.7291666666666666
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.1 (2-7a)~(2-8b)式：一般工址及活動斷層近域適用；輸出 T0^I，defs 內同時算得 S_I,S（0.22154）與 S_I,1（0.16154）。臺北盆地區域改用 S_I,S = 0.6/3.25 且 T0^I = 1.6／1.3／1.05 秒（台北一／二／三區，見 (2-9a)(2-9b)）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.31 §2.3.1 (2-7)(2-8)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level1_Sa",
+   "title": "等級 I 地震水平譜加速度係數 Sa,I（公路橋梁耐震 2.3.1 (2-5)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.1",
+   "page": 30,
+   "keywords": "公路橋梁耐震 等級I 譜加速度係數 分段 反應譜 (2-5)",
+   "unit": "無因次",
+   "output": "Sa_I",
+   "latex": "S_{a,I}=\\begin{cases}S_{I,S}(0.4+3T/T_0^{I}) & T \\le 0.2T_0^{I}\\\\ S_{I,S} & 0.2T_0^{I}\\le T \\le T_0^{I}\\\\ S_{I,1}/T & T_0^{I}\\le T\\end{cases}",
+   "vars": {
+    "S_IS": {
+     "desc": "工址短週期之等級I 地震水平譜加速度係數 S_I,S",
+     "unit": "無因次",
+     "min": 0
+    },
+    "S_I1": {
+     "desc": "工址一秒週期之等級I 地震水平譜加速度係數 S_I,1",
+     "unit": "無因次",
+     "min": 0
+    },
+    "T0_I": {
+     "desc": "等級I 地震譜加速度係數短週期與中長週期分界 T0^I",
+     "unit": "秒",
+     "min": 0.01
+    },
+    "T": {
+     "desc": "橋梁在所考慮方向之基本振動週期 T",
+     "unit": "秒",
+     "min": 0.001
+    }
+   },
+   "expr": "S_IS * (0.4 + 3.0 * T / T0_I) if T <= 0.2 * T0_I else (S_IS if T <= T0_I else S_I1 / T)",
+   "conditions": [
+    {
+     "expr": "S_IS >= 0 and S_I1 >= 0 and T0_I > 0 and T > 0",
+     "msg": "S_IS、S_I1 須非負，T0 與 T 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "S_IS": 0.22153846153846155,
+      "S_I1": 0.16153846153846155,
+      "T0_I": 0.7291666666666666,
+      "T": 0.5
+     },
+     "out": 0.22153846153846155
+    },
+    {
+     "in": {
+      "S_IS": 0.22153846153846155,
+      "S_I1": 0.16153846153846155,
+      "T0_I": 0.7291666666666666,
+      "T": 1.0
+     },
+     "out": 0.16153846153846155
+    },
+    {
+     "in": {
+      "S_IS": 0.22153846153846155,
+      "S_I1": 0.16153846153846155,
+      "T0_I": 0.7291666666666666,
+      "T": 0.05
+     },
+     "out": 0.13418901098901098
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.1 (2-5)式（一般工址及活動斷層近域）；臺北盆地區域用之 (2-9c) 式形式相同，僅 S_I,S 與 T0^I 改依 (2-9a)(2-9b) 取值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.30 §2.3.1 (2-5)式（hb_p30.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_rayleigh_period",
+   "title": "橋梁基本振動週期（Rayleigh 法）（公路橋梁耐震 2.3.1 (2-6)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.1",
+   "page": 30,
+   "keywords": "公路橋梁耐震 基本振動週期 Rayleigh beta zeta (2-6)",
+   "unit": "秒",
+   "output": "T",
+   "latex": "T = 2\\pi\\sqrt{\\frac{\\zeta}{\\beta g}},\\quad \\beta=\\int w(x)u(x)dx,\\; \\zeta=\\int w(x)u^2(x)dx",
+   "vars": {
+    "beta": {
+     "desc": "β = ∫w(x)u(x)dx（w 為單位靜載重、u 為計算方向變位）",
+     "unit": "kgf·m",
+     "min": 0.0001
+    },
+    "zeta": {
+     "desc": "ζ = ∫w(x)u²(x)dx",
+     "unit": "kgf·m2",
+     "min": 0.0001
+    },
+    "g": {
+     "desc": "重力加速度 g",
+     "unit": "m/s2",
+     "min": 9.8,
+     "default": 9.81
+    }
+   },
+   "expr": "2.0 * pi * sqrt(zeta / (beta * g))",
+   "conditions": [
+    {
+     "expr": "beta > 0 and zeta > 0 and g > 0",
+     "msg": "β、ζ、g 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "beta": 1000,
+      "zeta": 800,
+      "g": 9.81
+     },
+     "out": 1.7942805861869815
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.1 (2-6)式：w(x) 為沿計算方向施加在橋梁結構之單位靜載重，u(x) 為橋梁振動單元沿計算方向之變位。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.30 §2.3.1 (2-6)式（hb_p30.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level1_force",
+   "title": "等級 I 地震水平設計地震力（公路橋梁耐震 2.3.1 (2-4)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.1",
+   "page": 30,
+   "keywords": "公路橋梁耐震 等級I 水平設計地震力 用途係數 起始降伏放大倍數 (2-4)",
+   "unit": "kgf",
+   "output": "V_I",
+   "latex": "V_I = \\frac{I\\,S_{a,I}}{\\alpha_y}W \\ge \\frac{0.4\\,I\\,S_{I,S}}{\\alpha_y}W",
+   "vars": {
+    "I": {
+     "desc": "用途係數 I（表2-1）",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_aI": {
+     "desc": "等級I 地震水平譜加速度係數 Sa,I（依基本振動週期 T 計算）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "S_IS": {
+     "desc": "工址短週期之等級I 地震水平譜加速度係數 S_I,S（下限用）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "alpha_y": {
+     "desc": "起始降伏地震力放大倍數 αy（表2-2）",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "W": {
+     "desc": "橋梁振動單元靜載重（含上部結構靜載重及該單元所有橋墩重量）",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "V_calc",
+     "I * S_aI * W / alpha_y"
+    ],
+    [
+     "V_min",
+     "0.4 * I * S_IS * W / alpha_y"
+    ]
+   ],
+   "expr": "max(V_calc, V_min)",
+   "conditions": [
+    {
+     "expr": "I > 0 and S_aI >= 0 and S_IS >= 0 and alpha_y > 0 and W >= 0",
+     "msg": "I、αy 須為正，其餘非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "I": 1.2,
+      "S_aI": 0.22153846153846155,
+      "S_IS": 0.22153846153846155,
+      "alpha_y": 1.2,
+      "W": 10000
+     },
+     "out": 2215.3846153846152
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.1 (2-4)式：設計總橫力 V 取 (2-4) 式 V_I、(2-10) 式 V_II 與 (2-17) 式 V_III 之大值（2.3 節）。本式已內建不得小於 0.4·I·S_I,S/αy·W 之下限。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.30 §2.3.1 (2-4)式（hb_p30.png）",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_Ra",
+   "title": "結構系統容許韌性容量 Ra（公路橋梁耐震 2.3.2 (2-14d)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.2",
+   "page": 33,
+   "keywords": "公路橋梁耐震 容許韌性容量 Ra 韌性容量R 一般工址 台北盆地 (2-14d) (2-16d)",
+   "unit": "無因次",
+   "output": "Ra",
+   "latex": "R_a = 1 + \\frac{R-1}{1.5}\\;(一般工址、活動斷層近域);\\qquad R_a = 1 + \\frac{R-1}{2.0}\\;(臺北盆地)",
+   "vars": {
+    "R": {
+     "desc": "結構系統韌性容量 R（表2-6）",
+     "unit": "無因次",
+     "min": 1
+    },
+    "is_taipei": {
+     "desc": "是否屬臺北盆地區域：0=一般工址或活動斷層近域，1=臺北盆地",
+     "unit": "型態",
+     "min": 0,
+     "max": 1
+    }
+   },
+   "expr": "1.0 + (R - 1.0) / (2.0 if is_taipei > 0.5 else 1.5)",
+   "conditions": [
+    {
+     "expr": "R >= 1 and 0 <= is_taipei <= 1",
+     "msg": "R 須 ≥ 1，is_taipei 須為 0 或 1"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "R": 3.0,
+      "is_taipei": 0
+     },
+     "out": 2.3333333333333335
+    },
+    {
+     "in": {
+      "R": 3.0,
+      "is_taipei": 1
+     },
+     "out": 2.0
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.2 (2-14d)（一般工址）、(2-15d)（活動斷層近域，同 1.5）與 (2-16d)（臺北盆地，除以 2.0）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.33-34 §2.3.2 (2-14d)(2-16d)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level2_T0",
+   "title": "等級 II 地震工址譜加速度係數與 T0（公路橋梁耐震 2.3.2 (2-14)(2-15)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.2",
+   "page": 33,
+   "keywords": "公路橋梁耐震 等級II 譜加速度係數 近斷層 NA NV T0 (2-14) (2-15)",
+   "unit": "秒",
+   "output": "T0_II",
+   "latex": "S_{II,S}=F_a(0.8N_A),\\; S_{II,1}=F_v(0.45N_V),\\; T_0^{II}=S_{II,1}/S_{II,S}\\quad(近斷層)",
+   "vars": {
+    "Fa": {
+     "desc": "反應譜等加速度段之工址地盤放大係數",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "Fv": {
+     "desc": "反應譜等速度段之工址地盤放大係數",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_SII": {
+     "desc": "工址堅實地盤短週期之等級II 譜加速度係數（近斷層時以 0.8NA 取代）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "S_1II": {
+     "desc": "工址堅實地盤一秒週期之等級II 譜加速度係數（近斷層時以 0.45NV 取代）",
+     "unit": "無因次",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "S_IIS",
+     "Fa * S_SII"
+    ],
+    [
+     "S_II1",
+     "Fv * S_1II"
+    ]
+   ],
+   "expr": "S_II1 / S_IIS",
+   "conditions": [
+    {
+     "expr": "Fa > 0 and Fv > 0 and S_SII > 0 and S_1II >= 0",
+     "msg": "Fa、Fv 須為正且 S_SII > 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fa": 1.2,
+      "Fv": 1.5,
+      "S_SII": 0.6,
+      "S_1II": 0.35
+     },
+     "out": 0.7291666666666666
+    },
+    {
+     "in": {
+      "Fa": 1.2,
+      "Fv": 1.5,
+      "S_SII": 0.48,
+      "S_1II": 0.1575
+     },
+     "out": 0.41015625
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.2 (2-14a)~(2-14c)：一般工址 S_II,S = Fa·S_SII、S_II,1 = Fv·S_1II；活動斷層近域依 (2-15a)(2-15b) 將 S_SII 換為 0.8NA、S_1II 換為 0.45NV（第二組測試即 0.8×0.6=0.48、0.45×0.35=0.1575）。臺北盆地 S_II,S = 0.6、T0^II = 1.6／1.3／1.05 秒（(2-16a)(2-16b)）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.33-34 §2.3.2 (2-14)~(2-16)",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level2_Sa",
+   "title": "等級 II 地震水平譜加速度係數 Sa,II（公路橋梁耐震 2.3.2 (2-13)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.2",
+   "page": 33,
+   "keywords": "公路橋梁耐震 等級II 譜加速度係數 分段 (2-13)",
+   "unit": "無因次",
+   "output": "Sa_II",
+   "latex": "S_{a,II}=\\begin{cases}S_{II,S}(0.4+3T/T_0^{II}) & T \\le 0.2T_0^{II}\\\\ S_{II,S} & 0.2T_0^{II}\\le T \\le T_0^{II}\\\\ S_{II,1}/T & T_0^{II}\\le T\\end{cases}",
+   "vars": {
+    "S_IIS": {
+     "desc": "工址短週期之等級II 地震水平譜加速度係數 S_II,S",
+     "unit": "無因次",
+     "min": 0
+    },
+    "S_II1": {
+     "desc": "工址一秒週期之等級II 地震水平譜加速度係數 S_II,1",
+     "unit": "無因次",
+     "min": 0
+    },
+    "T0_II": {
+     "desc": "等級II 譜加速度係數短週期與中長週期分界 T0^II",
+     "unit": "秒",
+     "min": 0.01
+    },
+    "T": {
+     "desc": "橋梁基本振動週期 T",
+     "unit": "秒",
+     "min": 0.001
+    }
+   },
+   "expr": "S_IIS * (0.4 + 3.0 * T / T0_II) if T <= 0.2 * T0_II else (S_IIS if T <= T0_II else S_II1 / T)",
+   "conditions": [
+    {
+     "expr": "S_IIS >= 0 and S_II1 >= 0 and T0_II > 0 and T > 0",
+     "msg": "S_II,S、S_II,1 須非負，T0 與 T 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "S_IIS": 0.72,
+      "S_II1": 0.525,
+      "T0_II": 0.7291666666666666,
+      "T": 0.4
+     },
+     "out": 0.72
+    },
+    {
+     "in": {
+      "S_IIS": 0.72,
+      "S_II1": 0.525,
+      "T0_II": 0.7291666666666666,
+      "T": 1.2
+     },
+     "out": 0.4375
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.2 (2-13)式（一般工址）；活動斷層近域與臺北盆地分別用同一形式（(2-16c) 式）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.33 §2.3.2 (2-13)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_Fu_ratio",
+   "title": "等級 II／III 地震力折減係數比之調整值 m（公路橋梁耐震 2.3.2 (2-11)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.2",
+   "page": 32,
+   "keywords": "公路橋梁耐震 地震力折減係數 分段 0.52 0.144 0.70 (2-11) (2-18)",
+   "unit": "無因次",
+   "output": "ratio_m",
+   "latex": "\\left(\\frac{S_a}{F_u}\\right)_m=\\begin{cases}\\dfrac{S_a}{F_u} & \\frac{S_a}{F_u}\\le 0.3\\\\ 0.52\\dfrac{S_a}{F_u}+0.144 & 0.3\\le \\frac{S_a}{F_u}\\le 0.8\\\\ 0.70 & \\frac{S_a}{F_u}\\ge 0.8\\end{cases}",
+   "vars": {
+    "ratio": {
+     "desc": "譜加速度係數與地震力折減係數之比 Sa/Fu",
+     "unit": "無因次",
+     "min": 0
+    }
+   },
+   "expr": "ratio if ratio <= 0.3 else ((0.52 * ratio + 0.144) if ratio <= 0.8 else 0.70)",
+   "conditions": [
+    {
+     "expr": "ratio >= 0",
+     "msg": "Sa/Fu 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "ratio": 0.2
+     },
+     "out": 0.2
+    },
+    {
+     "in": {
+      "ratio": 0.5
+     },
+     "out": 0.404
+    },
+    {
+     "in": {
+      "ratio": 0.9
+     },
+     "out": 0.7
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.2 (2-11)式（等級II）與 2.3.3 (2-18)式（等級III）形式完全相同；設計地震力之下限值亦以 0.4·S_II,S 取代 Sa,II 後代入本式。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.32 §2.3.2 (2-11)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_Fu_T",
+   "title": "地震力折減係數 Fu 隨週期變化（公路橋梁耐震 2.3.2 (2-12)／2.3.3 (2-19)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.2",
+   "page": 33,
+   "keywords": "公路橋梁耐震 地震力折減係數 Fu T0 分段 線性 (2-12) (2-19)",
+   "unit": "無因次",
+   "output": "Fu",
+   "latex": "F_u=\\begin{cases}R_a & T\\ge T_0\\\\ (2R_a-1)+(R_a-(2R_a-1))\\frac{T-0.6T_0}{0.4T_0} & 0.6T_0\\le T\\le T_0\\\\ 2R_a-1 & 0.2T_0\\le T\\le 0.6T_0\\\\ (2R_a-1)+((2R_a-1)-1)\\frac{T-0.2T_0}{0.2T_0} & T\\le 0.2T_0\\end{cases}",
+   "vars": {
+    "Ra": {
+     "desc": "容許韌性容量 Ra（一般工址／近斷層 1+(R-1)/1.5；台北盆地 1+(R-1)/2.0）",
+     "unit": "無因次",
+     "min": 1
+    },
+    "T0": {
+     "desc": "該等級地震譜加速度係數之短週期與中長週期分界 T0",
+     "unit": "秒",
+     "min": 0.01
+    },
+    "T": {
+     "desc": "橋梁基本振動週期 T",
+     "unit": "秒",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "up",
+     "2.0 * Ra - 1.0"
+    ]
+   ],
+   "expr": "Ra if T >= T0 else (up + (Ra - up) * (T - 0.6 * T0) / (0.4 * T0) if T >= 0.6 * T0 else (up if T >= 0.2 * T0 else up + (up - 1.0) * (T - 0.2 * T0) / (0.2 * T0)))",
+   "conditions": [
+    {
+     "expr": "Ra >= 1 and T0 > 0 and T >= 0",
+     "msg": "Ra 須 ≥ 1，T0 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Ra": 2.3333333333333335,
+      "T0": 0.7291666666666666,
+      "T": 0.1
+     },
+     "out": 2.8285714285714287
+    },
+    {
+     "in": {
+      "Ra": 2.3333333333333335,
+      "T0": 0.7291666666666666,
+      "T": 0.3
+     },
+     "out": 3.666666666666667
+    },
+    {
+     "in": {
+      "Ra": 2.3333333333333335,
+      "T0": 0.7291666666666666,
+      "T": 0.8
+     },
+     "out": 2.3333333333333335
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.2 (2-12)式（等級II，用 Ra）與 2.3.3 (2-19)式（等級III，用 R，形式相同）。T→0 時 Fu→1，T=0.2T0 起為 2Ra−1，T=T0 以上為 Ra。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.33 §2.3.2 (2-12)式與 p.35 (2-19)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level2_force",
+   "title": "等級 II 地震水平設計地震力（公路橋梁耐震 2.3.2 (2-10)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.2",
+   "page": 32,
+   "keywords": "公路橋梁耐震 等級II 水平設計地震力 下限 (2-10)",
+   "unit": "kgf",
+   "output": "V_II",
+   "latex": "V_{II}=\\frac{I}{1.2\\alpha_y}\\left(\\frac{S_{a,II}}{F_{u,II}}\\right)_m W",
+   "vars": {
+    "I": {
+     "desc": "用途係數 I",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_aII": {
+     "desc": "等級II 地震水平譜加速度係數 Sa,II",
+     "unit": "無因次",
+     "min": 0
+    },
+    "F_uII": {
+     "desc": "等級II 地震結構系統地震力折減係數 Fu,II",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_IIS": {
+     "desc": "工址短週期之等級II 譜加速度係數 S_II,S（下限用）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "alpha_y": {
+     "desc": "起始降伏地震力放大倍數 αy",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "W": {
+     "desc": "橋梁振動單元靜載重 W",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "r_calc",
+     "S_aII / F_uII"
+    ],
+    [
+     "r_min",
+     "0.4 * S_IIS / F_uII"
+    ],
+    [
+     "m_calc",
+     "r_calc if r_calc <= 0.3 else ((0.52 * r_calc + 0.144) if r_calc <= 0.8 else 0.70)"
+    ],
+    [
+     "m_min",
+     "r_min if r_min <= 0.3 else ((0.52 * r_min + 0.144) if r_min <= 0.8 else 0.70)"
+    ]
+   ],
+   "expr": "max(I / (1.2 * alpha_y) * m_calc * W, I / (1.2 * alpha_y) * m_min * W)",
+   "conditions": [
+    {
+     "expr": "I > 0 and S_aII >= 0 and F_uII > 0 and S_IIS >= 0 and alpha_y > 0 and W >= 0",
+     "msg": "I、Fu,II、αy 須為正，其餘非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "I": 1.2,
+      "S_aII": 0.5,
+      "F_uII": 1.5,
+      "S_IIS": 0.6,
+      "alpha_y": 1.2,
+      "W": 10000
+     },
+     "out": 2644.4444444444443
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.2 (2-10)式：下限為將 Sa,II 以 0.4·S_II,S 取代後代入 (2-11) 式之值；本式已內建取大值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.32 §2.3.2 (2-10)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level3_force",
+   "title": "等級 III 地震水平設計地震力（公路橋梁耐震 2.3.3 (2-17)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.3",
+   "page": 35,
+   "keywords": "公路橋梁耐震 等級III 水平設計地震力 下限 (2-17)",
+   "unit": "kgf",
+   "output": "V_III",
+   "latex": "V_{III}=\\frac{I}{1.2\\alpha_y}\\left(\\frac{S_{a,III}}{F_{u,III}}\\right)_m W",
+   "vars": {
+    "I": {
+     "desc": "用途係數 I",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_aIII": {
+     "desc": "等級III 地震水平譜加速度係數 Sa,III",
+     "unit": "無因次",
+     "min": 0
+    },
+    "F_uIII": {
+     "desc": "等級III 地震水平地震力折減係數 Fu,III",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_IIIS": {
+     "desc": "工址短週期之等級III 譜加速度係數 S_III,S（下限用）",
+     "unit": "無因次",
+     "min": 0
+    },
+    "alpha_y": {
+     "desc": "起始降伏地震力放大倍數 αy",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "W": {
+     "desc": "橋梁振動單元靜載重 W",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "r_calc",
+     "S_aIII / F_uIII"
+    ],
+    [
+     "r_min",
+     "0.4 * S_IIIS / F_uIII"
+    ],
+    [
+     "m_calc",
+     "r_calc if r_calc <= 0.3 else ((0.52 * r_calc + 0.144) if r_calc <= 0.8 else 0.70)"
+    ],
+    [
+     "m_min",
+     "r_min if r_min <= 0.3 else ((0.52 * r_min + 0.144) if r_min <= 0.8 else 0.70)"
+    ]
+   ],
+   "expr": "max(I / (1.2 * alpha_y) * m_calc * W, I / (1.2 * alpha_y) * m_min * W)",
+   "conditions": [
+    {
+     "expr": "I > 0 and S_aIII >= 0 and F_uIII > 0 and S_IIIS >= 0 and alpha_y > 0 and W >= 0",
+     "msg": "I、Fu,III、αy 須為正，其餘非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "I": 1.2,
+      "S_aIII": 0.8,
+      "F_uIII": 1.2,
+      "S_IIIS": 0.8,
+      "alpha_y": 1.2,
+      "W": 10000
+     },
+     "out": 4088.888888888889
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.3 (2-17)式：下限以 0.4·S_III,S 取代 Sa,III 代入 (2-18) 式；設計總橫力取三等級之大值。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.35 §2.3.3 (2-17)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_level3_Sa",
+   "title": "等級 III 地震水平譜加速度係數 Sa,III（公路橋梁耐震 2.3.3 (2-20)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.3.3",
+   "page": 35,
+   "keywords": "公路橋梁耐震 等級III 譜加速度係數 分段 (2-20) (2-23c)",
+   "unit": "無因次",
+   "output": "Sa_III",
+   "latex": "S_{a,III}=\\begin{cases}S_{III,S}(0.4+3T/T_0^{III}) & T \\le 0.2T_0^{III}\\\\ S_{III,S} & 0.2T_0^{III}\\le T \\le T_0^{III}\\\\ S_{III,1}/T & T_0^{III}\\le T\\end{cases}",
+   "vars": {
+    "S_IIIS": {
+     "desc": "工址短週期之等級III 地震水平譜加速度係數 S_III,S",
+     "unit": "無因次",
+     "min": 0
+    },
+    "S_III1": {
+     "desc": "工址一秒週期之等級III 地震水平譜加速度係數 S_III,1",
+     "unit": "無因次",
+     "min": 0
+    },
+    "T0_III": {
+     "desc": "等級III 譜加速度係數分界 T0^III",
+     "unit": "秒",
+     "min": 0.01
+    },
+    "T": {
+     "desc": "橋梁基本振動週期 T",
+     "unit": "秒",
+     "min": 0.001
+    }
+   },
+   "expr": "S_IIIS * (0.4 + 3.0 * T / T0_III) if T <= 0.2 * T0_III else (S_IIIS if T <= T0_III else S_III1 / T)",
+   "conditions": [
+    {
+     "expr": "S_IIIS >= 0 and S_III1 >= 0 and T0_III > 0 and T > 0",
+     "msg": "S_III,S、S_III,1 須非負，T0 與 T 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "S_IIIS": 0.9,
+      "S_III1": 0.6,
+      "T0_III": 0.6666666666666666,
+      "T": 0.5
+     },
+     "out": 0.9
+    },
+    {
+     "in": {
+      "S_IIIS": 0.9,
+      "S_III1": 0.6,
+      "T0_III": 0.6666666666666666,
+      "T": 1.5
+     },
+     "out": 0.4
+    }
+   ],
+   "notes": "公路橋梁耐震 2.3.3 (2-20)式（一般工址）；活動斷層近域 S_III,S = Fa(1.0NA)、S_III,1 = Fv(0.55NV)（(2-22a)(2-22b)）；臺北盆地 S_III,S = 0.8、T0^III = 1.6／1.3／1.05 秒（(2-23a)(2-23b)）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.35 §2.3.3 (2-20)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_force_distribution",
+   "title": "橋梁單位長度設計水平地震力分布（公路橋梁耐震 2.4 (2-24)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.4",
+   "page": 37,
+   "keywords": "公路橋梁耐震 設計總橫力之分布 震力係數 kh (2-24)",
+   "unit": "kgf/m",
+   "output": "pe",
+   "latex": "p_e(x)=k_h w(x),\\qquad k_h=\\frac{V}{\\int w(x)dx}",
+   "vars": {
+    "V": {
+     "desc": "設計總橫力 V（三等級取大值）",
+     "unit": "kgf",
+     "min": 0
+    },
+    "W_total": {
+     "desc": "∫w(x)dx，即振動單元靜載重總和（含橋墩）",
+     "unit": "kgf",
+     "min": 0.001
+    },
+    "w_x": {
+     "desc": "計算位置之單位靜載重 w(x)",
+     "unit": "kgf/m",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "k_h",
+     "V / W_total"
+    ]
+   ],
+   "expr": "k_h * w_x",
+   "conditions": [
+    {
+     "expr": "V >= 0 and W_total > 0 and w_x >= 0",
+     "msg": "V、w(x) 非負且 W_total > 0"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "V": 2215.4,
+      "W_total": 20000,
+      "w_x": 800
+     },
+     "out": 88.616
+    }
+   ],
+   "notes": "公路橋梁耐震 2.4 (2-24a)(2-24b)式：k_h 為震力係數，w(x) 為沿計算方向橋梁結構之單位靜載重。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.37 §2.4 (2-24)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  },
+  {
+   "id": "hwbridgeseis_vertical_force",
+   "title": "總垂直地震力（公路橋梁耐震 2.6 (2-25)式）",
+   "src": "hwbridgeseis108",
+   "clause": "2.6",
+   "page": 38,
+   "keywords": "公路橋梁耐震 垂直地震力 近斷層 alpha_v 上部結構 下部結構 (2-25)",
+   "unit": "kgf",
+   "output": "V_V",
+   "latex": "V_V=\\frac{\\alpha_v I S_{II,S}}{\\alpha_y}W_{sup}+\\frac{\\alpha_v I(0.4S_{II,S})}{\\alpha_y}W_{sub},\\quad \\alpha_v=\\frac{2}{3}",
+   "vars": {
+    "I": {
+     "desc": "用途係數 I",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "S_IIS": {
+     "desc": "工址短週期等級II 地震水平譜加速度係數 S_II,S",
+     "unit": "無因次",
+     "min": 0
+    },
+    "alpha_y": {
+     "desc": "起始降伏地震力放大倍數 αy",
+     "unit": "無因次",
+     "min": 0.1
+    },
+    "W_sup": {
+     "desc": "上部結構所引致之靜載重 Wsup",
+     "unit": "kgf",
+     "min": 0
+    },
+    "W_sub": {
+     "desc": "下部結構所引致之靜載重 Wsub",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "defs": [
+    [
+     "alpha_v",
+     "2.0 / 3.0"
+    ]
+   ],
+   "expr": "alpha_v * I * S_IIS / alpha_y * W_sup + alpha_v * I * (0.4 * S_IIS) / alpha_y * W_sub",
+   "conditions": [
+    {
+     "expr": "I > 0 and S_IIS >= 0 and alpha_y > 0 and W_sup >= 0 and W_sub >= 0",
+     "msg": "I、αy 須為正，其餘非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "I": 1.2,
+      "S_IIS": 0.6,
+      "alpha_y": 1.2,
+      "W_sup": 8000,
+      "W_sub": 6000
+     },
+     "out": 4160.0
+    }
+   ],
+   "notes": "公路橋梁耐震 2.6 (2-25)式：僅位於必須考慮活動斷層近域效應之橋梁須計入；垂直地震力應依結構模式分配至各節點，上部結構採預力構材者須考慮其影響。αv = 2/3。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 hwbridgeseis108 PDF p.38 §2.6 (2-25)式",
+    "by": "agent",
+    "date": "2026-11-14"
+   },
+   "_file": "hwbridge_p1_ch2.json"
+  }
+ ],
+ "tables": []
+}

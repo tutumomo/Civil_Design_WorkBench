@@ -582,8 +582,9 @@ def _lint_entries():
             #  swc_* 水保技術規範（章本轉出）、sewer* 下水道設計標準（條文式無頁）、
             #  btr* 建築技術規則（條文式）、airconst* 營建空污（條文式）、
             #  farmroad* 農路設計規範（附表為 .odt 檔，無分頁）
+            #  pcc* 公共工程施工綱要規範（314 個 .odt/.doc 章本，無分頁）
             if not x.get("page") and not x["src"].startswith(
-                    ("swc_", "sewer", "btr", "airconst", "farmroad")):
+                    ("swc_", "sewer", "btr", "airconst", "farmroad", "pcc")):
                 bad.append(f"{i}: PDF 規範的 verified 條目須填 page（原頁碼）")
         if not con.execute("SELECT 1 FROM src WHERE id=?", (x["src"],)).fetchone():
             bad.append(f"{i}: 規範代號 {x['src']} 不在索引")

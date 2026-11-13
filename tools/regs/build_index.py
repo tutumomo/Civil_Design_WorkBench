@@ -390,6 +390,115 @@ def barrier_units(text):
     return chunk([u for u in units if u["lines"]])
 
 
+BRIDGE_HEAD = re.compile(r"([1-9]\d?(?:\.\d{1,2}){1,4})\.?(?:\s+(.*))?")
+BRIDGE_CHEAD = re.compile(r"(C[1-9]\d?(?:\.\d{1,2}){1,4})\.?(?:\s+(.*))?")
+BRIDGE_TAB_FIG = re.compile(r"^((?:表|圖)[C]?\d+-\d+(?:\s*\([a-zA-Z\d]+\))?)\s+(.*)")
+
+
+def bridge_seis_units(text):
+    """Split 《公路橋梁耐震設計規範》 into 規範本文 (1.1~8.7), 解說 (C1.1~C8.7), 參考文獻, 附表與附圖."""
+    pages = []
+    for p in text.split("=== p."):
+        if not p.strip():
+            continue
+        pno, body = p.split(" ===", 1)
+        pages.append((int(pno), body))
+
+    units = []
+    cur = {"clause": "0", "title": "（前言／目錄）", "path": "", "page": 1, "part": "", "lines": []}
+    units.append(cur)
+
+    for pno, body in pages:
+        lines = [ln.strip() for ln in body.splitlines() if ln.strip()]
+        for ln in lines:
+            if TOC.search(ln):
+                cur["lines"].append((pno, ln))
+                continue
+            if 21 <= pno <= 70:
+                m = BRIDGE_HEAD.match(ln)
+                if m:
+                    num = m.group(1)
+                    rest = (m.group(2) or "").strip()
+                    if rest and len(rest) <= 40 and not rest.endswith(("。", "：", "，", "；")):
+                        cur = {"clause": num, "title": rest, "path": f"規範本文 > {num} {rest}",
+                               "page": pno, "part": "規範本文", "lines": [(pno, ln)]}
+                        units.append(cur)
+                        continue
+            elif 71 <= pno <= 148:
+                m = BRIDGE_CHEAD.match(ln)
+                if m:
+                    num = m.group(1)
+                    rest = (m.group(2) or "").strip()
+                    if rest and len(rest) <= 40 and not rest.endswith(("。", "：", "，", "；")):
+                        cur = {"clause": num, "title": rest, "path": f"規範解說 > {num} {rest}",
+                               "page": pno, "part": "規範解說", "lines": [(pno, ln)]}
+                        units.append(cur)
+                        continue
+            elif 149 <= pno <= 150:
+                if ln == "參考文獻" and cur["clause"] != "參考文獻":
+                    cur = {"clause": "參考文獻", "title": "參考文獻", "path": "參考文獻",
+                           "page": pno, "part": "參考文獻", "lines": [(pno, ln)]}
+                    units.append(cur)
+                    continue
+            elif pno >= 151:
+                m = BRIDGE_TAB_FIG.match(ln)
+                if m:
+                    tf_id = m.group(1).replace(" ", "")
+                    tf_title = m.group(2).strip()[:40]
+                    cur = {"clause": tf_id, "title": tf_title, "path": f"附錄圖表 > {tf_id} {tf_title}",
+                           "page": pno, "part": "附錄圖表", "lines": [(pno, ln)]}
+                    units.append(cur)
+                    continue
+            cur["lines"].append((pno, ln))
+
+    return chunk([u for u in units if u["lines"] or u["clause"] != "0"])
+
+
+WOOD110_SECTIONS = [
+    ("9.2", "木構造建築物防火規劃基本原則", re.compile(r"^9\.2\s+木構造建築物防火規劃基本原則")),
+    ("9.3", "木構造系統防火設計", re.compile(r"^9\.3\s+木構造系統防火設計")),
+    ("9.3.1", "框組壁式系統", re.compile(r"^9\.3\.1\s*框組壁式系統")),
+    ("9.3.2", "樑柱構架系統", re.compile(r"^9\.3\.2\s*[梁樑]柱構架系統")),
+    ("9.3.3", "原木層疊系統", re.compile(r"^9\.3\.3\s*原木層疊系統")),
+    ("9.3.4", "其他系統", re.compile(r"^9\.3\.4\s*其他系統")),
+    ("附錄六", "國外常用木構造牆壁、樓地板和屋頂系統", re.compile(r"第九[·．\.]三點附[錄錄][六六]")),
+    ("附錄七", "特殊耐火級石膏板耐火性能試驗特定要求", re.compile(r"第九[·．\.]三點附[錄錄]七")),
+]
+
+
+def wood110_units(text):
+    """Split 《木構造建築物設計及施工技術規範》110.01.26 修正對照表 into 9.2, 9.3, 附錄六, 附錄七."""
+    lines = []
+    for p in text.split("=== p."):
+        if not p.strip():
+            continue
+        pno, body = p.split(" ===", 1)
+        for ln in body.splitlines():
+            s = ln.strip()
+            if s:
+                lines.append((int(pno), s))
+
+    units = []
+    cur = {"clause": "0", "title": "（令函）", "path": "令函", "page": 1, "part": "", "lines": []}
+    units.append(cur)
+
+    for pno, ln in lines:
+        matched = None
+        for cid, ctitle, pat in WOOD110_SECTIONS:
+            if pat.search(ln):
+                matched = (cid, ctitle)
+                break
+        if matched:
+            cid, ctitle = matched
+            cur = {"clause": cid, "title": ctitle, "path": f"第九章防火修正 > {cid} {ctitle}",
+                   "page": pno, "part": "修正規定", "lines": [(pno, ln)]}
+            units.append(cur)
+        else:
+            cur["lines"].append((pno, ln))
+
+    return chunk([u for u in units if u["lines"] or u["clause"] != "0"])
+
+
 def chunk(units, limit=6000):
     """Split oversized units (appendices, unnumbered tables) at page breaks so hits keep a page."""
     out = []
@@ -445,6 +554,12 @@ def main():
         is_law = source_kind in ("law", "law_point")
         if splitter == "barrier":
             units = barrier_units(text)
+            source_kind = "code"
+        elif splitter == "bridge_seis":
+            units = bridge_seis_units(text)
+            source_kind = "code"
+        elif splitter == "wood110":
+            units = wood110_units(text)
             source_kind = "code"
         elif source_kind == "law_point" or splitter == "point":
             units = point_units(text)

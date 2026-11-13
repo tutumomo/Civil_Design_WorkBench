@@ -3726,6 +3726,22 @@
    "legacy_status": "no-content"
   },
   {
+   "src": "src100",
+   "clause": "3.7",
+   "status": "qualitative",
+   "reason": "3.7 僅要求『以合理方法考慮 P-Δ 效應』，無計算式；實際計算式在 7.4 節（src100_pe_src、src100_pdelta_moment 已入庫）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "src100",
+   "clause": "7.5",
+   "status": "covered",
+   "reason": "7.5 為 7.2/7.3 節之修正規定（Pu 取軸拉力、不計混凝土拉力、不計 P-Δ、φts=φtrc=0.9），本身無獨立公式；互制式由 src100_beamcolumn_steel_interaction（7.3.2）涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
    "src": "steel99",
    "clause": "0",
    "status": "qualitative",

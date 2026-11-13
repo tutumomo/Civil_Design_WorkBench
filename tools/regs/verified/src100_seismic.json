@@ -1,0 +1,1031 @@
+{
+ "formulas": [
+  {
+   "id": "src100_joint_flexural_ratio",
+   "src": "src100",
+   "clause": "8.4.2",
+   "page": 79,
+   "title": "SRC 梁柱接合處之撓曲強度比（鋼骨鋼筋混凝土構造設計規範 8.4.2 (8.4-1)~(8.4-4)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 梁柱接頭 撓曲強度比 強柱弱梁 0.6 0.7 1.0 8.4-1 8.4-4",
+   "unit": "無因次",
+   "output": "ratio",
+   "latex": "\\frac{\\sum(M_{ns})_C}{\\sum(M_{ns})_B}\\ge0.6,\\ \\frac{\\sum(M_{nrc})_C}{\\sum(M_{nrc})_B}\\ge0.6;\\qquad \\frac{\\sum(M_{ns})_C}{\\sum(M_{ns})_B}\\ge1.0\\ (\\text{鋼梁}),\\ \\ge0.7\\ (\\text{應力平順傳遞})",
+   "vars": {
+    "sum_Mc": {
+     "desc": "接合處所有柱之標稱彎矩強度總和 ΣMnC（鋼骨或 RC 部分）",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "sum_Mb": {
+     "desc": "接合處所有梁之標稱彎矩強度總和 ΣMnB（鋼骨或 RC 部分）",
+     "unit": "kgf·cm",
+     "min": 0.0001
+    },
+    "steel_beam": {
+     "desc": "1＝鋼梁與 SRC 柱接合；0＝SRC 梁與 SRC 柱接合",
+     "unit": "型態",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    "smooth": {
+     "desc": "1＝經分析證明鋼梁應力可平順傳遞至 SRC 柱（(8.4-4) 式下限 0.7）",
+     "unit": "型態",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "limit",
+     "((1.0 if smooth < 0.5 else 0.7) if steel_beam > 0.5 else 0.6)"
+    ]
+   ],
+   "expr": "sum_Mc / sum_Mb",
+   "conditions": [
+    {
+     "expr": "sum_Mb > 0",
+     "msg": "ΣMnB 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result < 0.6",
+     "msg": "撓曲強度比小於 0.6，不符 (8.4-1)(8.4-2)"
+    },
+    {
+     "expr": "steel_beam > 0.5 and result < 1.0 and smooth < 0.5",
+     "msg": "鋼梁接合處之撓曲強度比小於 1.0，不符 (8.4-3)"
+    },
+    {
+     "expr": "steel_beam > 0.5 and smooth > 0.5 and result < 0.7",
+     "msg": "採 (8.4-4) 放寬時仍不得小於 0.7"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "sum_Mc": 120.0,
+      "sum_Mb": 100.0,
+      "steel_beam": 0,
+      "smooth": 0
+     },
+     "out": 1.2
+    },
+    {
+     "in": {
+      "sum_Mc": 60.0,
+      "sum_Mb": 100.0,
+      "steel_beam": 1,
+      "smooth": 1
+     },
+     "out": 0.6
+    }
+   ],
+   "notes": "(8.4-1)(8.4-2)：SRC 梁與 SRC 柱接合時，鋼骨部分與 RC 部分之撓曲強度比均不得小於 0.6。(8.4-3)：鋼梁與 SRC 柱接合時鋼骨部分不得小於 1.0；(8.4-4)：經分析證明可平順傳遞者可放寬為 0.7。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第79頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_column_axial_seismic",
+   "src": "src100",
+   "clause": "9.3",
+   "page": 96,
+   "title": "SRC 柱之耐震軸向強度檢核（鋼骨鋼筋混凝土構造設計規範 9.3 (9.3-1)(9.3-2)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 柱 軸向強度 耐震 地震力折減係數 Fu 1.4Fu 9.3-1 9.3-2",
+   "unit": "kgf（與輸入同單位）",
+   "output": "P_demand",
+   "latex": "1.2P_D+0.5P_L\\pm1.4F_uP_E\\le\\phi_cP_n;\\qquad 0.9P_D\\pm1.4F_uP_E\\le\\phi_tP_n",
+   "vars": {
+    "PD": {
+     "desc": "靜載重造成之軸力 PD",
+     "unit": "kgf",
+     "min": 0
+    },
+    "PL": {
+     "desc": "活載重造成之軸力 PL",
+     "unit": "kgf",
+     "min": 0,
+     "default": 0
+    },
+    "PE": {
+     "desc": "地震力造成之軸力 PE",
+     "unit": "kgf",
+     "min": 0
+    },
+    "Fu": {
+     "desc": "地震力折減係數 Fu（不必超過 2.5）",
+     "unit": "無因次",
+     "min": 0,
+     "default": 1.0
+    },
+    "mode": {
+     "desc": "0＝受軸壓力（(9.3-1)）；1＝受軸拉力（(9.3-2)）",
+     "unit": "型態",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    "L_full": {
+     "desc": "1＝停車場、公眾集會場所或活載重 >0.5 tf/m²，PL 係數取 1.0",
+     "unit": "型態",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "cL",
+     "1.0 if L_full > 0.5 else 0.5"
+    ]
+   ],
+   "expr": "1.2 * PD + cL * PL + 1.4 * Fu * PE if mode < 0.5 else 0.9 * PD + 1.4 * Fu * PE",
+   "conditions": [
+    {
+     "expr": "Fu <= 2.5",
+     "msg": "Fu 不必超過 2.5"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "Fu > 2.5",
+     "msg": "Fu 超過 2.5，已超出本條適用範圍"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "PD": 100000.0,
+      "PL": 50000.0,
+      "PE": 40000.0,
+      "Fu": 1.0,
+      "mode": 0,
+      "L_full": 0
+     },
+     "out": 201000.0
+    },
+    {
+     "in": {
+      "PD": 100000.0,
+      "PL": 50000.0,
+      "PE": 40000.0,
+      "Fu": 2.0,
+      "mode": 1,
+      "L_full": 1
+     },
+     "out": 202000.0
+    }
+   ],
+   "notes": "(9.3-1) 受軸壓力、(9.3-2) 受軸拉力；地震力項採 ±1.4(Fu)PE。Fu 不必超過 2.5。停車場、公眾集會場所或活載重 >0.5 tf/m² 者 (9.3-1) 式中 PL 係數取 1.0。上列組合不必超過相接構材或接頭區極限狀態下傳至柱之軸力的 1.25 倍；Pu/φPn ≤ 0.5 且符合相關規定者得免檢核。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第96頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_beam_shear_seismic",
+   "src": "src100",
+   "clause": "9.5.2",
+   "page": 98,
+   "title": "SRC 梁耐震設計之需求剪力分配（鋼骨鋼筋混凝土構造設計規範 9.5.2 (9.5-1)~(9.5-4)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 梁 耐震 需求剪力 Mpr 可能彎矩強度 1.25Fyr 9.5-1 9.5-4",
+   "unit": "kgf（與輸入同單位）",
+   "output": "V_required",
+   "latex": "V_u=\\frac{M_{pr1}+M_{pr2}}{L_n}\\pm\\frac{W}{2};\\quad M_{pr}=M_{ns}+M_{prc};\\quad \\phi_{vs}V_{ns}\\ge\\frac{M_{ns}}{M_{pr}}V_u",
+   "vars": {
+    "Mpr1": {
+     "desc": "梁一端交接面之可能彎矩強度 Mpr1（(9.5-3) 式）",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "Mpr2": {
+     "desc": "梁另一端交接面之可能彎矩強度 Mpr2",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "Ln": {
+     "desc": "梁淨跨距 Ln",
+     "unit": "cm",
+     "min": 0.0001
+    },
+    "Wv": {
+     "desc": "作用於梁上之總垂直載重 W",
+     "unit": "kgf",
+     "min": 0,
+     "default": 0
+    },
+    "Mns": {
+     "desc": "鋼骨部分標稱彎矩強度 Mns",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "Mprc": {
+     "desc": "RC 部分可能彎矩強度 Mprc（拉力鋼筋以 1.25Fyr 計算）",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "part": {
+     "desc": "0＝鋼骨部分（φvs=0.9）；1＝RC 部分（φvrc=0.75）",
+     "unit": "型態",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "Mpr",
+     "Mns + Mprc"
+    ],
+    [
+     "Vu",
+     "(Mpr1 + Mpr2) / Ln + Wv / 2.0"
+    ]
+   ],
+   "expr": "Vu * Mns / Mpr if part < 0.5 else Vu * Mprc / Mpr",
+   "conditions": [
+    {
+     "expr": "Ln > 0 and Mns + Mprc > 0",
+     "msg": "Ln 與 Mpr 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Mpr1": 8000000.0,
+      "Mpr2": 6000000.0,
+      "Ln": 600.0,
+      "Wv": 20000.0,
+      "Mns": 5000000.0,
+      "Mprc": 3000000.0,
+      "part": 0
+     },
+     "out": 20833.333333333332
+    },
+    {
+     "in": {
+      "Mpr1": 8000000.0,
+      "Mpr2": 6000000.0,
+      "Ln": 600.0,
+      "Wv": 20000.0,
+      "Mns": 5000000.0,
+      "Mprc": 3000000.0,
+      "part": 1
+     },
+     "out": 12499.999999999998
+    }
+   ],
+   "notes": "(9.5-4) 需求剪力 Vu 採梁兩端產生塑鉸後之剪力（非結構分析之係數化剪力）；(9.5-3) Mpr = Mns + Mprc，其中 Mprc 計算時拉力鋼筋降伏應力以 1.25Fyr 取代。需求剪力再依 (9.5-1)(9.5-2) 按 Mns/Mpr、Mprc/Mpr 分配至鋼骨與 RC 部分。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第98頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_strong_column",
+   "src": "src100",
+   "clause": "9.6.1",
+   "page": 101,
+   "title": "SRC 梁柱接頭之強柱弱梁檢核（鋼骨鋼筋混凝土構造設計規範 9.6.1 (9.6-1)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 強柱弱梁 梁柱接頭 ΣMc ΣMB 1.2 9.6-1",
+   "unit": "無因次",
+   "output": "ratio",
+   "latex": "\\frac{\\sum M_C}{\\sum M_B}\\ge1.2",
+   "vars": {
+    "sum_MC": {
+     "desc": "接頭處各柱在交接面之標稱彎矩強度總和 ΣMC（取各載重組合軸力下之最小彎矩強度）",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "sum_MB": {
+     "desc": "接頭處各梁在交接面之標稱彎矩強度總和 ΣMB",
+     "unit": "kgf·cm",
+     "min": 0.0001
+    }
+   },
+   "expr": "sum_MC / sum_MB",
+   "conditions": [
+    {
+     "expr": "sum_MB > 0",
+     "msg": "ΣMB 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "result < 1.2",
+     "msg": "強柱弱梁比值小於 1.2，該柱對強度與勁度之貢獻應不予計入"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "sum_MC": 180.0,
+      "sum_MB": 100.0
+     },
+     "out": 1.8
+    }
+   ],
+   "notes": "(9.6-1) 式：ΣMC/ΣMB ≥ 1.2，兩方向梁通過時應分別檢討；梁彎矩和之方向須與柱彎矩和相反，且順、逆鐘方向彎矩均須計入。另本節第1款要求接合處撓曲強度符合 8.4.2 節。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第101頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_column_shear_seismic",
+   "src": "src100",
+   "clause": "9.6.2",
+   "page": 102,
+   "title": "SRC 柱耐震設計之需求剪力分配（鋼骨鋼筋混凝土構造設計規範 9.6.2 (9.6-3)~(9.6-5)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 柱 耐震 需求剪力 Mct Mcb hn 9.6-3 9.6-5",
+   "unit": "kgf（與輸入同單位）",
+   "output": "V_required",
+   "latex": "V_u=\\frac{M_{ct}+M_{cb}}{h_n};\\qquad \\phi_{vs}V_{ns}\\ge\\frac{M_{ns}}{M_{pr}}V_u,\\quad \\phi_{vrc}V_{nrc}\\ge\\frac{M_{prc}}{M_{pr}}V_u",
+   "vars": {
+    "Mct": {
+     "desc": "柱上方接合處兩側梁產生塑鉸時柱端交接面之彎矩強度 Mct",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "Mcb": {
+     "desc": "柱下方接合處對應之彎矩強度 Mcb",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "hn": {
+     "desc": "柱淨高 hn",
+     "unit": "cm",
+     "min": 0.0001
+    },
+    "Mns": {
+     "desc": "鋼骨部分標稱彎矩強度 Mns",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "Mprc": {
+     "desc": "RC 部分可能彎矩強度 Mprc（拉力鋼筋以 1.25Fyr 計算）",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "part": {
+     "desc": "0＝鋼骨部分；1＝RC 部分",
+     "unit": "型態",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "Mpr",
+     "Mns + Mprc"
+    ],
+    [
+     "Vu",
+     "(Mct + Mcb) / hn"
+    ]
+   ],
+   "expr": "Vu * Mns / Mpr if part < 0.5 else Vu * Mprc / Mpr",
+   "conditions": [
+    {
+     "expr": "hn > 0 and Mns + Mprc > 0",
+     "msg": "hn 與 Mpr 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Mct": 6000000.0,
+      "Mcb": 5000000.0,
+      "hn": 300.0,
+      "Mns": 4000000.0,
+      "Mprc": 3000000.0,
+      "part": 0
+     },
+     "out": 20952.38095238095
+    },
+    {
+     "in": {
+      "Mct": 6000000.0,
+      "Mcb": 5000000.0,
+      "hn": 300.0,
+      "Mns": 4000000.0,
+      "Mprc": 3000000.0,
+      "part": 1
+     },
+     "out": 15714.285714285714
+    }
+   ],
+   "notes": "(9.6-5) 柱需求剪力 Vu = (Mct + Mcb)/hn，即梁端塑鉸時柱上下端彎矩所對應之剪力；Mpr 依 (9.5-3) 式。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第102頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_column_Ash",
+   "src": "src100",
+   "clause": "9.6.3",
+   "page": 104,
+   "title": "SRC 柱圍束箍筋需求量 Ash（鋼骨鋼筋混凝土構造設計規範 9.6.3 (9.6-6)(9.6-7)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 柱 圍束箍筋 Ash 折減係數 Ps Phcc 高度圍束區 9.6-6 9.6-7",
+   "unit": "cm2",
+   "output": "Ash",
+   "latex": "A_{sh}=0.3sb_c\\frac{f_c'}{F_{yh}}\\Big(\\frac{A_g}{A_{ch}}-1\\Big)\\Big[1-\\frac{P_s+P_{hcc}}{(P_n)_u}\\Big];\\qquad A_{sh}=0.09sb_c\\frac{f_c'}{F_{yh}}\\Big[1-\\frac{P_s+P_{hcc}}{(P_n)_u}\\Big]",
+   "vars": {
+    "s": {
+     "desc": "箍筋間距 s",
+     "unit": "cm",
+     "min": 0.0001
+    },
+    "bc": {
+     "desc": "箍筋圍束之柱核心寬度 bc",
+     "unit": "cm",
+     "min": 0.0001
+    },
+    "fc": {
+     "desc": "混凝土規定抗壓強度 f'c",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Fyh": {
+     "desc": "箍筋之規定降伏應力 Fyh",
+     "unit": "kgf/cm2",
+     "min": 0.0001
+    },
+    "Ag": {
+     "desc": "柱之全斷面積 Ag",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Ach": {
+     "desc": "箍筋圍束之柱核心斷面積 Ach",
+     "unit": "cm2",
+     "min": 0.0001
+    },
+    "Ps": {
+     "desc": "鋼骨部分軸壓強度 Ps = AsFys（(9.6-8) 式）",
+     "unit": "kgf",
+     "min": 0,
+     "default": 0
+    },
+    "Phcc": {
+     "desc": "高度圍束區混凝土額外提昇之軸壓強度 Phcc = 0.2f'c·Ahcc（(9.6-9) 式）",
+     "unit": "kgf",
+     "min": 0,
+     "default": 0
+    },
+    "Pn_u": {
+     "desc": "(Pn)u = AsFys + 0.85f'cAc + FyrAr（(9.6-10) 式）",
+     "unit": "kgf",
+     "min": 0.0001
+    }
+   },
+   "defs": [
+    [
+     "red",
+     "1.0 - (Ps + Phcc) / Pn_u"
+    ]
+   ],
+   "expr": "max(0.3 * s * bc * (fc / Fyh) * (Ag / Ach - 1.0) * red, 0.09 * s * bc * (fc / Fyh) * red)",
+   "conditions": [
+    {
+     "expr": "Fyh > 0 and Ach > 0 and Pn_u > 0",
+     "msg": "Fyh、Ach、(Pn)u 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "Ag < Ach",
+     "msg": "Ag 應大於 Ach"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "s": 10.0,
+      "bc": 40.0,
+      "fc": 280.0,
+      "Fyh": 4200.0,
+      "Ag": 2400.0,
+      "Ach": 1900.0,
+      "Ps": 240000.0,
+      "Phcc": 100000.0,
+      "Pn_u": 600000.0
+     },
+     "out": 1.04
+    }
+   ],
+   "notes": "(9.6-6)(9.6-7) 兩式取大值，且 Ash 不得小於剪力鋼筋需求量。折減係數 [1−(Ps+Phcc)/(Pn)u] 反映鋼骨分擔軸力與翼板圍束之貢獻。Ahcc 為鋼骨翼板所圍束之混凝土面積，H 型或 T 型鋼骨對弱軸彎曲時取 0，且 Ahcc ≤ 2500 cm²。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第104頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_column_confinement_forces",
+   "src": "src100",
+   "clause": "9.6.3",
+   "page": 104,
+   "title": "SRC 柱圍束箍筋公式之軸壓強度項（鋼骨鋼筋混凝土構造設計規範 9.6.3 (9.6-8)~(9.6-10)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 柱 圍束箍筋 Ps Phcc Pn_u Ahcc 9.6-8 9.6-9 9.6-10",
+   "unit": "kgf（與輸入同單位）",
+   "output": "Pn_u",
+   "latex": "P_s=A_sF_{ys};\\quad P_{hcc}=0.2f_c'A_{hcc};\\quad (P_n)_u=A_sF_{ys}+0.85f_c'A_c+F_{yr}A_r",
+   "vars": {
+    "As": {
+     "desc": "鋼骨部分之斷面積 As",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Fys": {
+     "desc": "鋼骨之規定降伏應力 Fys",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "fc": {
+     "desc": "混凝土規定抗壓強度 f'c",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Ac": {
+     "desc": "混凝土部分之斷面積 Ac",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Fyr": {
+     "desc": "主筋之規定降伏應力 Fyr",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Ar": {
+     "desc": "主筋部分之斷面積 Ar",
+     "unit": "cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Ahcc": {
+     "desc": "高度圍束區混凝土之斷面積 Ahcc（≤2500 cm²，弱軸彎曲之 H/T 型鋼骨取 0）",
+     "unit": "cm2",
+     "min": 0,
+     "max": 2500,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "Ps",
+     "As * Fys"
+    ],
+    [
+     "Phcc",
+     "0.2 * fc * Ahcc"
+    ]
+   ],
+   "expr": "Ps + 0.85 * fc * Ac + Fyr * Ar",
+   "conditions": [
+    {
+     "expr": "Ahcc <= 2500",
+     "msg": "Ahcc 不得大於 2500 cm²"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "Ahcc > 2500",
+     "msg": "Ahcc 超過 2500 cm² 上限，應予折減"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "As": 100.0,
+      "Fys": 2400.0,
+      "fc": 280.0,
+      "Ac": 2000.0,
+      "Fyr": 4200.0,
+      "Ar": 40.0,
+      "Ahcc": 500.0
+     },
+     "out": 884000.0
+    }
+   ],
+   "notes": "(9.6-8) Ps = AsFys；(9.6-9) Phcc = 0.2f'c·Ahcc；(9.6-10) (Pn)u = AsFys + 0.85f'cAc + FyrAr。輸出為 (Pn)u，Ps 與 Phcc 以 defs 計算後供 src100_column_Ash 使用。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第104頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_joint_shear_demand",
+   "src": "src100",
+   "clause": "9.7.1",
+   "page": 109,
+   "title": "SRC 梁柱接頭區之需要剪力強度 Vu（鋼骨鋼筋混凝土構造設計規範 9.7.1 (9.7-1)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 梁柱接頭 需要剪力 Vu 1.25Fyr Art Arb 9.7-1",
+   "unit": "kgf（與輸入同單位）",
+   "output": "Vu",
+   "latex": "V_u=\\big[1.25F_{yr}(A_{rt}+A_{rb})+\\Sigma M_{ns}/(d_b-t_f)\\big]-V_T",
+   "vars": {
+    "Fyr": {
+     "desc": "SRC 梁主筋之規定降伏應力 Fyr",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Art": {
+     "desc": "梁中受拉主筋之斷面積 Art",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Arb": {
+     "desc": "梁中受壓主筋之斷面積 Arb",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Mns": {
+     "desc": "梁中鋼骨部分之標稱彎矩強度 Mns",
+     "unit": "kgf·cm",
+     "min": 0
+    },
+    "db": {
+     "desc": "鋼梁斷面之深度 db",
+     "unit": "cm",
+     "min": 0
+    },
+    "tf": {
+     "desc": "鋼梁斷面翼板之厚度 tf",
+     "unit": "cm",
+     "min": 0
+    },
+    "VT": {
+     "desc": "作用於柱上下兩端交接面之水平剪力 VT",
+     "unit": "kgf",
+     "min": 0,
+     "default": 0
+    }
+   },
+   "expr": "1.25 * Fyr * (Art + Arb) + Mns / (db - tf) - VT",
+   "conditions": [
+    {
+     "expr": "db > tf",
+     "msg": "db 須大於 tf"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fyr": 4200.0,
+      "Art": 20.0,
+      "Arb": 15.0,
+      "Mns": 5000000.0,
+      "db": 50.0,
+      "tf": 1.2,
+      "VT": 30000.0
+     },
+     "out": 256209.01639344264
+    }
+   ],
+   "notes": "(9.7-1) 式：接頭區需要剪力由梁主筋拉力（1.25Fyr(Art+Arb)）與鋼骨部分彎矩（ΣMns/(db−tf)）之和扣除柱水平剪力 VT。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第109頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_joint_rc_Vnrc",
+   "src": "src100",
+   "clause": "9.7.1",
+   "page": 110,
+   "title": "SRC 梁柱接頭區 RC 部分之標稱剪力強度上限（鋼骨鋼筋混凝土構造設計規範 9.7.1 (9.7-3)~(9.7-5)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 梁柱接頭 剪力強度 Vnrc 圍束接頭 Aj 5.3 4.0 3.2 9.7-3 9.7-5",
+   "unit": "kgf（與輸入同單位）",
+   "output": "Vnrc",
+   "latex": "V_{nrc}=C\\sqrt{f_c'}A_j\\Big[1-\\frac{A_sF_{ys}}{2(P_n)_u}\\Big],\\quad C=5.3/4.0/3.2",
+   "vars": {
+    "fc": {
+     "desc": "混凝土規定抗壓強度 f'c",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Aj": {
+     "desc": "接頭區 RC 部分之有效受剪面積 Aj",
+     "unit": "cm2",
+     "min": 0
+    },
+    "As": {
+     "desc": "柱鋼骨部分之斷面積 As",
+     "unit": "cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Fys": {
+     "desc": "柱鋼骨之規定降伏應力 Fys",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Pn_u": {
+     "desc": "(Pn)u 依 (9.6-10) 式",
+     "unit": "kgf",
+     "min": 0.0001
+    },
+    "confine": {
+     "desc": "0＝其他（C=3.2）；1＝接頭三面或兩對面受圍束（C=4.0）；2＝圍束接頭四面受梁圍束（C=5.3）",
+     "unit": "型態",
+     "min": 0,
+     "max": 2,
+     "default": 0
+    }
+   },
+   "defs": [
+    [
+     "C",
+     "3.2 if confine < 0.5 else (4.0 if confine < 1.5 else 5.3)"
+    ]
+   ],
+   "expr": "C * sqrt(fc) * Aj * (1.0 - As * Fys / (2.0 * Pn_u))",
+   "conditions": [
+    {
+     "expr": "fc > 0 and Pn_u > 0",
+     "msg": "f'c、(Pn)u 須為正"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "Aj": 2000.0,
+      "As": 100.0,
+      "Fys": 2400.0,
+      "Pn_u": 600000.0,
+      "confine": 0
+     },
+     "out": 85673.98671708934
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "Aj": 2000.0,
+      "As": 100.0,
+      "Fys": 2400.0,
+      "Pn_u": 600000.0,
+      "confine": 2
+     },
+     "out": 141897.54050017922
+    }
+   ],
+   "notes": "(9.7-3) 圍束接頭 C=5.3；(9.7-4) 三面或兩對面受圍束 C=4.0；(9.7-5) 其他 C=3.2。φvrc=0.75。圍束接頭指接頭四面均受梁圍束，且該梁寬至少為柱寬之 3/4。Aj 寬度取「梁寬＋接頭深度」與「梁寬＋2×梁邊至柱邊距離」之較小值；梁為鋼梁時不得大於柱寬之半。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第110-111頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_wall_phiVn",
+   "src": "src100",
+   "clause": "9.10.1",
+   "page": 116,
+   "title": "SRC 剪力牆之設計剪力強度（鋼骨鋼筋混凝土構造設計規範 9.10.1 (9.10-1)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 剪力牆 設計剪力強度 phi_v Vnw 鋼板 鋼骨斜撐 9.10-1",
+   "unit": "kgf（與輸入同單位）",
+   "output": "phi_v_Vnw",
+   "latex": "\\phi_vV_{nw}=\\phi_{vs}V_{nws}+\\phi_{vrc}V_{nwrc},\\quad \\phi_{vs}=0.9,\\ \\phi_{vrc}=0.75",
+   "vars": {
+    "Vnws": {
+     "desc": "鋼骨部分標稱剪力強度 Vnws（9.10.2 節）",
+     "unit": "kgf",
+     "min": 0
+    },
+    "Vnwrc": {
+     "desc": "RC 部分標稱剪力強度 Vnwrc（9.10.3 節）",
+     "unit": "kgf",
+     "min": 0
+    }
+   },
+   "expr": "0.9 * Vnws + 0.75 * Vnwrc",
+   "conditions": [
+    {
+     "expr": "Vnws >= 0 and Vnwrc >= 0",
+     "msg": "強度須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Vnws": 100000.0,
+      "Vnwrc": 200000.0
+     },
+     "out": 240000.0
+    }
+   ],
+   "notes": "(9.10-1) 式；適用於符合 9.10.4 節之內裝鋼板或內裝雙對稱鋼骨斜撐 SRC 剪力牆。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第116頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_wall_Vnws",
+   "src": "src100",
+   "clause": "9.10.2",
+   "page": 117,
+   "title": "SRC 剪力牆鋼骨部分之標稱剪力強度 Vnws（鋼骨鋼筋混凝土構造設計規範 9.10.2 (9.10-2)(9.10-3)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 剪力牆 鋼板 鋼骨斜撐 Vnws 0.6FypAsp 2Pns cos 9.10-2 9.10-3",
+   "unit": "kgf（與輸入同單位）",
+   "output": "Vnws",
+   "latex": "V_{nws}=0.6F_{yp}A_{sp};\\qquad V_{nws}=2P_{ns}\\cos\\theta_w",
+   "vars": {
+    "Fyp": {
+     "desc": "鋼板之標稱降伏應力 Fyp",
+     "unit": "kgf/cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Asp": {
+     "desc": "剪力方向之鋼板斷面積 Asp",
+     "unit": "cm2",
+     "min": 0,
+     "default": 0
+    },
+    "Pns": {
+     "desc": "鋼骨斜撐之標稱受壓強度 Pns（依 6.4.1 節，reff 取 rs）",
+     "unit": "kgf",
+     "min": 0,
+     "default": 0
+    },
+    "theta_w": {
+     "desc": "鋼骨斜撐與水平線之夾角 θw",
+     "unit": "度",
+     "min": 0,
+     "max": 90,
+     "default": 45
+    },
+    "mode": {
+     "desc": "0＝內裝鋼板（(9.10-2)）；1＝內裝 X 型或 V 型雙對稱鋼骨斜撐（(9.10-3)）",
+     "unit": "型態",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   },
+   "expr": "0.6 * Fyp * Asp if mode < 0.5 else 2.0 * Pns * cos(radians(theta_w))",
+   "conditions": [
+    {
+     "expr": "Fyp >= 0 and Asp >= 0",
+     "msg": "Fyp、Asp 須非負"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Fyp": 2800.0,
+      "Asp": 50.0,
+      "Pns": 0.0,
+      "theta_w": 45,
+      "mode": 0
+     },
+     "out": 84000.0
+    },
+    {
+     "in": {
+      "Fyp": 0.0,
+      "Asp": 0.0,
+      "Pns": 120000.0,
+      "theta_w": 45,
+      "mode": 1
+     },
+     "out": 169705.62748477142
+    }
+   ],
+   "notes": "(9.10-2) 內裝鋼板；(9.10-3) 內裝 X 型或 V 型雙對稱鋼骨斜撐（一支受拉、一支受壓）。Pns 依 6.4.1 節計算，惟 (6.4-5) 式中之 reff 應取 rs。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第117頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "src100_wall_Vnwrc",
+   "src": "src100",
+   "clause": "9.10.3",
+   "page": 118,
+   "title": "SRC 剪力牆 RC 部分之標稱剪力強度 Vnwrc（鋼骨鋼筋混凝土構造設計規範 9.10.3 (9.10-4)）",
+   "keywords": "SRC 鋼骨鋼筋混凝土 剪力牆 RC 剪力強度 Vnwrc alpha_c 高寬比 牆筋比 9.10-4",
+   "unit": "kgf（與輸入同單位）",
+   "output": "Vnwrc",
+   "latex": "V_{nwrc}=(\\alpha_c\\sqrt{f_c'}+\\rho_nF_{yr})A_{cv};\\quad \\alpha_c=0.80\\ (H_w/L_w\\le1.5),\\ 0.53\\ (H_w/L_w\\ge2.0),\\ 0.53[3.0-(H_w/L_w)]",
+   "vars": {
+    "fc": {
+     "desc": "混凝土規定抗壓強度 f'c",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "rho_n": {
+     "desc": "與剪力作用方向垂直平面上之牆筋比 ρn",
+     "unit": "無因次",
+     "min": 0
+    },
+    "Fyr": {
+     "desc": "牆剪力鋼筋之規定降伏應力 Fyr",
+     "unit": "kgf/cm2",
+     "min": 0
+    },
+    "Acv": {
+     "desc": "剪力方向全牆或設計牆段之 RC 總斷面積 Acv",
+     "unit": "cm2",
+     "min": 0
+    },
+    "Hw": {
+     "desc": "剪力方向全牆或設計牆段之高度 Hw",
+     "unit": "cm",
+     "min": 0.0001
+    },
+    "Lw": {
+     "desc": "剪力方向全牆或設計牆段之長度 Lw",
+     "unit": "cm",
+     "min": 0.0001
+    }
+   },
+   "defs": [
+    [
+     "hw_lw",
+     "Hw / Lw"
+    ],
+    [
+     "alpha_c",
+     "0.8 if hw_lw <= 1.5 else (0.53 if hw_lw >= 2.0 else 0.53 * (3.0 - hw_lw))"
+    ]
+   ],
+   "expr": "(alpha_c * sqrt(fc) + rho_n * Fyr) * Acv",
+   "conditions": [
+    {
+     "expr": "fc > 0 and Lw > 0",
+     "msg": "f'c、Lw 須為正"
+    }
+   ],
+   "warn_if": [
+    {
+     "expr": "rho_n < 0.0025",
+     "msg": "牆筋比小於 0.0025，不符 9.10.3 第3款"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "fc": 280.0,
+      "rho_n": 0.0025,
+      "Fyr": 4200.0,
+      "Acv": 4000.0,
+      "Hw": 300.0,
+      "Lw": 400.0
+     },
+     "out": 95546.24169818083
+    },
+    {
+     "in": {
+      "fc": 280.0,
+      "rho_n": 0.0025,
+      "Fyr": 4200.0,
+      "Acv": 4000.0,
+      "Hw": 350.0,
+      "Lw": 200.0
+     },
+     "out": 86342.981406306
+    }
+   ],
+   "notes": "(9.10-4) 無開孔 RC 剪力牆。αc：Hw/Lw ≤1.5 取 0.80；≥2.0 取 0.53；介於之間取 0.53[3.0−(Hw/Lw)]。開孔者取「各牆墩強度和」與「本式全牆值」之較小者，且各牆墩和 ≤ 2.11Acv√f'c、單一牆墩 ≤ 2.65Acp√f'c、水平牆段 ≤ 2.65Acw√f'c。牆筋比任一向 ≥0.0025、間距 ≤450 mm。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 src100 PDF 第118頁",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  }
+ ],
+ "tables": []
+}

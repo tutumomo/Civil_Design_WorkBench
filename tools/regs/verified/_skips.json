@@ -2682,6 +2682,246 @@
    "legacy_status": "no-content"
   },
   {
+   "src": "pcc_spec",
+   "clause": "01726/3.2.2",
+   "status": "out_of_scope",
+   "reason": "河川水位測量之定位方法（經緯儀角度精度規定），非本工作區道路、排水溝、擋土牆、邊坡、箱涵之設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02218/3.1.8",
+   "status": "out_of_scope",
+   "reason": "標準貫入式土壤層鑽探試驗方法（63.5kg重錘、760mm落高、N值判定），本工作區無鑽探與N值計算器，尚未轉換",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02317/4.1.2",
+   "status": "covered",
+   "reason": "開挖回填計價斷面（一般構造物外緣外50cm、H:V=0.5:1；小型構造物30cm、H:V=0.3:1；岩盤內垂直回填30cm）與第02316章4.1.3同文，已由 pcc_excavation_pay_section_area 涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02344/2.2.2",
+   "status": "out_of_scope",
+   "reason": "灌漿設備規格（拌漿機轉數、水表流量許可差、壓力計刻度），屬施工機具規格，本工作區無對應計算器",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02513/2.2.3",
+   "status": "out_of_scope",
+   "reason": "給水用鋼管之尺度及許可差表（標稱外徑80～1650mm、厚度、質量），非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02517/3.1.2",
+   "status": "out_of_scope",
+   "reason": "給水用控制閥之檢驗項目（閥座洩漏、靜水壓、動水壓、流速上限），屬機電設備試驗，本工作區無對應計算器",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02532/3.6",
+   "status": "covered",
+   "reason": "擠壓式填縫帶規格（表2）與材質（表3）與第02533章2.1.5之表1、表2相同，已由 pcc_t_02533_c_type_jointer、pcc_t_02533_jointer_material 涵蓋；本版原文表3之時延展性、軟化點、閃火點三欄為空白",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02701/2.36",
+   "status": "covered",
+   "reason": "V.M.A.最小值表與第02742章2.2.2為同一組數值，已由 pcc_t_02742_vma_table 涵蓋；同款滯留強度指數式 Si/S×100 已由 pcc_02742_retained_strength 涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02701/3.1.1",
+   "status": "qualitative",
+   "reason": "純跨章引用條文（依第02742章第3.1項之規定），本款無自有算式或數值表，屬定性敘述",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02702/3.1.1",
+   "status": "qualitative",
+   "reason": "純跨章引用條文（依第02742章第3.1項之規定），本款無自有算式或數值表，屬定性敘述",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02794/3.1.5",
+   "status": "unrecognized",
+   "reason": "表7透水性鋪面檢測表於ODT文字層之工種、項目、次數、標準要求欄位互相交錯（透水性瀝青混合料列之瀝青含量與壓實度值明顯錯位），無法可靠還原，故未轉錄",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02796/3.7.5",
+   "status": "covered",
+   "reason": "本款要求粒料級配及改質瀝青含量檢驗與工地拌合公式之差異不得大於表14，已由 pcc_t_02796_jmf_tolerance 涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "02797/3.10.5",
+   "status": "covered",
+   "reason": "本款要求粒料級配及改質瀝青含量檢驗與工地拌合公式之差異不得大於表14，已由 pcc_t_02797_jmf_tolerance 涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "05821/2.1.1",
+   "status": "out_of_scope",
+   "reason": "橋梁盤式支承之材料規格（鋼板ASTM A572、防蝕油漆與金屬熔射膜厚80μm／160μm、橡膠板AASHTO施工篇18.4），屬橋梁支承範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "09260/3.2.2",
+   "status": "out_of_scope",
+   "reason": "輕鋼骨架牆體與桁架之施工要求，屬建築輕鋼構件範圍，非本工作區土木（道路、排水、擋土牆、邊坡、箱涵）設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "11610/2.2.16",
+   "status": "out_of_scope",
+   "reason": "污水處理試驗室酸鹼度計（攜帶型）規格，屬試驗儀器設備清單，本工作區無對應計算器",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "11610/2.2.18",
+   "status": "out_of_scope",
+   "reason": "污水處理試驗室導電度計（攜帶型）規格，屬試驗儀器設備清單，本工作區無對應計算器",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "11610/2.2.5",
+   "status": "out_of_scope",
+   "reason": "污水處理試驗室COD裝置規格，屬試驗儀器設備清單，本工作區無對應計算器",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "11881/2.1.6",
+   "status": "out_of_scope",
+   "reason": "景觀灌溉系統控制閥規格，屬園藝灌溉範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "11881/3.1.1",
+   "status": "out_of_scope",
+   "reason": "景觀灌溉系統安裝方法，屬園藝灌溉範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "11881/3.1.2",
+   "status": "out_of_scope",
+   "reason": "景觀灌溉設備安裝方法，屬園藝灌溉範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "13851/2.2.1",
+   "status": "out_of_scope",
+   "reason": "火警受信總機之一般要求與組成（工作電壓24V DC、輸入電源220V 60Hz、可處理狀況容量與歷史記錄筆數），屬消防機電範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "15151/2.2.4",
+   "status": "out_of_scope",
+   "reason": "餐飲業排水之反流制水閥與油脂截留器容量公式（Q=nq/tk、V=Q/6）及餐廳類別用水量表，屬下水道用戶接管範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "15911/2.2.3",
+   "status": "out_of_scope",
+   "reason": "空調監視控制系統之系統軟體功能規格，屬機電資訊範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "16234/2.1.7",
+   "status": "out_of_scope",
+   "reason": "太陽光電發電設施之監測系統規格，屬電力能源範圍，非本工作區設計計算範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "附錄一",
+   "status": "out_of_scope",
+   "reason": "附錄一為跨章共用條款鍵，內容含第02797、02798章瀝青混合料配合設計（已由 pcc_t_02742_quality_dense、pcc_t_02797_mix_design_spec 等涵蓋）、第02905章喬木植栽詳圖與建築章門五金分組；植栽與門五金非本工作區範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "附錄三",
+   "status": "covered",
+   "reason": "未夯壓瀝青混合料垂流試驗（網籃法）之計算式 C=A/B×100 已由 pcc_02798_cantabro_loss（條款鍵 02798/5）涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "附錄二",
+   "status": "covered",
+   "reason": "壓實瀝青混凝土垂流（肯塔堡飛散）試驗之計算式 C=A/B×100 已由 pcc_02798_cantabro_loss 涵蓋；同一條款鍵另含景觀修剪與建築門五金內容，非本工作區範圍",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "附錄六",
+   "status": "covered",
+   "reason": "輪跡試驗之動穩定值 DS=Δd/Δn 與變形率 RD=Δd/Δt 已由 pcc_02797_dynamic_stability、pcc_02797_deformation_rate 涵蓋；其餘為試驗步驟與儀器規定",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "pcc_spec",
+   "clause": "附錄四",
+   "status": "covered",
+   "reason": "現場透水試驗之計算式 Q=q/t 與 Q15=15Q 已由 pcc_02797_infield_permeability_flow、pcc_02797_infield_permeability_q15 涵蓋；其餘為試驗方法與儀器規定",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
    "src": "rainwater109",
    "clause": "I-1.1",
    "status": "qualitative",

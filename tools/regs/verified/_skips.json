@@ -233,6 +233,62 @@
    "legacy_status": "no-content"
   },
   {
+   "src": "concrete_const110",
+   "clause": "14.2.2",
+   "status": "qualitative",
+   "reason": "14.2.2 僅規定預力鋼腱品質須符合國家標準，無計算式；解說之鋼線／鋼絞線規格屬 CNS 產品標準",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "concrete_const110",
+   "clause": "14.2.9",
+   "status": "qualitative",
+   "reason": "14.2.9 為粘接劑定性要求；解說表R14.2.2 為橋梁用環氧樹脂規格（試驗項目繁多、部分數值於文字層缺失，待回紙本核對後再入庫）",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "concrete_const110",
+   "clause": "14.4.1",
+   "status": "covered",
+   "reason": "14.4.1 為鋼腱組裝配置之定性要求；其排置許可差由 14.4.3 表14.4.1（concrete_const110_table14_4_1_tendon）涵蓋",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "concrete_const110",
+   "clause": "16.7.2",
+   "status": "qualitative",
+   "reason": "16.7.2 為材料品質管制原則；解說表R16.1 為試驗項目與主要設備清單，非設計數值",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "concrete_const110",
+   "clause": "3.1.2",
+   "status": "qualitative",
+   "reason": "3.1.2 為配比一般要求（強度、工作性、耐久性須經監造者認可），無計算式；數值要求分別在 3.2/3.3 節各表",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "concrete_const110",
+   "clause": "3.9",
+   "status": "qualitative",
+   "reason": "3.9 為配比選定之三種方法（試拌、工地紀錄、經驗）之程序規定，無計算式",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
+   "src": "concrete_const110",
+   "clause": "9.4.9",
+   "status": "qualitative",
+   "reason": "9.4.9 為外模振動器之定性要求（固定附著、分布均勻）；解說表R9.4.1 為內部振動棒功能特性參考值，非本條規定",
+   "date": "2026-11-14",
+   "by": "agent"
+  },
+  {
    "src": "farmroad108",
    "clause": "附件-2",
    "status": "covered",

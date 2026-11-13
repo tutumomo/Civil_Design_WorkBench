@@ -1,0 +1,681 @@
+{
+ "formulas": [
+  {
+   "id": "sewer105_wet_well_min_volume",
+   "src": "sewer105",
+   "clause": "3-4-04",
+   "page": 234,
+   "title": "定速抽水機抽水站濕井最小有效蓄水容量 Vmin=Qp·T/4（式3-20）",
+   "keywords": "污水下水道 抽水站 濕井 容量 循環時間 啟動次數 定速抽水機",
+   "unit": "m3",
+   "output": "Vmin",
+   "latex": "V_{\\min} = \\dfrac{Q_p\\,T}{4}",
+   "vars": {
+    "Qp": {
+     "desc": "抽水機抽水量（最大台抽水機容量）",
+     "unit": "m3/min",
+     "min": 0.001,
+     "max": 1000.0
+    },
+    "T": {
+     "desc": "最小循環時間（起動、停止至再起動，min）",
+     "unit": "min",
+     "min": 1.0,
+     "max": 120.0,
+     "default": 15.0
+    }
+   },
+   "expr": "Qp * T / 4.0",
+   "warn_if": [
+    {
+     "expr": "T < 15",
+     "msg": "循環時間小於 15 min（每小時 4 次啟動）將加速抽水機與電動機損壞，大型抽水機尤須加長"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Qp": 2.0,
+      "T": 15.0
+     },
+     "out": 7.5,
+     "tol": 1e-06
+    },
+    {
+     "in": {
+      "Qp": 5.0,
+      "T": 12.0
+     },
+     "out": 15.0,
+     "tol": 1e-06
+    }
+   ],
+   "notes": "式(3-20)。濕井容量過大不經濟、過小則啟停過於頻繁。中型標準電動機全壓啟動可承受每小時 4 次啟動（最小循環時間 15 min）；降壓啟動可增至每小時 12~15 次；特殊乾井電動機 6 次、沉水式 12 次以上（可達 20 次）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.234（頁碼 217）式(3-20)（另以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_bell_mouth_submergence",
+   "src": "sewer105",
+   "clause": "3-4-04",
+   "page": 236,
+   "title": "吸水喇叭口至最低水位浸水深度 S=(1+2.3·FD)·D（式3-21）",
+   "keywords": "污水下水道 抽水站 濕井 吸水喇叭口 浸水深度 福祿數 渦流",
+   "unit": "m",
+   "output": "S",
+   "latex": "S = \\left(1 + 2.3\\,F_D\\right)D",
+   "vars": {
+    "FD": {
+     "desc": "福祿數（式3-22）",
+     "unit": "-",
+     "min": 0.0,
+     "max": 5.0
+    },
+    "D": {
+     "desc": "吸水喇叭口直徑",
+     "unit": "m",
+     "min": 0.02,
+     "max": 3.0
+    }
+   },
+   "expr": "(1.0 + 2.3 * FD) * D",
+   "tests": [
+    {
+     "in": {
+      "FD": 0.5,
+      "D": 0.3
+     },
+     "out": 0.645,
+     "tol": 1e-06
+    },
+    {
+     "in": {
+      "FD": 0.2,
+      "D": 0.5
+     },
+     "out": 0.73,
+     "tol": 1e-06
+    }
+   ],
+   "notes": "式(3-21)。抽水機吸水口與底板距離不得超過吸水喇叭口直徑的一半，最好為三分之一，以避免吸入空氣與渦流。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.236（頁碼 219）式(3-21)",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_suction_froude",
+   "src": "sewer105",
+   "clause": "3-4-04",
+   "page": 236,
+   "title": "吸水口福祿數 FD=v/√(gD)（式3-22）",
+   "keywords": "污水下水道 抽水站 福祿數 Froude 吸水口 流速 喇叭口",
+   "unit": "-",
+   "output": "FD",
+   "latex": "F_D = \\dfrac{v}{\\sqrt{gD}}",
+   "vars": {
+    "v": {
+     "desc": "吸水口流速",
+     "unit": "m/s",
+     "min": 0.0,
+     "max": 10.0
+    },
+    "g": {
+     "desc": "重力加速度",
+     "unit": "m/s2",
+     "min": 9.7,
+     "max": 9.9,
+     "default": 9.8
+    },
+    "D": {
+     "desc": "吸水喇叭口直徑",
+     "unit": "m",
+     "min": 0.02,
+     "max": 3.0
+    }
+   },
+   "expr": "v / sqrt(g * D)",
+   "tests": [
+    {
+     "in": {
+      "v": 1.0,
+      "g": 9.8,
+      "D": 0.3
+     },
+     "out": 0.583212,
+     "tol": 1e-05
+    },
+    {
+     "in": {
+      "v": 1.5,
+      "g": 9.8,
+      "D": 0.5
+     },
+     "out": 0.67763,
+     "tol": 1e-05
+    }
+   ],
+   "notes": "式(3-22)。與式(3-21) 併用決定喇叭口浸水深度。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.236（頁碼 219）式(3-22)",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_npsha",
+   "src": "sewer105",
+   "clause": "3-4-06",
+   "page": 261,
+   "title": "可用淨吸水高度 NPSHA=Ha+hs−hv−hent−hfs−Σhfvs−hvol（式3-23）",
+   "keywords": "污水下水道 抽水機 穴蝕 NPSHA 淨吸水高度 大氣壓 飽和蒸汽壓",
+   "unit": "m",
+   "output": "NPSHA",
+   "latex": "\\mathrm{NPSH}_A = H_a + h_s - h_v - h_{ent} - h_{fs} - \\Sigma h_{fvs} - h_{vol}",
+   "vars": {
+    "Ha": {
+     "desc": "水柱的大氣壓力（依海拔查表3-21，平地 10.33）",
+     "unit": "m",
+     "min": 5.0,
+     "max": 10.5
+    },
+    "hs": {
+     "desc": "靜吸水水頭（水位在葉輪基準線上為正、下方為負）",
+     "unit": "m",
+     "min": -10.0,
+     "max": 15.0
+    },
+    "hv": {
+     "desc": "該水溫下飽和蒸汽壓（查表3-22）",
+     "unit": "m",
+     "min": 0.0,
+     "max": 3.0
+    },
+    "hent": {
+     "desc": "吸水口損失水頭",
+     "unit": "m",
+     "min": 0.0,
+     "max": 20.0,
+     "default": 0.0
+    },
+    "hfs": {
+     "desc": "吸水管摩擦損失水頭",
+     "unit": "m",
+     "min": 0.0,
+     "max": 20.0,
+     "default": 0.0
+    },
+    "sum_hfvs": {
+     "desc": "吸水管上管件及閥類損失和",
+     "unit": "m",
+     "min": 0.0,
+     "max": 20.0,
+     "default": 0.0
+    },
+    "hvol": {
+     "desc": "其他不確定因素估計（通常約 0.6）",
+     "unit": "m",
+     "min": 0.0,
+     "max": 5.0,
+     "default": 0.6
+    }
+   },
+   "expr": "Ha + hs - hv - hent - hfs - sum_hfvs - hvol",
+   "warn_if": [
+    {
+     "expr": "result <= 0",
+     "msg": "NPSHA 非正，抽水機必然穴蝕，須降低吸水高度或減少吸入側損失"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Ha": 10.33,
+      "hs": 2.0,
+      "hv": 0.238,
+      "hent": 0.15,
+      "hfs": 0.5,
+      "sum_hfvs": 0.3,
+      "hvol": 0.6
+     },
+     "out": 10.542,
+     "tol": 1e-06
+    },
+    {
+     "in": {
+      "Ha": 9.19,
+      "hs": -3.0,
+      "hv": 0.433,
+      "hent": 0.2,
+      "hfs": 0.8,
+      "sum_hfvs": 0.4,
+      "hvol": 0.6
+     },
+     "out": 3.757,
+     "tol": 1e-06
+    }
+   ],
+   "notes": "式(3-23)。理論吸水高度 10.33 m（一大氣壓）為上限；暴風雨時大氣壓力會減少約 1.7%。NPSHA 須大於 1.2 倍 NPSHR 以避免穴蝕（見式3-24~3-26）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.261（頁碼 244）式(3-23) 及式中說明",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_npshr_thoma",
+   "src": "sewer105",
+   "clause": "3-4-06",
+   "page": 262,
+   "title": "抽水機必要淨吸水高度 NPSHR=σ·Ht（式3-24）",
+   "keywords": "污水下水道 抽水機 穴蝕 NPSHR Thoma 穴蝕常數 總動水頭",
+   "unit": "m",
+   "output": "NPSHR",
+   "latex": "\\mathrm{NPSH}_R = \\sigma\\,H_t",
+   "vars": {
+    "sigma": {
+     "desc": "Thoma 穴蝕常數（可查圖3-91 或式3-25）",
+     "unit": "-",
+     "min": 0.001,
+     "max": 1.0
+    },
+    "Ht": {
+     "desc": "抽水機總動水頭",
+     "unit": "m",
+     "min": 0.5,
+     "max": 300.0
+    }
+   },
+   "expr": "sigma * Ht",
+   "tests": [
+    {
+     "in": {
+      "sigma": 0.1,
+      "Ht": 20.0
+     },
+     "out": 2.0,
+     "tol": 1e-06
+    },
+    {
+     "in": {
+      "sigma": 0.05,
+      "Ht": 45.0
+     },
+     "out": 2.25,
+     "tol": 1e-06
+    }
+   ],
+   "notes": "式(3-24)。無製造商試驗資料時之推估法；NPSHR 正式值應採製造商試驗（總動水頭掉落 3% 之點）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.262（頁碼 245）式(3-24)（另以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_thoma_cavitation_sigma",
+   "src": "sewer105",
+   "clause": "3-4-06",
+   "page": 263,
+   "title": "Thoma 穴蝕常數 σ=K·Ns^(4/3)/10⁶（式3-25，Rutschi）",
+   "keywords": "污水下水道 抽水機 穴蝕 Thoma 常數 Rutschi 比速度 效率",
+   "unit": "-",
+   "output": "sigma",
+   "latex": "\\sigma = K\\times\\dfrac{N_s^{4/3}}{10^{6}}",
+   "vars": {
+    "K": {
+     "desc": "依抽水機效率查表3-23（70%→112.618、80%→78.950、90%→51.937）",
+     "unit": "-",
+     "min": 30.0,
+     "max": 200.0
+    },
+    "Ns": {
+     "desc": "比速度（單位 m³/min, m, rpm）",
+     "unit": "rpm",
+     "min": 10.0,
+     "max": 1000.0
+    }
+   },
+   "expr": "K * Ns ** (4.0 / 3.0) / 1e6",
+   "tests": [
+    {
+     "in": {
+      "K": 78.95,
+      "Ns": 200.0
+     },
+     "out": 0.0923405,
+     "tol": 1e-05
+    },
+    {
+     "in": {
+      "K": 112.618,
+      "Ns": 160.0
+     },
+     "out": 0.0978215,
+     "tol": 1e-05
+    }
+   ],
+   "notes": "式(3-25)。以單吸抽水機而言，Thoma 穴蝕常數 σ 可由 Rutschi 關係式求得；K 值見表3-23（效率愈高 K 愈小）。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.263（頁碼 246）式(3-25) 與表3-23（另以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_npshr_flow_correction",
+   "src": "sewer105",
+   "clause": "3-4-06",
+   "page": 263,
+   "title": "偏離 BEP 操作時 NPSHR 修正 NPSHR_op/NPSHR_BEP=(Q_op/Q_BEP)^n（式3-26）",
+   "keywords": "污水下水道 抽水機 穴蝕 NPSHR 修正 BEP 流量 比速度",
+   "unit": "-",
+   "output": "ratio",
+   "latex": "\\dfrac{\\mathrm{NPSH}_{R,op}}{\\mathrm{NPSH}_{R,BEP}} = \\left(\\dfrac{Q_{op}}{Q_{BEP}}\\right)^{n}",
+   "vars": {
+    "Q_op": {
+     "desc": "操作情況下之流量",
+     "unit": "m3/min",
+     "min": 0.001,
+     "max": 1000.0
+    },
+    "Q_BEP": {
+     "desc": "BEP 情況下之流量",
+     "unit": "m3/min",
+     "min": 0.001,
+     "max": 1000.0
+    },
+    "n": {
+     "desc": "指數（大部分水及污水抽水機 1.8~2.8）",
+     "unit": "-",
+     "min": 1.0,
+     "max": 4.0,
+     "default": 2.0
+    }
+   },
+   "expr": "(Q_op / Q_BEP) ** n",
+   "warn_if": [
+    {
+     "expr": "n < 1.8 or n > 2.8",
+     "msg": "指數 n 超出大部分水及污水抽水機之 1.8~2.8 範圍"
+    }
+   ],
+   "tests": [
+    {
+     "in": {
+      "Q_op": 1.2,
+      "Q_BEP": 1.0,
+      "n": 2.0
+     },
+     "out": 1.44,
+     "tol": 1e-06
+    },
+    {
+     "in": {
+      "Q_op": 1.5,
+      "Q_BEP": 1.0,
+      "n": 1.8
+     },
+     "out": 2.074743,
+     "tol": 1e-05
+    }
+   ],
+   "notes": "式(3-26)。抽水機在較低總動水頭下操作時流量會大於 BEP，須以本式修正 NPSHR；NPSHA 須大於 1.2 NPSHR。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.263（頁碼 246）式(3-26)（另以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  }
+ ],
+ "tables": [
+  {
+   "id": "sewer105_t3_1_bar_screen",
+   "src": "sewer105",
+   "clause": "3-3-01",
+   "page": 185,
+   "title": "表3-1 人工清除式及機械清除式粗攔污柵典型設計數據表",
+   "keywords": "污水下水道 攔污柵 粗攔污柵 柵條間距 接近速度 水頭損失 表3-1",
+   "kind": "lookup",
+   "unit": "-",
+   "columns": [
+    "單位",
+    "人工式",
+    "機械式"
+   ],
+   "rows": [
+    {
+     "key": "柵條尺寸 寬度",
+     "values": {
+      "單位": "mm",
+      "人工式": "5-15",
+      "機械式": "5-15"
+     }
+    },
+    {
+     "key": "柵條尺寸 深度",
+     "values": {
+      "單位": "mm",
+      "人工式": "25-38",
+      "機械式": "25-38"
+     }
+    },
+    {
+     "key": "柵條間距",
+     "values": {
+      "單位": "mm",
+      "人工式": "25-50",
+      "機械式": "15-75"
+     }
+    },
+    {
+     "key": "與垂直面之坡度",
+     "values": {
+      "單位": "度",
+      "人工式": "30-45",
+      "機械式": "0-30"
+     }
+    },
+    {
+     "key": "接近速度 最大",
+     "values": {
+      "單位": "m/s",
+      "人工式": "0.3-0.6",
+      "機械式": "0.6-1.0"
+     }
+    },
+    {
+     "key": "接近速度 最小",
+     "values": {
+      "單位": "m/s",
+      "人工式": "0.3-0.5",
+      "機械式": "0.3-0.5"
+     }
+    },
+    {
+     "key": "容許水頭損失",
+     "values": {
+      "單位": "mm",
+      "人工式": "150",
+      "機械式": "150-600"
+     }
+    }
+   ],
+   "notes": "表3-1。國內常用粗攔污柵柵條間距 20~150 mm、細攔污柵 6~25 mm（美國：粗 6~150 mm、細<6 mm、微細篩<50 μm；日本：粗 50~150 mm、細 15~25 mm）。機械清除式傾斜角與水平成 70~90 度，人工清除式 45~60 度。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.185（頁碼 168）表3-1（以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_t3_21_atmospheric_pressure",
+   "src": "sewer105",
+   "clause": "3-4-06",
+   "page": 262,
+   "title": "表3-21 大氣壓與海拔高度之關係（以水柱高度表示）",
+   "keywords": "污水下水道 大氣壓 海拔 NPSH 水柱 表3-21",
+   "kind": "interp",
+   "unit": "m",
+   "columns": [
+    "海拔高度(m)",
+    "大氣壓力(m 水柱)"
+   ],
+   "rows": [
+    [
+     0,
+     10.33
+    ],
+    [
+     500,
+     9.74
+    ],
+    [
+     1000,
+     9.19
+    ],
+    [
+     1500,
+     8.64
+    ],
+    [
+     2000,
+     8.13
+    ],
+    [
+     2500,
+     7.47
+    ],
+    [
+     3000,
+     7.17
+    ],
+    [
+     3500,
+     6.74
+    ]
+   ],
+   "notes": "表3-21。暴風雨時大氣壓力會減少約 1.7%。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.262（頁碼 245）表3-21（以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_t3_22_vapor_pressure",
+   "src": "sewer105",
+   "clause": "3-4-06",
+   "page": 262,
+   "title": "表3-22 水溫與飽和蒸汽壓之關係",
+   "keywords": "污水下水道 水溫 飽和蒸汽壓 NPSH hv 表3-22",
+   "kind": "interp",
+   "unit": "m",
+   "columns": [
+    "水溫(°C)",
+    "飽和蒸汽壓 hv(m)"
+   ],
+   "rows": [
+    [
+     0,
+     0.062
+    ],
+    [
+     5,
+     0.089
+    ],
+    [
+     10,
+     0.125
+    ],
+    [
+     15,
+     0.174
+    ],
+    [
+     20,
+     0.238
+    ],
+    [
+     25,
+     0.323
+    ],
+    [
+     30,
+     0.433
+    ],
+    [
+     35,
+     0.573
+    ],
+    [
+     40,
+     0.752
+    ],
+    [
+     45,
+     0.977
+    ],
+    [
+     50,
+     1.258
+    ]
+   ],
+   "notes": "表3-22。供式(3-23) NPSHA 計算用之 hv。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.262（頁碼 245）表3-22（以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  },
+  {
+   "id": "sewer105_t3_23_thoma_k",
+   "src": "sewer105",
+   "clause": "3-4-06",
+   "page": 263,
+   "title": "表3-23 式3-25 之 K 值（抽水機效率對應）",
+   "keywords": "污水下水道 Thoma K 值 抽水機效率 比速度 穴蝕 表3-23",
+   "kind": "interp",
+   "unit": "-",
+   "columns": [
+    "抽水機效率(%)",
+    "K 值"
+   ],
+   "rows": [
+    [
+     70,
+     112.618
+    ],
+    [
+     80,
+     78.95
+    ],
+    [
+     90,
+     51.937
+    ]
+   ],
+   "notes": "表3-23。Ns 使用單位為 m³/min, m, rpm。K 值可線性內插；效率低於 70% 或高於 90% 時不宜外插。",
+   "status": "verified",
+   "verified": {
+    "method": "逐字對照 PDF p.263（頁碼 246）表3-23（以 150 dpi 頁面影像目視核對）",
+    "by": "agent",
+    "date": "2026-11-14"
+   }
+  }
+ ]
+}

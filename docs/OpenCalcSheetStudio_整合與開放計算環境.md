@@ -124,7 +124,19 @@ python tools/project_paths.py --install --only OpenCalcSheet    # 只補它
 | Linux | `.deb` 需 root，**只下載並印出 `sudo apt install …`**，由使用者自行執行 |
 | macOS | 掛載 dmg → 複製 `.app`（沿用 OpenCADStudio 的流程，**尚未實測**） |
 
-* 已安裝（由 `opencalcsheet_exe()` 判定）則略過，**不自動升級**；要升級請手動下載新版。
+* 已安裝（由 `opencalcsheet_exe()` 判定）則略過，**不自動升級**；要升級請手動下載新版（見下）。
+* **升級時別被版本號騙**：同一輪 `2026.45.2` 會連發 `-tw.1`…`-tw.5`，`.deb` 的 `Version` 欄與檔名都不帶 `-tw.N`，
+  只看 `dpkg -l` 或 `probe` 的版本字串分不出 tw.4 與 tw.5。判斷是否真的換成功要**比對執行檔雜湊或安裝日期**：
+
+  ```bash
+  sha256sum /usr/bin/open-calcsheet-studio          # 升級前後比對
+  ls -l --time-style=long-iso /usr/bin/open-calcsheet-studio
+  ```
+
+  Linux 升級流程（2026-11-11 tw.4 → tw.5、2026-11-13 → 2026.46.1 各實測一次）：
+  `gh release download <tag> -R tutumomo/Open-CalcSheet-Studio -p "Open.CalcSheet.Studio.TW_<ver>_arm64.deb" -p SHA256SUMS.txt`
+  → `sha256sum` 比對 → `sudo dpkg -i <deb>` → 重啟 App → `ocss_crosscheck.py probe`、`ocss_tools_doc.py`。
+  deb 只換 `/usr/bin` 與系統 desktop，`~/.local/bin/open-calcsheet-studio-tw` 包裝腳本與使用者層 desktop 會留著。
 * 偵測**不執行**它的 `--version`／`--help`（實測會卡死），完全靠路徑解析。
 * 實測（2026-11-10，Windows）：資產挑選、SHA256 校驗、已安裝略過皆驗證通過；靜默安裝步驟本身因本機已裝而未實際執行，換一台乾淨機器第一次跑時請留意安裝程式是否彈 UAC 或安裝到非預期位置。
 

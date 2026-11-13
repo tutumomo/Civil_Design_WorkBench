@@ -2,7 +2,7 @@
 
 > 本檔由 `python tools/crosscheck/ocss_tools_doc.py` 從**執行中的 OCSS 即時抓取**後生成，**請勿手改**；OCSS 升版後重跑即可更新。整合脈絡、單位陷阱與能力邊界見 [`OpenCalcSheetStudio_整合與開放計算環境.md`](OpenCalcSheetStudio_整合與開放計算環境.md)。
 
-- **OCSS 版本**：2026.45.2　**工具總數**：49
+- **OCSS 版本**：2026.46.1　**工具總數**：49
 - **分類（kind）**：檔案 I/O 4、改動專案 27、讀取 15、介面操作 3
 - **同一份 registry、三種進入點**：MCP `http://127.0.0.1:3879/mcp`、REST 通用 `POST /api/v1/tools/<name>`、以及部分工具的語意化 REST 路由（下表『REST 路由』）。三者行為一致，token 相同。
 - **認證**：`Authorization: Bearer <token>`；token 在 `preferences.json` 的 `mcpToken`（機密，不入文件／版控）。

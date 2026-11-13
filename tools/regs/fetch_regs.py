@@ -77,6 +77,14 @@ SOURCES = [
      MOTC + "&serno=424&detailNo=2", "交通部", "104.04.13 規範修訂"),
     ("hwbridge109", "公路橋梁設計規範_1090103_修訂總說明及對照表", "file",
      MOTC + "&serno=424&detailNo=3", "交通部", "109.01.03 修訂總說明及對照表"),
+    ("hwbridgeseis108", "公路橋梁耐震設計規範_1080114", "file",
+     MOTC + "&serno=419&detailNo=4", "交通部", "108.01.14 修正"),
+    ("wood100", "木構造建築物設計及施工技術規範_1000523", "file",
+     "http://www.ksea.com.tw/public/commonlyspecifications/files/2_%E5%B7%A5%E7%A8%8B%E8%A8%AD%E8%A8%88%E7%9B%B8%E9%97%9C%E8%A6%8F%E7%AF%84/1.%E5%BB%BA%E7%AF%89/16.%E6%9C%A8%E6%A7%8B%E9%80%A0%E5%BB%BA%E7%AF%89%E7%89%A9%E8%A8%AD%E8%A8%88%E5%8F%8A%E6%96%BD%E5%B7%A5%E6%8A%80%E8%A1%93%E8%A6%8F%E7%AF%84%28100.05.23%20%E5%85%A7%E6%94%BF%E9%83%A8%29.pdf",
+     "內政部", "100.05.23 修正發布全文；110.01.26 修正第九章防火部分規定"),
+    ("wood110", "木構造建築物設計及施工技術規範_1100126_修正對照", "file",
+     "https://gazette.nat.gov.tw/EG_FileManager/eguploadpub/eg027017/ch02/type1/gov10/num1/Eg.pdf",
+     "內政部", "110.01.26 台內營字第1100800165號令修正第九點之二、第九點之三"),
     # ---- 法規命令（全國法規資料庫） ----
     ("btr_general", "建築技術規則總則編", "lawmoj", LAWMOJ + "D0070114", "內政部", ""),
     ("btr_design", "建築技術規則建築設計施工編", "lawmoj", LAWMOJ + "D0070115", "內政部", ""),
@@ -103,7 +111,8 @@ SOURCES = [
 
 
 def curl(url, dest, referer=None):
-    cmd = ["curl.exe", "-4", "-sS", "-L", "--retry", "2", "-m", "600", "-A", UA,
+    curl_bin = shutil.which("curl") or "curl.exe"
+    cmd = [curl_bin, "-4", "-sS", "-L", "--retry", "2", "-m", "600", "-A", UA,
            "-D", str(dest) + ".hdr", "-o", str(dest)]
     if referer:
         cmd += ["-e", referer]

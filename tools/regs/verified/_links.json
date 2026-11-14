@@ -64,7 +64,10 @@
   "hwdrain107_manning_n_J",
   "hwdrain107_transition_length_min",
   "hwdrain107_return_period_T31",
-  "hwdrain107_chute_aerated_roughness"
+  "hwdrain107_chute_aerated_roughness",
+  "swc78_road_drain_limits",
+  "swc86_freeboard",
+  "swc87_culvert_max_depth"
  ],
  "channel_profile": [
   "swc84_manning_v",
@@ -97,7 +100,10 @@
  ],
  "sediment_basin": [
   "swc35_usle",
-  "swc92_sediment_volume"
+  "swc92_sediment_volume",
+  "swc93_design_capacity",
+  "swc93_design_limits",
+  "sewer_std12_sediment_rate"
  ],
  "foundation_isolated": [
   "rc112_punching_vc",
@@ -167,7 +173,10 @@
   "rc112_wall_Vn_seismic",
   "found112_shear_FS_T632",
   "rc112_cover_T205131",
-  "rc112_min_wall_thickness_T11311"
+  "rc112_min_wall_thickness_T11311",
+  "swc120_wall_stability_fs",
+  "swc120_eccentricity_limit",
+  "swc118_wall_height_limits"
  ],
  "block_wall": [
   "found112_K0",
@@ -185,7 +194,9 @@
   "rc112_wall_Vn_inplane",
   "rc112_wall_min_reinf",
   "found112_shear_FS_T632",
-  "rc112_cover_T205131"
+  "rc112_cover_T205131",
+  "swc118_wall_height_limits",
+  "swc118_masonry_rules"
  ],
  "counterfort_wall": [
   "found112_K0",
@@ -202,7 +213,8 @@
   "found112_dPWE",
   "found112_shear_FS_T632",
   "rc112_cover_T205131",
-  "rc112_min_wall_thickness_T11311"
+  "rc112_min_wall_thickness_T11311",
+  "swc118_wall_height_limits"
  ],
  "mse_wall": [
   "found112_K0",
@@ -218,7 +230,8 @@
   "found112_Pw_water",
   "found112_dPWE",
   "found112_shear_FS_T632",
-  "rc112_cover_T205131"
+  "rc112_cover_T205131",
+  "swc118_wall_height_limits"
  ],
  "anchored_wall": [
   "found112_K0",
@@ -292,7 +305,9 @@
   "steel99_embed_friction_V",
   "steel99_bolt_tension_T1033",
   "steel99_bolt_strength_T1032",
-  "steel99_bolt_preload_T1031"
+  "steel99_bolt_preload_T1031",
+  "steel99_asd_interaction_821",
+  "steel99_Fe_prime_824"
  ],
  "channel_cover": [
   "hwbridge_deck_moment_A",

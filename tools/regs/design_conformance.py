@@ -70,6 +70,10 @@ KNOWN = [
      "finding": "建築技術規則構造篇第11條規定鋼筋混凝土單位重 2400 kg/m³（＝23.54 kN/m³）；工作台 retaining_wall.GAMMA_CONC 採 24.0 kN/m³",
      "impact": "引擎混凝土自重比規範值高 1.9%，擋土牆穩定檢核（抗滑、抗傾倒）偏保守約 1%；不影響安全性方向",
      "action": "保留 24.0 kN/m³（工程慣用整數值且偏保守）；若採 23.54 會使各案 FS 略降，須重跑回歸後再決定"},
+    {"id": "steel_column_asd_Fe_axis", "severity": "low",
+     "finding": "steel99 式(8.2-4) F'e 之長細比須取「彎曲平面」方向（8.2 本文寫「Lb 及 rb 為構材挫屈平面之未支撐長度與斷面迴轉半徑」，解說 8-4 寫「計算 Fe′時必須考慮構材之彎曲平面所在之方向並採用正確之長細比；僅受強軸彎曲時仍須考慮兩個方向之長細比」；AISC-ASD H1 為 l_b／r_b＝彎曲平面內者，本庫依解說與 AISC 解讀，本文「挫屈平面」之字面可另作弱軸挫屈解讀，故列為待決而非逕判錯誤）——強軸彎曲 fbx 應用 (KL/r)x。steel_column.beam_column_interaction 之 ASD 分支反過來，強軸彎曲取 klr_y、弱軸彎曲取 klr_x",
+     "impact": "H 型鋼 ry<rx，強軸項 F'ex 被低估（例：klr_x=40、klr_y=80 時 F'ex 只有規範值的 1/4），彎矩放大項 1/(1−fa/F'ex) 偏大，結果偏保守；弱軸項則反向偏不保守，但弱軸彎矩通常小。組合式本身（式8.2-1～8.2-3）已與 steel99_asd_interaction_821 逐值一致",
+     "action": "須決定是否改為依彎曲平面取長細比（會改變 ASD 鋼柱之互制比，屬設計變更，改後重跑 design_launch_check steel_column 與 crosscheck steel_column_template）；改前沿用現值（整體偏保守）"},
     {"id": "rc_column_no_slenderness", "severity": "medium",
      "finding": "112 版第 6.6.4.4.1~6.6.4.5.2 規定柱細長效應（樓層穩定指數 Q、臨界挫屈載重 Pc、彎矩放大因數 δ、Mc=δM2）；工作台 rc_design.column_design 自述「Biaxial bending, slenderness, splice and anchorage checks must be added」，未實作細長效應",
      "impact": "細長柱（ℓc/h 大、Pu/Pc 高）的設計彎矩會偏小，可能低估需求鋼筋；Q≤0.05 之無側移判定與 δ≥1.0 之放大均未反映在輸出",
@@ -311,7 +315,115 @@ def numeric_probes():
         return [(f"角變量分級 {k}", lv["ratio"], 1.0 / n, "-", 1e-12)
                 for lv, (k, n) in zip(levels, keys)]
 
+    def swc120_limits():
+        """擋土牆安定門檻：retaining_wall.LIMITS 與偏心中段比例 vs 水保第120條。"""
+        sys.path.insert(0, str(ROOT / "tools" / "design"))
+        import retaining_wall as RW
+        T = "swc120_wall_stability_fs"
+        rows = [("滑動 FS（常時）", RW.LIMITS["sliding_static"], V.table(T, "滑動", "常時")["value"], "-", 1e-9),
+                ("滑動 FS（地震）", RW.LIMITS["sliding_seismic"], V.table(T, "滑動", "地震")["value"], "-", 1e-9),
+                ("傾倒 FS（常時）", RW.LIMITS["overturning_static"], V.table(T, "傾倒", "常時")["value"], "-", 1e-9),
+                ("傾倒 FS（地震）", RW.LIMITS["overturning_seismic"], V.table(T, "傾倒", "地震")["value"], "-", 1e-9),
+                ("基礎承載 FS", RW.LIMITS["bearing"], V.table(T, "基礎承載", "常時")["value"], "-", 1e-9)]
+        # 引擎以中段比例 frac（岩盤 1/2、土層 1/3）判定，容許偏心＝frac·B/2
+        for label, frac, rock in (("土層", 1.0 / 3.0, 0), ("岩盤", 0.5, 1)):
+            B = 3.2
+            rows.append((f"容許偏心距（{label}，B={B}）", frac * B / 2.0,
+                         V.evaluate("swc120_eccentricity_limit", {"B": B, "rock": rock})["value"], "m", 1e-12))
+        return rows
+
+    def swc118_heights():
+        """各擋土牆引擎之牆型有效高上限 vs 水保第118條。"""
+        sys.path.insert(0, str(ROOT / "tools" / "design"))
+        import retaining_wall as RW
+        import block_wall as BW
+        import counterfort_wall as CW
+        import mse_wall as MW
+        T = "swc118_wall_height_limits"
+        col = "有效高上限"
+        pairs = [(RW.WALL_TYPE_SPECS["gravity"]["max_height_m"], "重力式"),
+                 (RW.WALL_TYPE_SPECS["semigravity"]["max_height_m"], "半重力式"),
+                 (RW.WALL_TYPE_SPECS["cantilever"]["max_height_m"], "懸臂式"),
+                 (CW.SPEC["max_effective_height_m"], "扶壁式"),
+                 (BW.BLOCK_WALL_SPECS["gabion"]["max_effective_height_m"], "蛇籠（箱籠）"),
+                 (BW.BLOCK_WALL_SPECS["crib"]["max_effective_height_m"], "格籠（總高）"),
+                 (BW.BLOCK_WALL_SPECS["crib"]["max_layer_height_m"], "格籠（每層）"),
+                 (MW.SPEC["max_effective_height_m"], "加勁土壤構造物"),
+                 (BW.BLOCK_WALL_SPECS["masonry_wet"]["max_effective_height_m"], "砌石"),
+                 (BW.BLOCK_WALL_SPECS["sandwich"]["max_by_site"]["cut"], "三明治式（開挖坡面）"),
+                 (BW.BLOCK_WALL_SPECS["sandwich"]["max_by_site"]["fill"], "三明治式（填方坡面）")]
+        rows = [(f"有效高上限 {row}", e, V.table(T, row, col)["value"], "m", 1e-9) for e, row in pairs]
+        M = "swc118_masonry_rules"
+        for key, row in (("masonry_dry", "乾砌"), ("masonry_wet", "漿砌")):
+            spec = BW.BLOCK_WALL_SPECS[key]
+            rows.append((f"{row} 石材往上高度倍數", spec["stone_height_factor"],
+                         V.table(M, row, "往上高度上限倍數")["value"], "-", 1e-9))
+            rows.append((f"{row} 牆面坡度下限", spec["min_front_batter"],
+                         V.table(M, row, "牆面坡度下限")["value"], "-", 1e-9))
+        return rows
+
+    def swc_channel_rules():
+        """排水溝引擎預設值 vs 水保第78、86、87條。"""
+        T = "swc78_road_drain_limits"
+        d = CH.DEFAULTS
+        rows = [("邊溝最小坡度（一般）", d["slope_min"], V.table(T, "邊溝最小坡度（一般道路）", "值")["value"] / 100.0, "m/m", 1e-12),
+                ("邊溝最小坡度（山區農路）", d["slope_min_mountain_farm"], V.table(T, "邊溝最小坡度（山區農路）", "值")["value"] / 100.0, "m/m", 1e-12),
+                ("側溝最小寬度", d["min_dim_m"], V.table(T, "側溝最小寬度", "值")["value"] / 100.0, "m", 1e-12),
+                ("側溝最小深度", d["min_dim_m"], V.table(T, "側溝最小深度", "值")["value"] / 100.0, "m", 1e-12),
+                ("橫向排水間距", d["cross_drain_spacing_m"], V.table(T, "橫向排水設置間距", "值")["value"], "m", 1e-12)]
+        for Q, b, h_tot, S in ((0.3, 0.6, 0.8, 0.01), (2.0, 1.2, 1.5, 0.005)):
+            r = CH.analyse(Q, b, h_tot, S)
+            rows.append((f"出水高 Q={Q},b={b},S={S}", r["freeboard_required_m"],
+                         V.evaluate("swc86_freeboard", {"h": r["h_normal_m"]})["value"], "m", 2e-3))  # 引擎四捨五入至 mm
+        for D in (0.6, 1.2):
+            r = CH.check_culvert(0.1, D, 0.013, 0.01)
+            rows.append((f"涵管設計水深 D={D}", r["h_ratio"] * D,
+                         V.evaluate("swc87_culvert_max_depth", {"D": D})["value"], "m", 1e-12))
+        return rows
+
+    def sediment_capacity():
+        """沉砂池容量、深度與下水道快速複核常數 vs 水保第93條、下水道工程設施標準第12條。"""
+        import sediment_basin as SB
+        rows = []
+        for area, exc, imp, kind in ((2.0, 0.1, 0.0, "temporary"), (2.0, 0.1, 0.0, "permanent"), (3.0, 1.0, 0.2, "temporary")):
+            r = SB.analyse(area, exc, imp, kind=kind, Am=22.5)
+            vs = r["production"]["production_m3"]
+            rows.append((f"設計容量 area={area},exc={exc},{kind}", r["capacity_m3"],
+                         V.evaluate("swc93_design_capacity", {"Vs": vs, "temporary": 1 if kind == "temporary" else 0})["value"],
+                         "m3", 1e-6))
+        L = "swc93_design_limits"
+        rows += [("深度下限", SB.DEPTH_MIN, V.table(L, "深度下限", "值")["value"], "m", 1e-12),
+                 ("深度上限", SB.DEPTH_MAX, V.table(L, "深度上限", "值")["value"], "m", 1e-12),
+                 ("臨時性容量倍數", SB.TEMP_CAPACITY_FACTOR, V.table(L, "臨時性容量倍數", "值")["value"], "-", 1e-12)]
+        S12 = "sewer_std12_sediment_rate"
+        rows += [("下水道標準 每公頃沉砂量", SB.SEWER_RATE, V.table(S12, "一般（計畫開發面積）", "下限")["value"], "m3/ha", 1e-12),
+                 ("下水道標準 臨時下限", SB.SEWER_TEMP_RANGE[0], V.table(S12, "山坡地開發施工期間臨時沉砂池", "下限")["value"], "m3/ha", 1e-12),
+                 ("下水道標準 臨時上限", SB.SEWER_TEMP_RANGE[1], V.table(S12, "山坡地開發施工期間臨時沉砂池", "上限")["value"], "m3/ha", 1e-12)]
+        return rows
+
+    def steel_asd_interaction():
+        """steel_column ASD 梁柱互制 vs steel99 式(8.2-1)～(8.2-3)。F'e 取引擎自己的值（軸向取法差異另列於 KNOWN）。"""
+        sys.path.insert(0, str(ROOT / "tools" / "design"))
+        import steel_column as SC
+        rows = []
+        props = {"Ag_cm2": 100.0, "Sx_cm3": 1000.0, "Sy_cm3": 300.0}
+        for p, mx, my, fa_cap in ((50.0, 800.0, 30.0, 1.2), (60.0, 900.0, 0.0, 1.1), (12.0, 900.0, 45.0, 1.2)):
+            o = SC.beam_column_interaction("asd", props, 2.5, 2100.0, {"Fa_tf_cm2": fa_cap},
+                                           {"Fb_tf_cm2": 1.5, "Lb_cm": 300.0}, p, mx, my,
+                                           0.85, 0.85, 40.0, 80.0, None)
+            v = V.evaluate("steel99_asd_interaction_821", {
+                "fa": o["fa_tf_cm2"], "Fa": fa_cap, "fbx": o["fbx_tf_cm2"], "Fbx": o["Fb_x_tf_cm2"],
+                "fby": o["fby_tf_cm2"], "Fby": o["Fb_y_tf_cm2"], "Cmx": 0.85, "Cmy": 0.85,
+                "Fex": o["Fex_tf_cm2"], "Fey": o["Fey_tf_cm2"], "Fy": 2.5})["value"]
+            rows.append((f"P={p},Mx={mx},My={my}（{o['equation']}）", o["ratio"], v, "-", 1e-9))
+        return rows
+
     return [
+        ("swc120_wall_stability_fs", "retaining_wall.LIMITS／合力中段比例", swc120_limits),
+        ("swc118_wall_height_limits", "各擋土牆引擎牆型有效高上限", swc118_heights),
+        ("swc78_road_drain_limits", "channel_hydraulics.DEFAULTS／analyse／check_culvert", swc_channel_rules),
+        ("swc93_design_capacity", "sediment_basin.analyse 與常數", sediment_capacity),
+        ("steel99_asd_interaction_821", "steel_column.beam_column_interaction（ASD）", steel_asd_interaction),
         ("found112_Ka_coulomb", "earth_pressure.coulomb_active_coefficient", ka_coulomb),
         ("found112_KAE", "earth_pressure.coulomb_active_coefficient (M-O)", kae_mo),
         ("rc112_phi_flexure", "rc_design.phi_by_strain", phi_flexure),

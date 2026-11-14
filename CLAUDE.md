@@ -73,7 +73,7 @@ python tools/project_paths.py --configure  # Re-configure CADCraft/OpenCADStudio
 
 ### Open CalcSheet Studio 交叉驗算（需桌面程式開啟）
 ```bash
-# 連線檢查、版本、22 個模組（台灣 17 個 tw-*）
+# 連線檢查、版本、28 個模組（台灣 23 個 tw-*）
 python tools/crosscheck/ocss_crosscheck.py probe
 
 # 無狀態試算一段計算書（不碰專案），並自動檢查單位陷阱

@@ -18,7 +18,7 @@
 你在 `tutumomo/Open-CalcSheet-Studio`（上游 OpenAEC Open CalcSheet Studio 的台灣在地化 fork）工作。
 它的下游使用者是 `tutumomo/Civil_Design_WorkBench`：一個以 AI 智能體做土木設計（擋土牆、排水溝、箱涵、滯洪池、
 沉砂池、RC／鋼構件、基礎、載重）的 repo。它把 OCSS 當成「第二套獨立算法」與「逐式可稽核計算書」來用，
-透過 MCP（`http://127.0.0.1:3879/mcp`）與 REST（`POST /api/v1/tools/<name>`），目前一共 49 個工具。
+透過 MCP（`http://127.0.0.1:3879/mcp`）與 REST（`POST /api/v1/tools/<name>`），目前一共 60 個工具（2026.46.2-tw.9 實測）。
 
 動手之前，先讀下游的這幾個地方，搞清楚它現在怎麼用你：
 - `docs/OpenCalcSheetStudio_整合與開放計算環境.md`（特別是 §4 能力邊界、§5 單位陷阱、§7 已知限制、§8 後續）
@@ -79,7 +79,7 @@ spreadsheet／jupyter／marimo／pdf）產出**可重算、可機讀、可稽核
       改值後 `sheet_evaluate` 的回應反映新值與 `modified` 標記。
 15. **內建 AI 智能體側邊欄**：讓使用者不必切到別的視窗，就在 App 內叫智能體做設計工作。
     - 側邊欄是可開關的 Tauri 面板（與主編輯區分欄），關閉時不佔版面；`--headless` 模式下不載入。
-    - 智能體直接操作 App 自己的工具：**同一個 registry、不走 HTTP**（in-process 呼叫 49 個工具），
+    - 智能體直接操作 App 自己的工具：**同一個 registry、不走 HTTP**（in-process 呼叫 60 個工具），
       行為與 MCP／REST 完全一致；另可設定為外部 MCP 客戶端（stdio／http），
       接上 `regs`（規範查詢）、設計引擎與 OpenCADStudio，讓側邊欄一路做到出圖。
     - 模型來源可設定：Anthropic／OpenAI／Gemini 相容端點，或指向本機 **magpie**（`http://127.0.0.1:3425`），
@@ -101,7 +101,7 @@ spreadsheet／jupyter／marimo／pdf）產出**可重算、可機讀、可稽核
 
 ## 硬性約束
 
-- **相容性**：現有 49 個工具的名稱、參數、回應欄位都不得做破壞性修改，只能新增；必要的改名要保留舊名作 alias 至少一個版本。
+- **相容性**：現有 60 個工具的名稱、參數、回應欄位都不得做破壞性修改，只能新增；必要的改名要保留舊名作 alias 至少一個版本。
 - **MCP 與 REST 一致**：新工具兩邊都要有；annotations（readOnly／destructive／idempotent／openWorld）要正確，因為下游用它們產文件。
 - **機密**：token 只能放在 `preferences.json`，不得印進日誌或回應。
 - **在地化**：tw-* 模組依台灣規範（RC 112、鋼構 99、耐震 113、風 103、基礎 112、建技規則、水保技術規範），每個模組要寫出規範版本與條號。

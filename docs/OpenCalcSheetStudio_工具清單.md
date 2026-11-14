@@ -2,8 +2,8 @@
 
 > 本檔由 `python tools/crosscheck/ocss_tools_doc.py` 從**執行中的 OCSS 即時抓取**後生成，**請勿手改**；OCSS 升版後重跑即可更新。整合脈絡、單位陷阱與能力邊界見 [`OpenCalcSheetStudio_整合與開放計算環境.md`](OpenCalcSheetStudio_整合與開放計算環境.md)。
 
-- **OCSS 版本**：2026.46.1　**工具總數**：49
-- **分類（kind）**：檔案 I/O 4、改動專案 27、讀取 15、介面操作 3
+- **OCSS 版本**：2026.46.2　**工具總數**：60
+- **分類（kind）**：檔案 I/O 4、改動專案 31、讀取 22、介面操作 3
 - **同一份 registry、三種進入點**：MCP `http://127.0.0.1:3879/mcp`、REST 通用 `POST /api/v1/tools/<name>`、以及部分工具的語意化 REST 路由（下表『REST 路由』）。三者行為一致，token 相同。
 - **認證**：`Authorization: Bearer <token>`；token 在 `preferences.json` 的 `mcpToken`（機密，不入文件／版控）。
 - **Linux 設定檔位置**：`~/.local/share/tw.opencalcsheet.studio/preferences.json`（TW 版；上游為 `studio.openstructuralcalculation.app`）（Tauri `app_data_dir`；非 `~/.config`）。
@@ -85,6 +85,32 @@
 | `calc_evaluate` | 讀取 | 唯讀、冪等 | 無狀態試算一段計算文字，不動專案、逐行回結果。批次驗算首選（不污染專案） |
 | `sheet_insert_formula` | 改動專案 | 會改動、非冪等 | 把公式庫的公式（含輸入與範例值）插入工作表計算文字 |
 
+### 批次與背景工作（不動專案，2026.46.2 新增）
+
+| 工具 | 類別 | 特性 | 用途 |
+|---|---|---|---|
+| `calc_evaluate_batch` | 讀取 | 唯讀、冪等 | 一次試算多段計算文字（每項同 calc_evaluate），不動專案；上限 200 項，逐項回結果或該項錯誤。超過 120 秒的工作改用 job_start |
+| `job_start` | 讀取 | 會改動、非冪等 | 在背景開始多段試算（同 calc_evaluate_batch 的項目），立即回 jobId；不動專案，工作只存在記憶體（保留最近 20 筆已結束工作） |
+| `job_status` | 讀取 | 唯讀、冪等 | 查背景工作狀態（running／done／cancelled）與已完成項數；results=true（預設）回目前已算出的結果 |
+| `job_cancel` | 讀取 | 會改動、冪等 | 停止背景工作（在目前這項算完後停）；已算出的結果仍可由 job_status 取得 |
+
+### 拋棄式工作階段（不動使用者專案，2026.46.2 新增）
+
+| 工具 | 類別 | 特性 | 用途 |
+|---|---|---|---|
+| `session_new` | 改動專案 | 會改動、非冪等 | 開拋棄式工作表：先把目前專案（名稱、路徑、工作表、報告、undo、未儲存旗標）收起，換成空專案；之後的操作都不進使用者專案與最近檔案 |
+| `session_close` | 改動專案 | 會改動、非冪等 | 關閉 session_new 開的拋棄式工作表，把原專案完整放回（含未儲存旗標與 undo 歷史）；沒有開 session 時回 CONFLICT |
+
+### 工作表讀取、執行與繪圖（2026.46.2 新增）
+
+| 工具 | 類別 | 特性 | 用途 |
+|---|---|---|---|
+| `sheet_read` | 讀取 | 唯讀、冪等 | 以資料形式讀任一工作表：試算表逐格（值、公式、顯示文字）、圖形節點輸出與錯誤、Jupyter 逐 cell（source、execution count、輸出）、Marimo 等 |
+| `sheet_run` | 改動專案 | 會改動、冪等 | 執行工作表並回傳新內容（同 sheet_read）。Jupyter：依序執行所有 code cell，遇錯停止，輸出存入專案；Marimo：重新載入並執行所有 cell。⚠ 會改動專案 |
+| `sheet_reset_input` | 改動專案 | 會改動、冪等 | 把工作表輸入值還原為交付設計值（由 sheet_set_input 設的值，未設過的回計算文字預設）；可指定 names，省略則全部已改欄位還原；一步 undo |
+| `sheet_drawing` | 讀取 | 唯讀、冪等 | 匯出繪圖工作表為 SVG 或 DXF（標註與 {{…}} 文字已代入計算結果，例如標註 'L/2' 隨 L 變）。座標為實際毫米（SVG 寫 data-eenheid="mm"；DXF 依 $INSUNITS：4＝mm、6＝m）；回應另列出所有綁定的變數 |
+| `module_schema` | 讀取 | 唯讀、冪等 | 由 modules_list 的模組描述輸入欄位（name、label、kind、unit、default、choices）與計算文字引用的規範條號，供客戶端組 case.json；欄位範圍不在文字中宣告，回傳與該欄位相關的比較式作為防護條件 |
+
 ### 模組庫與公式庫
 
 | 工具 | 類別 | 特性 | 用途 |
@@ -126,7 +152,7 @@
 - **REST 路由**：`GET /api/v1/info`、`POST /api/v1/tools/app_info`
 - **參數**：無
 
-> Name and version of the app, the MCP and REST addresses, the OpenAPI document, and whether the API is read-only or paused.
+> Name and version of the app, which edition this build is (tw or upstream) together with the full release tag, commit and build date, the MCP and REST addresses, the OpenAPI document, and whether the API is read-only or paused. Use edition and tag to tell the Taiwan build from the upstream build: they share the version number.
 
 #### `project_get`
 
@@ -149,6 +175,7 @@
 | 參數 | 型別 | 必填 | 說明 |
 |---|---|---|---|
 | `force` | boolean |  | Discard unsaved changes. |
+| `scratch` | boolean |  | Open a throwaway sheet instead: same as session_new (the open project comes back with session_close). |
 
 > Start a new, empty project. Refused with CONFLICT when the open project has unsaved changes, unless force=true (then those changes are lost).
 
@@ -389,8 +416,9 @@
 | `name` | string |  | Input name. |
 | `value` | string｜number |  | New value. |
 | `values` | object |  | Several values at once: {name: value}. |
+| `design` | boolean |  | Record the values as the delivered design values. Default true; false leaves the delivered values and so marks the fields as modified. |
 
-> Set input values of a sheet: an input field or a choice list (see inputs in sheet_get). Pass name and value for one value, or values as an object {name: value} for several. For a choice list pass the option value (the option text is also accepted). Numbers may be given as number or text ('4.2' or '4,2'), in the unit of the field. Nothing is written if one value is invalid.
+> Set input values of a sheet: an input field or a choice list (see inputs in sheet_get). Pass name and value for one value, or values as an object {name: value} for several. For a choice list pass the option value (the option text is also accepted). Numbers may be given as number or text ('4.2' or '4,2'), in the unit of the field. Nothing is written if one value is invalid. The values you set are recorded as the delivered design values: when the user later changes a field in the app, sheet_get and sheet_evaluate report it as modified with its original value. Pass design=false to change a value the way a user does, leaving the delivered value as it was.
 
 #### `sheet_set_pdf`
 
@@ -578,6 +606,9 @@
 | `id` | string |  | Sheet id. Default: the sheet that is open in the app. |
 | `numbers` | boolean |  | Include the numbers of the sheet. Default true. |
 | `names` | array<string> |  | Only these numbers (variable names). |
+| `lines` | boolean |  | Also return the calculation line by line, as calc_evaluate does. Default false. |
+| `conventionalUnits` | boolean |  | Also give each value in the conventional unit where there is one (kN/mm^2 → MPa, tf/m^2 → kPa). Default false. |
+| `strict` | boolean |  | Refuse the calculation when a unit warning is raised. Default false. |
 
 > Compute a sheet with its own inputs and the project data, and return the outcome: title, norm, governing UC (UC_max), verdict (passes), every UC value and the numbers the sheet shows (name → value in the sheet's unit). Pass names to return only those numbers, or numbers=false to leave them out.
 
@@ -593,6 +624,8 @@
 | `values` | object |  | Input values {name: value}. |
 | `useProjectData` | boolean |  | Make the project data available as variables. Default true. |
 | `maxLines` | integer |  | At most this many lines. Default 400. |
+| `conventionalUnits` | boolean |  | Also give each value in the conventional unit where there is one (kN/mm^2 → MPa, tf/m^2 → kPa). Default false. |
+| `strict` | boolean |  | Refuse the calculation when a unit warning is raised (warnings[] would not be empty). Default false. |
 
 > Compute a piece of calculation text without changing the project, and return the result line by line (headings, text, assignments with expression, result and unit, inputs, choices) plus the governing UC and verdict if the text has them. The project data (CC, K_FI, windgebied, …) are available as variables unless useProjectData=false. values sets input fields and choice lists by name.
 
@@ -610,6 +643,149 @@
 | `language` | string：`en`／`nl` |  | Language of the text lines of a worked example. Default: the language of the app. |
 
 > Insert a formula from the formula library (formulas_list) into a sheet's calculation text: its inputs with example values and the formula lines. position: 'end' (default), 'start', or a line number to insert after (0 = before the first line). Returns the lines that were inserted.
+
+### 批次與背景工作（不動專案，2026.46.2 新增）
+
+#### `calc_evaluate_batch`
+
+- **用途**：一次試算多段計算文字（每項同 calc_evaluate），不動專案；上限 200 項，逐項回結果或該項錯誤。超過 120 秒的工作改用 job_start
+- **類別／特性**：讀取；唯讀、冪等
+- **REST 路由**：`POST /api/v1/evaluate/batch`、`POST /api/v1/tools/calc_evaluate_batch`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `items` | array<object> | 是 | The texts to compute, each with the arguments of calc_evaluate (source, values, useProjectData, maxLines, conventionalUnits, strict). At most 200. |
+
+> Compute several calculation texts in one request without changing the project. Each item takes the arguments of calc_evaluate and gets the same answer calc_evaluate would give, or its error ({index, ok:false, error:{code, message, data}}), in the order of the items. At most 200 items. For work that may take longer than the bridge timeout (120 s), use job_start.
+
+#### `job_start`
+
+- **用途**：在背景開始多段試算（同 calc_evaluate_batch 的項目），立即回 jobId；不動專案，工作只存在記憶體（保留最近 20 筆已結束工作）
+- **類別／特性**：讀取；會改動、非冪等
+- **REST 路由**：`POST /api/v1/jobs`、`POST /api/v1/tools/job_start`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `items` | array<object> | 是 | The texts to compute, each with the arguments of calc_evaluate (source, values, useProjectData, maxLines, conventionalUnits, strict). At most 200. |
+
+> Start computing several calculation texts in the background (the items of calc_evaluate_batch) and return a jobId at once. Poll job_status for progress and results; job_cancel stops it. Does not change the project. Jobs live in memory only (the last 20 finished jobs are kept).
+
+#### `job_status`
+
+- **用途**：查背景工作狀態（running／done／cancelled）與已完成項數；results=true（預設）回目前已算出的結果
+- **類別／特性**：讀取；唯讀、冪等
+- **REST 路由**：`GET /api/v1/jobs/{jobId}`、`POST /api/v1/tools/job_status`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `jobId` | string | 是 | The job id from job_start. |
+| `results` | boolean |  | Include the answers so far. Default true. |
+
+> The state of a background job: running, done or cancelled; how many items are done; and with results=true (default) the answers so far, each as in calc_evaluate_batch.
+
+#### `job_cancel`
+
+- **用途**：停止背景工作（在目前這項算完後停）；已算出的結果仍可由 job_status 取得
+- **類別／特性**：讀取；會改動、冪等
+- **REST 路由**：`DELETE /api/v1/jobs/{jobId}`、`POST /api/v1/tools/job_cancel`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `jobId` | string | 是 | The job id from job_start. |
+
+> Stop a background job after the item it is computing now. The answers so far stay available through job_status. A job that has finished is left as it is.
+
+### 拋棄式工作階段（不動使用者專案，2026.46.2 新增）
+
+#### `session_new`
+
+- **用途**：開拋棄式工作表：先把目前專案（名稱、路徑、工作表、報告、undo、未儲存旗標）收起，換成空專案；之後的操作都不進使用者專案與最近檔案
+- **類別／特性**：改動專案；會改動、非冪等
+- **REST 路由**：`POST /api/v1/session/new`、`POST /api/v1/tools/session_new`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `force` | boolean |  | Set the open project aside even when it has unsaved changes; those changes are not lost. |
+
+> Open a throwaway sheet: the open project is set aside (name, path, sheets, report, undo history and the unsaved flag) and an empty project takes its place. Everything the tools do from then on stays out of the real project and out of the recent files. Close it with session_close, which puts the project back exactly as it was. Useful for a computation that should not touch the user's project. Refused with CONFLICT when a session is already open, or when the open project has unsaved changes and force is not true.
+
+#### `session_close`
+
+- **用途**：關閉 session_new 開的拋棄式工作表，把原專案完整放回（含未儲存旗標與 undo 歷史）；沒有開 session 時回 CONFLICT
+- **類別／特性**：改動專案；會改動、非冪等
+- **REST 路由**：`POST /api/v1/session/close`、`POST /api/v1/tools/session_close`
+- **參數**：無
+
+> Close the throwaway sheet opened with session_new (or project_new with scratch=true) and put the project back exactly as it was, including the unsaved flag and the undo history. The answers from Open FEM Studio that were fetched during the session are dropped. Refused with CONFLICT when no session is open.
+
+### 工作表讀取、執行與繪圖（2026.46.2 新增）
+
+#### `sheet_read`
+
+- **用途**：以資料形式讀任一工作表：試算表逐格（值、公式、顯示文字）、圖形節點輸出與錯誤、Jupyter 逐 cell（source、execution count、輸出）、Marimo 等
+- **類別／特性**：讀取；唯讀、冪等
+- **REST 路由**：`GET /api/v1/sheets/{id}/content`、`POST /api/v1/tools/sheet_read`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string |  | Sheet id. Default: the sheet that is open in the app. |
+| `maxCells` | integer |  | Spreadsheet: at most this many filled cells in total. Default 2000. |
+
+> Read the content of any sheet as data. Spreadsheet: every filled cell per worksheet (a1, kind, value, formula, displayed text; formulas give the result the spreadsheet engine computed). Graph: the graph is computed and each node gives its output values (text, value or si_value), errors and warnings, plus the table of view nodes. Jupyter: each notebook with its cells, source, execution count and stored outputs (stream text, results, errors; images only as their MIME type); cells never run have executionCount null. Marimo: each cell's code and stored output as plain text. Calculation sheet: the outcome and the structured lines (as sheet_evaluate with lines=true). Stored notebook output is what the notebook showed when it was last run in the app; call sheet_run to run it again first.
+
+#### `sheet_run`
+
+- **用途**：執行工作表並回傳新內容（同 sheet_read）。Jupyter：依序執行所有 code cell，遇錯停止，輸出存入專案；Marimo：重新載入並執行所有 cell。⚠ 會改動專案
+- **類別／特性**：改動專案；會改動、冪等
+- **REST 路由**：`POST /api/v1/sheets/{id}/run`、`POST /api/v1/tools/sheet_run`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `timeoutSeconds` | integer |  | Notebook: wait at most this long. Default 90. |
+| `maxCells` | integer |  | Spreadsheet: at most this many filled cells. Default 2000. |
+
+> Run a sheet and return its new content (the same data as sheet_read). Jupyter: the sheet opens in the app, every code cell of the open notebook runs top to bottom (stopping after an error), and the new output is stored in the project. Marimo: the notebook reloads, which runs every cell, and the output is stored once it stops changing. Graph, spreadsheet and calculation sheets compute when read, so this equals sheet_read. Notebooks run only in the desktop app, and need its Python environment. completed=false means the run did not finish in time and the output may be stale or partial: do not rely on it.
+
+#### `sheet_reset_input`
+
+- **用途**：把工作表輸入值還原為交付設計值（由 sheet_set_input 設的值，未設過的回計算文字預設）；可指定 names，省略則全部已改欄位還原；一步 undo
+- **類別／特性**：改動專案；會改動、冪等
+- **REST 路由**：`POST /api/v1/sheets/{id}/inputs/reset`、`POST /api/v1/tools/sheet_reset_input`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `names` | array<string> |  | Only these inputs. Default: every modified input. |
+
+> Put input values of a sheet back to the delivered design values (the values set with sheet_set_input, or the defaults of the calculation text for fields never set). Pass names for some fields; without names every modified field goes back. One undo step. A sheet that was never filled in through the API tracks no design values: then nothing is reset and tracked is false.
+
+#### `sheet_drawing`
+
+- **用途**：匯出繪圖工作表為 SVG 或 DXF（標註與 {{…}} 文字已代入計算結果，例如標註 'L/2' 隨 L 變）。座標為實際毫米（SVG 寫 data-eenheid="mm"；DXF 依 $INSUNITS：4＝mm、6＝m）；回應另列出所有綁定的變數
+- **類別／特性**：讀取；唯讀、冪等
+- **REST 路由**：`GET /api/v1/sheets/{id}/drawing`、`POST /api/v1/tools/sheet_drawing`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `id` | string | 是 | Sheet id (from project_get or sheets_list). |
+| `format` | string：`svg`／`dxf` |  | Default svg. |
+| `view` | string |  | Id or title of one view. Default: every view of the sheet. |
+| `unit` | string：`mm`／`m` |  | DXF only: the unit of the coordinates. Default mm. |
+
+> Export a drawing sheet as SVG or DXF, with the dimensions and {{…}} texts that hang on the calculation sheet filled in (a dimension 'L/2' follows the value of L). Coordinates are millimetres in reality; SVG says so in the file (data-eenheid="mm", width/height in mm) and DXF in $INSUNITS (4 = mm, 6 = m; unit sets which). In DXF the y-axis points up, as DXF expects. The answer also lists every binding (expression, value, unit, error) and each view with its bounds in mm; bindings the calculation sheet cannot resolve are in unbound. Symbols and arcs cannot become plain DXF entities without drawing them wrong: they are counted in skipped and left out of the DXF.
+
+#### `module_schema`
+
+- **用途**：由 modules_list 的模組描述輸入欄位（name、label、kind、unit、default、choices）與計算文字引用的規範條號，供客戶端組 case.json；欄位範圍不在文字中宣告，回傳與該欄位相關的比較式作為防護條件
+- **類別／特性**：讀取；唯讀、冪等
+- **REST 路由**：`GET /api/v1/modules/{templateId}/schema`、`POST /api/v1/tools/module_schema`
+
+| 參數 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `templateId` | string | 是 | Module (templateId from modules_list). |
+
+> Describe a module from modules_list: its input fields (name, label, kind, unit, default, choices) and the norm clauses its calculation text cites, so a client can build a case.json for it. The bounds a field has to satisfy are not declared in the text: the sheet checks them itself and refuses outside them, so the comparing lines of the text that mention the field are returned as guards.
 
 ### 模組庫與公式庫
 

@@ -313,11 +313,11 @@ OCSS 的 API／MCP（`127.0.0.1:3879`）**只在桌面程式開著時存在**，
 
 ```bash
 python tools/crosscheck/ocss_crosscheck.py register-mcp --apply   # 寫入本機 .mcp.json（token 不印出、不進版控）
-python tools/crosscheck/ocss_crosscheck.py probe                  # 版本、22 個模組（台灣 17 個 tw-*）
+python tools/crosscheck/ocss_crosscheck.py probe                  # 版本、28 個模組（台灣 23 個 tw-*）
 python tools/crosscheck/ocss_crosscheck.py checks                 # 本專案引擎 vs OCSS 對照案例
 ```
 
-49 個 OCSS 工具的用途／參數／路由見 [`docs/OpenCalcSheetStudio_工具清單.md`](docs/OpenCalcSheetStudio_工具清單.md)。
+60 個 OCSS 工具的用途／參數／路由見 [`docs/OpenCalcSheetStudio_工具清單.md`](docs/OpenCalcSheetStudio_工具清單.md)。
 
 ### 步驟 3.3：MCP 通道（讓 AI 直接呼叫工具，選用但建議）
 

@@ -234,7 +234,7 @@
     ]
    ],
    "expr": "min(a,b)",
-   "notes": "Lb≤Lc 且符合第4.5節結實斷面等條件時，Fb 得取 0.66Fy（steel99_Fb_compact）。Lb>Lc 者依 7.2.3（未收錄）。",
+   "notes": "Lb≤Lc 且符合第4.5節結實斷面等條件時，Fb 得取 0.66Fy（steel99_Fb_compact）。Lb>Lc 者依 7.2.3：拉力外緣 Fb＝0.60Fy，壓力外緣見 steel99_Fb_ltb_asd_723（I 型）、steel99_Fb_channel_729（槽型鋼）。",
    "tests": [
     {
      "in": {

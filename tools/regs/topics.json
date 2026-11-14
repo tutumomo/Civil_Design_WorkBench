@@ -898,7 +898,7 @@
     "tools\\design\\rc_design.py"
    ],
    "notes": [
-    "tools\\design\\rc_design.py 目前引用 100 年版條號（§2.3.2、§3.4.4 等），新版條號以本卡為準；新舊對照尚未完成。"
+    "tools\\design\\rc_design.py 已完成 100 年版 ↔ 112 年版條號與算式對照（docs\\混凝土結構設計規範_取得與條文庫.md §5），現行設計與報告條號以本卡（112.08.10 版）為準。"
    ]
   },
   {

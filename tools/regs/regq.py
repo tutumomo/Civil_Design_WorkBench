@@ -108,17 +108,41 @@ def smart_search(con, q, include_old=False, n=15, per=3):
     """Keyword search for a spoken sentence: as typed -> filler words removed -> 2-char words."""
     terms = q.split()
     hits, total = search(con, terms, include_old, n, per)
-    if total or len(terms) > 1:
+    has_long_cjk = bool(re.search(r"[一-鿿]{4,}", norm(q)))
+    if total and (len(terms) > 1 or total >= 3 or not has_long_cjk):
         return hits, total, terms
     chunks = [c for c in FILLER.split(norm(q)) if len(c) >= 2]
     if chunks and chunks != terms:
-        hits, total = search(con, chunks, include_old, n, per)
-        if total:
-            return hits, total, chunks
-    grams = list(dict.fromkeys(c[i:i + 2] for c in chunks for i in range(len(c) - 1)))
+        ch_hits, ch_total = search(con, chunks, include_old, n, per)
+        if ch_total and (ch_total >= 3 or not any(re.search(r"[一-鿿]{4,}", c) for c in chunks)):
+            return ch_hits, ch_total, chunks
+        if ch_total > total:
+            hits, total = ch_hits, ch_total
+    grams = list(dict.fromkeys(
+        c[i:i + 2] for c in chunks
+        if total == 0 or re.search(r"[一-鿿]{4,}", c)
+        for i in range(len(c) - 1)
+    ))
     if grams:
-        hits, total = search(con, grams, include_old, n, per)
-        return hits, total, grams
+        ghits, gtotal = search(con, grams, include_old, n, per)
+        if hits and gtotal > total:
+            # 精確片語僅命中極少（<3 筆）時，保留精確命中於前，補入二元拆詞召回結果
+            seen = {(r["src"], r["clause"], r["rowid"]) for _, _, r in hits}
+            merged = list(hits)
+            cnt = {}
+            for _, _, r in merged:
+                cnt[r["src"]] = cnt.get(r["src"], 0) + 1
+            for m, sc, r in ghits:
+                k = (r["src"], r["clause"], r["rowid"])
+                if k in seen or cnt.get(r["src"], 0) >= per:
+                    continue
+                seen.add(k)
+                cnt[r["src"]] = cnt.get(r["src"], 0) + 1
+                merged.append((m, sc, r))
+                if len(merged) >= n:
+                    break
+            return merged, gtotal, grams
+        return ghits, gtotal, grams
     return hits, total, terms
 
 

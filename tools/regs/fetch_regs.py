@@ -29,7 +29,10 @@ MOTC = "https://www.motc.gov.tw/ch/app/data/doc?id=740&module=divpubreg&type=s&p
 LAWMOJ = "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode="
 GLRS = "https://glrs.moi.gov.tw/LawContent.aspx?id="
 # glrs 頁面掛多個附件時，挑標題含此關鍵字者（規範本文標「(108年7月1日生效)」，對照表沒有）
-GLRS_PICK = {"barrier108": "生效"}
+GLRS_PICK = {
+    "barrier108": "生效",
+    "concrete_const110": "結構混凝土施工規範",
+}
 
 # id, file stem (名稱_版次), kind, url, authority, version note
 SOURCES = [
@@ -52,9 +55,23 @@ SOURCES = [
      "內政部（淡江大學風工程研究中心轉載）", "103.12.03 修正版全文（glrs 附件僅 6 頁公告）"),
     ("steel99", "鋼構造建築物鋼結構設計技術規範_990916", "glrs_all", GLRS + "GL000143",
      "內政部", "96.06 發布，99.09.16 修正第十三．二點（含容許應力法與極限設計法兩冊）"),
+    ("src100", "鋼骨鋼筋混凝土構造設計規範與解說_1000324", "glrs_all", GLRS + "FL030878",
+     "內政部", "100.03.24 修正（共 12 章節附件）"),
+    ("concrete_const110", "結構混凝土施工規範_1100713", "glrs_pick", GLRS + "GL001342",
+     "內政部", "110.07.13 台內營字第1100809581號令修正"),
     ("urbanroad113", "市區道路及附屬工程設計規範_1130912", "file",
      "https://www.nlma.gov.tw/filesys/file/chinese/law/c1130912-1.pdf",
      "內政部", "113.09.12 修正"),
+    ("rainwater109", "雨水下水道設計指南_10909", "nlma",
+     "https://www.nlma.gov.tw/uploads/files/f7665378061a6761b12232c9008982e1.pdf",
+     "內政部營建署", "109.09 版"),
+    ("sewer105", "污水下水道工程設計指針與解說_10503", "nlma",
+     "https://www.nlma.gov.tw/uploads/files/181b592fbe9bb8228d80db826ac496bd.pdf",
+     "內政部營建署", "105.03 版"),
+    # ---- 工程會公共工程施工綱要規範 ----
+    ("pcc_spec", "公共工程施工綱要規範", "pcc_spec",
+     "https://pcic.pcc.gov.tw/pwc-web/tec/tec301",
+     "行政院公共工程委員會", "全 314 章現行全文（pcic.pcc.gov.tw）"),
     # ---- 交通部部頒規範（公路） ----
     ("hwroute115", "公路路線設計規範_11507版", "file",
      MOTC + "&serno=447&detailNo=1534440204138450944",
@@ -334,9 +351,164 @@ def pdf_text(p):
 
 
 def docx_text(p):
+    """Read visible text (paragraphs + tables in document order) from a DOCX file."""
     import docx
+    from docx.oxml.table import CT_Tbl
+    from docx.oxml.text.paragraph import CT_P
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+
     d = docx.Document(p)
-    return "\n".join(par.text for par in d.paragraphs)
+    lines = []
+    for child in d.element.body.iterchildren():
+        if isinstance(child, CT_P):
+            t = " ".join(Paragraph(child, d).text.split())
+            if t:
+                lines.append(t)
+        elif isinstance(child, CT_Tbl):
+            tbl = Table(child, d)
+            for row in tbl.rows:
+                cells = [" ".join(c.text.split()) for c in row.cells]
+                if any(cells):
+                    lines.append(" | ".join(cells))
+    return "\n".join(lines)
+
+
+def _find_antiword():
+    candidates = [
+        shutil.which("antiword"),
+        r"C:\Program Files\Git\mingw64\bin\antiword.EXE",
+        r"C:\Program Files\Git\usr\bin\antiword.exe",
+    ]
+    for c in candidates:
+        if c and Path(c).exists():
+            return c
+    return None
+
+
+def doc_text_fast(p, word_app=None):
+    """Extract text from legacy binary .doc via antiword UTF-8, falling back to Word COM."""
+    aw = _find_antiword()
+    if aw:
+        env = dict(os.environ, HOME=str(Path.home()))
+        r = subprocess.run([aw, "-m", "UTF-8.txt", str(p)], capture_output=True, env=env)
+        if r.returncode == 0:
+            txt = r.stdout.decode("utf-8", "replace").strip()
+            if len(txt) > 50:
+                return "\n".join(ln.strip() for ln in txt.splitlines() if ln.strip())
+    if word_app is not None:
+        d = word_app.Documents.Open(str(p.resolve()), ReadOnly=True, AddToRecentFiles=False)
+        try:
+            return d.Content.Text
+        finally:
+            d.Close(False)
+    raise RuntimeError(f"cannot extract .doc text: {p.name}")
+
+
+def nlma_download(url, dest):
+    """Download a PDF from nlma.gov.tw, bypassing F5/TSPD JS challenge via Chrome if needed."""
+    if dest.exists() and sniff(dest) == "pdf":
+        return
+    try:
+        curl(url, dest)
+        if sniff(dest) == "pdf":
+            return
+    except Exception:
+        pass
+    import time
+    from playwright.sync_api import sync_playwright
+
+    chrome = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+    kwargs = {"headless": True}
+    if Path(chrome).exists():
+        kwargs["executable_path"] = chrome
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(**kwargs)
+        ctx = browser.new_context()
+        page = ctx.new_page()
+        page.goto("https://www.nlma.gov.tw/ch/titlelist/11842", wait_until="domcontentloaded", timeout=60000)
+        for wait_s in (6, 5, 5):
+            time.sleep(wait_s)
+            resp = ctx.request.get(url, headers={"Referer": "https://www.nlma.gov.tw/ch/titlelist/11842"}, timeout=120000)
+            if resp.status == 200 and resp.body()[:4] == b"%PDF":
+                dest.write_bytes(resp.body())
+                browser.close()
+                return
+        browser.close()
+    raise RuntimeError(f"nlma download is not PDF: {url}")
+
+
+def pcc_spec_fetch(outdir):
+    """Fetch all active chapters from pcic.pcc.gov.tw and extract text in CSI chapter order."""
+    import time
+    import requests
+
+    api_list = "https://pcic.pcc.gov.tw/pwc-web/api/service/tec-fundamental-codes/getSearchList"
+    api_dl = "https://pcic.pcc.gov.tw/pwc-web/api/service/adm-files/downloadFile"
+    sess = requests.Session()
+    sess.headers.update({"Content-Type": "application/json;charset=UTF-8", "User-Agent": UA})
+    r = sess.post(api_list, json={"currentPage": 0, "perPage": 400}, timeout=60)
+    r.raise_for_status()
+    items = r.json().get("content") or []
+    if not items:
+        raise RuntimeError("pcic getSearchList returned empty content")
+
+    if not outdir.exists():
+        outdir.mkdir(parents=True)
+
+    # Sort by chapter code (`sample`, e.g. 01271)
+    items = sorted(items, key=lambda it: str(it.get("sample") or ""))
+    parts, chunks, hashes = [], [], []
+    total_bytes = 0
+    for it in items:
+        code = str(it.get("sample") or "").strip()
+        cname = re.sub(r'[\\/:*?"<>|\s]+', "_", str(it.get("cname") or "").strip()).strip("_")
+        flist = it.get("viewIdFileList") or []
+        if not flist:
+            continue  # deleted chapter (e.g. 10213 本章已刪除)
+        by_type = {str(f.get("fileType") or "").lower(): f for f in flist}
+        picked = by_type.get("odt") or by_type.get("docx") or by_type.get("doc")
+        if not picked:
+            continue
+        ext = str(picked["fileType"]).lower()
+        dest = outdir / f"{code}_{cname}.{ext}"
+        if dest.exists() and dest.stat().st_size > 0:
+            raw_bytes = dest.read_bytes()
+        else:
+            raw_bytes = None
+            last_err = None
+            for attempt in range(4):
+                try:
+                    resp = sess.post(api_dl, json={"id": picked["fileNo"]}, timeout=60)
+                    resp.raise_for_status()
+                    raw_bytes = resp.content
+                    break
+                except Exception as exc:
+                    last_err = exc
+                    time.sleep(1.5 * (attempt + 1))
+            if raw_bytes is None:
+                raise RuntimeError(f"{code}_{cname}: {last_err}")
+            dest.write_bytes(raw_bytes)
+        total_bytes += len(raw_bytes)
+        hashes.append(hashlib.sha256(raw_bytes).digest())
+        if ext == "odt":
+            txt = odt_text(dest)
+        elif ext == "docx":
+            txt = docx_text(dest)
+        else:
+            txt = doc_text_fast(dest)
+        ver = str(it.get("fEdition") or "").strip()
+        label = f"{code}_{cname}"
+        parts.append({"file": f"{outdir.name}/{dest.name}", "code": code, "title": str(it.get("cname") or ""),
+                      "version": ver, "ext": ext, "text_chars": len(txt)})
+        chunks.append(f"\n##### {label}\n第 {code} 章\n{it.get('cname', '')}\n版本：{ver}\n{txt}\n")
+
+    rec = {
+        "type": "multi", "kind": "code", "attachments": len(parts),
+        "bytes": total_bytes, "sha256": hashlib.sha256(b"".join(hashes)).hexdigest(),
+        "pages": None, "parts": parts,
+    }
+    return rec, "\n".join(chunks).strip(), {"folder": outdir.name}
 
 
 def word_to_pdf(src, dst):
@@ -512,6 +684,16 @@ def main():
                 if sid == "farmroad108":
                     rec.update(kind="law_point", splitter="point")
                 stem_v = stem
+            elif kind == "pcc_spec":
+                outdir = OUT / stem
+                upd, text, files = pcc_spec_fetch(outdir)
+                rec.update(upd)
+                stem_v = stem
+            elif kind == "nlma":
+                nlma_download(url, raw)
+                rec.update(bytes=raw.stat().st_size, sha256=hashlib.sha256(raw.read_bytes()).hexdigest())
+                upd, text, files, stem_v = fetch_doc(raw, stem, kind)
+                rec.update(upd)
             else:
                 if kind == "glrs":
                     rec["page"] = url

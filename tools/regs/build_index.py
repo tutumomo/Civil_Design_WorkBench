@@ -175,20 +175,32 @@ def code_units(text):
     (part file / 第NNNNN章) and only the longest increasing run of section numbers is kept.
     """
     lines, page, part, group = [], None, "", 0
+    part_csi, part_csi_done = "", False
     for ln in text.splitlines():
         s = ln.strip()
         if s.startswith("##### "):
             part, group = s[6:], group + 1
+            m_pcsi = re.match(r"^(\d{5})_", part)
+            part_csi = m_pcsi.group(1) if m_pcsi else ""
+            part_csi_done = False
             lines.append(("part", s[6:], page, group))
             continue
         m = re.fullmatch(r"=== p\.(\d+) ===", s)
         if m:
             page = int(m.group(1))
             continue
-        if CSI.fullmatch(s):
-            group += 1
-            lines.append(("csi", CSI.fullmatch(s).group(1), page, group))
-            continue
+        m_csi = CSI.fullmatch(s)
+        if m_csi:
+            if part_csi:
+                if m_csi.group(1) == part_csi and not part_csi_done:
+                    part_csi_done = True
+                    group += 1
+                    lines.append(("csi", m_csi.group(1), page, group))
+                    continue
+            else:
+                group += 1
+                lines.append(("csi", m_csi.group(1), page, group))
+                continue
         if s:
             lines.append(("text", s, page, group))
 
@@ -499,6 +511,376 @@ def wood110_units(text):
     return chunk([u for u in units if u["lines"] or u["clause"] != "0"])
 
 
+def src100_units(text):
+    """Split 《鋼骨鋼筋混凝土構造設計規範與解說》 by chapter PDF part and C.x(.y) headings."""
+    lines, page, part, chap = [], None, "", None
+    for ln in text.splitlines():
+        s = ln.strip()
+        if s.startswith("##### "):
+            part = s[6:]
+            m_p = re.match(r"^(\d{2})_", part)
+            chap = int(m_p.group(1)) if m_p and 1 <= int(m_p.group(1)) <= 10 else None
+            lines.append(("part", part, page, chap))
+            continue
+        m = re.fullmatch(r"=== p\.(\d+) ===", s)
+        if m:
+            page = int(m.group(1))
+            continue
+        if s:
+            lines.append(("text", s, page, chap))
+
+    # Each chapter 01..10 accepts only `{chap}.x...` headings; ignore bare 1./2./3. list bullets
+    cand = []
+    for i, (kind, s, _, ch) in enumerate(lines):
+        if kind != "text" or ch is None:
+            continue
+        m = re.fullmatch(rf"({ch}\.\d+(?:\.\d+)*)\s+([一-鿿A-Za-z（(].*)", s)
+        if not m:
+            continue
+        num, rest = m.group(1), m.group(2).strip()
+        if rest.endswith(("。", "；", "，")) or len(rest) > 50:
+            continue
+        cand.append((ch, tuple(int(x) for x in num.split(".")), i, num, rest))
+    heads = {}
+    for ch in {c[0] for c in cand}:
+        cs = [c for c in cand if c[0] == ch]
+        for k in lis([c[1] for c in cs]):
+            heads[cs[k][2]] = cs[k]
+
+    units, titles = [], {}
+    cur = None
+    for i, (kind, s, pg, ch) in enumerate(lines):
+        if kind == "part":
+            titles = {}
+            if s.startswith("11_"):
+                cur = {"clause": "參考文獻", "title": "參考文獻", "path": "參考文獻",
+                       "page": pg or 1, "part": s, "lines": []}
+            elif s.startswith("12_"):
+                cur = {"clause": "符號說明", "title": "符號說明", "path": "符號說明",
+                       "page": pg or 1, "part": s, "lines": []}
+            else:
+                cur = {"clause": f"第{ch}章" if ch else "0", "title": s, "path": "",
+                       "page": pg or 1, "part": s, "lines": []}
+            units.append(cur)
+            continue
+        h = heads.get(i)
+        if h:
+            _, _, _, num, rest = h
+            title = re.split(r"[，。：:；;]", rest)[0][:40].strip()
+            titles[num] = title
+            parents = [".".join(num.split(".")[:k]) for k in range(1, num.count(".") + 1)]
+            path = " > ".join(f"{p} {titles[p]}" for p in parents if p in titles)
+            cur = {"clause": num, "title": title, "path": path, "page": pg,
+                   "part": part, "lines": []}
+            units.append(cur)
+            continue
+        if cur is not None:
+            # 過濾 PDF 粗體重複渲染的同標題行
+            if cur["lines"] and cur["lines"][-1][1] == s and len(s) <= 30:
+                continue
+            cur["lines"].append((pg, s))
+    return chunk([u for u in units if u["lines"] or not u["clause"].startswith("第")])
+
+
+def concrete_const110_units(text):
+    """Split 《結構混凝土施工規範》 by chapter (1..19) + 附錄甲/乙, allowing no-space headings in ch.10-19."""
+    raw = []
+    page = 1
+    started = False
+    for ln in text.splitlines():
+        s = ln.strip()
+        m = re.fullmatch(r"=== p\.(\d+) ===", s)
+        if m:
+            page = int(m.group(1))
+            continue
+        if not s:
+            continue
+        if not started:
+            if re.fullmatch(r"1\s+第\s*一\s*章\s+總\s*則", s):
+                started = True
+            else:
+                continue
+        raw.append((page, s))
+
+    CHAP_LINE = re.compile(r"^(\d{1,2})\s+第\s*[一二三四五六七八九十百]+\s*章\s+(.+)$")
+    APPX_LINE = re.compile(r"^(附錄[甲乙])\s+(.+)$")
+    RUN_HDR = re.compile(r"^(?:第\s*[一二三四五六七八九十百]+\s*章\s+.+|\d{1,2}-\d{1,2}|附錄[甲乙]\s+.+)$")
+
+    chap_groups = []
+    chap = None
+    seen_appx = set()
+    tagged = []  # (kind, data, pg, s)
+    for pg, s in raw:
+        mc = CHAP_LINE.fullmatch(s)
+        if mc:
+            chap = int(mc.group(1))
+            ctitle = re.sub(r"\s+", " ", mc.group(2)).strip()
+            tagged.append(("chap", (chap, ctitle), pg, s))
+            continue
+        ma = APPX_LINE.fullmatch(s)
+        if ma and ma.group(1) not in seen_appx:
+            seen_appx.add(ma.group(1))
+            chap = None
+            tagged.append(("appx", (ma.group(1), re.sub(r"\s+", " ", ma.group(2)).strip()), pg, s))
+            continue
+        if RUN_HDR.fullmatch(s):
+            continue
+        tagged.append(("text", chap, pg, s))
+
+    cand = []
+    for i, (kind, data, pg, s) in enumerate(tagged):
+        if kind != "text" or data is None:
+            continue
+        ch = data
+        m = re.fullmatch(rf"({ch}\.\d+(?:\.\d+)*)\s*([^\d.].*)", s)
+        if not m or TOC.search(s):
+            continue
+        num, rest = m.group(1), m.group(2).strip()
+        if not STARTS_TEXT.match(rest) or rest.startswith(("節", "％", "%", "mm", "cm", "kg", "之")):
+            continue
+        # 單點項（10.1）後若為完整句尾且很長，多為條文交叉參照而非標題
+        if num.count(".") == 1 and len(rest) > 45 and rest.endswith("。"):
+            continue
+        cand.append((ch, tuple(int(x) for x in num.split(".")), i, num, rest))
+
+    heads = {}
+    for ch in {c[0] for c in cand}:
+        cs = [c for c in cand if c[0] == ch]
+        for k in lis([c[1] for c in cs]):
+            heads[cs[k][2]] = cs[k]
+
+    units, titles, cur_chap_path = [], {}, ""
+    cur = None
+    for i, (kind, data, pg, s) in enumerate(tagged):
+        if kind == "chap":
+            ch, ctitle = data
+            titles = {}
+            cur_chap_path = f"第{ch}章 {ctitle}"
+            cur = {"clause": f"第{ch}章", "title": ctitle, "path": cur_chap_path,
+                   "page": pg, "part": "", "lines": []}
+            units.append(cur)
+            continue
+        if kind == "appx":
+            aid, atitle = data
+            cur_chap_path = f"{aid} {atitle}"
+            cur = {"clause": aid, "title": atitle, "path": cur_chap_path,
+                   "page": pg, "part": "", "lines": []}
+            units.append(cur)
+            continue
+        h = heads.get(i)
+        if h:
+            _, _, _, num, rest = h
+            title = re.split(r"[，。：:；;]", rest)[0][:40].strip()
+            titles[num] = title
+            parents = [".".join(num.split(".")[:k]) for k in range(1, num.count(".") + 1)]
+            path = " > ".join([cur_chap_path] + [f"{p} {titles[p]}" for p in parents if p in titles])
+            cur = {"clause": num, "title": title, "path": path, "page": pg, "part": "",
+                   "lines": [(pg, rest)] if len(rest) > len(title) else []}
+            units.append(cur)
+            continue
+        if cur is not None:
+            cur["lines"].append((pg, s))
+    return chunk([u for u in units if u["lines"] or u["clause"].startswith("附錄")])
+
+
+def rainwater109_units(text):
+    """Split 《雨水下水道設計指南》 by 篇 (I/II/III/IV) and 章, matching Y.Z(.W) only within 章 Y."""
+    CN_MAP = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
+    ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV"}
+    PART_RE = re.compile(r"^第([一二三四])篇\s+(.+)$")
+    CHAP_RE = re.compile(r"^第([一二三四五六七八九十]+)章\s+(.+)$")
+    PG_CODE = re.compile(r"^(?:I|II|III|IV)\s*-\s*\d+$")
+
+    pages = []
+    for p in text.split("=== p.")[1:]:
+        pno, body = p.split(" ===", 1)
+        pn = int(pno)
+        if pn < 22:  # p.1~21 為封面與目錄
+            continue
+        pages.append((pn, [ln.strip() for ln in body.splitlines() if ln.strip()]))
+
+    part_no, part_name, chap_no, chap_name = 1, "", None, ""
+    raw = []  # (part_no, part_name, chap_no, chap_name, pg, s)
+    for pn, lns in pages:
+        # 第二篇（p.133~176）為掃描圖檔，無文字層
+        if 133 <= pn <= 176:
+            if pn == 133:
+                raw.append((2, "抽水站設計", 0, "（掃描影像）", pn,
+                            "［第二篇 抽水站設計（p.133～176）為掃描影像，無文字層，數值與條文須查原 PDF］"))
+            continue
+        idx = 0
+        # 略過每頁頁首的「第X篇」「第Y章」「I-15」重複頁眉
+        while idx < min(4, len(lns)):
+            s = lns[idx]
+            mp = PART_RE.fullmatch(s)
+            if mp:
+                new_p = CN_MAP[mp.group(1)]
+                if new_p != part_no:
+                    part_no, part_name, chap_no, chap_name = new_p, mp.group(2).strip(), None, ""
+                else:
+                    part_name = mp.group(2).strip()
+                idx += 1
+                continue
+            mc = CHAP_RE.fullmatch(s)
+            if mc:
+                chap_no = CN_MAP.get(mc.group(1))
+                chap_name = re.sub(r"\s+", " ", mc.group(2)).strip()
+                idx += 1
+                continue
+            if PG_CODE.fullmatch(s):
+                idx += 1
+                continue
+            break
+        for s in lns[idx:]:
+            mc = CHAP_RE.fullmatch(s)
+            if mc and len(s) < 40:
+                chap_no = CN_MAP.get(mc.group(1))
+                chap_name = re.sub(r"\s+", " ", mc.group(2)).strip()
+                continue
+            raw.append((part_no, part_name, chap_no, chap_name, pn, s))
+
+    cand = []
+    for i, (pno, _, ch, _, _, s) in enumerate(raw):
+        if not ch:
+            continue
+        m = re.fullmatch(rf"({ch}\.\d+(?:\.\d+)*)\s+([一-鿿A-Za-z（(].*)", s)
+        if not m or TOC.search(s):
+            continue
+        num, rest = m.group(1), m.group(2).strip()
+        if len(rest) > 45 and rest.endswith("。"):
+            continue
+        cand.append(((pno, ch), tuple(int(x) for x in num.split(".")), i, num, rest))
+
+    heads = {}
+    for g in {c[0] for c in cand}:
+        cs = [c for c in cand if c[0] == g]
+        for k in lis([c[1] for c in cs]):
+            heads[cs[k][2]] = cs[k]
+
+    units, titles = [], {}
+    cur = None
+    last_group = None
+    for i, (pno, pname, ch, cname, pg, s) in enumerate(raw):
+        grp = (pno, ch)
+        if grp != last_group:
+            last_group = grp
+            titles = {}
+            if pno == 2:
+                units.append({"clause": "II-0", "title": "抽水站設計（掃描影像）",
+                              "path": "第二篇 抽水站設計", "page": pg, "part": "第二篇",
+                              "lines": [(pg, s)]})
+                cur = None
+                continue
+            cur = {"clause": f"{ROMAN[pno]}-{ch or 0}", "title": cname or pname,
+                   "path": f"第{pno}篇 {pname}" + (f" > 第{ch}章 {cname}" if ch else ""),
+                   "page": pg, "part": f"第{pno}篇", "lines": []}
+            units.append(cur)
+        h = heads.get(i)
+        if h:
+            _, _, _, num, rest = h
+            title = re.split(r"[，。：:；;]", rest)[0][:40].strip()
+            titles[num] = title
+            parents = [".".join(num.split(".")[:k]) for k in range(1, num.count(".") + 1)]
+            pstr = f"第{pno}篇 {pname} > 第{ch}章 {cname}"
+            if parents:
+                pstr += " > " + " > ".join(f"{p} {titles[p]}" for p in parents if p in titles)
+            cur = {"clause": f"{ROMAN[pno]}-{num}", "title": title, "path": pstr,
+                   "page": pg, "part": f"第{pno}篇",
+                   "lines": [(pg, rest)] if len(rest) > len(title) else []}
+            units.append(cur)
+            continue
+        if cur is not None:
+            cur["lines"].append((pg, s))
+    return chunk([u for u in units if u["lines"]])
+
+
+def sewer105_units(text):
+    """Split 《污水下水道工程設計指針與解說》 on X-Y-ZZ section codes + 第一篇 總則一二三."""
+    PART_RE = re.compile(r"^第([一二])篇(?:\s+(.*))?$")
+    CHAP_RE = re.compile(r"^第([一二三四五六七八九十]+)章\s*(.*)$")
+    SEC_RE = re.compile(r"^第\s*(\d+)\s*節\s*(.*)$")
+    CODE_RE = re.compile(r"^(\d{1,2}-\d{1,2}-\d{2})\s+(.+?)(?:\s*\(原則\d+\))?\s*$")
+    CN_ITEM = re.compile(r"^([一二三四五六七八九十]+)、\s*(.*)$")
+
+    pages = []
+    for p in text.split("=== p.")[1:]:
+        pno, body = p.split(" ===", 1)
+        pn = int(pno)
+        if pn < 18:  # p.1~17 為封面與目錄
+            continue
+        lns = [ln.strip() for ln in body.splitlines() if ln.strip()]
+        # 第一行為書內頁碼純數字時略過
+        if lns and re.fullmatch(r"\d{1,3}", lns[0]):
+            lns = lns[1:]
+        pages.append((pn, lns))
+
+    units = []
+    p_lbl, c_lbl, s_lbl = "第一篇 總則", "", ""
+    cur = None
+    in_part1 = True
+
+    def cur_path():
+        return " > ".join(x for x in (p_lbl, c_lbl, s_lbl) if x)
+
+    for pn, lns in pages:
+        i = 0
+        while i < len(lns):
+            s = lns[i]
+            mp = PART_RE.fullmatch(s)
+            if mp:
+                if mp.group(1) == "一":
+                    in_part1 = True
+                    nxt = lns[i + 1] if not mp.group(2) and i + 1 < len(lns) else mp.group(2) or ""
+                    p_lbl = f"第一篇 {nxt}".strip()
+                    if not mp.group(2) and nxt:
+                        i += 1
+                else:
+                    in_part1 = False
+                    nxt = lns[i + 1] if not mp.group(2) and i + 1 < len(lns) else mp.group(2) or ""
+                    p_lbl = f"第二篇 {nxt}".strip()
+                    if not mp.group(2) and nxt:
+                        i += 1
+                i += 1
+                continue
+            mc = CHAP_RE.fullmatch(s)
+            if mc and len(s) < 40:
+                c_lbl = re.sub(r"\s+", " ", s)
+                s_lbl = ""
+                i += 1
+                continue
+            ms = SEC_RE.fullmatch(s)
+            if ms and len(s) < 40:
+                s_lbl = re.sub(r"\s+", " ", s)
+                i += 1
+                continue
+            if in_part1:
+                mi = CN_ITEM.match(s)
+                if mi:
+                    n = cn_int(mi.group(1))
+                    rest = mi.group(2).strip()
+                    if not rest and i + 1 < len(lns):
+                        rest = lns[i + 1]
+                        i += 1
+                    cur = {"clause": f"總則-{n}", "title": rest[:40], "path": cur_path(),
+                           "page": pn, "part": "第一篇", "lines": [(pn, rest)]}
+                    units.append(cur)
+                    i += 1
+                    continue
+            else:
+                mk = CODE_RE.fullmatch(s)
+                if mk:
+                    code, title = mk.group(1), mk.group(2).strip()[:40]
+                    cur = {"clause": code, "title": title, "path": cur_path(),
+                           "page": pn, "part": c_lbl, "lines": [(pn, s)]}
+                    units.append(cur)
+                    i += 1
+                    continue
+            if cur is not None:
+                cur["lines"].append((pn, s))
+            i += 1
+    return chunk([u for u in units if u["lines"]])
+
+
 def chunk(units, limit=6000):
     """Split oversized units (appendices, unnumbered tables) at page breaks so hits keep a page."""
     out = []
@@ -560,6 +942,18 @@ def main():
             source_kind = "code"
         elif splitter == "wood110":
             units = wood110_units(text)
+            source_kind = "code"
+        elif sid == "src100" or splitter == "src100":
+            units = src100_units(text)
+            source_kind = "code"
+        elif sid == "concrete_const110" or splitter == "concrete_const110":
+            units = concrete_const110_units(text)
+            source_kind = "code"
+        elif sid == "rainwater109" or splitter == "rainwater109":
+            units = rainwater109_units(text)
+            source_kind = "code"
+        elif sid == "sewer105" or splitter == "sewer105":
+            units = sewer105_units(text)
             source_kind = "code"
         elif source_kind == "law_point" or splitter == "point":
             units = point_units(text)

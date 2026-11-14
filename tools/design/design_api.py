@@ -397,7 +397,7 @@ def _format_fallback(calculator: str, result: Mapping[str, Any]) -> str:
                     crack.get("w_mm", "-"),
                     crack.get("limit_mm", "-"),
                 ),
-                "依據《混凝土結構設計規範》100.06.09 版；仍須技師覆核。",
+                "依據《混凝土結構設計規範》112.08.10 現行版（已對帳 100.06.09 舊版）；仍須技師覆核。",
             ]
         )
     if calculator == "rc_column":
@@ -423,7 +423,7 @@ def _format_fallback(calculator: str, result: Mapping[str, Any]) -> str:
                 ),
                 "  柱箍筋初步：%s@%s mm"
                 % (ties.get("bar", "-"), ties.get("spacing_mm", "-")),
-                "依據《混凝土結構設計規範》100.06.09 版；"
+                "依據《混凝土結構設計規範》112.08.10 現行版（已對帳 100.06.09 舊版）；"
                 "耐震圍束與接頭另計，仍須技師覆核。",
             ]
         )

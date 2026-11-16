@@ -1004,6 +1004,11 @@
   .xcheck-notes { margin: 8px 0 0; padding-left: 18px; font-size: 12px; line-height: 19px; color: var(--text-2); }
   .xcheck-notes li { margin-bottom: 3px; }
   .xcheck-limits { margin: 8px 0 0; padding-left: 18px; font-size: 12px; line-height: 19px; color: var(--text-2); }
+  .xcheck-io { margin: 8px 0 0; font-size: 12px; }
+  .xcheck-io > summary { cursor: pointer; color: var(--text-2); font-weight: 600; }
+  .xcheck-io > summary:hover { color: var(--text); }
+  .xcheck-io .xcheck-table { margin-top: 6px; }
+  .xcheck-json { margin: 6px 0 0; padding: 8px 10px; max-height: 220px; overflow: auto; background: var(--surface-2); border-radius: 6px; font-family: var(--mono); font-size: 11.5px; line-height: 18px; }
   .ref-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -3196,7 +3201,35 @@ function renderCrosscheckSheetHtml(d) {
   ];
   if (d.saved_previous) rows.push("原本開啟的專案有未儲存變更，已先幫你存檔（內容還在原檔案裡）。");
   if (!d.raised) rows.push("視窗沒有自動跳到前景，請自行切到 Open CalcSheet Studio。");
-  return `<div style="margin-top:6px;line-height:1.8">${rows.map(x => `<div>${x}</div>`).join("")}</div>`;
+
+  // 寫進計算表的輸入值：讓使用者當場核對「我改的參數」與「表上算的參數」是不是同一組
+  const inputs = Array.isArray(d.input_rows) ? d.input_rows : [];
+  const verif = Array.isArray(d.verification) ? d.verification : [];
+  const badRows = verif.filter(v => !v.ok);
+  let io = "";
+  if (inputs.length) {
+    const flagged = new Set(badRows.map(v => v.name));
+    io += `<details class="xcheck-io" open><summary>寫進這張計算表的參數（工作表頂端也有同一份）`
+       + `${d.verified ? "・已讀回確認 ✓" : "・讀回有異 ✗"}</summary>`
+       + `<table class="xcheck-table"><thead><tr><th>項目</th><th>模板變數</th><th>寫入值</th></tr></thead><tbody>`
+       + inputs.map(r => `<tr${flagged.has(r.name) ? ' style="background:#fee2e2"' : ""}>`
+           + `<td>${esc(r.label)}</td><td><code>${esc(r.name)}</code></td>`
+           + `<td>${xcNum(r.value)}${r.unit ? " " + esc(r.unit) : ""}</td></tr>`).join("")
+       + `</tbody></table></details>`;
+  }
+  if (badRows.length) {
+    io += `<div class="xcheck-limits">讀回不一致的項目：`
+       + badRows.map(v => `${esc(v.name)} 應為 ${xcNum(v.want)}、實際 ${v.got === null ? "找不到" : xcNum(v.got)}`).join("；")
+       + `</div>`;
+  }
+  const echo = (d.payload_echo && Object.keys(d.payload_echo).length)
+    ? `<details class="xcheck-io"><summary>工作台送出的參數（原始 JSON）</summary>`
+      + `<pre class="xcheck-json">${esc(JSON.stringify(d.payload_echo, null, 2))}</pre></details>` : "";
+  const notes = (d.alignment || []).length
+    ? `<details class="xcheck-io"><summary>為了能對照而做的處理</summary>`
+      + `<ul class="xcheck-limits">${d.alignment.map(a => `<li>${esc(a)}</li>`).join("")}</ul></details>` : "";
+  return `<div style="margin-top:6px;line-height:1.8">${rows.map(x => `<div>${x}</div>`).join("")}`
+       + `${io}${echo}${notes}</div>`;
 }
 
 function renderCrosscheckHtml(d) {

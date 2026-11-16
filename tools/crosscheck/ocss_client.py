@@ -238,6 +238,14 @@ class OcssClient:
         """讓 App 切到指定工作表（給使用者看）；'project'／'report' 為特殊頁。"""
         return self._request(f"/sheets/{sheet_id}/select", {})
 
+    def view_get(self) -> dict:
+        """目前工作表的檢視模式（code-visual／code-output／visual-output／print-preview／ifc）。"""
+        return self._request("/view")
+
+    def view_set(self, view: str) -> dict:
+        """切換檢視模式。用 code-output 讓視窗顯示「算式＋結果」，也順帶強制重繪。"""
+        return self._request("/view", {"view": view}, method="PUT")
+
 
 # -------------------------------------------------------------------- 結果解析
 _NUMERIC_UNIT = re.compile(r"[A-Za-zµμ]")

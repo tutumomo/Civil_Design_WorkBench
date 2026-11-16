@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import threading
 import time
@@ -276,7 +277,7 @@ def _steel_inputs(payload: dict, res: dict) -> tuple[dict, list[str]]:
     inputs = {
         "design_method": 1,
         "f_y_in": float(col["fy_mpa"]), "f_y_bp_in": float(col["fy_mpa"]),
-        "fc_in": float(bp["fc_mpa"]) * _KGF_PER_MPA,
+        "fc_in": round(float(bp["fc_mpa"]) * _KGF_PER_MPA, 2),   # 取 2 位：算式行不要出現 285.52160000000003
         "anchor_grade": _ANCHOR_GRADE.get(grade, 3),
         "shear_mode": 2 if an.get("shear_path") == "anchors" else 1,
         "L_col": float(col["length_m"]), "K_x": float(col["Kx"]), "K_y": float(col["Ky"]),
@@ -357,6 +358,9 @@ SPECS: dict[str, dict] = {
         "limits": ["設計流量、內寬、溝深、縱坡、曼寧 n 皆須大於 0"],
         "inputs": _channel_inputs,
         "compare": _channel_compare,
+        "banner": [("設計流量 Q", "Q_direct", "m³/s"), ("渠道底寬 B", "B_chan", "m"),
+                   ("渠道淨深 H", "H_chan", "m"), ("渠底縱坡 S", "S_chan", ""),
+                   ("曼寧 n", "n_manning", ""), ("出水高下限", "fb_min", "m")],
     },
     "foundation_isolated": {
         "template": "tw-isolated-footing",
@@ -371,6 +375,12 @@ SPECS: dict[str, dict] = {
         ],
         "inputs": _footing_inputs,
         "compare": _footing_compare,
+        "banner": [("基腳 B", "B_f", "mm"), ("基腳 L", "L_f", "mm"),
+                   ("基腳厚 h", "h_f", "mm"), ("柱 c1", "c_1", "mm"),
+                   ("柱 c2", "c_2", "mm"), ("柱軸力 P", "P_serv", "kN"),
+                   ("Mx", "Mx_serv", "kN·m"), ("My", "My_serv", "kN·m"),
+                   ("容許支承力 qa", "q_a_in", "kPa"), ("f'c", "fc_in", "MPa"),
+                   ("fy", "fy_in", "MPa"), ("保護層", "cover", "mm")],
     },
     "steel_column": {
         "template": "tw-steel-column",
@@ -387,6 +397,11 @@ SPECS: dict[str, dict] = {
         ],
         "inputs": _steel_inputs,
         "compare": _steel_compare,
+        "banner": [("基板 B", "B_p", "mm"), ("基板 N", "N_p", "mm"),
+                   ("基板厚 t", "t_p", "mm"), ("柱軸力 P", "P_u", "kN"),
+                   ("Mx", "M_ux", "kN·m"), ("My", "M_uy", "kN·m"),
+                   ("剪力 V", "V_u", "kN"), ("混凝土強度（模板單位）", "fc_in", "kgf/cm²"),
+                   ("錨栓直徑", "d_b", "mm"), ("錨栓埋深", "h_ef", "mm")],
     },
 }
 
@@ -604,24 +619,70 @@ SHEET_SCHEMA = "civil-ocss-sheet/1"
 PROJECT_DIR = ROOT / "out" / "design_workbench" / "crosscheck"
 
 
-def _sheet_banner(spec: dict, alignment: list[str], when: str) -> str:
+def _sheet_banner(spec: dict, alignment: list[str], when: str,
+                  inputs: dict | None = None) -> str:
     """計算表最上面那段說明（OCSS 的文字行以 `'` 開頭），免得技師把模板自身的
     UC 當成本專案的結果——模板含沒對齊的預設值（例：型鋼斷面用內建表）。"""
     def esc(s: str) -> str:
         return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
     items = "".join("<li>%s</li>" % esc(a) for a in alignment)
+    vals = ""
+    if inputs and spec.get("banner"):
+        rows = []
+        for label, key, unit in spec["banner"]:
+            if key not in inputs:
+                continue
+            rows.append("%s = %s%s" % (esc(label), esc(inputs[key]),
+                                       (" " + esc(unit)) if unit else ""))
+        if rows:
+            vals = ('<div style="margin-top:6px"><b>寫進這張表的輸入值</b>'
+                    '（＝你在設計工作台按「執行計算」時的那組參數）：<br>%s</div>'
+                    % "、".join(rows))
     html = (
         '<div style="padding:10px 14px;margin:0 0 10px;border:1px solid #b45309;'
         'border-radius:8px;background:#fffbeb;line-height:1.7">'
         '<b>這是「設計工作台」產生的交叉驗算用計算表</b>（%s，模型：%s）<br>'
-        '本專案引擎算出的值已<b>內嵌在下列算式的同一行</b>。<br>'
+        '本專案引擎算出的值已<b>內嵌在下列算式的同一行</b>。%s<br>'
         '<b>下面這個模板自身的 UC／合格判定，不代表本專案結果</b>：模板含沒有對齊的預設值'
         '（例如型鋼斷面固定取內建表、配筋用模板預設）。逐項比對請看設計工作台的「OCSS 交叉驗算」面板。'
         '<div style="margin-top:6px"><b>為了能對照而做的處理：</b></div>'
         '<ul style="margin:4px 0 0 18px;padding:0;font-size:12px">%s</ul></div>'
-    ) % (esc(when), esc(spec["label"]), items)
+    ) % (esc(when), esc(spec["label"]), vals, items)
     return "'" + html + "\n"
+
+
+def _banner_rows(spec: dict, inputs: dict) -> list[dict]:
+    """給畫面看的「寫進計算表的輸入值」（標籤、變數名、值、單位）。"""
+    rows = []
+    for label, key, unit in spec.get("banner", []):
+        if key in inputs:
+            rows.append({"label": label, "name": key, "value": inputs[key], "unit": unit})
+    return rows
+
+
+_NUM_ONLY = re.compile(r"-?[0-9]+(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?")
+
+
+def _verify_inputs(source: str, inputs: dict) -> list[dict]:
+    """讀回計算表，逐項確認 `變數 = 值` 那一行真的寫入了這個值。
+
+    這是「沒傳進計算表」的守門：不看送出的字串，而是看 OCSS 手上那份文字實際寫的是多少。
+    """
+    rows = []
+    for name, val in inputs.items():
+        pat = re.compile(r"^[ \t]*%s[ \t]*=[ \t]*(%s)" % (re.escape(name), _NUM_ONLY.pattern), re.M)
+        m = pat.search(source or "")
+        got = float(m.group(1)) if m else None
+        try:
+            want = float(val)
+        except (TypeError, ValueError):
+            want = None
+        ok = (got is not None and want is not None
+              and abs(got - want) <= 1e-9 * max(1.0, abs(want)))
+        rows.append({"name": name, "want": str(val),
+                     "got": (None if got is None else got), "ok": ok})
+    return rows
 
 
 def _raise_window() -> bool:
@@ -680,6 +741,8 @@ def open_sheet(calc_id: str, payload: dict | None = None, client=None,
         "status": None, "message": "", "project_file": None, "sheet": None,
         "sheet_id": None, "uc": None, "passes": None, "line_count": None,
         "saved_previous": False, "raised": False, "ocss_version": None,
+        "payload_echo": payload if isinstance(payload, dict) else {},
+        "input_rows": [], "verification": [], "verified": None, "view_set": None,
     }
 
     def done(status_, message=""):
@@ -693,6 +756,7 @@ def open_sheet(calc_id: str, payload: dict | None = None, client=None,
         return done(e.status, e.message)
 
     spec = prep["spec"]
+    out["alignment"] = prep["alignment"]
     # 輸入值內嵌到算式行（與 calcbook 同一套做法，選單型會補一行賦值）
     try:
         source = CB.bake_inputs(prep["src"], prep["inv"], prep["inputs"])
@@ -703,7 +767,8 @@ def open_sheet(calc_id: str, payload: dict | None = None, client=None,
     title = "交叉驗算｜%s｜%s" % (spec["label"], time.strftime("%Y-%m-%d %H:%M"))
     sheet_name = "本專案參數（%s）" % spec["label"]
     line_count = len([ln for ln in source.splitlines() if ln.strip()])
-    source = _sheet_banner(spec, prep["alignment"], time.strftime("%Y-%m-%d %H:%M")) + "\n" + source
+    source = _sheet_banner(spec, prep["alignment"], time.strftime("%Y-%m-%d %H:%M"),
+                           prep["inputs"]) + "\n" + source
     target = Path(out_dir) if out_dir else PROJECT_DIR
     target.mkdir(parents=True, exist_ok=True)
     path = (target / ("%s_%s.ifccalculation" % (calc_id, stamp))).resolve()
@@ -735,7 +800,19 @@ def open_sheet(calc_id: str, payload: dict | None = None, client=None,
         if ev.get("errorLines"):
             raise OcssError("-", "計算表有 %s 行錯誤" % ev.get("errorLines"))
         client.sheet_select(sheet_id)      # 讓 App 切到這張表（給使用者看）
+        try:
+            # 切到「算式＋結果」檢視：技師直接看到逐式數值，也順帶強制視窗重繪
+            client.view_set("code-output")
+            out["view_set"] = True
+        except Exception:
+            out["view_set"] = False
         client.project_save_as(str(path))
+        # 讀回 App 手上那張表，逐項確認「變數 = 值」真的寫進去了（沒傳進去的守門）
+        try:
+            got = client.sheet(sheet_id) or {}
+        except OcssError:
+            got = {}
+        out["verification"] = _verify_inputs(got.get("source") or "", prep["inputs"])
     except OcssUnavailable as e:
         return done("unavailable", str(e))
     except OcssError as e:
@@ -757,7 +834,18 @@ def open_sheet(calc_id: str, payload: dict | None = None, client=None,
     out.update({"project_file": str(path), "sheet": sheet_name, "sheet_id": sheet_id,
                 "uc": ev.get("uc"), "passes": ev.get("passes"),
                 "line_count": line_count})
+    out["input_rows"] = _banner_rows(spec, prep["inputs"])
+    bad = [v for v in out["verification"] if not v["ok"]]
+    out["verified"] = bool(out["verification"]) and not bad
     out["raised"] = _raise_window()
+    if not out["verified"]:
+        detail = "、".join(
+            "%s 應為 %s、實際 %s" % (v["name"], v["want"],
+                                     "找不到" if v["got"] is None else v["got"])
+            for v in bad) or "沒有任何輸入值可驗證"
+        return done("error",
+                    "計算表已產生並存檔（%s），但讀回 App 手上那份文字與送出的參數不一致：%s。"
+                    "請確認 OCSS 視窗顯示的是剛開的這張表，再按一次。" % (path.name, detail))
     return done("ok")
 
 
@@ -792,6 +880,12 @@ def _print_sheet(r: dict) -> None:
         print("  工作表：%s（%s 行）" % (r["sheet"], r["line_count"]))
         print("  模板自身 UC：%s（含模板預設的未對齊項，不是本專案的使用率）" % r["uc"])
         print("  視窗已拉到前景：%s" % ("是" if r["raised"] else "否"))
+    rows = r.get("input_rows") or []
+    if rows:
+        print("  寫進計算表的輸入值（讀回 %s）：" % (
+            "已逐項確認" if r.get("verified") else "有不一致"))
+        for row in rows:
+            print("    %-22s %-12s %s %s" % (row["label"], row["name"], row["value"], row["unit"]))
 
 
 def main(argv=None) -> int:

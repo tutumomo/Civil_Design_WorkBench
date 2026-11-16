@@ -81,13 +81,15 @@ class FakeClient:
 class FakeSheetClient(FakeClient):
     """假的專案／工作表客戶端，記錄動過哪些操作。"""
 
-    def __init__(self, project_state: dict | None = None, fail_at: str | None = None):
+    def __init__(self, project_state: dict | None = None, fail_at: str | None = None,
+                 sheet_source: str | None = None):
         super().__init__({})
         self.state = dict(project_state or {"filePath": "C:/tmp/prev.ifccalculation",
                                             "unsaved": False})
         self.fail_at = fail_at
         self.ops: list[str] = []
         self.source = None
+        self.sheet_source = sheet_source     # 假裝 App 上實際存的文字（驗證用）
         self.saved_as = None
         self.opened = None
 
@@ -131,6 +133,18 @@ class FakeSheetClient(FakeClient):
         self.ops.append("sheet_select")
         self._maybe_fail("sheet_select")
         return {}
+
+    def view_set(self, view):
+        self.ops.append("view_set:%s" % view)
+        self._maybe_fail("view_set")
+        return {}
+
+    def sheet(self, sheet_id, evaluate=False):
+        """讀回剛寫進去的表（驗證「值真的有寫進去」用）。"""
+        self.ops.append("sheet")
+        self._maybe_fail("sheet")
+        return {"id": sheet_id,
+                "source": self.source if self.sheet_source is None else self.sheet_source}
 
     def project_save_as(self, path):
         self.ops.append("project_save_as")
@@ -181,8 +195,9 @@ def main() -> int:
     sres = D.run_calculation("steel_column", example("steel_column"),
                              persist=False)["result"]
     sinputs, snotes = L._steel_inputs(example("steel_column"), sres)
-    check("混凝土強度換算成 kgf/cm²",
-          abs(sinputs["fc_in"] - float(sres["base_plate"]["fc_mpa"]) * 10.1972) < 1e-6)
+    check("混凝土強度換算成 kgf/cm²（取 2 位小數）",
+          abs(sinputs["fc_in"] - float(sres["base_plate"]["fc_mpa"]) * 10.1972) < 0.005,
+          str(sinputs["fc_in"]))
     check("基板尺寸換算成 mm",
           abs(sinputs["B_p"] - float(sres["base_plate"]["plate_B_m"]) * 1000) < 1e-6)
     check("剪力取合力", abs(sinputs["V_u"] - 30.0) < 1e-6, str(sinputs["V_u"]))
@@ -323,6 +338,8 @@ def main() -> int:
     check("狀態 ok", r2["status"] == "ok", r2["message"])
     check("另存成 .ifccalculation", (r2["project_file"] or "").endswith(".ifccalculation"))
     check("有切到該工作表", "sheet_select" in c2.ops)
+    check("切到「算式＋結果」檢視", "view_set:code-output" in c2.ops, str(c2.ops))
+    check("有讀回 App 手上的表做驗證", "sheet" in c2.ops, str(c2.ops))
     check("select 在 save_as 之前", c2.ops.index("sheet_select") < c2.ops.index("project_save_as"))
     check("工作表名稱帶計算器", bool(r2["sheet"]) and "排水溝" in r2["sheet"], str(r2.get("sheet")))
     check("回報行數與 UC", r2["line_count"] > 0 and r2["uc"] == 0.5, str(r2["line_count"]))
@@ -332,6 +349,13 @@ def main() -> int:
     check("計算文字已內嵌輸入值（不是 ?{ 預設）",
           "?{" not in (c2.source or "") and "1e-05" not in (c2.source or ""),
           (c2.source or "")[:120])
+    check("橫幅列出寫進這張表的輸入值", "寫進這張表的輸入值" in (c2.source or ""))
+    check("讀回驗證通過（每個輸入值都在算式那一行）", r2["verified"] is True,
+          json.dumps(r2["verification"], ensure_ascii=False)[:200])
+    check("回報畫面上的輸入值清單",
+          any(row["name"] == "B_chan" for row in r2["input_rows"]), str(r2["input_rows"])[:200])
+    check("回報收到的參數（payload_echo）", r2["payload_echo"].get("inner_width_m") == 0.4,
+          str(r2["payload_echo"])[:120])
 
     # 12c 中途失敗 → 把原本專案開回來
     c3 = FakeSheetClient({"filePath": "C:/tmp/prev.ifccalculation", "unsaved": False},
@@ -347,6 +371,26 @@ def main() -> int:
     r4 = L.open_sheet("foundation_isolated", p_bad, client=c4, out_dir=tmp)
     check("參數不適用時不碰專案", r4["status"] == "not_applicable" and c4.ops == [],
           str(c4.ops))
+
+    # 12e 讀回的值與送出不符（App 手上是舊的預設值）→ 一定要叫出來，不能報成功
+    p5 = deep_patch(example("channel_hydraulics"),
+                    {"inner_width_m": 0.55, "depth_m": 1.0})
+    c0 = FakeSheetClient()
+    r0 = L.open_sheet("channel_hydraulics", p5, client=c0, out_dir=tmp)
+    good = c0.source or ""
+    check("寫入的文字本身讀回驗證通過", r0["verified"] is True,
+          json.dumps(r0["verification"], ensure_ascii=False)[:300])
+    c5 = FakeSheetClient(sheet_source=good.replace("B_chan = 0.55", "B_chan = 0.4"))
+    r5 = L.open_sheet("channel_hydraulics", p5, client=c5, out_dir=tmp)
+    check("讀回的值與送出不符時回報 error", r5["status"] == "error", r5["status"])
+    check("訊息點名是哪一項不符", "B_chan" in r5["message"], r5["message"][:160])
+    check("不符時 verified 為 False", r5["verified"] is False)
+    # 12f 同樣的參數，App 手上是對的內容 → verified 為 True
+    c6 = FakeSheetClient(sheet_source=good)
+    r6 = L.open_sheet("channel_hydraulics", p5, client=c6, out_dir=tmp)
+    check("讀回相符時 verified 為 True", r6["verified"] is True,
+          json.dumps(r6["verification"], ensure_ascii=False)[:200])
+    check("相符時狀態 ok", r6["status"] == "ok", r6["status"])
 
     print()
     if FAILS:

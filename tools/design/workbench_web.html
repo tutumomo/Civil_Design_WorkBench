@@ -3341,7 +3341,7 @@ function renderResult(d) {
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">${links}</div>
           <div>輸出目錄：<code>${esc(data.out_dir || "")}</code></div>${notes}`;
       } catch (e) {
-        out.innerHTML = `❌ 出圖失敗：${esc(e.message || String(e))}<br><span class="hint">請確認本機工作台（<code>設計工作台.bat</code>）與 AutoCAD（accoreconsole）可用。</span>`;
+        out.innerHTML = `❌ 出圖失敗：${esc(e.message || String(e))}<br><span class="hint">請確認本機工作台（<code>設計工作台.bat</code>）已啟動，且 CAD 出圖後端（預設 Open CAD Studio TW，經 <code>tools/acad/acc.py</code>）可用。</span>`;
       } finally {
         drawBtn.disabled = false;
         drawBtn.textContent = "產生設計圖";

@@ -112,7 +112,11 @@ TESTS = [
     {
         "id": "regression",
         "cmd": ["tools/selftest/regression.py"],
-        "globs": ["tools/"],  # AGENTS.md §3：改動 tools/ 任一處都必跑全案回歸
+        # AGENTS.md §3：只有會動到數字（引擎、數量模型、案件資料、基準）才跑全案回歸；
+        # 文件、UI、安裝腳本等改動不必陪跑。
+        "globs": ["tools/design/", "tools/case_package/", "tools/wall_section/",
+                  "tools/box_section/", "tools/takeoff/", "cases/",
+                  "tools/selftest/baseline.json"],
         "what": "全案回歸（需本機 CAD 後端與既有 out/ 產物）",
         "needs_cad": True,
     },
@@ -168,9 +172,8 @@ def select(args):
         changed = _changed_paths()
         hit = [t for t in tests if any(c.startswith(g) for c in changed for g in t["globs"])]
         if not hit:
-            print("改動（%d 檔）未對應任何自測，改跑全部。" % len(changed))
-            return tests
-        # 任一 tools/ 改動都命中回歸（globs 含 "tools/"），這是刻意照 AGENTS.md §3
+            print("改動（%d 檔）未對應任何自測，略過。" % len(changed))
+            return []
         return hit
     return tests
 

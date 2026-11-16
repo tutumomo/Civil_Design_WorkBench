@@ -103,7 +103,7 @@
   - **人類視覺化驗收看板**：`CadCraft Studio` 為 GUI 視窗看板，無 headless CLI，嚴禁 AI 嘗試用腳本操控其介面做背景轉檔；僅供人類開圖檢視。詳見 `docs/CadCraft與CadCraft_Studio分工規範.md`。
 - **改動留痕與驗證閉環（Git Commit & Test-Before-Delivery）**：
   1. 每次實質改動（修改工具、新增功能、修復 bug、重構或升級規範）完成後，都必須建立對應的 Git commit，確保異動具備語意化說明，以便後續追蹤、審計與快速回滾。
-  2. 每次改動後，都必須編寫、補充或同步更新相關測試與檢核腳本；在交付給使用者前，必須執行測試與全案回歸，確保所有測試與品管驗證全部通過（退出碼為 0），嚴禁未經驗證即宣稱完成。
+  2. 測試只跑**改動範圍**：程式碼有改 → `tools/selftest/run_all.py --changed`（依 git 改動挑選）或對應的單支自測；**純文件、`.gitignore`、資料夾進出版控、註解或文案字串等非程式改動免跑 selftest**。全案回歸（`regression.py`）只在改到設計引擎、數量模型、計算或案件資料時，以及交付／收工前跑。嚴禁未經驗證即宣稱完成。
 - **完稿重開驗證（Reopen & Check）**：寫檔成功 ≠ 圖面可用。每次產出 CAD 檔必須重讀驗證並將實際出圖之 PDF 轉為 PNG 目視檢查；回報時須列出風險限制、數據來源與自評可信度（1–10）。
 
 ## 4. 確定性工具註冊表（Deterministic Tool Registry）
@@ -161,7 +161,7 @@
 - **When doing terrain / cut-fill / LandXML work (CivilCraft) or quantity takeoff (TakeoffCraft)**: Read [`docs/CadCraft_Studio操作指引.md`](docs/CadCraft_Studio操作指引.md) first（需使用者開啟視窗並提供 token，token 不落地）。
 - **When choosing between CADCraft CLI and CadCraft Studio (分工邊界)**: Read [`docs/CadCraft與CadCraft_Studio分工規範.md`](docs/CadCraft與CadCraft_Studio分工規範.md)（後台代工一律用 CLI，Studio 僅為人類視覺化看板）。
 - **Before producing or modifying any drawing (basemap, A3 sheet, detail)**: Read [`本項目的出圖規定(不定期新增).md`](<本項目的出圖規定(不定期新增).md>) 並遵守；出圖樣式與線粗見 `docs/出圖樣式與線粗.md`，舊圖改樣式用 `tools/acad/apply_plot_style.py`。
-- **After changing any tool under `tools/` (改過工具後)**: 必跑 `tools/selftest/run_all.py`（或 `--changed` 只跑相關）；其中回歸可用 `tools/selftest/regression.py --only <案名>` 只跑指定案件；若改到 `tools/design/` 另跑 `tools/selftest/design_core_selftest.py` 與 `tools/selftest/design_workbench_selftest.py`；改查詢台跑 `tools/regs/regq_selftest.py`。詳見 [`docs/回歸測試.md`](docs/回歸測試.md)。
+- **After changing any tool under `tools/` (改過工具後)**: 先跑 `tools/selftest/run_all.py --changed`（只跑 git 改動相關，足以涵蓋多數改動）；只有動到計算／數量／繪圖引擎或案件資料時，才加跑 `tools/selftest/regression.py`（可用 `--only <案名>` 縮小範圍）。**純文件、`.gitignore`、資料夾移出版控、註解與文案字串不需跑 selftest。** 若改到 `tools/design/` 另跑 `tools/selftest/design_core_selftest.py` 與 `tools/selftest/design_workbench_selftest.py`；改查詢台跑 `tools/regs/regq_selftest.py`。詳見 [`docs/回歸測試.md`](docs/回歸測試.md)。
 - **Before producing or modifying a budget (預算書與單價稽核)**: Read [`docs/預算書產線.md`](docs/預算書產線.md)（費率公式、可微調項與方向、單價庫）並跑 `tools/boq/price_audit.py`；產出使用 `tools/boq/boq_build.py`。
 - **Before producing or modifying a design report (設計報告)**: Read [`docs/設計報告產線.md`](docs/設計報告產線.md)（14 章骨架、章節派生防錯）並用 `tools/report/make_report.py`。
 - **Before estimating design flow, sizing channel, profile, slope, or basin (水文/水力/邊坡/沉砂池計算)**: Read [`docs/設計計算產線.md`](docs/設計計算產線.md) 並呼叫對應確定性腳本，嚴禁在對話中口算或臆測。

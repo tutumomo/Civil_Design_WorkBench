@@ -1597,8 +1597,11 @@ async function fetchCrosscheckCapabilities() {
       const d = await r.json();
       return d.capabilities || {};
     }
+    // 伺服器有回應但沒有這個端點 → 本機跑的是舊版（重啟即可），與靜態版要分開講
+    if (r.status === 404) return {__stale: true};
+    return null;
   } catch (e) {}
-  return null;   // null = 這個版本沒有交叉驗算後端（靜態版），{} = 有但沒這個計算器
+  return null;   // null = 沒有交叉驗算後端（靜態版／雲端版）
 }
 
 async function fetchCrosscheckStatus() {
@@ -3363,11 +3366,17 @@ function renderResult(d) {
        </div>`;
 
   // ---- OCSS 交叉驗算（第二套獨立演算法，僅供覆核，不阻擋出圖）----
-  const xcCap = crosscheckCapabilities ? (crosscheckCapabilities[current.id] || null) : null;
+  const xcStale = !!(crosscheckCapabilities && crosscheckCapabilities.__stale);
+  const xcCap = (crosscheckCapabilities && !xcStale) ? (crosscheckCapabilities[current.id] || null) : null;
   const xcSupported = !!(xcCap && xcCap.supported);
-  const xcHasBackend = crosscheckCapabilities !== null;
+  const xcHasBackend = crosscheckCapabilities !== null && !xcStale;
   let xcheckPanelHtml = "";
-  if (xcHasBackend && xcCap && xcCap.status !== "none") {
+  if (xcStale) {
+    xcheckPanelHtml = `<div class="xcheck-panel" id="xcheckpanel">
+         <div class="case-panel-head"><span>🔬 OCSS 交叉驗算</span></div>
+         <div class="case-panel-body"><p class="hint">本機工作台伺服器是舊版，還沒有交叉驗算端點。重啟後即可使用：<code>./web.sh restart</code>（Windows 為 <code>設計工作台.bat</code> 重開）。</p></div>
+       </div>`;
+  } else if (xcHasBackend && xcCap && xcCap.status !== "none") {
     const st = crosscheckStatus || {};
     const ocssLine = st.available === false
       ? `Open CalcSheet Studio 目前無法連線：${esc(st.message || "桌面程式可能沒開。")}`

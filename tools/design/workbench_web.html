@@ -201,6 +201,7 @@
   .nav-sep { flex: none; width: 1px; height: 16px; margin: 0 4px; background: var(--line-strong); }
   .nav-links { display: flex; align-items: center; gap: 4px; }
   .nav-links a {
+    white-space: nowrap;
     padding: 8px 12px;
     border-radius: 9999px;
     color: var(--text-2);
@@ -435,9 +436,11 @@
     padding: 16px 24px;
     background: var(--surface-2);
   }
-  .panel-head-right { display: flex; align-items: center; gap: 10px; }
-  .panel-head b { color: var(--text); font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: .04em; }
-  .run-state { font-family: var(--mono); font-size: 12px; line-height: 16px; color: var(--text-3); letter-spacing: .06em; }
+  .panel-head { flex-wrap: wrap; row-gap: 12px; }
+  .panel-head-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+  .panel-head b { color: var(--text); font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: .04em; white-space: nowrap; }
+  .panel-head-right .btn { white-space: nowrap; }
+  .run-state { font-family: var(--mono); font-size: 12px; line-height: 16px; color: var(--text-3); letter-spacing: .06em; white-space: nowrap; }
   .panel-body { padding: 24px; }
 
   .schema-card {
@@ -816,13 +819,14 @@
   .result > * { animation: fadeUp .5s var(--ease) both; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
-  .tagline { margin-top: 96px; padding-top: 48px; border-top: 1px solid var(--line); }
+  /* 收尾區：工具本身是主角，標語與頁尾退為結語，間距比主要區塊之間小一階 */
+  .tagline { margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line); }
   .tagline-text {
     margin: 0;
     max-width: 680px;
     color: var(--text);
-    font-size: 30px;
-    line-height: 36px;
+    font-size: 20px;
+    line-height: 30px;
     font-weight: 600;
     letter-spacing: .01em;
     text-wrap: balance;
@@ -835,7 +839,7 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 16px;
-    margin-top: 64px;
+    margin-top: 48px;
     padding-top: 24px;
     border-top: 1px solid var(--line);
     color: var(--text-3);
@@ -852,7 +856,7 @@
   @media (min-width: 768px) {
     .hero h1 { font-size: 48px; line-height: 48px; }
     .calc-head h2 { font-size: 30px; line-height: 36px; }
-    .tagline-text { font-size: 36px; line-height: 40px; }
+    .tagline-text { font-size: 24px; line-height: 34px; }
   }
   /* Step 2 & Step 3 UI Enhancements */
   .side-search {
@@ -1166,12 +1170,25 @@
     .theme-switch button span { display: none; }
     .hero { grid-template-columns: 1fr; align-items: start; gap: 24px; padding: 40px 0 32px; }
     .hero-side { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; text-align: left; }
-    .layout { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
-    .sidebar { position: static; order: 2; max-height: none; overflow: visible; }
-    .workspace { order: 1; }
-    .group { margin-top: 16px; }
-    .group h3 { padding: 0; }
-    .group button { display: inline-flex; width: auto; margin: 2px; border-radius: 9999px; border-color: var(--line); background: var(--surface); }
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-top: 24px; }
+    /* 窄螢幕：先選計算器再填參數（與寬螢幕左→右同序）；清單改成一列可橫向捲動的分組條，不把計算區推到幾千像素之後 */
+    .sidebar { position: static; min-width: 0; max-height: none; overflow: visible; padding-right: 0; }
+    .side-kicker { margin-bottom: 12px; }
+    .side-note { display: none; }
+    #catalog {
+      display: flex;
+      gap: 24px;
+      margin: 0 -16px;
+      padding: 4px 16px 12px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-padding-inline: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--surface-3) transparent;
+    }
+    .group, .group + .group { flex: none; margin-top: 0; }
+    .group h3 { padding: 0 0 0 4px; }
+    .group button { display: inline-flex; width: auto; margin: 0 4px 0 0; border-color: var(--line); border-radius: 9999px; background: var(--surface); white-space: nowrap; }
     .schema-card { grid-template-columns: 1fr; gap: 16px; }
     .schema-legend { grid-template-columns: 1fr; }
     .quick-grid { grid-template-columns: 1fr; }
@@ -1182,9 +1199,11 @@
     .status { align-self: flex-start; }
     .panel-body { padding: 16px; }
     .panel-head { padding: 16px; }
-    .tagline { margin-top: 64px; }
+    .tagline { margin-top: 48px; }
   }
   @media (max-width: 560px) {
+    .panel-head-right { flex: 1 1 100%; }
+    .panel-head-right .scenario-select { flex: 1 1 100%; min-width: 0; }
     .nav-links a { padding: 8px; }
     .brand span { display: none; }
     .brand { padding: 4px; }
@@ -1305,17 +1324,18 @@
           <p class="empty-sub">選擇左側工項，確認參數後執行。</p>
         </div>
       </section>
-
-      <section class="tagline" aria-label="工作台原則">
-        <p class="tagline-text" id="tagline">同一個引擎，網頁、命令列與智能體算出一樣的結果。三個月後回頭查，參數、算式與時間都還在。</p>
-      </section>
-
-      <footer class="footer">
-        <p>本頁呼叫 <code>tools\design\design_api.py</code>，每次計算自動保存於 <code>out\design_workbench\runs\</code>。設計結果仍須由工程師依現行規範、鑽探與現場條件覆核。</p>
-        <span class="foot-mark">CIVIL WORKBENCH · 2026</span>
-      </footer>
     </main>
   </div>
+
+  <!-- 標語與頁尾放在雙欄之外：窄螢幕時才會排在計算器清單之後，真正收尾 -->
+  <section class="tagline" aria-label="工作台原則">
+    <p class="tagline-text" id="tagline">同一個引擎，網頁、命令列與智能體算出一樣的結果。三個月後回頭查，參數、算式與時間都還在。</p>
+  </section>
+
+  <footer class="footer">
+    <p>本頁呼叫 <code>tools\design\design_api.py</code>，每次計算自動保存於 <code>out\design_workbench\runs\</code>。設計結果仍須由工程師依現行規範、鑽探與現場條件覆核。</p>
+    <span class="foot-mark">CIVIL WORKBENCH · 2026</span>
+  </footer>
 </div>
 
 <script>
@@ -1803,6 +1823,11 @@ function select(id) {
   currentRules = current.field_rules || {};
   lastResult = null;
   document.querySelectorAll("#catalog button").forEach(b => b.classList.toggle("on", b.dataset.id === id));
+  // 窄螢幕的計算器清單是橫向捲動條：把選中的項目捲進可視範圍（只動清單本身，不捲動整頁）
+  const strip = $("#catalog"), onBtn = strip && strip.querySelector("button.on");
+  if (onBtn && strip.scrollWidth > strip.clientWidth) {
+    strip.scrollLeft = Math.max(0, onBtn.offsetLeft - strip.offsetLeft - 16);
+  }
   $("#engine").textContent = current.engine;
   $("#title").textContent = current.title;
   $("#desc").textContent = current.description;

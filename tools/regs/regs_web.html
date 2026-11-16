@@ -219,6 +219,7 @@
   .nav-sep { flex: none; width: 1px; height: 16px; margin: 0 4px; background: var(--line-strong); }
   .nav-links { display: flex; align-items: center; gap: 4px; }
   .nav-links a {
+    white-space: nowrap;
     padding: 8px 12px;
     border-radius: 9999px;
     color: var(--text-2);
@@ -256,7 +257,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
     gap: 40px;
-    padding: 64px 0 40px;
+    padding: 64px 0 32px;
   }
   .hero h1 {
     margin: 0;
@@ -291,8 +292,9 @@
   .meta b { color: var(--accent); font-size: 16px; line-height: 20px; font-weight: 600; }
   .meta span { display: block; }
 
+  /* 查詢框緊接在說明之後：標題、說明、輸入框是同一組 */
   .ask {
-    margin-top: 24px;
+    margin-top: 0;
     padding: 16px;
     border: 1px solid var(--line);
     border-radius: 16px;
@@ -363,7 +365,7 @@
     grid-template-columns: 264px minmax(0, 1fr);
     align-items: start;
     gap: 32px;
-    margin-top: 32px;
+    margin-top: 48px;
     padding-top: 32px;
     border-top: 1px solid var(--line);
   }
@@ -760,13 +762,14 @@
   .drawer .vbadge small { display: block; color: var(--text-3); font-size: 12px; }
   .drawer .pgnote { font-size: 12px; color: var(--text-3); margin-top: 6px; }
 
-  .tagline { margin-top: 96px; padding-top: 48px; border-top: 1px solid var(--line); }
+  /* 收尾區：查詢工具本身是主角，標語與頁尾退為結語，間距比主要區塊之間小一階 */
+  .tagline { margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line); }
   .tagline-text {
     margin: 0;
     max-width: 680px;
     color: var(--text);
-    font-size: 30px;
-    line-height: 36px;
+    font-size: 20px;
+    line-height: 30px;
     font-weight: 600;
     letter-spacing: .01em;
     text-wrap: balance;
@@ -779,7 +782,7 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 16px;
-    margin-top: 64px;
+    margin-top: 48px;
     padding-top: 24px;
     border-top: 1px solid var(--line);
     color: var(--text-3);
@@ -796,31 +799,37 @@
   @media (min-width: 768px) {
     .hero h1 { font-size: 48px; line-height: 48px; }
     .rhead h2 { font-size: 36px; line-height: 40px; }
-    .tagline-text { font-size: 36px; line-height: 40px; }
+    .tagline-text { font-size: 24px; line-height: 34px; }
   }
   @media (max-width: 920px) {
     .wrap { padding: 0 16px 48px; }
     .topbar { margin-top: 12px; }
     .theme-switch button { padding: 6px 8px; }
     .theme-switch button span { display: none; }
-    .hero { grid-template-columns: 1fr; align-items: start; gap: 24px; padding: 40px 0 32px; }
+    .hero { grid-template-columns: 1fr; align-items: start; gap: 24px; padding: 40px 0 24px; }
     .hero-side { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; text-align: left; }
     .meta { max-width: none; text-align: left; }
-    .layout { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
+    .layout { grid-template-columns: 1fr; gap: 24px; margin-top: 32px; padding-top: 24px; }
     .sidebar { position: static; order: 2; max-height: none; overflow: visible; padding-right: 0; }
-    .result { order: 1; }
+    .result { order: 1; min-height: 0; }
     .side-kicker { margin-bottom: 12px; }
-    .topics { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    /* 窄螢幕：主題群組改成等寬格線，群組內的主題橫向排成膠囊，不再一顆一列 */
+    .topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 12px; align-items: start; }
     .topics button { display: inline-flex; width: auto; border-color: var(--line); border-radius: 9999px; background: var(--surface); }
     .topics button small { display: none; }
     .item, .item.compact { padding: 52px 14px 14px; }
     .item .no, .item.compact .no { flex-direction: row; gap: 4px; width: auto; min-height: 0; top: 12px; left: 14px; padding: 1px 10px; }
     .item .no i { font-size: 12px; }
     .item > .full { right: 12px; top: 12px; }
-    .tagline { margin-top: 64px; }
+    .tagline { margin-top: 48px; }
     .ask input[type=text] { font-size: 16px; line-height: 24px; padding: 10px 2px; }
   }
   @media (max-width: 560px) {
+    /* 手機寬度：導覽列收緊，暫存夾按鈕只留圖示與數字（文字留給螢幕閱讀器） */
+    .topbar { gap: 4px; padding: 6px 6px 6px 10px; }
+    .topbar .nav-sep { display: none; }
+    .basket-top-btn { padding: 6px 8px; }
+    .basket-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .nav-links a { padding: 8px; }
     .brand span { display: none; }
     .brand { padding: 4px; }
@@ -837,6 +846,7 @@
   }
   /* === Step 1, 2, 3 UX Enhancements === */
   .basket-top-btn {
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -1359,6 +1369,9 @@
   @media (max-width: 920px) {
     .item, .item.compact { padding: 52px 14px 14px; }
     .item-actions { right: 12px; top: 12px; }
+    /* 主題群組的窄版排法（須在 .tgroup 基本樣式之後才會生效） */
+    .tgroup { margin-bottom: 0; }
+    .tgroup-list { flex-direction: row; flex-wrap: wrap; gap: 6px; padding: 10px; }
   }
   @media print {
     body { background: #fff !important; color: #000 !important; font-size: 12pt; }
@@ -1410,7 +1423,7 @@
     </div>
     <span class="nav-sep" aria-hidden="true"></span>
     <button type="button" class="basket-top-btn" id="basketBtn" title="開啟本案引用條文暫存夾（可複製報告段落或列印 A4 依據單）">
-      <span>📌 本案依據</span>
+      <span aria-hidden="true">📌</span><span class="basket-lbl">本案依據</span>
       <span class="cnt" id="basketCnt">0</span>
     </button>
   </nav>

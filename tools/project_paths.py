@@ -525,7 +525,7 @@ def opencalcsheet_exe() -> str | None:
       1. `OCSS_EXE`（明確指定時照用）
       2. Windows：比對鍵＝`opencalcsheetstudiotw` 的資料夾（實際為「Open CalcSheet Studio TW」）
          內的 `open-calcsheet-studio.exe`（排除 uninstall.exe）
-      3. macOS：比對鍵相同的 .app（「Open CalcSheet Studio TW.app」，尚未實測）
+      3. macOS：比對鍵相同的 .app（「Open CalcSheet Studio TW.app」，2026-11-11 arm64 實測）
       4. Linux：比對鍵相同的 .desktop 檔的 Exec → `~/.local/bin/open-calcsheet-studio-tw`
          → PATH 的 `open-calcsheet-studio-tw`（尚未以 TW 版實測）
     未安裝回傳 None。**不得執行它的 `--version`／`--help`（會卡住）。**

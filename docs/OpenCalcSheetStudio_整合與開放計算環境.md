@@ -122,7 +122,7 @@ python tools/project_paths.py --install --only OpenCalcSheet    # 只補它
 |---|---|
 | Windows | 取 release 中檔名含 `.TW_` 的 `*_x64-setup.exe`（安裝到「Open CalcSheet Studio TW」，與上游並存）→ 以同 release 的 `SHA256SUMS.txt` 校驗（不符即刪檔並中止）→ `setup.exe /S` 靜默安裝（可能跳 UAC，請使用者核准）→ 以 `opencalcsheet_exe()` 確認。失敗時安裝檔保留在系統暫存夾，印出手動執行指令 |
 | Linux | `.deb` 需 root，**只下載並印出 `sudo apt install …`**，由使用者自行執行 |
-| macOS | 掛載 dmg → 複製 `.app`（沿用 OpenCADStudio 的流程，**尚未實測**） |
+| macOS | 掛載 dmg → 複製 `.app` 到 `/Applications`（`/Applications` 不可寫時改放 `~/.local/opt`）→ 建 `~/.local/bin/open-calcsheet-studio-tw` symlink。**2026-11-11 已實測（arm64，v2026.45.2-tw.5）**：dmg 內 app 名為「Open CalcSheet Studio TW.app」，解析器直接認得，不需改名 |
 
 * 已安裝（由 `opencalcsheet_exe()` 判定）則略過，**不自動升級**；要升級請手動下載新版（見下）。
 * **升級時別被版本號騙**：同一輪 `2026.45.2` 會連發 `-tw.1`…`-tw.5`，`.deb` 的 `Version` 欄與檔名都不帶 `-tw.N`，

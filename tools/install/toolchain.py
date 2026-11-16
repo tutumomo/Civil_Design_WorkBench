@@ -261,7 +261,7 @@ def _detect_opencadstudio() -> str | None:
     return opencadstudio_exe()
 
 
-#: Open CalcSheet Studio TW 資產命名（實測 v2026.45.2-tw.4）：
+#: Open CalcSheet Studio TW 資產命名（實測 v2026.45.2-tw.4；macOS 於 tw.5 實測）：
 #:   Open.CalcSheet.Studio.TW_2026.45.2_x64-setup.exe   Windows NSIS 安裝程式 → 「Open CalcSheet Studio TW」
 #:   Open.CalcSheet.Studio.TW_2026.45.2_aarch64.dmg     macOS（Apple Silicon）
 #:   Open.CalcSheet.Studio.TW_2026.45.2_amd64.deb／_arm64.deb  Linux
@@ -271,7 +271,8 @@ def _detect_opencadstudio() -> str | None:
 #: 安裝策略（依資產副檔名分流，tool.kind="installer"）：
 #:   · Windows：下載 → SHA256 校驗 → `setup.exe /S` 靜默安裝 → 以 opencalcsheet_exe() 驗證。
 #:     不執行 `--version`／`--help`（實測會卡住）。若安裝程式要求 UAC，請使用者核准。
-#:   · macOS：沿用 dmg 流程（掛載 → 複製 .app → symlink）。**尚未在 macOS 實測**。
+#:   · macOS：掛載 dmg → 複製 .app 到 /Applications → symlink（2026-11-11 實測 v2026.45.2-tw.5、arm64）。
+#:     dmg 內 app 已名為「Open CalcSheet Studio TW.app」，解析器直接認得，macos_app_name 免設。
 #:   · Linux：.deb 試 `sudo -n apt-get install`（免密碼 sudo 才成功），否則印指令；裝好後補防黑屏啟動腳本與選單項目。
 #: 已安裝則略過，不自動升級。
 TOOLS: list[Tool] = [

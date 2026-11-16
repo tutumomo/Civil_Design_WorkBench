@@ -455,6 +455,45 @@ def status(client=None) -> dict:
             "edition": info.get("edition")}
 
 
+# ============================================================ 共用準備
+class PrepError(Exception):
+    """準備階段就無法繼續（能力不足、參數不適用、模板不一致…）。"""
+
+    def __init__(self, status: str, message: str):
+        super().__init__(message)
+        self.status, self.message = status, message
+
+
+def _prepare(calc_id: str, payload: dict | None) -> dict:
+    """重跑本專案引擎，並備好 OCSS 的輸入與計算文字。
+
+    值一律取自引擎**實際採用**的結果（含預設值），不另維護一套預設邏輯。
+    失敗時丟 `PrepError`（帶 status，讓呼叫端轉成對外狀態）。
+    """
+    import design_api as D
+
+    spec = SPECS.get(calc_id)
+    if spec is None:
+        raise PrepError("not_supported", "這個計算器尚未開放即時交叉驗算。")
+    env = D.run_calculation(calc_id, payload or {}, persist=False)
+    res = env.get("result")
+    if not isinstance(res, dict):
+        raise PrepError("engine_error", "本專案引擎對這組參數算不出結果，請先修正參數：%s"
+                        % (env.get("error") or ""))
+    try:
+        inputs, alignment = spec["inputs"](payload or {}, res)
+        src, inv = T.load_template(spec["template"])
+        src, values = T.apply_inputs(src, inv, inputs)
+    except NotApplicable as e:
+        raise PrepError("not_applicable", str(e)) from None
+    except T.TemplateCheckError as e:
+        raise PrepError("error", "對照表與 OCSS 模板不一致：%s" % e) from None
+    except (KeyError, TypeError, ValueError) as e:
+        raise PrepError("error", "本專案結果缺少對照所需的欄位：%s" % e) from None
+    return {"spec": spec, "env": env, "res": res, "inputs": inputs,
+            "alignment": alignment, "src": src, "values": values, "inv": inv}
+
+
 # ============================================================ 執行
 def _base(calc_id: str, spec: dict | None) -> dict:
     return {
@@ -494,26 +533,14 @@ def run(calc_id: str, payload: dict | None, client=None) -> dict:
         out["elapsed_s"] = round(time.time() - t0, 2)
         return out
 
-    if spec is None:
-        return done("not_supported", "這個計算器尚未開放即時交叉驗算。")
-
-    env = D.run_calculation(calc_id, payload or {}, persist=False)
-    res = env.get("result")
-    if not isinstance(res, dict):
-        return done("engine_error", "本專案引擎對這組參數算不出結果，請先修正參數：%s"
-                    % (env.get("error") or ""))
-    out["ours_ok"] = bool(env.get("ok"))
-
     try:
-        inputs, out["alignment"] = spec["inputs"](payload or {}, res)
-        src, inv = T.load_template(spec["template"])
-        src, values = T.apply_inputs(src, inv, inputs)
-    except NotApplicable as e:
-        return done("not_applicable", str(e))
-    except T.TemplateCheckError as e:
-        return done("error", "對照表與 OCSS 模板不一致：%s" % e)
-    except (KeyError, TypeError, ValueError) as e:
-        return done("error", "本專案結果缺少對照所需的欄位：%s" % e)
+        prep = _prepare(calc_id, payload)
+    except PrepError as e:
+        return done(e.status, e.message)
+    env, res = prep["env"], prep["res"]
+    src, values, inputs = prep["src"], prep["values"], prep["inputs"]
+    out["ours_ok"] = bool(env.get("ok"))
+    out["alignment"] = prep["alignment"]
     out["ocss_inputs"] = inputs
 
     client = client or OcssClient(timeout=EVAL_TIMEOUT_S)
@@ -572,6 +599,169 @@ def run(calc_id: str, payload: dict | None, client=None) -> dict:
     return done("ok")
 
 
+# ============================================================ 在 OCSS 開啟計算表
+SHEET_SCHEMA = "civil-ocss-sheet/1"
+PROJECT_DIR = ROOT / "out" / "design_workbench" / "crosscheck"
+
+
+def _sheet_banner(spec: dict, alignment: list[str], when: str) -> str:
+    """計算表最上面那段說明（OCSS 的文字行以 `'` 開頭），免得技師把模板自身的
+    UC 當成本專案的結果——模板含沒對齊的預設值（例：型鋼斷面用內建表）。"""
+    def esc(s: str) -> str:
+        return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+    items = "".join("<li>%s</li>" % esc(a) for a in alignment)
+    html = (
+        '<div style="padding:10px 14px;margin:0 0 10px;border:1px solid #b45309;'
+        'border-radius:8px;background:#fffbeb;line-height:1.7">'
+        '<b>這是「設計工作台」產生的交叉驗算用計算表</b>（%s，模型：%s）<br>'
+        '本專案引擎算出的值已<b>內嵌在下列算式的同一行</b>。<br>'
+        '<b>下面這個模板自身的 UC／合格判定，不代表本專案結果</b>：模板含沒有對齊的預設值'
+        '（例如型鋼斷面固定取內建表、配筋用模板預設）。逐項比對請看設計工作台的「OCSS 交叉驗算」面板。'
+        '<div style="margin-top:6px"><b>為了能對照而做的處理：</b></div>'
+        '<ul style="margin:4px 0 0 18px;padding:0;font-size:12px">%s</ul></div>'
+    ) % (esc(when), esc(spec["label"]), items)
+    return "'" + html + "\n"
+
+
+def _raise_window() -> bool:
+    """把手上的 OCSS 視窗拉到前景（Windows；其他平台或失敗都只是回 False，不影響結果）。"""
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32
+        hits: list[int] = []
+        proc = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+
+        def cb(hwnd, _):
+            if not user32.IsWindowVisible(hwnd):
+                return True
+            n = user32.GetWindowTextLengthW(hwnd)
+            if n <= 0:
+                return True
+            buf = ctypes.create_unicode_buffer(n + 1)
+            user32.GetWindowTextW(hwnd, buf, n + 1)
+            t = buf.value
+            if "CalcSheet" in t or "計算書" in t:
+                hits.append(hwnd)
+            return True
+
+        user32.EnumWindows(proc(cb), 0)
+        for h in hits:
+            user32.ShowWindow(h, 9)         # SW_RESTORE
+            user32.SetForegroundWindow(h)
+        return bool(hits)
+    except Exception:
+        return False
+
+
+def open_sheet(calc_id: str, payload: dict | None = None, client=None,
+               out_dir: Path | None = None) -> dict:
+    """在執行中的 OCSS 開一張「這組參數」的計算表，讓使用者直接看逐式結果。
+
+    會**取代** OCSS 目前開啟的專案，所以先照 `ocss_calcbook` 的規矩處理未儲存內容：
+    有檔案路徑就存檔（內容留在磁碟），純記憶體且有未儲存變更則停下來請使用者先存。
+
+    值會**內嵌在算式那一行**（不是留成輸入欄位），因為 literal 型模板在工作表裡
+    沒有輸入欄位，而且「值與並排的式子一起看」才是逐式計算書要的樣子。
+
+    回傳 `status`：`ok`／`not_supported`／`not_applicable`／`unavailable`／
+    `engine_error`／`error`／`busy`。
+    """
+    import ocss_calcbook as CB
+    from ocss_client import OcssClient, OcssError, OcssUnavailable
+
+    t0 = time.time()
+    out = {
+        "schema": SHEET_SCHEMA, "calculator": calc_id,
+        "status": None, "message": "", "project_file": None, "sheet": None,
+        "sheet_id": None, "uc": None, "passes": None, "line_count": None,
+        "saved_previous": False, "raised": False, "ocss_version": None,
+    }
+
+    def done(status_, message=""):
+        out["status"], out["message"] = status_, message
+        out["elapsed_s"] = round(time.time() - t0, 2)
+        return out
+
+    try:
+        prep = _prepare(calc_id, payload)
+    except PrepError as e:
+        return done(e.status, e.message)
+
+    spec = prep["spec"]
+    # 輸入值內嵌到算式行（與 calcbook 同一套做法，選單型會補一行賦值）
+    try:
+        source = CB.bake_inputs(prep["src"], prep["inv"], prep["inputs"])
+    except CB.CalcbookError as e:
+        return done("error", "無法把輸入值寫進計算文字：%s" % e)
+
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    title = "交叉驗算｜%s｜%s" % (spec["label"], time.strftime("%Y-%m-%d %H:%M"))
+    sheet_name = "本專案參數（%s）" % spec["label"]
+    line_count = len([ln for ln in source.splitlines() if ln.strip()])
+    source = _sheet_banner(spec, prep["alignment"], time.strftime("%Y-%m-%d %H:%M")) + "\n" + source
+    target = Path(out_dir) if out_dir else PROJECT_DIR
+    target.mkdir(parents=True, exist_ok=True)
+    path = (target / ("%s_%s.ifccalculation" % (calc_id, stamp))).resolve()
+
+    client = client or OcssClient(timeout=EVAL_TIMEOUT_S)
+    if not _LOCK.acquire(timeout=LOCK_WAIT_S):
+        return done("busy", "Open CalcSheet Studio 正忙於另一筆計算，請稍後再試。")
+    sheet_id = None
+    prev_path = None
+    try:
+        info = client.require()
+        out["ocss_version"] = info.get("version")
+
+        cur = client.project() or {}
+        prev_path = cur.get("filePath")
+        if cur.get("unsaved"):
+            if not prev_path:
+                return done("error",
+                            "OCSS 目前專案有未儲存變更且沒有檔案路徑，換成這張表會遺失內容。"
+                            "請先在 OCSS 內存檔（或另存），再按一次。")
+            client.project_save()          # 先存檔：內容留在磁碟，不會遺失
+            out["saved_previous"] = True
+
+        client.project_new(force=True)
+        client.project_set_name(title)
+        res = client.sheet_add_source(source, name=sheet_name)
+        sheet_id = res.get("id")
+        ev = client.sheet_evaluate(sheet_id)
+        if ev.get("errorLines"):
+            raise OcssError("-", "計算表有 %s 行錯誤" % ev.get("errorLines"))
+        client.sheet_select(sheet_id)      # 讓 App 切到這張表（給使用者看）
+        client.project_save_as(str(path))
+    except OcssUnavailable as e:
+        return done("unavailable", str(e))
+    except OcssError as e:
+        # 專案已經被換掉了，盡量把使用者原本那份開回來
+        restored = False
+        if sheet_id is not None and prev_path:
+            try:
+                client.project_open(str(prev_path))
+                restored = True
+            except Exception:
+                pass
+        msg = "Open CalcSheet Studio 回報錯誤：%s" % e.message
+        if prev_path:
+            msg += "（原本的專案%s）" % ("已開回" if restored else "請自行由 File > Open 開回：%s" % prev_path)
+        return done("error", msg)
+    finally:
+        _LOCK.release()
+
+    out.update({"project_file": str(path), "sheet": sheet_name, "sheet_id": sheet_id,
+                "uc": ev.get("uc"), "passes": ev.get("passes"),
+                "line_count": line_count})
+    out["raised"] = _raise_window()
+    return done("ok")
+
+
+
 # ============================================================ CLI
 def _print(r: dict) -> None:
     print("%s ↔ %s　狀態 %s　結論 %s　%s s" % (
@@ -593,11 +783,24 @@ def _print(r: dict) -> None:
         print("  ⚠ " + w)
 
 
+def _print_sheet(r: dict) -> None:
+    print("狀態 %s　%s s" % (r["status"], r.get("elapsed_s")))
+    if r["message"]:
+        print("  " + r["message"])
+    if r["status"] == "ok":
+        print("  專案檔：%s" % r["project_file"])
+        print("  工作表：%s（%s 行）" % (r["sheet"], r["line_count"]))
+        print("  模板自身 UC：%s（含模板預設的未對齊項，不是本專案的使用率）" % r["uc"])
+        print("  視窗已拉到前景：%s" % ("是" if r["raised"] else "否"))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="工作台即時交叉驗算（本專案引擎 ↔ OCSS 模板）")
     ap.add_argument("calculator", nargs="?", help="計算器 id")
     ap.add_argument("--payload", help="參數 JSON 檔；省略則用計算器範例參數")
     ap.add_argument("--list", action="store_true", help="列出各計算器的即時驗算能力")
+    ap.add_argument("--open", action="store_true",
+                    help="改在 OCSS 視窗開一張計算表（會取代 OCSS 目前專案，未存檔會先存）")
     ap.add_argument("--json", action="store_true", help="輸出 JSON")
     a = ap.parse_args(argv)
 
@@ -612,6 +815,12 @@ def main(argv=None) -> int:
         payload = json.loads(Path(a.payload).read_text(encoding="utf-8"))
     else:
         payload = next(c["example"] for c in D.list_calculators() if c["id"] == a.calculator)
+    if a.open:
+        r = open_sheet(a.calculator, payload)
+        print(json.dumps(r, ensure_ascii=False, indent=2) if a.json else "", end="")
+        if not a.json:
+            _print_sheet(r)
+        return 0 if r["status"] == "ok" else 1
     r = run(a.calculator, payload)
     if a.json:
         print(json.dumps(r, ensure_ascii=False, indent=2))

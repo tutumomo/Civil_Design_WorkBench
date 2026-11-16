@@ -89,6 +89,7 @@ python tools/crosscheck/ocss_crosscheck.py register-mcp --apply
 python tools/crosscheck/ocss_live.py --list
 python tools/crosscheck/ocss_live.py channel_hydraulics          # 用計算器範例參數
 python tools/crosscheck/ocss_live.py steel_column --payload _temp/p.json --json
+python tools/crosscheck/ocss_live.py channel_hydraulics --open   # 在 OCSS 視窗開啟該組參數的計算表
 ```
 
 ### Three-Axis Case Delivery Pipeline

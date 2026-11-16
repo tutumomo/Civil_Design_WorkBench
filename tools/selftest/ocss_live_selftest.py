@@ -78,6 +78,72 @@ class FakeClient:
                 "truncated": False, "uncheckedLines": [], "title": "fake"}
 
 
+class FakeSheetClient(FakeClient):
+    """假的專案／工作表客戶端，記錄動過哪些操作。"""
+
+    def __init__(self, project_state: dict | None = None, fail_at: str | None = None):
+        super().__init__({})
+        self.state = dict(project_state or {"filePath": "C:/tmp/prev.ifccalculation",
+                                            "unsaved": False})
+        self.fail_at = fail_at
+        self.ops: list[str] = []
+        self.source = None
+        self.saved_as = None
+        self.opened = None
+
+    def _maybe_fail(self, op):
+        if self.fail_at == op:
+            from ocss_client import OcssError
+            raise OcssError("-", "假錯誤：%s" % op)
+
+    def project(self):
+        self.ops.append("project")
+        return dict(self.state)
+
+    def project_save(self, path=None):
+        self.ops.append("project_save")
+        self._maybe_fail("project_save")
+        return {}
+
+    def project_new(self, force=False):
+        self.ops.append("project_new")
+        self._maybe_fail("project_new")
+        return {}
+
+    def project_set_name(self, name):
+        self.ops.append("project_set_name")
+        return {}
+
+    def sheet_add_source(self, source, name=None):
+        self.ops.append("sheet_add_source")
+        self._maybe_fail("sheet_add_source")
+        self.source = source
+        self.sheet_name = name
+        return {"id": "sheet-1"}
+
+    def sheet_evaluate(self, sheet_id, names=None):
+        self.ops.append("sheet_evaluate")
+        self._maybe_fail("sheet_evaluate")
+        return {"uc": 0.5, "passes": True, "errorLines": 0,
+                "lines": [{"type": "assignment", "name": "x", "value": 1.0}] * 3}
+
+    def sheet_select(self, sheet_id):
+        self.ops.append("sheet_select")
+        self._maybe_fail("sheet_select")
+        return {}
+
+    def project_save_as(self, path):
+        self.ops.append("project_save_as")
+        self._maybe_fail("project_save_as")
+        self.saved_as = path
+        return {}
+
+    def project_open(self, path):
+        self.ops.append("project_open")
+        self.opened = path
+        return {}
+
+
 def main() -> int:
     print("[1] 三態能力表")
     caps = L.capability_map([c["id"] for c in D.list_calculators()])
@@ -237,6 +303,50 @@ def main() -> int:
                 if i["name"] == "單支錨栓最大拉力 T" and i["status"] == "skipped"]
     check("T 項被略過並寫原因",
           len(skipped8) == 1 and "8 支" in skipped8[0]["reason"])
+
+    print("[12] 在 OCSS 開啟計算表（假客戶端，不動真實專案）")
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="ocss_sheet_")
+
+    # 12a 未儲存且沒有檔案路徑 → 停下來，不動專案
+    c1 = FakeSheetClient({"filePath": None, "unsaved": True})
+    r1 = L.open_sheet("channel_hydraulics", ex, client=c1, out_dir=tmp)
+    check("未儲存且無檔名時停下", r1["status"] == "error" and "未儲存" in r1["message"], r1["message"])
+    check("此時不動任何專案操作", "project_new" not in c1.ops, str(c1.ops))
+
+    # 12b 未儲存但有檔案路徑 → 先存檔再換專案
+    c2 = FakeSheetClient({"filePath": "C:/tmp/prev.ifccalculation", "unsaved": True})
+    r2 = L.open_sheet("channel_hydraulics", ex, client=c2, out_dir=tmp)
+    check("先存檔再開新專案",
+          c2.ops[:3] == ["project", "project_save", "project_new"], str(c2.ops[:4]))
+    check("回報已幫使用者存檔", r2["saved_previous"] is True)
+    check("狀態 ok", r2["status"] == "ok", r2["message"])
+    check("另存成 .ifccalculation", (r2["project_file"] or "").endswith(".ifccalculation"))
+    check("有切到該工作表", "sheet_select" in c2.ops)
+    check("select 在 save_as 之前", c2.ops.index("sheet_select") < c2.ops.index("project_save_as"))
+    check("工作表名稱帶計算器", bool(r2["sheet"]) and "排水溝" in r2["sheet"], str(r2.get("sheet")))
+    check("回報行數與 UC", r2["line_count"] > 0 and r2["uc"] == 0.5, str(r2["line_count"]))
+    check("表格最上面有說明橫幅、且註明模板 UC 不代表本專案",
+          (c2.source or "").startswith("'<div")
+          and "不代表本專案結果" in (c2.source or ""))
+    check("計算文字已內嵌輸入值（不是 ?{ 預設）",
+          "?{" not in (c2.source or "") and "1e-05" not in (c2.source or ""),
+          (c2.source or "")[:120])
+
+    # 12c 中途失敗 → 把原本專案開回來
+    c3 = FakeSheetClient({"filePath": "C:/tmp/prev.ifccalculation", "unsaved": False},
+                         fail_at="sheet_evaluate")
+    r3 = L.open_sheet("channel_hydraulics", ex, client=c3, out_dir=tmp)
+    check("失敗時回報 error", r3["status"] == "error", r3["status"])
+    check("失敗時把原本的專案開回來", c3.opened == "C:/tmp/prev.ifccalculation", str(c3.opened))
+
+    # 12d 參數不適用 → 不碰專案
+    c4 = FakeSheetClient()
+    p_bad = example("foundation_isolated")
+    deep_patch(p_bad, {"geometry": {"thickness_m": 0.15}})
+    r4 = L.open_sheet("foundation_isolated", p_bad, client=c4, out_dir=tmp)
+    check("參數不適用時不碰專案", r4["status"] == "not_applicable" and c4.ops == [],
+          str(c4.ops))
 
     print()
     if FAILS:

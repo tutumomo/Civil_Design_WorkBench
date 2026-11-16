@@ -3176,6 +3176,29 @@ const xcPct = v => {
   return `${Number(v.toPrecision(5))}%`;
 };
 
+function renderCrosscheckSheetHtml(d) {
+  if (!d) return `<span class="hint">伺服器沒有回應內容。</span>`;
+  if (d.status !== "ok") {
+    const why = {
+      not_supported: "這個計算器尚未開放即時交叉驗算。",
+      not_applicable: d.message || "這組參數不在可對照的範圍內。",
+      unavailable: d.message || "Open CalcSheet Studio 目前無法連線。",
+      busy: d.message || "Open CalcSheet Studio 正忙於另一筆計算。",
+      engine_error: d.message || "本專案引擎對這組參數算不出結果。",
+      error: d.message || "開啟計算表時發生錯誤。"
+    }[d.status] || d.message || "未知狀態。";
+    return `<div style="margin-top:6px"><b>${esc(why)}</b></div>`;
+  }
+  const rows = [
+    `✅ 已在 Open CalcSheet Studio 開啟計算表「<b>${esc(d.sheet || "")}</b>」（${esc(String(d.line_count ?? "—"))} 行）`,
+    `模板自身 UC ${esc(String(d.uc ?? "—"))}（含模板預設的側壁配筋等未對齊項，不是本專案的使用率）`,
+    `專案檔：<code>${esc(d.project_file || "")}</code>`,
+  ];
+  if (d.saved_previous) rows.push("原本開啟的專案有未儲存變更，已先幫你存檔（內容還在原檔案裡）。");
+  if (!d.raised) rows.push("視窗沒有自動跳到前景，請自行切到 Open CalcSheet Studio。");
+  return `<div style="margin-top:6px;line-height:1.8">${rows.map(x => `<div>${x}</div>`).join("")}</div>`;
+}
+
 function renderCrosscheckHtml(d) {
   if (!d) return `<span class="hint">伺服器沒有回應內容。</span>`;
   const counts = d.counts || {};
@@ -3389,13 +3412,15 @@ function renderResult(d) {
            <div class="case-panel-head">
              <span>🔬 OCSS 交叉驗算</span>
              <div style="display:flex;gap:8px;align-items:center">
+               <button class="btn small" id="xcheckopenbtn" ${ok ? "" : "disabled title=\"計算結果未通過，請先修正參數\""} title="在 Open CalcSheet Studio 視窗開一張這組參數的計算表（會取代它目前開啟的專案；未存檔會先幫你存）">在 OCSS 開啟計算表</button>
                <button class="btn small" id="xcheckbtn" ${ok ? "" : "disabled title=\"計算結果未通過，請先修正參數\""}>以 OCSS 再算一次</button>
              </div>
            </div>
            <div class="case-panel-body">
              <p class="hint" style="margin:0 0 6px">把這組參數交給 <b>Open CalcSheet Studio</b> 的對應模板再算一次，逐項比對兩邊數值。屬第二意見，<b>不影響</b>「產生設計圖」。</p>
+             <p class="hint" style="margin:0 0 6px">「在 OCSS 開啟計算表」會把同一份逐式計算（值已內嵌在算式行）開在 OCSS 視窗裡讓你看，並另存到 <code>out/design_workbench/crosscheck/</code>。它會<b>取代</b> OCSS 目前開啟的專案——若那份有未儲存變更且已有檔案路徑，會先幫你存檔；純記憶體的新專案則會停下來請你先存。</p>
              <p class="hint" style="margin:0 0 6px">${ocssLine}</p>
-             <div id="xcheckresult" class="hint">${ok ? "按「以 OCSS 再算一次」開始交叉驗算。" : "⚠ 計算結果未通過，交叉驗算按鈕已停用。"}</div>
+             <div id="xcheckresult" class="hint">${ok ? "按「以 OCSS 再算一次」在頁面上比對，或按「在 OCSS 開啟計算表」直接看計算書。" : "⚠ 計算結果未通過，交叉驗算按鈕已停用。"}</div>
            </div>
          </div>`
       : `<div class="xcheck-panel" id="xcheckpanel">
@@ -3542,6 +3567,33 @@ function renderResult(d) {
       } finally {
         xBtn.disabled = false;
         xBtn.textContent = "以 OCSS 再算一次";
+      }
+    };
+  }
+  if ($("#xcheckopenbtn")) {
+    const oBtn = $("#xcheckopenbtn");
+    oBtn.onclick = async () => {
+      const out = $("#xcheckresult");
+      oBtn.disabled = true;
+      oBtn.textContent = "開啟中…";
+      out.innerHTML = "⏳ 正在把這組參數寫成 OCSS 計算表並開啟…";
+      try {
+        const resp = await fetch("/api/design/crosscheck/open", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({calculator: current.id, payload})
+        });
+        let data = null;
+        try { data = await resp.json(); } catch (e) { data = null; }
+        if (!resp.ok) {
+          throw new Error((data && data.error) || `伺服器回應 HTTP ${resp.status}`);
+        }
+        out.innerHTML = renderCrosscheckSheetHtml(data);
+      } catch (e) {
+        out.innerHTML = `❌ 開啟失敗：${esc(e.message || String(e))}<br><span class="hint">請確認 Open CalcSheet Studio 桌面程式已開啟並啟用 API，且由本機瀏覽器連線。</span>`;
+      } finally {
+        oBtn.disabled = false;
+        oBtn.textContent = "在 OCSS 開啟計算表";
       }
     };
   }

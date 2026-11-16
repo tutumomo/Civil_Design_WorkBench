@@ -612,9 +612,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path not in ("/api/design/run", "/api/design/section", "/api/design/crosscheck"):
+        if u.path not in ("/api/design/run", "/api/design/section",
+                          "/api/design/crosscheck", "/api/design/crosscheck/open"):
             return self.json({"error": "not found"}, 404)
-        if u.path == "/api/design/crosscheck" and not self._is_local():
+        if u.path.startswith("/api/design/crosscheck") and not self._is_local():
             return self.json({"error": "交叉驗算只接受本機請求"}, 403)
         try:
             length = int(self.headers.get("Content-Length", "0"))
@@ -628,6 +629,9 @@ class Handler(BaseHTTPRequestHandler):
             if u.path == "/api/design/crosscheck":
                 import ocss_live
                 return self.json(ocss_live.run(calc, payload))
+            if u.path == "/api/design/crosscheck/open":
+                import ocss_live
+                return self.json(ocss_live.open_sheet(calc, payload))
             if u.path == "/api/design/section":
                 import design_section
                 try:

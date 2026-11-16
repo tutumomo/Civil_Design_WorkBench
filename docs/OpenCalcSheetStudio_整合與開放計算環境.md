@@ -224,12 +224,13 @@ python tools/crosscheck/ocss_map_gen.py          # 產生缺少的對照表
 
 上面的批次對照跑的是 `checks/*.json` 裡**固定的一組參數**，證明「公式對得上」；這一層跑的是工作台上**當下任何一組參數**，讓技師改完尺寸後立刻看兩套算法是否還是同一個答案。
 
-**入口**：設計工作台的「🔬 OCSS 交叉驗算」面板（結果區，設計圖面板下方），按「以 OCSS 再算一次」。屬第二意見，**不阻擋**「產生設計圖」。
+**入口**：設計工作台的「🔬 OCSS 交叉驗算」面板（結果區，設計圖面板下方），兩顆按鈕：「以 OCSS 再算一次」（背景比對，結果顯示在網頁）與「在 OCSS 開啟計算表」（把同一份逐式計算打開在 OCSS 視窗裡看，見 §6.1e）。屬第二意見，**不阻擋**「產生設計圖」。
 
 ```bash
 python tools/crosscheck/ocss_live.py --list                 # 各計算器的三態能力
 python tools/crosscheck/ocss_live.py channel_hydraulics      # 用計算器範例參數
 python tools/crosscheck/ocss_live.py steel_column --payload _temp/p.json --json
+python tools/crosscheck/ocss_live.py channel_hydraulics --open   # 在 OCSS 開啟計算表
 ```
 
 **伺服器端點**（`tools/regs/regs_server.py`）：
@@ -238,7 +239,8 @@ python tools/crosscheck/ocss_live.py steel_column --payload _temp/p.json --json
 |---|---|
 | `GET /api/design/crosscheck/capabilities` | 三態能力表，不連 OCSS |
 | `GET /api/design/crosscheck/status` | OCSS 是否可用、版本；**不回傳 token** |
-| `POST /api/design/crosscheck` | 執行；**只接受本機請求**（`client_address` 為 127.x／::1） |
+| `POST /api/design/crosscheck` | 執行比對；**只接受本機請求**（`client_address` 為 127.x／::1） |
+| `POST /api/design/crosscheck/open` | 在 OCSS 開啟該組參數的計算表（§6.1e）；同樣**只接受本機請求** |
 
 **三態能力表**（`ocss_live.capability_map()`）：`supported`（可立即驗算）／`offline_only`（已有固定參數的批次案例，尚未開放任意參數）／`none`（尚無對照）。2026-11-16 只開放三個**全項吻合**的計算器：
 
@@ -270,6 +272,35 @@ python tools/crosscheck/ocss_live.py steel_column --payload _temp/p.json --json
 **不回傳 OCSS 的整體 UC／合格判定**：那混了沒對齊的部分（基腳自重歸零、配筋用模板預設），拿來當結論會誤導。回傳的是逐項數值、對齊說明與略過原因。
 
 **自測**：`tools/selftest/ocss_live_selftest.py`（假客戶端，不需桌面程式，已納入 `run_all.py` 的 `ocss-live`）。
+
+### 6.1e 在 OCSS 視窗開啟計算表（2026-11-16）
+
+§6.1d 的比對只把結果貼回網頁，逐式計算表本身看不到。`ocss_live.open_sheet()` 把**同一組參數**的計算表直接開在 OCSS 視窗裡，讓使用者自己往下讀每一行算式。
+
+**入口**：工作台面板的「在 OCSS 開啟計算表」按鈕 → `POST /api/design/crosscheck/open`（`{"calculator": …, "payload": …}`，只接受本機請求）；CLI 為 `ocss_live.py <計算器> --open`。
+
+**做法**：`_prepare()` 重跑本專案引擎取得實際採用的值 → `ocss_calcbook.bake_inputs()` 把值**內嵌進算式同一行**（不留下 `?{預設}` 提示，模板預設值不會被誤當成本案參數）→ 在首行插入說明橫幅（OCSS 的文字行以 `'` 開頭、可含 HTML）→ 開新專案、加工作表、`sheet_evaluate`、`sheet_select`、`project_save_as`。
+
+**輸出**：`out/design_workbench/crosscheck/<計算器>_<YYYYmmdd-HHMMSS>.ifccalculation`（可重開、可交付稽核）。
+
+**不會弄丟使用者的東西**：
+
+| OCSS 目前狀態 | 處理 |
+|---|---|
+| 專案有未儲存變更、**有**檔案路徑 | 先 `project_save()` 存回原檔（回應 `saved_previous: true`），再換成新專案 |
+| 專案有未儲存變更、**沒有**檔案路徑 | 停下來回 `error` 並要求先存檔；**完全不動專案** |
+| 中途 `sheet_evaluate` 失敗 | 嘗試 `project_open(原檔路徑)` 把原本那份開回來，並在訊息裡寫明結果 |
+
+**橫幅**：計算表最上面會寫「這是設計工作台產生的交叉驗算用計算表、本專案引擎的值已內嵌在下列算式」，並註明**模板自身的 UC／合格判定不代表本專案結果**（模板含側壁配筋預設值、自重歸零等對齊處理）。實測模板自身 UC：排水溝 0.98、鋼柱 **1.69**（鋼柱模板把未對齊的項目一起算進去，看數值就好、不要拿它當本專案的使用率）、獨立基腳 0.73。
+
+**實測踩到的兩件事**：
+
+1. `sheet_evaluate` 回的是 `numbers`（實測空 dict）、`uc`、`passes`、`errorLines`、`norm`，**沒有 `lines`**；只有無狀態的 `/evaluate` 才有 `lines`。行數改由寫入的計算文字非空白行計算，**在加橫幅之前**先算。
+2. 加橫幅後行數會多一行，自測只檢查 `line_count > 0`，另加「首行是橫幅且含『不代表本專案結果』」的檢查。
+
+**把視窗拉到前景**：`_raise_window()` 在 Windows 以 ctypes `EnumWindows` 找標題含 `CalcSheet`／`計算書` 的視窗，`ShowWindow(h, 9)` + `SetForegroundWindow(h)`；任何失敗都回 `False`（只是沒跳前景，不影響功能）。
+
+**不做的兩件事**：不改使用者 OCSS 內的模板檔（只讀模板、開新專案）；不把 token 放進回應或專案檔。
 
 ### 6.2 Token 與埠（機密）
 

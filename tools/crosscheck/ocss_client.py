@@ -173,6 +173,10 @@ class OcssClient:
         payload = {"path": str(path)} if path else {}
         return self._request("/project/save", payload)
 
+    def project_open(self, path: str) -> dict:
+        """由路徑開啟 .ifccalculation（受未儲存變更保護，會回 CONFLICT）。"""
+        return self._request("/project/open", {"path": str(path)})
+
     def project_save_as(self, path: str) -> dict:
         """另存新檔（自動補 .ifccalculation），專案改指向新檔。"""
         return self._request("/project/save-as", {"path": str(path)})
@@ -229,6 +233,10 @@ class OcssClient:
 
     def sheet_remove(self, sheet_id: str) -> dict:
         return self._request(f"/sheets/{sheet_id}", method="DELETE")
+
+    def sheet_select(self, sheet_id: str) -> dict:
+        """讓 App 切到指定工作表（給使用者看）；'project'／'report' 為特殊頁。"""
+        return self._request(f"/sheets/{sheet_id}/select", {})
 
 
 # -------------------------------------------------------------------- 結果解析

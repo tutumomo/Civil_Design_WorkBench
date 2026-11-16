@@ -56,6 +56,12 @@ TESTS = [
         "what": "OCSS template 型交叉驗算框架（假客戶端，不需桌面程式）",
     },
     {
+        "id": "ocss-live",
+        "cmd": ["tools/selftest/ocss_live_selftest.py"],
+        "globs": ["tools/crosscheck/", "tools/design/", "tools/regs/", "tools/selftest/"],
+        "what": "工作台即時交叉驗算（參數對應、防護、可比範圍，假客戶端）",
+    },
+    {
         "id": "ocss-load-suggest",
         "cmd": ["tools/selftest/ocss_load_suggest_selftest.py"],
         "globs": ["tools/crosscheck/", "tools/selftest/"],

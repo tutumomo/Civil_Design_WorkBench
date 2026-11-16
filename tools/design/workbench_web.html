@@ -959,7 +959,7 @@
     line-height: 16px;
     color: var(--text-2);
   }
-  .refs-panel, .case-panel, .history-panel, .drawing-panel {
+  .refs-panel, .case-panel, .history-panel, .drawing-panel, .xcheck-panel {
     margin-top: 16px;
     border: 1px solid var(--line-strong);
     border-radius: 8px;
@@ -992,6 +992,18 @@
     font-size: 12px;
   }
   .drawing-panel .case-panel-head { flex-wrap: wrap; gap: 8px; }
+  /* 交叉驗算面板 */
+  .xcheck-panel .case-panel-head { flex-wrap: wrap; gap: 8px; }
+  .xcheck-panel .case-panel-body { border-top: 1px solid var(--line); }
+  .xcheck-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 20px; }
+  .xcheck-table th, .xcheck-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  .xcheck-table th:first-child, .xcheck-table td:first-child { min-width: 8.5em; }
+  .xcheck-table th { background: var(--surface-2); color: var(--text-3); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .xcheck-table td.num { font-family: var(--mono); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .xcheck-table tr:last-child td { border-bottom: 0; }
+  .xcheck-notes { margin: 8px 0 0; padding-left: 18px; font-size: 12px; line-height: 19px; color: var(--text-2); }
+  .xcheck-notes li { margin-bottom: 3px; }
+  .xcheck-limits { margin: 8px 0 0; padding-left: 18px; font-size: 12px; line-height: 19px; color: var(--text-2); }
   .ref-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1563,6 +1575,9 @@ let pyodideReadyPromise = null;
 // 「設計圖」能力表：本機伺服器提供 /api/design/section；Cloudflare 靜態版沒有
 // Python 後端（只有 Pyodide），出圖需 AutoCAD／ezdxf，故該端點不存在。
 let sectionCapabilities = null;
+// 「OCSS 交叉驗算」能力表：本機伺服器提供 /api/design/crosscheck；靜態版沒有 Python 後端
+let crosscheckCapabilities = null;
+let crosscheckStatus = null;
 
 async function fetchSectionCapabilities() {
   try {
@@ -1573,6 +1588,25 @@ async function fetchSectionCapabilities() {
     }
   } catch (e) {}
   return {};
+}
+
+async function fetchCrosscheckCapabilities() {
+  try {
+    const r = await fetch("/api/design/crosscheck/capabilities");
+    if (r.ok) {
+      const d = await r.json();
+      return d.capabilities || {};
+    }
+  } catch (e) {}
+  return null;   // null = 這個版本沒有交叉驗算後端（靜態版），{} = 有但沒這個計算器
+}
+
+async function fetchCrosscheckStatus() {
+  try {
+    const r = await fetch("/api/design/crosscheck/status");
+    if (r.ok) return await r.json();
+  } catch (e) {}
+  return null;
 }
 
 function loadHistoryFromStorage() {
@@ -1700,6 +1734,8 @@ function filterCatalog(query) {
 async function boot() {
   loadHistoryFromStorage();
   sectionCapabilities = await fetchSectionCapabilities();
+  crosscheckCapabilities = await fetchCrosscheckCapabilities();
+  crosscheckStatus = await fetchCrosscheckStatus();
   const data = await fetchCatalogData();
   catalog = data.calculators;
   const groups = new Map();
@@ -3116,6 +3152,89 @@ function upgradeRefMathWithKatex() {
   });
 }
 
+// 交叉驗算數值：比一般 `fmt` 多留小數位，工程數值常是 1e-3～1e-6 級
+const xcNum = v => {
+  if (v === null || v === undefined) return "—";
+  if (typeof v !== "number") return esc(v);
+  if (!isFinite(v)) return "∞";
+  const a = Math.abs(v);
+  if (a === 0) return "0";
+  if (a >= 1e6 || a < 1e-4) return v.toExponential(4);
+  return String(Number(v.toPrecision(7)));
+};
+
+// 百分比：位數依量級縮減，太小直接寫「<0.001%」，避免整列都是 12 位小數
+const xcPct = v => {
+  const a = Math.abs(v);
+  if (a === 0) return "0%";
+  if (a < 0.001) return "<0.001%";
+  if (a < 1) return `${Number(v.toPrecision(3))}%`;
+  if (a < 100) return `${Number(v.toPrecision(4))}%`;
+  return `${Number(v.toPrecision(5))}%`;
+};
+
+function renderCrosscheckHtml(d) {
+  if (!d) return `<span class="hint">伺服器沒有回應內容。</span>`;
+  const counts = d.counts || {};
+  if (d.status !== "ok") {
+    const why = {
+      not_supported: "這個計算器尚未開放即時交叉驗算。",
+      not_applicable: d.message || "這組參數不在可對照的範圍內。",
+      unavailable: d.message || "Open CalcSheet Studio 目前無法連線。",
+      engine_error: d.message || "本專案引擎對這組參數算不出結果。",
+      error: d.message || "交叉驗算過程發生錯誤。"
+    }[d.status] || d.message || "未知狀態。";
+    const limits = (d.limits || []).length
+      ? `<ul class="xcheck-limits">${d.limits.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : "";
+    return `<div style="margin-top:6px"><b>${esc(why)}</b>${limits}</div>`;
+  }
+  const verdictTxt = {
+    match: "全部項目吻合",
+    handled: "有差異，但每一項都已寫明處置方式",
+    diff: "有未處置的差異，請覆核",
+    nothing_compared: "這組參數下沒有可比的項目"
+  }[d.verdict] || d.verdict;
+  const verdictCls = d.verdict === "diff" ? "ng" : "ok";
+  const rows = (d.items || []).map(it => {
+    if (it.status === "skipped") {
+      return `<tr><td>${esc(it.name)}</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>
+              <td class="note">不比</td><td>${esc(it.reason || "")}</td></tr>`;
+    }
+    const mark = it.status === "pass" ? "ok" : (it.status === "handled" ? "note" : "ng");
+    const markTxt = it.status === "pass" ? "✓ 吻合" : (it.status === "handled" ? "△ 已處置" : "✗ 有差異");
+    const diffTxt = (it.rel === null || it.rel === undefined)
+      ? (it.diff === 0 ? "相同" : `差 ${xcNum(it.diff)}`)
+      : `差 ${xcPct(it.rel * 100)}`;
+    let detail = "";
+    if (it.status === "handled" && it.disposition) {
+      detail = `<br><span class="hint">處置［${esc(it.disposition.kind)}］：${esc(it.disposition.reason)}</span>`;
+    } else if (it.status === "fail" && it.tol) {
+      detail = `<br><span class="hint">容差：相對 ${esc(String(it.tol.rel ?? ""))}${it.tol.abs ? `／絕對 ${esc(String(it.tol.abs))}` : ""}</span>`;
+    }
+    return `<tr><td>${esc(it.name)}</td><td class="num">${xcNum(it.ours)}</td><td class="num">${xcNum(it.ocss)}</td>
+            <td class="num">${esc(diffTxt)}</td><td class="${mark}">${esc(markTxt)}</td>
+            <td>${esc(it.unit || "")}${detail}</td></tr>`;
+  }).join("");
+  const notes = (d.alignment || []).length
+    ? `<ul class="xcheck-notes">${d.alignment.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : "";
+  const warns = (d.unit_warnings || []).length
+    ? `<div class="warn" style="margin-top:8px">${d.unit_warnings.map(w => esc(w)).join("<br>")}</div>` : "";
+  const inputs = (d.ocss_inputs && Object.keys(d.ocss_inputs).length)
+    ? `<details style="margin-top:8px"><summary class="hint" style="cursor:pointer">灌進 OCSS 的輸入值（供稽核）</summary>
+         <pre class="summary" style="font-size:12px">${esc(JSON.stringify(d.ocss_inputs, null, 2))}</pre></details>` : "";
+  return `<div style="margin-top:6px">
+      <span class="verdict ${verdictCls}">${esc(verdictTxt)}</span>
+      <span class="hint" style="margin-left:8px">比對 ${esc(String(counts.total || 0))} 項：吻合 ${esc(String(counts.passed || 0))}、已處置 ${esc(String(counts.handled || 0))}、有差異 ${esc(String(counts.failed || 0))}、不比 ${esc(String(counts.skipped || 0))}</span>
+      ${counts.total ? `<div class="table-wrap"><table class="xcheck-table">
+        <thead><tr><th>項目</th><th>本專案</th><th>OCSS</th><th>差異</th><th>結果</th><th>單位／說明</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>` : ""}
+      ${notes}
+      ${warns}
+      ${inputs}
+      <div class="hint" style="margin-top:6px">OCSS 版本 ${esc(d.ocss_version || "—")}　耗時 ${esc(String(d.elapsed_s ?? "—"))} 秒</div>
+    </div>`;
+}
+
 function renderResult(d) {
   const tsEl = $("#printtimestamp");
   if (tsEl) tsEl.innerHTML = `列印時間：${esc(d.generated_at || new Date().toISOString())}<br>計算引擎：${esc(d.engine || current?.engine || "")}`;
@@ -3243,6 +3362,47 @@ function renderResult(d) {
          </div>
        </div>`;
 
+  // ---- OCSS 交叉驗算（第二套獨立演算法，僅供覆核，不阻擋出圖）----
+  const xcCap = crosscheckCapabilities ? (crosscheckCapabilities[current.id] || null) : null;
+  const xcSupported = !!(xcCap && xcCap.supported);
+  const xcHasBackend = crosscheckCapabilities !== null;
+  let xcheckPanelHtml = "";
+  if (xcHasBackend && xcCap && xcCap.status !== "none") {
+    const st = crosscheckStatus || {};
+    const ocssLine = st.available === false
+      ? `Open CalcSheet Studio 目前無法連線：${esc(st.message || "桌面程式可能沒開。")}`
+      : (st.version ? `Open CalcSheet Studio ${esc(st.version)}（${esc(st.edition || "")}）` : "Open CalcSheet Studio");
+    const scopeTxt = xcSupported ? esc(xcCap.scope || "") : esc(xcCap.reason || "");
+    const limits = (xcCap.limits || []).length
+      ? `<ul class="xcheck-limits">${xcCap.limits.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : "";
+    xcheckPanelHtml = xcSupported
+      ? `<div class="xcheck-panel" id="xcheckpanel">
+           <div class="case-panel-head">
+             <span>🔬 OCSS 交叉驗算</span>
+             <div style="display:flex;gap:8px;align-items:center">
+               <button class="btn small" id="xcheckbtn" ${ok ? "" : "disabled title=\"計算結果未通過，請先修正參數\""}>以 OCSS 再算一次</button>
+             </div>
+           </div>
+           <div class="case-panel-body">
+             <p class="hint" style="margin:0 0 6px">把這組參數交給 <b>Open CalcSheet Studio</b> 的對應模板再算一次，逐項比對兩邊數值。屬第二意見，<b>不影響</b>「產生設計圖」。</p>
+             <p class="hint" style="margin:0 0 6px">${ocssLine}</p>
+             <div id="xcheckresult" class="hint">${ok ? "按「以 OCSS 再算一次」開始交叉驗算。" : "⚠ 計算結果未通過，交叉驗算按鈕已停用。"}</div>
+           </div>
+         </div>`
+      : `<div class="xcheck-panel" id="xcheckpanel">
+           <div class="case-panel-head"><span>🔬 OCSS 交叉驗算</span></div>
+           <div class="case-panel-body">
+             <p class="hint" style="margin:0 0 4px">${scopeTxt}</p>
+             ${limits}
+           </div>
+         </div>`;
+  } else if (!xcHasBackend) {
+    xcheckPanelHtml = `<div class="xcheck-panel" id="xcheckpanel">
+         <div class="case-panel-head"><span>🔬 OCSS 交叉驗算</span></div>
+         <div class="case-panel-body"><p class="hint">此版本（雲端／靜態）沒有交叉驗算後端；請於本機工作台（<code>./web.sh design</code>）執行同一組參數。</p></div>
+       </div>`;
+  }
+
   $("#result").innerHTML = `
     <div class="result-top">
       <h3>計算結果</h3>
@@ -3269,6 +3429,7 @@ function renderResult(d) {
       </div>
     </div>
     ${sectionPanelHtml}
+    ${xcheckPanelHtml}
     <pre class="summary">${esc(d.summary)}</pre>
     ${rows ? `<div class="table-wrap"><table><thead><tr><th>檢核項目</th><th>計算值</th><th>準則</th><th>單位</th><th>安全裕度／使用率</th><th>結果</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}
     ${warn.length ? `<div class="warn"><ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
@@ -3345,6 +3506,33 @@ function renderResult(d) {
       } finally {
         drawBtn.disabled = false;
         drawBtn.textContent = "產生設計圖";
+      }
+    };
+  }
+  if ($("#xcheckbtn")) {
+    const xBtn = $("#xcheckbtn");
+    xBtn.onclick = async () => {
+      const out = $("#xcheckresult");
+      xBtn.disabled = true;
+      xBtn.textContent = "驗算中…";
+      out.innerHTML = "⏳ 正在呼叫 Open CalcSheet Studio 用同一組參數再算一次…";
+      try {
+        const resp = await fetch("/api/design/crosscheck", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({calculator: current.id, payload})
+        });
+        let data = null;
+        try { data = await resp.json(); } catch (e) { data = null; }
+        if (!resp.ok) {
+          throw new Error((data && data.error) || `伺服器回應 HTTP ${resp.status}`);
+        }
+        out.innerHTML = renderCrosscheckHtml(data);
+      } catch (e) {
+        out.innerHTML = `❌ 交叉驗算失敗：${esc(e.message || String(e))}<br><span class="hint">請確認 Open CalcSheet Studio 桌面程式已開啟並啟用 API，且由本機瀏覽器連線。</span>`;
+      } finally {
+        xBtn.disabled = false;
+        xBtn.textContent = "以 OCSS 再算一次";
       }
     };
   }

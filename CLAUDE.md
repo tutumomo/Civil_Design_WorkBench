@@ -84,6 +84,11 @@ python tools/crosscheck/ocss_crosscheck.py checks
 
 # 安裝後一次性設定：先開啟程式並啟用 MCP/API，再把 MCP 連線寫入本機 .mcp.json（預設僅預覽；token 不印出）
 python tools/crosscheck/ocss_crosscheck.py register-mcp --apply
+
+# 工作台即時交叉驗算：用「當下這組參數」再算一次並逐項比對（三態能力表）
+python tools/crosscheck/ocss_live.py --list
+python tools/crosscheck/ocss_live.py channel_hydraulics          # 用計算器範例參數
+python tools/crosscheck/ocss_live.py steel_column --payload _temp/p.json --json
 ```
 
 ### Three-Axis Case Delivery Pipeline

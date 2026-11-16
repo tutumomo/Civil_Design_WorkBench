@@ -195,42 +195,54 @@ def run_case(client, case: dict, emit=print) -> dict:
     items: list[dict] = []
     for cmp_ in case["compare"]:
         total += 1
-        ours, ou = get_ours(run, cmp_["ours"])
-        theirs, tu = get_ocss(ev, cmp_["ocss"])
-        if cmp_.get("scale"):                      # 兩邊單位不同時先換算（例：m → mm）
-            ours *= float(cmp_["scale"])
-            ou = ""
-        if cmp_.get("reciprocal"):
-            theirs = 1.0 / theirs if theirs else float("inf")
-        diff = abs(ours - theirs)
-        rel = diff / abs(theirs) if theirs else float("inf")
-        tol = cmp_.get("tol") or {"rel": 0.01}
-        within = diff <= tol.get("abs", 0.0) or rel <= tol.get("rel", 0.0)
+        item = compare_one(run, ev, cmp_)
         line = "  %-22s 本專案 %-12.6g OCSS %-12.6g %s　差 %.3g%%" % (
-            cmp_["name"], ours, theirs, (tu or ou or "").ljust(6), rel * 100)
-        item = {
-            "name": cmp_["name"],
-            "ours": ours, "ocss": theirs,
-            "unit": tu or ou or "",
-            "diff": diff, "rel": rel,
-            "tol": tol,
-            "status": "pass" if within else "fail",
-            "disposition": None,
-        }
-        if within:
+            item["name"], item["ours"], item["ocss"], item["unit"].ljust(6), item["rel"] * 100)
+        if item["status"] == "pass":
             emit("  ✓" + line[1:])
-            items.append(item)
-            continue
-        disp = cmp_.get("disposition") or {}
-        if disp.get("kind") in DISPOSITIONS and str(disp.get("reason", "")).strip():
+        elif item["status"] == "handled":
             handled += 1
+            disp = item["disposition"]
             emit("  △" + line[1:] + "　已處置[%s]：%s" % (disp["kind"], disp["reason"]))
-            item["status"] = "handled"
-            item["disposition"] = disp
         else:
             failed += 1
-            emit("  ✗" + line[1:] + "　未處置的差異（容差 %s）" % tol)
+            emit("  ✗" + line[1:] + "　未處置的差異（容差 %s）" % item["tol"])
         items.append(item)
     for w in unit_warnings(ev):
         emit("  ⚠ " + w)
     return {"total": total, "failed": failed, "handled": handled, "items": items}
+
+
+def compare_one(run: dict, ev: dict, cmp_: dict) -> dict:
+    """比對一個項目（本專案信封 ↔ OCSS evaluate 結果），回傳結果列。
+
+    `status`：`pass`（容差內）／`handled`（超出容差但已寫處置）／`fail`（未處置的差異）。
+    批次對照（`run_case`）與工作台即時驗算（`ocss_live.py`）共用這一份判定，
+    兩邊的容差與處置規則因此不會各說各話。
+    """
+    ours, ou = get_ours(run, cmp_["ours"])
+    theirs, tu = get_ocss(ev, cmp_["ocss"])
+    if cmp_.get("scale"):                      # 兩邊單位不同時先換算（例：m → mm）
+        ours *= float(cmp_["scale"])
+        ou = ""
+    if cmp_.get("reciprocal"):
+        theirs = 1.0 / theirs if theirs else float("inf")
+    diff = abs(ours - theirs)
+    rel = diff / abs(theirs) if theirs else float("inf")
+    tol = cmp_.get("tol") or {"rel": 0.01}
+    within = diff <= tol.get("abs", 0.0) or rel <= tol.get("rel", 0.0)
+    item = {
+        "name": cmp_["name"],
+        "ours": ours, "ocss": theirs,
+        "unit": tu or ou or "",
+        "diff": diff, "rel": rel,
+        "tol": tol,
+        "status": "pass" if within else "fail",
+        "disposition": None,
+    }
+    if not within:
+        disp = cmp_.get("disposition") or {}
+        if disp.get("kind") in DISPOSITIONS and str(disp.get("reason", "")).strip():
+            item["status"] = "handled"
+            item["disposition"] = disp
+    return item

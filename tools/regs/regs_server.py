@@ -27,6 +27,7 @@ PAGE = HERE / "regs_web.html"
 ROOT = HERE.parent.parent
 DESIGN_PAGE = ROOT / "tools" / "design" / "workbench_web.html"
 sys.path.insert(0, str(ROOT / "tools" / "design"))
+sys.path.insert(0, str(ROOT / "tools" / "crosscheck"))
 VERSION = "1.1"
 
 
@@ -505,6 +506,13 @@ class Handler(BaseHTTPRequestHandler):
     def json(self, obj, code=200):
         self.send(code, json.dumps(obj, ensure_ascii=False), "application/json; charset=utf-8")
 
+    def _is_local(self) -> bool:
+        """本機來源？交叉驗算會驅動 OCSS 桌面程式，只讓本機請求進來。"""
+        host = (self.client_address[0] if self.client_address else "") or ""
+        if host in ("127.0.0.1", "::1", "localhost"):
+            return True
+        return host.startswith("127.")
+
     def do_GET(self):
         u = urlparse(self.path)
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
@@ -537,6 +545,16 @@ class Handler(BaseHTTPRequestHandler):
                 import design_section
                 ids = [r["id"] for r in design_api.list_calculators()]
                 return self.json({"capabilities": design_section.capability_map(ids)})
+            if u.path == "/api/design/crosscheck/capabilities":
+                import design_api
+                import ocss_live
+                ids = [r["id"] for r in design_api.list_calculators()]
+                return self.json({"capabilities": ocss_live.capability_map(ids)})
+            if u.path == "/api/design/crosscheck/status":
+                import ocss_live
+                st = ocss_live.status()
+                st["local"] = self._is_local()   # 遠端連線看得到狀態，但不能驅動 OCSS
+                return self.json(st)
             if u.path == "/api/design/section/file":
                 import design_section
                 rel = (q.get("path") or "").strip()
@@ -594,8 +612,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path not in ("/api/design/run", "/api/design/section"):
+        if u.path not in ("/api/design/run", "/api/design/section", "/api/design/crosscheck"):
             return self.json({"error": "not found"}, 404)
+        if u.path == "/api/design/crosscheck" and not self._is_local():
+            return self.json({"error": "交叉驗算只接受本機請求"}, 403)
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if length <= 0 or length > 2_000_000:
@@ -605,6 +625,9 @@ class Handler(BaseHTTPRequestHandler):
             payload = body.get("payload")
             if not isinstance(payload, dict):
                 return self.json({"error": "payload 必須是 JSON 物件"}, 400)
+            if u.path == "/api/design/crosscheck":
+                import ocss_live
+                return self.json(ocss_live.run(calc, payload))
             if u.path == "/api/design/section":
                 import design_section
                 try:

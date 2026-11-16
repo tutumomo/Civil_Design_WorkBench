@@ -128,6 +128,7 @@
 | `tools/design/design_api.py` / `design_cli.py` | **設計計算統一 JSON 入口（`civil-design-run/1`）**：涵蓋 22+ 項土木結構計算器 | 網頁工作台 `tools/design/workbench_web.html`；`docs/設計工作台.md` |
 | `tools/crosscheck/ocss_crosscheck.py` | **OCSS 交叉驗算**：同一題目分別用本專案引擎與 Open CalcSheet Studio 開放計算環境各算一次，比對數值與單位（`probe`／`eval`／`checks`／`register-mcp`） | 需 OCSS 桌面程式開啟，因此**不進**回歸預設流程；`docs/OpenCalcSheetStudio_整合與開放計算環境.md` |
 | `tools/crosscheck/ocss_calcbook.py` | **逐式計算書（X5）**：把交叉驗算案例做成 OCSS 專案檔（`.ifccalculation`，輸入值內嵌在算式行）＋機讀結果 JSON；不動使用者未儲存專案 | 需 OCSS 桌面程式開啟；結果 JSON 可餵 `make_report.py --crosscheck` 生成報告附錄 D；`docs/OpenCalcSheetStudio_整合與開放計算環境.md` §6.1b |
+| `tools/crosscheck/ocss_live.py` | **工作台即時交叉驗算（X7）**：把使用者當下這組參數灌進 OCSS 模板再算一次，逐項比對；三態能力表 `supported`／`offline_only`／`none`，不可比的項目標 `skipped` 並寫原因 | 工作台「🔬 OCSS 交叉驗算」面板與 `GET/POST /api/design/crosscheck`（POST 只收本機）；屬第二意見，**不阻擋出圖**；`docs/OpenCalcSheetStudio_整合與開放計算環境.md` §6.1d |
 | `tools/crosscheck/ocss_load_suggest.py` | **上游載重模組（X6）**：地震／風／靜活載模組 → `building_frame` 建議值（帶來源標示，只補未填欄位、不覆寫使用者輸入） | 需 OCSS 桌面程式開啟；`docs/OpenCalcSheetStudio_整合與開放計算環境.md` §6.1b |
 | `tools/crosscheck/ocss_map_gen.py` | **模板對照表產生器（X0）**：盤點原始資料＋既有對照案例 → `tools/crosscheck/maps/<模板>.json`（未核實欄位標「待人工核對」、附候選，不臆測） | 不需 OCSS 桌面程式（只讀磁碟）；不覆寫已有人工對照表 |
 | `tools/design/hydrology.py` | 集水區水文分析（水保第 16~19 條）：降雨強度、合理化公式 Qp、逕流係數、集流時間 | 排水溝設計流量計算首選；`docs/設計計算產線.md` |

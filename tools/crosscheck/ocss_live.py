@@ -800,13 +800,14 @@ def open_sheet(calc_id: str, payload: dict | None = None, client=None,
         if ev.get("errorLines"):
             raise OcssError("-", "計算表有 %s 行錯誤" % ev.get("errorLines"))
         client.sheet_select(sheet_id)      # 讓 App 切到這張表（給使用者看）
+        client.project_save_as(str(path))
         try:
-            # 切到「算式＋結果」檢視：技師直接看到逐式數值，也順帶強制視窗重繪
+            # 切到「算式＋結果」檢視：技師直接看到逐式數值，也順帶強制視窗重繪。
+            # 一定要放在 save_as 之後——存檔會把檢視模式重設回 code-visual（實測）。
             client.view_set("code-output")
             out["view_set"] = True
         except Exception:
             out["view_set"] = False
-        client.project_save_as(str(path))
         # 讀回 App 手上那張表，逐項確認「變數 = 值」真的寫進去了（沒傳進去的守門）
         try:
             got = client.sheet(sheet_id) or {}

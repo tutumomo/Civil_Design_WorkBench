@@ -338,7 +338,10 @@ def main() -> int:
     check("狀態 ok", r2["status"] == "ok", r2["message"])
     check("另存成 .ifccalculation", (r2["project_file"] or "").endswith(".ifccalculation"))
     check("有切到該工作表", "sheet_select" in c2.ops)
-    check("切到「算式＋結果」檢視", "view_set:code-output" in c2.ops, str(c2.ops))
+    check("切到「算式＋結果」檢視，且在存檔之後（存檔會重設檢視）",
+          "view_set:code-output" in c2.ops
+          and c2.ops.index("project_save_as") < c2.ops.index("view_set:code-output"),
+          str(c2.ops))
     check("有讀回 App 手上的表做驗證", "sheet" in c2.ops, str(c2.ops))
     check("select 在 save_as 之前", c2.ops.index("sheet_select") < c2.ops.index("project_save_as"))
     check("工作表名稱帶計算器", bool(r2["sheet"]) and "排水溝" in r2["sheet"], str(r2.get("sheet")))

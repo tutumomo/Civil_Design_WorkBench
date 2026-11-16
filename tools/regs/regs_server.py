@@ -493,12 +493,12 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):  # keep the console quiet
         pass
 
-    def send(self, code, body, ctype):
+    def send(self, code, body, ctype, cache="no-store"):
         data = body.encode("utf-8") if isinstance(body, str) else body
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", cache)
         self.end_headers()
         self.wfile.write(data)
 
@@ -513,12 +513,18 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, PAGE.read_text(encoding="utf-8"), "text/html; charset=utf-8")
         if u.path in ("/design", "/design/"):
             return self.send(200, DESIGN_PAGE.read_text(encoding="utf-8"), "text/html; charset=utf-8")
-        if u.path.startswith("/vendor/katex/"):
-            f = (HERE / "vendor" / "katex" / u.path[len("/vendor/katex/"):]).resolve()
-            if not str(f).startswith(str(HERE / "vendor" / "katex")) or not f.is_file():
+        # 自帶的前端資產（KaTeX、自託管字型）；檔案內容固定，允許瀏覽器快取一週
+        for vdir in ("katex", "fonts"):
+            prefix = f"/vendor/{vdir}/"
+            if not u.path.startswith(prefix):
+                continue
+            base = (HERE / "vendor" / vdir).resolve()
+            f = (base / u.path[len(prefix):]).resolve()
+            if not f.is_relative_to(base) or not f.is_file():
                 return self.json({"error": "not found"}, 404)
-            ct = {".js": "text/javascript", ".css": "text/css", ".woff2": "font/woff2"}.get(f.suffix, "application/octet-stream")
-            return self.send(200, f.read_bytes(), ct)
+            ct = {".js": "text/javascript", ".css": "text/css; charset=utf-8", ".woff2": "font/woff2",
+                  ".txt": "text/plain; charset=utf-8"}.get(f.suffix, "application/octet-stream")
+            return self.send(200, f.read_bytes(), ct, cache="public, max-age=604800")
         if u.path == "/api/pageauto":
             return self.json(page_assets.auto_page(q.get("src", ""), q.get("part", ""), int(q.get("page", "0"))) or {})
         con = regq.connect()  # one connection per request: sqlite objects are not shared across threads

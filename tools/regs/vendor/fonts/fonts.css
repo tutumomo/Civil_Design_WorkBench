@@ -1,0 +1,26 @@
+/* 自託管字型（規範查詢台與設計工作台共用，離線可用）
+ * 來源：github.com/google/fonts（ofl/notosanstc、ofl/ibmplexmono），授權 SIL OFL 1.1，見同目錄 OFL-*.txt
+ * Noto Sans TC：可變字型，字重軸限縮為 400–700；IBM Plex Mono：只保留 Latin 與常用符號
+ */
+@font-face {
+  font-family: "Noto Sans TC";
+  src: url("/vendor/fonts/NotoSansTC-VF.woff2") format("woff2-variations"),
+       url("/vendor/fonts/NotoSansTC-VF.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/vendor/fonts/IBMPlexMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/vendor/fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+}

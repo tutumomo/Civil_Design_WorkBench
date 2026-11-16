@@ -57,9 +57,8 @@
 })();
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23131209'/%3E%3Ccircle cx='16' cy='13' r='6' fill='none' stroke='%23D9B382' stroke-width='1.6'/%3E%3Cpath d='M16 3v4M16 19v4M7 13h4M21 13h4M6 27h20' stroke='%23D9B382' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/vendor/fonts/NotoSansTC-VF.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/vendor/fonts/fonts.css">
 <link rel="stylesheet" href="/vendor/katex/katex.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css'">
 <style>
   :root {
@@ -93,10 +92,9 @@
     --topbar-bg: rgba(24, 24, 24, .72);
     --shadow-pop: 0 8px 24px rgba(0, 0, 0, .35);
     --shadow-card: 0 1px 2px rgba(0, 0, 0, .5);
-    --title-grad: linear-gradient(90deg, #FFFFFF 0%, #9B9B9B 100%);
     --ease: cubic-bezier(.22, 1, .36, 1);
     --sans: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-    --mono: "IBM Plex Mono", "Consolas", monospace;
+    --mono: "IBM Plex Mono", "Consolas", "Noto Sans TC", monospace;
     color-scheme: dark;
   }
   :root[data-theme="light"] {
@@ -130,7 +128,6 @@
     --topbar-bg: rgba(255, 255, 255, .8);
     --shadow-pop: 0 8px 24px rgba(38, 32, 20, .10);
     --shadow-card: 0 1px 2px rgba(38, 32, 20, .08);
-    --title-grad: linear-gradient(90deg, #1E1B14 0%, #6B6458 100%);
     color-scheme: light;
   }
   * { box-sizing: border-box; }
@@ -243,33 +240,19 @@
     gap: 40px;
     padding: 64px 0 48px;
   }
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 500;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-  }
-  .eyebrow::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 9999px; background: var(--accent); }
   .hero h1 {
-    margin: 16px 0 0;
+    margin: 0;
     max-width: 680px;
     font-size: 36px;
     line-height: 40px;
     font-weight: 700;
     letter-spacing: .02em;
     text-wrap: balance;
-    background: var(--title-grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--text);
   }
+  /* 計算器使用的確定性引擎（可稽核資訊），放在標題下方當中繼資料 */
+  .engine { margin: 8px 0 0; color: var(--text-3); font-size: 13px; line-height: 20px; }
+  .engine code { color: var(--text-2); font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
   .hero .sub {
     margin: 16px 0 0;
     max-width: 680px;
@@ -526,7 +509,7 @@
     background: var(--accent-soft);
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
   }
   .schema-val {
@@ -672,7 +655,7 @@
   .list-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
   .list-grid .field label { margin-bottom: 6px; }
   .btn.small { padding: 4px 10px; border-radius: 6px; font-size: 12px; line-height: 18px; }
-  .list-empty { grid-column: 1 / -1; margin: 0; color: var(--text-3); font-size: 13px; line-height: 20px; }
+  .list-empty { grid-column: 1 / -1; margin: 0; color: var(--text-3); font-size: 13px; line-height: 22px; }
   .list-editor .hint { margin: 0; color: var(--text-3); font-family: var(--sans); font-size: 12px; line-height: 16px; }
 
   .json-wrap { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
@@ -760,10 +743,11 @@
     overflow-wrap: anywhere;
     font-family: var(--mono);
     font-size: 14px;
-    line-height: 20px;
+    line-height: 22px;
   }
   .table-wrap { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 22px; font-variant-numeric: tabular-nums; }
+  .summary, .schema-val, .margin-label, .meta { font-variant-numeric: tabular-nums; }
   th, td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
   tbody tr { transition: background-color .3s var(--ease); }
   tbody tr:hover { background: var(--surface-2); }
@@ -815,9 +799,8 @@
     background: var(--surface);
     text-align: center;
   }
-  .empty-kicker { color: var(--text-3); font-family: var(--mono); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; }
   .empty-title { margin: 0; color: var(--text); font-size: 18px; line-height: 28px; font-weight: 600; }
-  .empty-sub { margin: 0; color: var(--text-3); font-size: 14px; line-height: 20px; }
+  .empty-sub { margin: 0; color: var(--text-3); font-size: 14px; line-height: 22px; text-wrap: pretty; }
   .error {
     margin-top: 16px;
     padding: 12px 16px;
@@ -972,8 +955,8 @@
   .margin-fill.ng { background: var(--rust); }
   .margin-label {
     font-family: var(--mono);
-    font-size: 11px;
-    line-height: 14px;
+    font-size: 12px;
+    line-height: 16px;
     color: var(--text-2);
   }
   .refs-panel, .case-panel, .history-panel, .drawing-panel {
@@ -1036,7 +1019,7 @@
     background: var(--accent-soft);
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
   }
   .ref-src {
@@ -1066,16 +1049,17 @@
     border-radius: 4px;
     background: var(--hover-wash);
     color: var(--text-2);
-    font-size: 11px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 18px;
   }
   .ref-vars span b { color: var(--accent); font-family: var(--mono); }
   .ref-mini-table {
     width: 100%;
     margin: 6px 0;
     border-collapse: collapse;
-    font-size: 11px;
-    line-height: 15px;
+    font-size: 12px;
+    line-height: 18px;
+    font-variant-numeric: tabular-nums;
   }
   .ref-mini-table th, .ref-mini-table td {
     padding: 3px 6px;
@@ -1085,8 +1069,8 @@
   .ref-mini-table th { background: var(--surface-2); color: var(--text-2); }
   .ref-note {
     color: var(--text-3);
-    font-size: 11px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 18px;
   }
   .history-list {
     display: flex;
@@ -1222,7 +1206,6 @@
     </div>
   </nav>  <header class="hero" data-reveal>
     <div class="hero-main">
-      <p class="eyebrow">DESIGN WORKBENCH</p>
       <h1>工程設計工作台</h1>
       <p class="sub">擋土牆、排水溝、箱涵到邊坡，挑一個計算器，填入現場尺寸，當場取得檢核、警示與可追溯的計算紀錄。</p>
     </div>
@@ -1260,9 +1243,9 @@
       </div>
       <section class="calc-head">
         <div>
-          <div class="eyebrow" id="engine">CALCULATION ENGINE</div>
           <h2 id="title">載入中…</h2>
           <p class="desc" id="desc"></p>
+          <p class="engine">計算引擎 <code id="engine">—</code></p>
           <div class="codes" id="codes"></div>
         </div>
         <div class="status" id="status" data-state="ready">READY</div>
@@ -1301,7 +1284,6 @@
 
       <section class="result" id="result" data-reveal>
         <div class="empty-result">
-          <span class="empty-kicker">READY</span>
           <p class="empty-title">先挑一個計算器</p>
           <p class="empty-sub">選擇左側工項，確認參數後執行。</p>
         </div>
@@ -1788,7 +1770,7 @@ function select(id) {
   const autoBtn = $("#autosize");
   if (autoBtn) autoBtn.hidden = !AUTOSIZE_CALCULATORS.has(current.id);
   updateScenarioDropdown();
-  $("#result").innerHTML = `<div class="empty-result"><span class="empty-kicker">READY</span><p class="empty-title">參數已載入</p><p class="empty-sub">確認上方幾何示意圖與參數後，按「執行計算」取得檢核結果</p></div>`;
+  $("#result").innerHTML = `<div class="empty-result"><p class="empty-title">參數已載入</p><p class="empty-sub">確認上方幾何示意圖與參數後，按「執行計算」取得檢核結果</p></div>`;
   renderForm();
   history.replaceState(null, "", `?calc=${encodeURIComponent(id)}`);
 }

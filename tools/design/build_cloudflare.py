@@ -9,6 +9,7 @@ The generated bundle in `_temp/cloudflare_deploy` includes:
   - `public/index.html` (規範查詢台 UI - `regs_web.html`)
   - `public/design/index.html` (工程設計工作台 UI - `workbench_web.html`)
   - `public/vendor/katex/*` (KaTeX math rendering assets)
+  - `public/vendor/fonts/*` (self-hosted Noto Sans TC / IBM Plex Mono, SIL OFL 1.1)
   - `public/api/regs/*` (topics, sources, 29 pre-built topic cards, 64 clause buckets, search index, formula PNGs)
   - `public/api/design/catalog.json`, `health.json`, `verified_entries.json`, `py_bundle.json`
   - `worker.js` & `wrangler.toml`
@@ -606,11 +607,11 @@ def build_bundle(out_dir: Path) -> dict[str, int]:
     (pub / "index.html").write_text(regs_html, encoding="utf-8")
     (pub / "design" / "index.html").write_text(design_html, encoding="utf-8")
 
-    # 1b. Copy KaTeX vendor assets to public/vendor/katex
-    katex_src = ROOT / "tools" / "regs" / "vendor" / "katex"
-    katex_dst = pub / "vendor" / "katex"
-    if katex_src.exists():
-        shutil.copytree(katex_src, katex_dst, dirs_exist_ok=True)
+    # 1b. Copy vendor assets (KaTeX, self-hosted fonts) to public/vendor/<name>
+    for vdir in ("katex", "fonts"):
+        vsrc = ROOT / "tools" / "regs" / "vendor" / vdir
+        if vsrc.exists():
+            shutil.copytree(vsrc, pub / "vendor" / vdir, dirs_exist_ok=True)
 
     # 2. Build Regulation Lookup static data & buckets
     regs_stats = build_regs_assets(pub)

@@ -45,8 +45,15 @@ TESTS = [
     {
         "id": "design-section",
         "cmd": ["tools/selftest/design_section_selftest.py"],
+        # 11 個出圖工具目錄全部涵蓋：design_section_selftest.py 逐一驗
+        # 21 個可出圖計算器（出 DXF、驗 $INSUNITS／$MEASUREMENT／TOMO、品管零錯誤）。
+        # 少了任何一個，改動該工具時 `--changed` 就不會觸發出圖自測。
         "globs": ["tools/design/", "tools/wall_section/", "tools/box_section/",
-                  "tools/selftest/"],
+                  "tools/rc_section/", "tools/basin_section/",
+                  "tools/foundation_section/", "tools/foundation_plan/",
+                  "tools/frame_section/", "tools/network_section/",
+                  "tools/profile_section/", "tools/steel_base_section/",
+                  "tools/channel_cover/", "tools/selftest/"],
         "what": "設計圖產線：三態表態、出 DXF、繪圖者（不需 CAD）",
     },
     {
@@ -120,8 +127,13 @@ TESTS = [
         "cmd": ["tools/selftest/regression.py"],
         # AGENTS.md §3：只有會動到數字（引擎、數量模型、案件資料、基準）才跑全案回歸；
         # 文件、UI、安裝腳本等改動不必陪跑。
+        # 出圖工具也列入：改動出圖端會改變交付的圖，回歸會比對「設計圖」軸。
         "globs": ["tools/design/", "tools/case_package/", "tools/wall_section/",
-                  "tools/box_section/", "tools/takeoff/", "cases/",
+                  "tools/box_section/", "tools/rc_section/", "tools/basin_section/",
+                  "tools/foundation_section/", "tools/foundation_plan/",
+                  "tools/frame_section/", "tools/network_section/",
+                  "tools/profile_section/", "tools/steel_base_section/",
+                  "tools/channel_cover/", "tools/takeoff/", "cases/",
                   "tools/selftest/baseline.json"],
         "what": "全案回歸（需本機 CAD 後端與既有 out/ 產物）",
         "needs_cad": True,

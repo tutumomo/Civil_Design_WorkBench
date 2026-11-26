@@ -36,8 +36,15 @@ schema 重點
       "boq":    { rates: {...}, items: [ { no, name, unit, qty_from?, qty_factor?, qty?, price|analysis, note } ] },
       "report": { summary, basis, applicability, survey, assumptions, comparison,
                   drawings, risks, deliverables, quantities_note? },
-      "drawing": { dxf, scale, require_dwg, require_layers }
+      "drawing": { dxf, scale, require_dwg, require_layers },
+      "requirements": {                                # 選填；沒有它時行為完全不變
+        source: 需求單來源,
+        items: [ { id(R-01), text, origin, kind, mandatory,
+                   satisfied_by: [ {type, ref} ], evidence, status } ]
+      }
     }
+
+requirements 的 schema 與追溯規則見 tools/case_package/requirements.py。
 """
 
 import argparse
@@ -81,6 +88,7 @@ from report_sections import (  # noqa: E402  報告段落派生（拆出見 2026
     _rebar_summary_table, _advanced_wall_sections, _dxf_scale,
     _attach_section_figure, _design_sections,
 )
+import requirements as RQ  # noqa: E402  需求單（requirements）與追溯矩陣
 
 
 
@@ -406,6 +414,23 @@ def consistency(case):
     if proj.get("client") in (None, ""):
         warn("project.client（委託單位）未填 —— 報告封面會留待補")
 
+    # ---- 需求單（requirements）與追溯矩陣 ----
+    # 有填才檢查：這是選填區塊，沒有它時全案行為完全不變。
+    for i in RQ.validate(case):
+        (err if i["level"] == "error" else warn)(i["msg"])
+    if case.get("requirements") is not None:
+        tr = RQ.trace(case)
+        for r in tr["rows"]:
+            if r["status"] == "open" and r["mandatory"]:
+                _miss = [t["ref"] for t in r["targets"] if not t["found"]]
+                err("需求 %s（%s）尚未滿足：%s"
+                    % (r["id"], r["text"][:28],
+                       ("追溯標的指不到：" + "、".join(_miss)) if _miss
+                       else "缺 evidence 或未指定 satisfied_by"))
+            elif r["status"] == "open":
+                warn("需求 %s（%s）為建議事項但未補齊追溯（不擋交件）"
+                     % (r["id"], r["text"][:28]))
+
     return out
 
 
@@ -587,6 +612,19 @@ def derive_report(case):
     })
     rep["schema_version"] = rep.get("schema_version", 1.0)
     rep["_note"] = f"由 tools\\case_package\\case_core.py 自 {SCHEMA} 派生，請勿手改"
+
+    # ---- 需求單追溯矩陣：有填 requirements 才產出 ----
+    if case.get("requirements") is not None:
+        try:
+            tr = RQ.trace(case)
+            rep["requirements"] = {
+                "source": tr["source"],
+                "items": tr["rows"],
+                "markdown": RQ.matrix_markdown(tr),
+            }
+            rep.setdefault("_derived", {})["requirements_traced"] = "auto"
+        except Exception as ex:
+            rep.setdefault("_derived", {})["requirements_error"] = str(ex)
     return rep
 
 
@@ -608,7 +646,7 @@ def summary(case):
 # --------------------------------------------------------------------------- #
 def main():
     ap = argparse.ArgumentParser(description="統一案件檔：一致性檢查與兩軸輸入派生")
-    ap.add_argument("action", choices=["check", "derive", "show"])
+    ap.add_argument("action", choices=["check", "derive", "show", "trace"])
     ap.add_argument("case", help="統一案件檔（civil-case/1）")
     ap.add_argument("--out-dir", default=None)
     a = ap.parse_args()
@@ -627,6 +665,20 @@ def main():
     if a.action == "show":
         print(json.dumps(summary(case), ensure_ascii=False, indent=1))
         sys.exit(0 if not errors else 1)
+
+    if a.action == "trace":
+        if case.get("requirements") is None:
+            print("案件檔沒有 requirements 區塊（選填）。")
+            sys.exit(0)
+        tr = RQ.trace(case)
+        print("需求單來源：%s" % (tr["source"] or "（未填）"))
+        print(RQ.matrix_markdown(tr))
+        _open = [r for r in tr["rows"] if r["status"] == "open" and r["mandatory"]]
+        print("")
+        print("需求 %d 條；強制未滿足 %d 條。" % (len(tr["rows"]), len(_open)))
+        for r in _open:
+            print("  未滿足 %s：%s" % (r["id"], r["text"]))
+        sys.exit(1 if _open else 0)
 
     if a.action == "check":
         sys.exit(0 if not errors else 1)

@@ -1079,6 +1079,46 @@ class DocxReport:
             self.table({"caption": "交叉驗算產製資訊",
                         "columns": ["項目", "內容"], "rows": extra})
 
+    def appendix_requirements_table(self, req: dict | None):
+        """附錄 E：需求單追溯矩陣（需求 → 滿足它的計算／圖／工項 → 證據）。
+
+        只有案件檔有 `requirements` 區塊時才出現。
+        """
+        req = req or {}
+        items = req.get("items") or []
+        if not items:
+            return
+        labels = {"satisfied": "已滿足", "open": "未滿足", "na": "不適用"}
+        body = []
+        for r in items:
+            tg = "\n".join("%s：%s%s" % (t.get("type") or "—", t.get("ref") or "—",
+                                          "" if t.get("found") else "（找不到）")
+                           for t in (r.get("targets") or [])) or "—"
+            body.append([
+                r.get("id") or "—",
+                r.get("text") or "—",
+                r.get("origin") or "—",
+                tg,
+                r.get("evidence") or "—",
+                labels.get(r.get("status"), r.get("status") or "—"),
+            ])
+        self.table({
+            "caption": "需求單追溯矩陣",
+            "columns": [
+                {"name": "編號", "width_cm": 1.4, "align": "center"},
+                {"name": "需求", "width_cm": 4.4, "align": "left"},
+                {"name": "來源", "width_cm": 2.4, "align": "left"},
+                {"name": "追溯標的", "width_cm": 3.6, "align": "left"},
+                {"name": "證據", "width_cm": 3.2, "align": "left"},
+                {"name": "狀態", "width_cm": 1.3, "align": "center"},
+            ],
+            "rows": body,
+            "note": "「已滿足」指每個追溯標的都指得到案件檔裡實際存在的東西且附有證據；"
+                    "「未滿足」指有追溯標的指不到（缺圖／缺工項／缺章節）或缺證據，"
+                    "須補齊後才得隨件交付。工具只驗追溯鏈條是否成立，"
+                    "工程判斷是否正確仍須技師簽核。",
+        })
+
     def end_mark(self):
         p = self._para(align=WD_ALIGN_PARAGRAPH.CENTER, before=18, after=6)
         f = self.fonts["caption"]

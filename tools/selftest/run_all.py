@@ -84,6 +84,13 @@ TESTS = [
         "what": "道路設計章節：第 6／7／11 章有內容、缺資料誠實標需人工補（不需 CAD）",
     },
     {
+        "id": "requirements",
+        "cmd": ["tools/selftest/requirements_selftest.py"],
+        "globs": ["tools/case_package/", "tools/report/", "templates/report/",
+                  "cases/", "tools/selftest/"],
+        "what": "需求單與追溯矩陣：格式檢核、追溯鏈條、可選性（不需 CAD）",
+    },
+    {
         "id": "ocss-live",
         "cmd": ["tools/selftest/ocss_live_selftest.py"],
         "globs": ["tools/crosscheck/", "tools/design/", "tools/regs/", "tools/selftest/"],

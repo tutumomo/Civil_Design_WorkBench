@@ -225,6 +225,8 @@ def render_appendices(builder: DocxReport, model: ReportModel, extra_meta: dict 
         aid = app.get("id")
         if aid == "crosscheck" and not getattr(model, "crosscheck", None):
             continue
+        if aid == "requirements" and not (model.get("requirements") or {}).get("items"):
+            continue
         builder.appendix_title(app.get("letter", ""), app.get("title", ""))
         if app.get("note"):
             builder.note(app["note"])
@@ -236,4 +238,7 @@ def render_appendices(builder: DocxReport, model: ReportModel, extra_meta: dict 
             builder.appendix_meta(extra_meta)
         elif aid == "crosscheck":
             builder.appendix_crosscheck_table(model.crosscheck, model.crosscheck_meta)
+        elif aid == "requirements":
+            # 只有案件檔有 requirements 區塊時才出現附錄 E。
+            builder.appendix_requirements_table(model.get("requirements"))
     builder.end_mark()

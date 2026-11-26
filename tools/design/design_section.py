@@ -685,11 +685,16 @@ def _publish(dxf: str) -> tuple[dict[str, str], str]:
 def generate(calc_id: str, payload: Mapping[str, Any], *,
              unit: str = "m", scale: str | int = "auto",
              project: str = "", drafter: str = "",
-             publish: bool = True) -> dict[str, Any]:
+             publish: bool = True,
+             out_dir: str | None = None) -> dict[str, Any]:
     """出圖並回傳檔案清單。
 
     回傳 `{"ok": bool, "files": [...], "case_path": ..., "out_dir": ...,
     "scale": 實際比例, "unit": ..., "notes": [...]}`。
+
+    `out_dir`：指定產出資料夾。**留空則用工作台慣例**
+    `out/design_sections/<計算器>/<時間戳>/`；三軸交付包會指定
+    `out/<案名>/設計圖/`，讓交付物落在案件自己的資料夾內（AGENTS.md §1.1）。
     """
     spec = CAPABILITIES.get(calc_id)
     if spec is None:
@@ -702,7 +707,11 @@ def generate(calc_id: str, payload: Mapping[str, Any], *,
     case = built["case"]
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = os.path.join(_out_root(), calc_id, stamp)
+    _explicit_out = bool(out_dir)
+    if out_dir:
+        out_dir = os.path.abspath(out_dir)
+    else:
+        out_dir = os.path.join(_out_root(), calc_id, stamp)
     os.makedirs(out_dir, exist_ok=True)
     temp_dir = os.path.join(_temp_root(), calc_id, stamp)
     os.makedirs(temp_dir, exist_ok=True)
@@ -748,8 +757,9 @@ def generate(calc_id: str, payload: Mapping[str, Any], *,
             notes.append("品管未通過（check_delivery E1~E18 exit %d）：%s"
                          % (qc_code, sheet["suffix"]))
 
-    # 給前端下載用的相對路徑（相對 out/design_sections，避免外洩絕對路徑）
-    root = os.path.abspath(_out_root())
+    # 給前端下載用的相對路徑（相對 out/design_sections，避免外洩絕對路徑）。
+    # 指定 out_dir（三軸交付包）時，改以該資料夾為根，前端下載路徑才對得上。
+    root = os.path.abspath(out_dir if _explicit_out else _out_root())
     for f in files:
         try:
             f["rel"] = os.path.relpath(os.path.abspath(f["path"]), root

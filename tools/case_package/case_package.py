@@ -68,6 +68,7 @@ TOOLS = {
 
 AXIS_NAMES = {"boq": "預算書", "report": "設計報告",
               "drawing": "設計圖（現況平面圖）", "section": "設計圖（擋土牆斷面圖）",
+              "design": "設計圖（計算器出圖）",
               "crosscheck": "逐式計算書（OCSS 交叉驗算）"}
 
 
@@ -277,6 +278,162 @@ def run_drawing(master, out_dir):
             "returncode": code, "files": files, "log": tail,
             "note": ("check_delivery.py E1~E18 通過" + extra_note) if code == 0
                     else "品管檢核或圖／數對帳未通過"}
+
+
+def run_design(master, out_dir, no_pdf):
+    """泛用「計算器出圖」軸：把案件的 `quantities.model` 對應到出圖工具並出圖。
+
+    為什麼需要這條軸：出圖能力原本只接在工作台（`tools/design/design_section.py` 的
+    `generate()`），走三軸交付包時完全拿不到圖——`TOOLS` 只有 `section`（擋土牆／排水溝／
+    邊坡）與 `box_section`（箱涵）兩個出圖工具。21 個可出圖計算器裡有 19 個
+    在正式交件流程中沒有圖，也沒有品管與圖／數對帳。
+
+    做法：不重新實作出圖，直接呼叫 `design_section.generate()`（唯一出圖來源），
+    出圖後依序跑兩道閘門：
+      ② `check_delivery.py` E1~E18（品管）
+      ③ `dxf_takeoff.py`（圖／數對帳；該 model 不支援對帳時**明寫未對帳**，不假裝通過）
+    """
+    case_path = master.get("_case_path")
+    if not case_path:
+        return None
+
+    sys.path.insert(0, os.path.join(ROOT, "tools", "design"))
+    import design_section as DS
+
+    model = (master.get("quantities") or {}).get("model")
+    _qvalues = (master.get("quantities") or {}).get("values") or {}
+    calc_id = master.get("design_calc") or _calc_id_for_model(DS, model, _qvalues)
+    if not calc_id:
+        return {"axis": "design", "name": AXIS_NAMES["design"], "ok": False,
+                "returncode": None, "files": [], "log": "",
+                "note": ("案件 model=%r 沒有對應的出圖能力；"
+                         "hydrology 這類無幾何的計算器不適用出圖" % model)}
+    if DS.status_of(calc_id) != "supported":
+        return {"axis": "design", "name": AXIS_NAMES["design"], "ok": False,
+                "returncode": None, "files": [], "log": "",
+                "note": "計算器 %s 不支援出圖（status=%s）"
+                        % (calc_id, DS.status_of(calc_id))}
+
+    payload = master.get("design_payload")
+    if payload is None:
+        payload = _payload_for_model(master, model)
+    if payload is None:
+        return {"axis": "design", "name": AXIS_NAMES["design"], "ok": False,
+                "returncode": None, "files": [], "log": "",
+                "note": ("案件 model=%r 缺 design_payload（或可對應的計算器輸入），"
+                         "無法出圖；請在案件檔補 design_payload" % model)}
+
+    sub = os.path.join(out_dir, "設計圖")
+    os.makedirs(sub, exist_ok=True)
+    # 出圖產物要落在 out/<案名>/（AGENTS.md §1.1），不是 out/design_sections/<時間戳>/。
+    out_root = os.path.join(out_dir, "設計圖")
+    try:
+        res = DS.generate(calc_id, payload, unit="m", scale="auto",
+                          project=master.get("title") or "",
+                          drafter=master.get("design_drafter") or "",
+                          publish=not no_pdf, out_dir=out_root)
+    except Exception as ex:
+        return {"axis": "design", "name": AXIS_NAMES["design"], "ok": False,
+                "returncode": 1, "files": [], "log": "",
+                "note": "出圖失敗：%s" % ex}
+
+    files = _files([f["path"] for f in res.get("files", [])])
+    log = "\n".join(str(n) for n in (res.get("notes") or []))
+    code = 0
+    qc_fail = []
+    for q in (res.get("qc") or []):
+        if not q.get("passed"):
+            qc_fail.append("%s（exit %s）" % (q.get("file"), q.get("exit")))
+            log += "\n[品管未通過] %s\n%s" % (q.get("file"), q.get("tail") or "")
+    if qc_fail:
+        code = 1
+        log += "\n品管 E1~E18 未通過：%s" % "、".join(qc_fail)
+
+    # ---- 圖／數對帳：只有 dxf_takeoff 支援的 model 才對帳，其餘明寫「未對帳」 ----
+    # 不可把「沒對帳」當成「對帳通過」——那正是閘門失效的樣態。
+    takeoff_note = ""
+    dxfs = [f["path"] for f in res.get("files", []) if f["path"].endswith(".dxf")]
+    if dxfs:
+        tcode, tlog = _run([PY, TOOLS["takeoff"], dxfs[0], "--case", case_path,
+                            "--tol", "0.5"],
+                           os.path.join(out_dir, "_log_design_takeoff.txt"))
+        log += "\n[圖／數對帳]\n" + tlog
+        if tcode == 0:
+            takeoff_note = "；圖／數對帳相符"
+        elif "無法對帳" in (tlog or ""):
+            takeoff_note = "；⚠ 圖／數對帳未執行（%s 不支援斷面積對帳）" % model
+        else:
+            code = 1
+            takeoff_note = "；圖／數對帳未通過"
+
+    ok = code == 0 and bool(files)
+    return {"axis": "design", "name": AXIS_NAMES["design"], "ok": ok,
+            "returncode": code, "files": files, "log": log,
+            "note": ("%s 出圖完成；品管 E1~E18 通過%s"
+                     % (calc_id, takeoff_note)) if ok else
+                    ("%s 出圖未通過閘門（品管／對帳）" % calc_id)}
+
+
+def _calc_id_for_model(DS, model, values=None):
+    """由案件 quantities.model 反查對應的出圖計算器 id。
+
+    多個計算器共用同一 model（例如擋土牆六型都是 `wall`），此時優先選
+    `wall_stability`（通用型）；型別專屬的（counterfort／mse／anchored）
+    要靠案件的 `quantities.values.wall_type` 判斷。
+    """
+    if not model:
+        return None
+    cands = [cid for cid, spec in DS.CAPABILITIES.items() if spec.get("model") == model]
+    if not cands:
+        return None
+    if len(cands) == 1:
+        return cands[0]
+    # 同 model 多候選：依牆型挑專屬計算器
+    wt = str((values or {}).get("wall_type") or "").strip().lower()
+    by_wt = {"counterfort": "counterfort_wall", "mse": "mse_wall",
+             "anchored": "anchored_wall", "block": "block_wall"}
+    if wt in by_wt and by_wt[wt] in cands:
+        return by_wt[wt]
+    return "wall_stability" if "wall_stability" in cands else cands[0]
+
+
+def _payload_for_model(master, model):
+    """由案件檔組出計算器輸入 payload（出圖工具吃的是計算器輸入，不是數量模型值）。
+
+    規則：
+      * `design_payload` 明寫 → 直接用（案件檔的正規入口）。
+      * 否則用 `quantities.values` 加上案件內的土工／材料參數。
+        對 `wall`／`box_culvert`／`channel`／`slope`，出圖工具吃的就是
+        `quantities.values` 本身（數量模型的輸入），可直接沿用。
+    """
+    q = master.get("quantities") or {}
+    values = dict(q.get("values") or {})
+    if not values:
+        return None
+    payload = dict(values)
+    # 土工與材料參數在案件檔的別的區段，出圖工具需要它們才能算穩定與配筋。
+    for src, dst in (("soil", "soil"), ("concrete", None)):
+        if src in master and dst:
+            payload[dst] = master[src]
+    if isinstance(master.get("concrete"), dict):
+        payload.update(master["concrete"])
+    if isinstance(master.get("soil"), dict):
+        payload["soil"] = master["soil"]
+    if isinstance(master.get("seismic"), dict) and "kh" in master["seismic"]:
+        payload["kh"] = master["seismic"]["kh"]
+    # 牆型由案件指定；擋土牆專屬型別要帶 wall_type。
+    if model == "wall":
+        wt = str(values.get("wall_type") or "").strip().lower()
+        if not wt:
+            return None
+        payload["wall_type"] = wt
+    # 排水溝／箱涵的水力參數在 hydraulics 區段。
+    hyd = master.get("hydraulics") or {}
+    if isinstance(hyd, dict):
+        for k in ("design_flow_m3s", "slope", "manning_n", "freeboard_min_m"):
+            if hyd.get(k) is not None:
+                payload.setdefault(k, hyd[k])
+    return payload
 
 
 def run_section(master, out_dir, no_pdf):
@@ -505,7 +662,8 @@ def main():
     ap = argparse.ArgumentParser(description="案件交付包：三軸一次跑完")
     ap.add_argument("master", help="案件主檔 JSON")
     ap.add_argument("--out-dir", default=None)
-    ap.add_argument("--only", default=None, help="只跑指定軸，逗號分隔：boq,report,drawing,crosscheck")
+    ap.add_argument("--only", default=None,
+                    help="只跑指定軸，逗號分隔：boq,report,drawing,section,design,crosscheck")
     ap.add_argument("--with-crosscheck", action="store_true",
                     help="加跑逐式計算書軸（需 OCSS 桌面程式開著；預設不跑）")
     ap.add_argument("--no-pdf", action="store_true")
@@ -517,12 +675,27 @@ def main():
     master = json.load(open(mp, encoding="utf-8"))
     master["_master_path"] = mp
 
+    # 只跑 design 軸時，案件可能沒有數量模型與預算工項（例：RC 梁只有計算器輸入）。
+    # 那些 error 屬於「沒有跑的那條軸」，不該擋住本次出圖 —— 逐項過濾。
+    _only_design = bool(a.only) and set(a.only.split(",")) == {"design"}
+
     # ---- 統一案件檔（civil-case/1）：先檢查一致性，再派生兩軸輸入 ----
     if master.get("schema") == "civil-case/1":
         sys.path.insert(0, HERE)
         import case_core
         issues = case_core.consistency(master)
-        errors = [i for i in issues if i["level"] == "error"]
+        if _only_design:
+            # 只跑 design：與數量／預算／報告無關的 error 不擋（例：未知數量模型、
+            # boq.items 為空、project.agency 未填）。與出圖有關的仍擋。
+            _design_kw = ("數量模型", "boq", "工項", "project.", "報告")
+            errors = [i for i in issues
+                      if i["level"] == "error"
+                      and not any(k in i["msg"] for k in _design_kw)]
+            for i in issues:
+                if i["level"] == "error" and i not in errors:
+                    print(f"  [略過] {i['msg']}（只跑 design 軸，與出圖無關）")
+        else:
+            errors = [i for i in issues if i["level"] == "error"]
         warns = [i for i in issues if i["level"] == "warn"]
         print(f"統一案件檔：{os.path.basename(mp)}　一致性 {len(errors)} error / {len(warns)} warn")
         for i in errors:
@@ -530,8 +703,9 @@ def main():
         if errors:
             sys.exit("一致性檢查未通過，已中止（不產出任何交付物）")
         master["_case_path"] = mp
-        master["boq"] = case_core.derive_boq(master)
-        master["report"] = case_core.derive_report(master)
+        if not _only_design:
+            master["boq"] = case_core.derive_boq(master)
+            master["report"] = case_core.derive_report(master)
         proj = master.get("project") or {}
         master.setdefault("title", proj.get("name") or "未命名案件")
         if not master.get("drawing"):
@@ -567,6 +741,8 @@ def main():
 
     if "section" in want:
         results.append(run_section(master, out_dir, a.no_pdf))
+    if "design" in want:
+        results.append(run_design(master, out_dir, a.no_pdf))
     if "crosscheck" in want:
         # 先跑交叉驗算，報告軸才帶得到附錄 D 的資料
         results.append(run_crosscheck(master, out_dir))

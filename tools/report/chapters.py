@@ -38,6 +38,36 @@ def _heading(builder: DocxReport, chapter_no: int, sec: dict):
         builder.section_title(chapter_no, heading)
 
 
+def _pick_for_category(table: Any, model: ReportModel) -> Any:
+    """依案件類別挑出合適的文案。
+
+    為什麼需要：同一章在不同工程類別的語意不同。例如第 11 章對擋土牆是
+    「排水孔與伸縮縫」、對道路是「路面橫坡排水與側溝」；沿用同一段 intro
+    會讓讀者看到與本案無關的說明（例：道路報告出現「排水孔直徑 ≥5 cm」）。
+
+    `table` 必須是 `{"道路": "…", "擋土牆": "…"}` 這樣的 dict；
+    找不到對應類別時回傳 None（呼叫端據此保留原有文案，維持舊有行為）。
+    """
+    if not isinstance(table, dict):
+        return None
+    cat = str(model.project.get("category") or "")
+    if not cat:
+        return None
+    for token, val in table.items():
+        if token in cat:
+            return val
+    # 別名比對（與 chapter_applies 同一套規則）
+    from report_model import CATEGORY_ALIASES
+    for token, aliases in CATEGORY_ALIASES.items():
+        if token in cat:
+            for alias in aliases:
+                if alias in cat:
+                    val = table.get(token)
+                    if val is not None:
+                        return val
+    return None
+
+
 def _render_section(builder: DocxReport, model: ReportModel, chapter_no: int,
                     sec: dict, status: ChapterStatus) -> bool:
     """排一個資料區塊；有資料回 True，缺資料回 False（由呼叫端出佔位符）。"""
@@ -145,8 +175,12 @@ def render_chapters(builder: DocxReport, model: ReportModel) -> list[ChapterStat
             builder.end_chapter()
             continue
 
-        if chapter.get("intro"):
-            builder.para(chapter["intro"])
+        intro = chapter.get("intro")
+        alt = _pick_for_category(chapter.get("intro_by_category"), model)
+        if alt is not None:
+            intro = alt
+        if intro:
+            builder.para(intro)
 
         for sec in chapter.get("sections", []):
             ok = _render_section(builder, model, no, sec, status)
@@ -155,7 +189,11 @@ def render_chapters(builder: DocxReport, model: ReportModel) -> list[ChapterStat
             else:
                 status.missing_sections += 1
                 label = sec.get("label") or sec.get("heading") or sec.get("kind") or "資料區塊"
-                builder.placeholder(status, label, sec.get("hint", ""))
+                hint = sec.get("hint", "")
+                alt_hint = _pick_for_category(sec.get("hint_by_category"), model)
+                if alt_hint is not None:
+                    hint = alt_hint
+                builder.placeholder(status, label, hint)
 
         for man in chapter.get("manual", []) or []:
             # skip_if：若該章對應的資料區塊已由案件（或設計計算）自動填入，
@@ -166,7 +204,11 @@ def render_chapters(builder: DocxReport, model: ReportModel) -> list[ChapterStat
                 continue
             if cond and _present(model, cond):
                 continue
-            builder.placeholder(status, man.get("label", ""), man.get("hint", ""))
+            hint = man.get("hint", "")
+            alt_hint = _pick_for_category(man.get("hint_by_category"), model)
+            if alt_hint is not None:
+                hint = alt_hint
+            builder.placeholder(status, man.get("label", ""), hint)
 
         builder.end_chapter()
 

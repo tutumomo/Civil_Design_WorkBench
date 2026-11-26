@@ -77,6 +77,13 @@ TESTS = [
         "what": "圖／數對帳：13 個可出圖模型的 DXF 量測與數量模型相符（不需 CAD）",
     },
     {
+        "id": "road-sections",
+        "cmd": ["tools/selftest/road_sections_selftest.py"],
+        "globs": ["tools/case_package/", "tools/report/", "templates/report/",
+                  "cases/", "tools/selftest/"],
+        "what": "道路設計章節：第 6／7／11 章有內容、缺資料誠實標需人工補（不需 CAD）",
+    },
+    {
         "id": "ocss-live",
         "cmd": ["tools/selftest/ocss_live_selftest.py"],
         "globs": ["tools/crosscheck/", "tools/design/", "tools/regs/", "tools/selftest/"],

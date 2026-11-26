@@ -1036,6 +1036,156 @@ def _sections_channel(out, q, case):
 
 
 
+def _sections_road(out, q, case):
+    """報告段落：道路／路面（由 _design_sections 分派）。
+
+    ⚠ 設計邊界（誠實註記，不可臆測）：
+    本專案**沒有柔性鋪面結構設計引擎**（柔性鋪面設計手冊的 TI／ESAL／軸重當量因子
+    等條目目前僅供規範查詢台查閱，無引擎可逐值比對），因此本章**不做**：
+      · 交通量分析與軸重當量（ESAL）換算
+      · 鋪面結構層厚度設計（底層／基層／面層厚度分配）
+      · 承載力（加州法 T／GE）檢核
+    上述項目在案件缺交通量與路面結構調查資料時，本章明寫「需人工補」，
+    **不假造數值**。
+
+    本章可確定產出的是「路面結構組成與鋪裝數量」：由案件的鋪裝厚度、面積、
+    體積與結構層設定（若有）直接派生，屬可查核的量。
+    """
+    L = float(q.get("length_m") or 0.0)
+    W = float(q.get("width_avg_m") or 0.0)
+    A = float(q.get("area_m2") or 0.0)
+    t_cm = float(q.get("thickness_cm") or 0.0)
+    V = float(q.get("volume_m3") or 0.0)
+
+    # ---- 第 6 章：載重作用（鋪裝自重；交通載重缺資料時明寫需人工補）----
+    # 瀝青混凝土單位重採一般值 2.2 t/m³（22 kN/m³）。
+    unit_w_kn = 22.0
+    if t_cm > 0 and A > 0:
+        w_total = A * (t_cm / 100.0) * unit_w_kn
+    else:
+        w_total = 0.0
+    traffic = case.get("traffic") or {}
+    have_traffic = bool(traffic.get("esal") or traffic.get("daily_traffic")
+                         or traffic.get("axis_load_kn"))
+    out["loads"] = {
+        "items": [_tbl(
+            "鋪裝自重與交通載重作用表",
+            [("載重項目", 4.2, "left"), ("計算式", 4.4, "left"),
+             ("大小", 3.0, "center"), ("說明", 4.2, "left")],
+            [["鋪裝自重（面層）", "面積 %.1f m² × 厚 %.1f cm × 22 kN/m³" % (A, t_cm),
+              "%.1f kN" % w_total, "瀝青混凝土單位重採一般值"],
+             ["交通載重（軸重當量）",
+              ("案件已提供軸次／日交通量" if have_traffic else "缺交通量與路面結構調查資料"),
+              ("依案件" if have_traffic else "—"),
+              ("軸重當量因子換算 ESAL（本專案無引擎，須依柔性鋪面設計手冊人工計算）"
+               if have_traffic
+               else "交通量分析與軸重換算須由設計者依《柔性鋪面設計手冊》辦理")]],
+            note="本表僅列鋪裝自重與交通載重之來源；交通載重未經換算前，"
+                 "不可據以判定現有路面結構之承載能力。")],
+        "notes": [
+            "本章之交通載重採軸重當量因子法換算之設計軸次（ESAL）為基礎；"
+            "換算需交通量調查資料與《柔性鋪面設計手冊》之軸重當量因子表，"
+            "%s。" % ("案件已提供，可據以續算" if have_traffic
+                     else "本案件未提供，故本章不列數值（須人工補）"),
+            "本專案目前無柔性鋪面結構設計引擎，TI 與加州承載力式僅能由規範查詢台"
+            "查閱條文、無法逐值運算；結構厚度設計須由設計者以正式工具完成。",
+        ],
+    }
+
+    # ---- 第 7 章：穩定檢核（路面結構與幾何）----
+    # 道路的「穩定」在此指路面結構承載與幾何斷面（橫坡、寬度）之檢核。
+    # 結構承載力檢核缺交通量與結構調查，標為需人工補。
+    cross_slope = q.get("cross_slope_pct")
+    checks = []
+    if cross_slope not in (None, ""):
+        checks.append({
+            "item": "路面橫坡（排水）",
+            "requirement": "≥ 1.0%（道路工程實務常見值）",
+            "value": "%.2f%%" % float(cross_slope),
+            "verdict": _verdict(float(cross_slope) >= 1.0),
+        })
+    else:
+        checks.append({
+            "item": "路面橫坡（排水）",
+            "requirement": "≥ 1.0%（道路工程實務常見值）",
+            "value": "—",
+            "verdict": "需人工補",
+        })
+    checks.append({
+        "item": "鋪築體積 V = A × t",
+        "requirement": "與案件宣告值差異 ≤ 1.0%",
+        "value": "%.2f m³" % V,
+        "verdict": _verdict(abs(A * (t_cm / 100.0) - V) / V * 100.0 <= 1.0) if V else "需人工補",
+    })
+    out["stability"] = {
+        "checks": checks,
+        "notes": [
+            "路面結構承載力檢核（加州法 T／GE 或 AASHTO）需交通量調查與"
+            "既有路面結構調查資料；%s，"
+            "本章不列計算值（須人工補）。" % ("案件已提供，可據以續算" if have_traffic
+                                          else "本案件未提供交通量與結構調查資料"),
+            "本章所列幾何檢核僅針對案件檔已宣告之數量與橫坡，"
+            "屬「數量自洽」檢核，非結構安全判定。",
+        ],
+    }
+
+    # ---- 第 11 章：排水與伸縮縫配置 ----
+    # 道路的「排水」＝路面排水（橫坡 + 側溝／路肩排水）與路面結構層排水。
+    # 側溝設計需要集水區水文參數（降雨、逕流係數、面積），缺則明寫。
+    catch = case.get("catchment")
+    notes = []
+    items = []
+    if catch and HY is not None:
+        try:
+            hr2 = HY.design_flow(
+                float(catch["P_mm"]), float(catch["T_year"]),
+                float(catch["area_ha"]), catch.get("condition", "丘陵地或森林"),
+                bool(catch.get("developed")), bool(catch.get("upper_c")),
+                float(catch.get("l_m", 100.0)), float(catch.get("v_ms", 0.4)),
+                float(catch.get("L_km", 0.0)), float(catch.get("H_km", 0.0)))
+            items.append(_tbl(
+                "集水區水文分析結果表（路面側溝流量來源）",
+                [("項目", 4.6, "left"), ("數值", 2.8, "center"),
+                 ("單位", 1.8, "center"), ("依據", 4.8, "left")],
+                [["年平均降雨量 P", "%.0f" % hr2["P_mm"], "mm", "等雨量線圖（第16條）"],
+                 ["重現期距 T", "%.0f" % hr2["T_year"], "年", "非農業使用 25 年（第83條）"],
+                 ["集水區面積 A", "%.3f" % hr2["area_ha"], "ha", "≤1000 ha（第17條）"],
+                 ["集流時間 tc", "%.2f" % hr2["tc_min"], "分", "tc=t1+t2（第19條）"],
+                 ["降雨強度 I", "%.2f" % hr2["I_mm_hr"], "mm/hr", "第16條"],
+                 ["逕流係數 C", "%.3f" % hr2["C"], "-", hr2["condition"]],
+                 ["洪峰流量 Qp", "%.4f" % hr2["Qp_m3s"], "m³/s", "Qp=(1/360)CIA（第17條）"]]))
+            notes.append("路面側溝設計流量由合理化公式計算：Qp=%.4f m³/s。"
+                         % hr2["Qp_m3s"])
+        except Exception as ex:
+            notes.append("集水區水文分析未完成：%s" % ex)
+    else:
+        notes.append("路面側溝（邊溝）設計流量須以集水區水文分析取得；"
+                     "本案件未提供集水區參數（降雨量、重現期、面積、逕流係數），"
+                     "故本章不列側溝流量與斷面（須人工補）。")
+
+    items.append(_tbl(
+        "鋪裝與排水配置數量表",
+        [("項目", 5.0, "left"), ("數值", 2.8, "center"),
+         ("單位", 1.8, "center"), ("說明", 4.4, "left")],
+        [["鋪裝面積 A", "%.1f" % A, "m²", "設計中心線與左右邊界圍成面積"],
+         ["鋪築厚度 t", "%.1f" % t_cm, "cm", "設計指定"],
+         ["鋪築體積 V", "%.2f" % V, "m³", "V = A × t（未含拌合損耗與鬆散係數）"],
+         ["全線長度 L", "%.2f" % L, "m", "沿設計中心線量測"],
+         ["平均寬度 W", "%.2f" % W, "m", "逐斷面量測平均"],
+         ["路面橫坡", ("%.2f" % float(cross_slope)) if cross_slope not in (None, "")
+          else "—", "%", "案件未提供時須以量測或設計值補入"],
+         ["側溝／邊溝流量", "—", "m³/s",
+          "須集水區水文分析；缺參數時不臆測"]]))
+    out["drainage"] = {
+        "checks": [],
+        "items": items,
+        "notes": notes + [
+            "路面結構層（底層／基層）排水與級配碎石層排水能力，"
+            "須以結構層厚度與滲透係數判定；本專案無對應引擎，須人工補。",
+        ],
+    }
+    return out
+
 def _design_sections(model, q, case):
     """由設計計算模組自動產生報告第 6／7／11 章的內容。
 
@@ -1053,5 +1203,9 @@ def _design_sections(model, q, case):
         _sections_box(out, q, case)
     if model == "channel" and CH is not None:
         _sections_channel(out, q, case)
+    if model == "road":
+        # 道路／路面：不依賴專用引擎，僅以案件檔已宣告之數量派生可查核的章節；
+        # 交通量與鋪面結構設計部分明寫需人工補（見 _sections_road 說明）。
+        _sections_road(out, q, case)
     _attach_section_figure(out, case)
     return out

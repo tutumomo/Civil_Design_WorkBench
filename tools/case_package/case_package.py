@@ -360,8 +360,9 @@ def run_design(master, out_dir, no_pdf):
         log += "\n[圖／數對帳]\n" + tlog
         if tcode == 0:
             takeoff_note = "；圖／數對帳相符"
-        elif "無法對帳" in (tlog or ""):
-            takeoff_note = "；⚠ 圖／數對帳未執行（%s 不支援斷面積對帳）" % model
+        elif tcode == 2:
+            # 退出碼 2＝未對帳：模型不適用或案件缺輸入。要明寫，不可當成通過。
+            takeoff_note = "；⚠ 圖／數對帳未執行（%s；原因見 _log_design_takeoff.txt）" % model
         else:
             code = 1
             takeoff_note = "；圖／數對帳未通過"
@@ -559,14 +560,20 @@ def run_section(master, out_dir, no_pdf):
     # 這一步抓的是 E1~E18 抓不到的東西：圖形正確但數量畫錯（例如內腔多邊形重複、
     # 外框含內腔沒扣）。實測排水溝曾因內腔畫兩次而淨面積差 96%，品管完全看不出來。
     takeoff_log = ""
-    if ok and _mdl != "slope":
+    if ok:
+        # slope 也進對帳：邊坡斷面圖量的是地表線長度（對 slope_face_m＋平台延伸），
+        # 語意寫在 dxf_takeoff 的 spec note 裡。之前是把 slope 整個跳過，
+        # 等於這類圖從來沒有圖／數對帳過。
         tcmd = [PY, TOOLS["takeoff"], out, "--case", case_path, "--tol", "0.5"]
         tcode, tlog = _run(tcmd, os.path.join(out_dir, "_log_section_takeoff.txt"))
         takeoff_log = tlog
         tail = tail + "\n[圖／數對帳 " + os.path.basename(out) + "]\n" + tlog
-        if tcode != 0:
+        # 退出碼 2 ＝「未對帳」（該模型不適用或缺輸入），不算失敗但要留痕。
+        if tcode not in (0, 2):
             ok = False
             code = tcode
+        elif tcode == 2:
+            tail = tail + "\n（邊坡：本次未對帳，原因見上）"
         if rebar_out:
             t2 = [PY, TOOLS["takeoff"], rebar_out, "--case", case_path, "--tol", "0.5"]
             t2code, t2log = _run(t2, os.path.join(out_dir, "_log_section_takeoff_rebar.txt"))

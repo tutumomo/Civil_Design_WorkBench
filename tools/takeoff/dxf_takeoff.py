@@ -51,12 +51,29 @@ def _entity_pts(e):
         return []
 
 
+def _expand_bbox(d, x, y):
+    """把一個點併進圖層的包圍盒（xmin/xmax/ymin/ymax）。"""
+    x, y = float(x), float(y)
+    if d["xmin"] is None or x < d["xmin"]:
+        d["xmin"] = x
+    if d["xmax"] is None or x > d["xmax"]:
+        d["xmax"] = x
+    if d["ymin"] is None or y < d["ymin"]:
+        d["ymin"] = y
+    if d["ymax"] is None or y > d["ymax"]:
+        d["ymax"] = y
+
+
 def measure(dxf_path, void_layers=("34_溝內腔",), skip_layers=("90_圖框",)):
     """量測 DXF 模型空間，回傳 {layer: {area, length, count, entities}}。
 
     area   —— 閉合多邊形 |面積| 之和（m²）
     length —— LINE／LWPOLYLINE 長度之和（m）
     count  —— 圖元數
+
+    `areas`  —— 各閉合多邊形的面積清單（m²，依圖元順序）。
+                 同一圖層可能同時畫「實體」與「示意剖面」等多塊，
+                 只看總和會把不同語意的量混在一起；對帳要挑特定塊時用得到。
     """
     doc = ezdxf.readfile(dxf_path)
     msp = doc.modelspace()
@@ -65,21 +82,35 @@ def measure(dxf_path, void_layers=("34_溝內腔",), skip_layers=("90_圖框",))
         lay = e.dxf.layer
         if lay in skip_layers or lay.startswith("90_"):
             continue
-        d = out.setdefault(lay, {"area": 0.0, "length": 0.0, "count": 0, "entities": {}})
+        d = out.setdefault(lay, {"area": 0.0, "length": 0.0, "count": 0,
+                                 "entities": {}, "areas": [], "lengths": [],
+                                 "xmin": None, "xmax": None, "ymin": None, "ymax": None})
         t = e.dxftype()
         d["count"] += 1
         d["entities"][t] = d["entities"].get(t, 0) + 1
         if t == "LWPOLYLINE":
             pts = _entity_pts(e)
+            for (px, py) in pts:
+                _expand_bbox(d, px, py)
             if e.closed and len(pts) >= 3:
-                d["area"] += abs(_poly_area(pts))
+                a = abs(_poly_area(pts))
+                d["area"] += a
+                d["areas"].append(round(a, 4))
             for i in range(len(pts) - 1):
-                d["length"] += math.dist(pts[i], pts[i + 1])
+                seg = math.dist(pts[i], pts[i + 1])
+                d["length"] += seg
+                d["lengths"].append(round(seg, 4))
         elif t == "LINE":
-            d["length"] += math.dist((e.dxf.start.x, e.dxf.start.y),
-                                    (e.dxf.end.x, e.dxf.end.y))
+            _expand_bbox(d, e.dxf.start.x, e.dxf.start.y)
+            _expand_bbox(d, e.dxf.end.x, e.dxf.end.y)
+            seg = math.dist((e.dxf.start.x, e.dxf.start.y),
+                            (e.dxf.end.x, e.dxf.end.y))
+            d["length"] += seg
+            d["lengths"].append(round(seg, 4))
         elif t == "CIRCLE":
-            d["length"] += 2 * math.pi * e.dxf.radius
+            seg = 2 * math.pi * e.dxf.radius
+            d["length"] += seg
+            d["lengths"].append(round(seg, 4))
     for d in out.values():
         d["area"] = round(d["area"], 4)
         d["length"] = round(d["length"], 2)
@@ -97,6 +128,385 @@ def net_area(meas, gross_layer="30_擋土牆混凝土", void_layers=("34_溝內�
 SECTION_LAYERS = {
     "box_culvert": ("30_箱涵混凝土", ("34_箱涵內腔",)),
 }
+
+
+# --------------------------------------------------------------------------- #
+# 模型對帳規格表（把圖／數對帳從「只會擋土牆／箱涵」擴到全部可出圖模型）
+# --------------------------------------------------------------------------- #
+# 每筆規格說明「量哪個圖層」與「期望值怎麼推」，兩者必須同一語意，
+# 否則對帳就是在比不相干的兩個量（比對結果看似相符，實則毫無意義）。
+#
+# `unit` 量測單位：m²（面積）／m（長度）／個（數量）。
+# `expect` 從 `quantities.values`（案件輸入）推導期望值；
+# 若該輸入在案件檔中不存在，spec 會回傳 None → 誠實標「案件檔缺輸入，無法對帳」。
+#
+# ⚠ 語意差異要寫在 `note` 裡，因為「圖上量的」與「模型算的」有時是同一個量的
+# 不同視角（例如基腳圖同時畫平面與剖面，平面面積與剖面積不同）。
+RECONCILE_SPECS = {
+    "rc_beam": {
+        "layer": "30_構材混凝土", "unit": "m²", "kind": "area",
+        "expect": lambda q: _rect_area_mm(q, "b_mm", "h_mm"),
+        "note": "圖上量梁斷面外框 b×h；模型取計算器輸入之斷面尺寸。",
+    },
+    "rc_column": {
+        "layer": "30_構材混凝土", "unit": "m²", "kind": "area",
+        "expect": lambda q: _rect_area_mm(q, "b_mm", "h_mm"),
+        "note": "圖上量柱斷面外框 b×h；模型取計算器輸入之斷面尺寸。",
+    },
+    "foundation_isolated": {
+        "layer": "30_基腳混凝土", "unit": "m²", "kind": "area",
+        "expect": lambda q: _footing_drawn_area(q),
+        "note": "F-1 同時畫平面（B×L）與剖面（B×t）兩塊，量到的是兩塊之和；"
+                "模型＝基腳平面面積 ＋ 剖面面積（剖面為基腳本體一端，非示意）。",
+    },
+    "foundation_combined": {
+        "layer": "30_基腳混凝土", "unit": "m²", "kind": "area",
+        "expect": lambda q: _footing_drawn_area(q),
+        "note": "F-2 同時畫平面（B×L）與剖面（L×t）兩塊，量到的是兩塊之和；"
+                "模型＝基腳平面面積 ＋ 剖面面積（剖面為基腳本體一端，非示意）。",
+    },
+    "channel_cover": {
+        "layer": "30_溝蓋混凝土", "unit": "m²", "kind": "area",
+        "expect": lambda q: _channel_cover_area(q),
+        "note": "C-01 為溝蓋斷面詳圖，量到的是每延米蓋版斷面積；"
+                "模型取「總寬（淨寬＋兩側溝壁）× 版厚」，與圖上蓋版同寬。",
+    },
+    "detention_basin": {
+        "layer": "30_池體輪廓", "unit": "m²", "kind": "area",
+        "expect": lambda q: _detention_drawn_area(q),
+        # 池頂外框與池底矩形都是閉合多邊形；池底＝內側較小的那塊。
+        # 取「所有閉合塊中與模型值相符者」會變成自我實現，故改依幾何判定：
+        # 池頂外框含池底（面積更大），池底＝最小的那塊閉合矩形。
+        "pick": lambda d: min(d["areas"]) if d["areas"] else None,
+        "note": "P-1 畫三樣東西：池頂外框、池底矩形、縱剖面折線。"
+                "只有「池底矩形面積＝池底 L×W」能與數量模型同語意，"
+                "故對帳只取該矩形（其餘為示意，不計價）。",
+    },
+    "sediment_basin": {
+        "layer": "30_池體輪廓", "unit": "m²", "kind": "area",
+        "expect": lambda q: _basin_footprint(q),
+        "note": "P-2 畫池底平面（L×W）與縱剖面折線；對帳只取池底矩形"
+                "（剖面為示意，不計價）。",
+    },
+    "steel_column": {
+        "layer": "32_承台混凝土", "unit": "m²", "kind": "area",
+        "expect": lambda q: _steel_pedestal_area(q),
+        # 承台平面（B×N）與承台剖面兩塊都在此圖層；平面塊較小，剖面塊較大。
+        "pick": lambda d: min(d["areas"]) if d["areas"] else None,
+        "note": "SC-1 的 `32_承台混凝土` 畫兩塊：承台平面（B×N）與承台剖面；"
+                "對帳取面積較小的平面塊，模型取計算結果之承台尺寸。",
+    },
+    "building_frame": {
+        "layer": "30_柱", "unit": "m²", "kind": "area",
+        "expect": lambda q: _frame_column_area(q),
+        "note": "FR-1 量到所有柱斷面積之和；模型取柱數×柱斷面。",
+    },
+    "channel_profile": {
+        "layer": "30_溝底線", "unit": "m", "kind": "xspan",
+        "expect": lambda q: _float_or_none(q, "reach_length_m"),
+        "note": "L-1 是**縱橫異比例**圖（垂直方向誇大最高 30 倍），"
+                "圖上折線長度不是真實長度；對帳取溝底線的**水平投影長度**"
+                "（X 座標跨度）＝計算段長 reach_length_m。",
+    },
+    "pile_group": {
+        "layer": "30_樁位", "unit": "個", "kind": "count",
+        "expect": lambda q: _pile_count(q),
+        "note": "FP-1 以圓點標示樁位；模型取計算器結果之樁數。",
+    },
+    "settlement": {
+        "layer": "30_基腳", "unit": "m²", "kind": "area",
+        "expect": lambda q: _settlement_footing_area(q),
+        "pick": lambda d: sum(d["areas"]) if d["areas"] else None,
+        "note": "FS-1 量到所有基腳矩形面積之和；模型取各基腳 B×L 合計。",
+    },
+    "drainage_network": {
+        "layer": None, "unit": None, "kind": "na",
+        "expect": lambda q: None,
+        "note": "NW-1 為示意圖（節點間距按版面比例，非實距），"
+                "圖上長度不代表實際管長，故不做數量對帳。",
+    },
+    # ---- 邊坡：坡面斜長（斷面圖）----
+    # 注意語意：坡面「面積」是斜長 × 邊坡長度的展開量，斷面圖上量不到；
+    # 斷面圖能對的是地表線長度：坡面斜長 ＋ 前後平台延伸 ＋ 階段平台。
+    # `35_坡面線` 圖層同時含「地表折線」與「加粗坡面線（0,0)→(run,H)）」，
+    # 兩者重疊，故量到值 = 地表線長度 ＋ 坡面斜長。
+    "slope": {
+        "layer": "35_坡面線", "unit": "m", "kind": "length",
+        "expect": lambda q: _slope_surface_line_length(q),
+        "note": "E-01 為邊坡**斷面**圖：量到的是地表線長度（地表折線＋重疊的加粗坡面線）；"
+                "模型為坡面斜長＋前後平台延伸(各 3 m)＋階段平台寬。"
+                "坡面面積是斜長×邊坡長度的展開量，斷面圖上量不到，不在此對帳。",
+    },
+}
+
+
+def _float_or_none(d, key):
+    v = (d or {}).get(key)
+    if v in (None, ""):
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _int_or_none(d, key):
+    v = (d or {}).get(key)
+    if v in (None, ""):
+        return None
+    try:
+        return int(float(v))
+    except (TypeError, ValueError):
+        return None
+
+
+def _rect_area_mm(q, b_key, h_key):
+    """mm 級矩形斷面積 → m²。"""
+    b = _float_or_none(q, b_key)
+    h = _float_or_none(q, h_key)
+    if b is None or h is None:
+        return None
+    return b * h / 1.0e6
+
+
+def _footing_plan_area(q):
+    """基腳底面積 B×L（m²）。B、L 在 `geometry` 下或平鍵皆可。"""
+    g = (q or {}).get("geometry") or {}
+    b = _float_or_none(g, "B_m")
+    l = _float_or_none(g, "L_m")
+    if b is None:
+        b = _float_or_none(q, "B_m")
+    if l is None:
+        l = _float_or_none(q, "L_m")
+    if b is None or l is None:
+        return None
+    return b * l
+
+
+def _footing_drawn_area(q):
+    """基腳圖上的混凝土面積（m²）＝平面 B×L ＋ 剖面 B×t。
+
+    F-1／F-2 同一圖層畫兩塊：平面視圖（矩形 B×L）與剖面視圖（矩形 B×t），
+    兩塊都在 `30_基腳混凝土`。量測會把兩塊加總，所以期望值也要含剖面塊。
+
+    剖面塊的長邊：獨立基腳是 B，聯合基腳是 L（沿柱列方向剖）。
+    """
+    g = (q or {}).get("geometry") or {}
+    b = _float_or_none(g, "B_m")
+    l = _float_or_none(g, "L_m")
+    t = _float_or_none(g, "thickness_m")
+    if b is None:
+        b = _float_or_none(q, "B_m")
+    if l is None:
+        l = _float_or_none(q, "L_m")
+    if t is None:
+        t = _float_or_none(q, "thickness_m")
+    if b is None or l is None or t is None:
+        return None
+    combined = bool((q or {}).get("columns")) or _model_is_combined(q)
+    sec_len = l if combined else b
+    return b * l + sec_len * t
+
+
+def _model_is_combined(q):
+    """案件 model 是否為聯合基腳。"""
+    return str((q or {}).get("model") or "").strip() == "foundation_combined"
+
+
+def _channel_cover_area(q):
+    """溝蓋斷面積（m²）＝蓋版寬度 × 版厚。
+
+    圖上蓋版橫跨「既有溝壁內側淨寬 ＋ 兩側壁厚」＝total_width_m，
+    故期望值用總寬而非淨寬（用淨寬會差 2×壁厚，實測 66.7%）。
+    """
+    g = (q or {}).get("geometry") or {}
+    w = _float_or_none(g, "clear_width_m")
+    t = _float_or_none(g, "slab_thickness_mm")
+    tw = _float_or_none(g, "wall_thickness_m")
+    total = _float_or_none(g, "total_width_m")
+    if w is None:
+        w = _float_or_none(q, "clear_width_m")
+    if t is None:
+        t = _float_or_none(q, "slab_thickness_mm")
+    if tw is None:
+        tw = _float_or_none(q, "wall_thickness_m")
+    if total is None and w is not None and tw is not None:
+        total = w + 2.0 * tw
+    if total is None:
+        total = w
+    if total is None or t is None:
+        return None
+    return total * t / 1000.0
+
+
+def _basin_footprint(q):
+    """池底面積（m²）。滯洪池在 `basin` 下；沉砂池為平鍵。"""
+    b = (q or {}).get("basin") or {}
+    l = _float_or_none(b, "bottom_length_m")
+    w = _float_or_none(b, "bottom_width_m")
+    if l is None:
+        l = _float_or_none(q, "bottom_length_m")
+    if w is None:
+        w = _float_or_none(q, "bottom_width_m")
+    if l is None:
+        l = _float_or_none(q, "length_m")
+    if w is None:
+        w = _float_or_none(q, "width_m")
+    if l is None or w is None:
+        return None
+    return l * w
+
+
+def _detention_drawn_area(q):
+    """滯洪池池底面積（m²）＝池底 L×W（`basin.bottom_length_m` × `bottom_width_m`）。"""
+    return _basin_footprint(q)
+
+
+def _steel_pedestal_area(q):
+    """鋼柱承台面積（m²）。尺寸在 `base_plate` 結果或平鍵。"""
+    bp = (q or {}).get("base_plate") or {}
+    b = _float_or_none(bp, "pedestal_B_m")
+    n = _float_or_none(bp, "pedestal_N_m")
+    if b is None:
+        b = _float_or_none(q, "pedestal_B_m")
+    if n is None:
+        n = _float_or_none(q, "pedestal_N_m")
+    if b is None or n is None:
+        return None
+    return b * n
+
+
+def _pile_count(q):
+    """樁數（個）。`n_piles` 在計算結果裡，或由 `piles[]` 長度取得。"""
+    n = _int_or_none(q, "n_piles")
+    if n is not None:
+        return n
+    piles = (q or {}).get("piles") or []
+    return len(piles) if piles else None
+
+
+def _channel_profile_bed_length(q):
+    """溝底線斜長（m）＝水平計算段長 ＋ 縱落差。
+
+    圖上的溝底線是斜線：水平投影＝reach_length_m，縱落差＝reach_length_m × slope。
+    模型取斜長（與圖上量測同語意），不是水平長度。
+    """
+    L = _float_or_none(q, "reach_length_m")
+    if L is None:
+        return None
+    s = _float_or_none(q, "slope")
+    if s is None:
+        return L
+    return math.hypot(L, L * s)
+
+
+def _frame_column_area(q):
+    """構架柱總面積（m²）＝Σ 柱投影面積。
+
+    FR-1 是**立面圖**：柱畫成「寬 × 層高」的矩形（寬 0.45 m、層高 3.5 m → 1.575 m²），
+    不是平面的柱斷面（0.45×0.45）。故此處以立面投影面積對帳。
+    """
+    g = (q or {}).get("geometry") or {}
+    cw = _float_or_none(g, "column_mm")
+    if cw is None:
+        # 結果裡 `column_mm` 是 [寬, 深] 陣列（輸入的 `column_width_mm` 為單值）
+        cm = g.get("column_mm")
+        if isinstance(cm, (list, tuple)) and cm:
+            cw = _float_or_none({"v": cm[0]}, "v")
+        elif cm is not None:
+            cw = _float_or_none(g, "column_mm")
+    cw_in = _float_or_none(g, "column_width_mm")
+    if cw_in is not None:
+        cw = cw_in
+    grid = g.get("x_grid_m") or q.get("x_grid_m")
+    elevs = g.get("elevations_m") or q.get("elevations_m")
+    if cw is None or not grid or not elevs:
+        return None
+    storeys = g.get("storey_heights_m") or q.get("storey_heights_m")
+    if not storeys:
+        # 由高程差推各層高
+        storeys = [round(elevs[i + 1] - elevs[i], 6) for i in range(len(elevs) - 1)]
+    if not storeys or not grid:
+        return None
+    total = 0.0
+    for h in storeys:
+        total += len(grid) * (cw / 1000.0) * float(h)
+    return total
+
+
+def _settlement_footing_area(q):
+    """基腳沉陷：Σ B×L（m²）。基腳清單在 `footings[]`。"""
+    fs = (q or {}).get("footings") or []
+    total = 0.0
+    any_found = False
+    for f in fs:
+        b = _float_or_none(f, "B_m")
+        l = _float_or_none(f, "L_m")
+        if b is None or l is None:
+            continue
+        total += b * l
+        any_found = True
+    return total if any_found else None
+
+
+def _slope_surface_line_length(q):
+    """邊坡斷面圖 `35_坡面線` 圖層的預期長度（m）。
+
+    圖層內容 = 地表折線（坡趾前平台 3 m → 坡面 → 坡頂平台 3 m，含階段平台）
+                ＋ 加粗坡面線（0,0)→(run,H)，與地表折線的坡面段重疊。
+    所以量到值 = 坡面斜長 + 前後平台 6 m + 階段平台寬總和 + 坡面斜長（重疊的粗線）。
+    階段坡面每段斜長合計仍等於整段坡面斜長（平台為水平，不增加斜長）。
+
+    另含坡頂／坡腳各一道「坡面排水溝」小凹槽（同圖層），其長度由排水溝幾何
+    決定、與數量模型無直接對應，故一併算入期望值（兩道凹槽的周長）。
+    """
+    h = _float_or_none(q, "height_m")
+    beta = _float_or_none(q, "slope_angle_deg")
+    if h is None or beta is None or beta <= 0:
+        return None
+    face = h / math.sin(math.radians(beta))
+    bench_w = _float_or_none(q, "bench_width_m") or 0.0
+    bench_n = _float_or_none(q, "bench_count") or 0.0
+    pad = 3.0                      # make_wall_section 內的 PAD（前後平台延伸）
+    return 2.0 * face + 2.0 * pad + bench_w * bench_n + 2.0 * _slope_drain_len()
+
+
+def _slope_drain_len():
+    """坡面排水溝凹槽的周長（m）—— 與 make_wall_section 的畫法一致。
+
+    凹槽畫成 4 點折線（半寬 0.30 m、深 0.25 m 的梯形缺角）：
+    (x-0.30, 0) → (x-0.20, -0.25) → (x+0.20, -0.25) → (x+0.30, 0)。
+    """
+    dx, dy = 0.10, 0.25
+    bottom = 0.40
+    side = math.hypot(dx, dy)
+    return 2.0 * side + bottom
+
+
+def _measured_value(meas, spec):
+    """依規格從量測結果取對應的值。"""
+    layer = spec.get("layer")
+    if not layer:
+        return None
+    d = meas.get(layer)
+    if d is None:
+        return None
+    pick = spec.get("pick")
+    if pick:
+        return pick(d)
+    kind = spec.get("kind")
+    if kind == "area":
+        return d["area"]
+    if kind == "length":
+        return d["length"]
+    if kind == "count":
+        return d["count"]
+    if kind == "xspan":
+        # 水平投影長度：縱橫異比例圖上唯一能與真實長度相比的量
+        if d.get("xmin") is None or d.get("xmax") is None:
+            return None
+        return d["xmax"] - d["xmin"]
+    return None
 
 
 REBAR_LAYER = "40_鋼筋"
@@ -354,6 +764,108 @@ def check_road(case_path, dxf_path, tol_pct=1.0):
             "tol_pct": tol_pct, "ok": ok, "measure": meas}
 
 
+#: 案件 model → 設計計算器 id。兩者命名不一致的只有這幾個
+#: （出圖模型的 model 名是圖面語意，計算器 id 是計算功能名）。
+MODEL_CALC_ID = {
+    "rc_beam": "rc_beam",
+    "rc_column": "rc_column",
+    "foundation_isolated": "foundation_isolated",
+    "foundation_combined": "foundation_combined",
+    "channel_cover": "channel_cover",
+    "detention_basin": "detention_basin",
+    "sediment_basin": "sediment_basin",
+    "steel_column": "steel_column",
+    "building_frame": "building_frame",
+    "channel_profile": "channel_profile",
+    "pile_group": "foundation_pile",
+    "settlement": "settlement_assessment",
+}
+
+
+def _merge_engine_result(model, q, case):
+    """把設計計算器的**結果**併進 q，供對帳期望值使用。
+
+    為什麼必要：出圖工具的圖上數字取自計算結果（`design_section.build_case`
+    把結果寫進案件檔的 `quantities.values`），但其中有些量（例如樁數
+    `n_piles`、承台尺寸 `base_plate`、沉陷基腳清單 `footings`）
+    只存在於計算結果，案件輸入裡沒有。若只讀輸入就會誤判成「缺輸入，無法對帳」。
+
+    合併策略：把結果頂層鍵平鋪進 q（不覆寫既有輸入鍵），並保留原始輸入，
+    讓 `expect` 可以兩邊都取到。
+    """
+    calc_id = MODEL_CALC_ID.get(model)
+    if not calc_id:
+        return q
+    try:
+        import sys as _sys
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        _dd = os.path.join(os.path.dirname(HERE), "design")
+        if _dd not in _sys.path:
+            _sys.path.insert(0, _dd)
+        import design_api as API
+        env = API.run_calculation(calc_id, q)
+        result = (env or {}).get("result") or {}
+    except Exception:
+        return q
+    merged = dict(q)
+    merged.setdefault("model", model)
+    for k, v in result.items():
+        if k not in merged or merged.get(k) in (None, ""):
+            merged[k] = v
+    # 常見的巢狀結果（geometry／base_plate 等）也平鋪一份，方便 expect 取值。
+    for nest in ("geometry", "base_plate"):
+        sub = result.get(nest)
+        if isinstance(sub, dict):
+            for k, v in sub.items():
+                merged.setdefault(k, v)
+    return merged
+
+
+def _check_by_spec(case_path, dxf_path, model, q, meas, spec, tol_pct):
+    """依 `RECONCILE_SPECS` 的模型規格做圖／數對帳。
+
+    三種結果要分清楚，**不可**混為一談：
+      * `ok=True`  —— 量測值與期望值在容差內。
+      * `ok=False` —— 量到值但超出容差（真的對不上）。
+      * `ok=None`  —— **沒有對帳**（圖層不存在／案件缺輸入／該模型不適用對帳）。
+                        這種情況必須明寫原因，絕不可當成通過。
+    """
+    base = {"case": os.path.basename(os.path.dirname(os.path.abspath(case_path))),
+            "model": model, "dxf": os.path.basename(dxf_path),
+            "tol_pct": tol_pct, "measure": meas}
+    unit = spec.get("unit") or ""
+    note = spec.get("note") or ""
+
+    if spec.get("kind") == "na":
+        # 該模型本來就不適用數量對帳（例如示意圖）。
+        base.update(rows=[], diff_pct=None, ok=None, note=note,
+                    reason="此模型不適用數量對帳")
+        return base
+
+    layer = spec.get("layer")
+    if layer not in meas:
+        base.update(rows=[], diff_pct=None, ok=None, note=note,
+                    reason="圖上沒有圖層「%s」，無法對帳。" % layer)
+        return base
+
+    drawn = _measured_value(meas, spec)
+    expect = spec["expect"](q)
+    if expect is None:
+        base.update(rows=[], diff_pct=None, ok=None, note=note,
+                    reason="案件檔缺對帳所需的輸入，無法對帳。")
+        return base
+
+    diff_pct = abs(drawn - expect) / expect * 100.0 if expect else None
+    ok = diff_pct is not None and diff_pct <= tol_pct
+    rows = [{"item": "圖面%s" % ("量測值" if spec.get("kind") == "count" else "量測"),
+             "drawn": round(drawn, 4), "model": round(expect, 4),
+             "diff_pct": round(diff_pct, 4) if diff_pct is not None else None,
+             "ok": ok, "unit": unit}]
+    base.update(rows=rows, diff_pct=round(diff_pct, 4) if diff_pct is not None else None,
+                ok=ok, note=note)
+    return base
+
+
 def check_case(case_path, dxf_path, tol_pct=0.5):
     """把圖面量測值與案件檔的衍生數量對帳。"""
     import sys
@@ -374,6 +886,13 @@ def check_case(case_path, dxf_path, tol_pct=0.5):
     else:
         model, q, _ = CC.quantity_context(case)
     meas = measure(dxf_path)
+
+    # ---- 新路徑：模型有專屬對帳規格 → 依規格比對（item 3）----
+    spec = RECONCILE_SPECS.get(model)
+    if spec is not None:
+        q = _merge_engine_result(model, q, case)
+        return _check_by_spec(case_path, dxf_path, model, q, meas, spec, tol_pct)
+
     gross_layer, void_layers = SECTION_LAYERS.get(
         model, ("30_擋土牆混凝土", ("34_溝內腔",)))
     net, gross, void = net_area(meas, gross_layer, void_layers)
@@ -415,6 +934,12 @@ def format_report(r):
                     d["entities"] if d["entities"] else ""))
     L.append("")
     L.append("  對帳：")
+    if r.get("reason"):
+        # 沒有對帳 ≠ 對帳通過。這裡要把原因寫清楚，讓呼叫端不能誤判。
+        L.append("    → ⚠ 未對帳：%s" % r["reason"])
+        if r.get("note"):
+            L.append("      （%s）" % r["note"])
+        return "\n".join(L)
     for row in r["rows"]:
         m = "—" if row["model"] is None else "%.4f" % row["model"]
         L.append("    %-22s 圖面 %.4f %s ／ 模型 %s"
@@ -480,6 +1005,10 @@ if __name__ == "__main__":
                       % (row["item"], row["drawn"], m, d, v))
             raise SystemExit(0 if r2["ok"] else 1)
         print(format_report(r))
+        # 退出碼語意：0＝對帳相符；1＝對上了但超出容差；2＝未對帳（無法比對）。
+        # 「未對帳」不可與「相符」共用 0，否則呼叫端會把沒比過的當成比過。
+        if r["ok"] is None:
+            raise SystemExit(2)
         raise SystemExit(0 if r["ok"] else 1)
     meas = measure(a.dxf)
     for lay, d in sorted(meas.items()):

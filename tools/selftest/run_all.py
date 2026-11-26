@@ -63,6 +63,20 @@ TESTS = [
         "what": "OCSS template 型交叉驗算框架（假客戶端，不需桌面程式）",
     },
     {
+        "id": "takeoff-reconcile",
+        "cmd": ["tools/selftest/takeoff_reconcile_selftest.py"],
+        # 圖／數對帳牽動所有出圖工具（量到的圖層與語意跟各工具的畫法有關），
+        # 所以 globs 涵蓋全部出圖目錄，不只是 takeoff/。
+        "globs": ["tools/takeoff/", "tools/design/", "tools/wall_section/",
+                  "tools/box_section/", "tools/rc_section/",
+                  "tools/basin_section/", "tools/foundation_section/",
+                  "tools/foundation_plan/", "tools/frame_section/",
+                  "tools/network_section/", "tools/profile_section/",
+                  "tools/steel_base_section/", "tools/channel_cover/",
+                  "tools/case_package/", "tools/selftest/"],
+        "what": "圖／數對帳：13 個可出圖模型的 DXF 量測與數量模型相符（不需 CAD）",
+    },
+    {
         "id": "ocss-live",
         "cmd": ["tools/selftest/ocss_live_selftest.py"],
         "globs": ["tools/crosscheck/", "tools/design/", "tools/regs/", "tools/selftest/"],

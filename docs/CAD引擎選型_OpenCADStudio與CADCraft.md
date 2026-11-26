@@ -28,7 +28,7 @@
 
 | 項目 | OpenCADStudio | ArtCraft CADCraft |
 |---|---|---|
-| 來源 | GitHub 開源（GPL-3.0），上游 HakanSeven12；**本專案 `--install` 一律取 fork `tutumomo/OpenCADStudio`**（Big5 SHX 大字體修正，2026-11-10 起） | ArtCraft Launcher 套件（16 個 App） |
+| 來源 | GitHub 開源（GPL-3.0），上游 `HakanSeven12/OpenCADStudio`；**本專案 `--install` 自 2026-11-26 起取上游版**（新版已含 Big5 SHX 大字體修正，不再使用 fork） | ArtCraft Launcher 套件（16 個 App） |
 | 語言 | Rust（73%）＋ Fluent | 原生 C++/Rust |
 | 桌面 GUI | 有（wgpu GPU 加速，Vulkan 可用） | `cadcraft.exe` |
 | 無介面 CLI | `--export / --serve / --batch / --mcp` | `cadcraft-cli {info,convert,run,commands,mcp}` |
@@ -277,6 +277,23 @@ curl -s -X POST http://127.0.0.1:4271/api/v1/plot \
 | 快速批次 DXF→DWG | **cadcraft-cli convert** |
 | PNG / SVG | **cadcraft-cli convert** |
 | 保住 `TOMO_PLOTSTYLE` | **OpenCADStudio** |
+
+### 12.7 上游 v2026.47 的存檔規則（2026-11-26 實測）
+
+切換到上游版後發現的差異，`acc.py::_ocs_save()` 已依此調整：
+
+- **`/save` 不再允許覆寫既有檔**：目標已存在且內容不同時固定回 `400 destination_exists`
+  （`"Destination exists; set overwrite=true to replace a different file"`），
+  **實測帶 `"overwrite": true` 也一樣被拒**——這個旗標只在 `/save_verified` 生效。
+- **`/save_verified` 才是可覆寫的路由**：需要 `document_id`（`/open` 回應的
+  `state.document_id`）＋ `"overwrite": true`，存檔後會重開並比對語意 manifest，
+  正好符合本專案「完稿重開驗證」的規定；代價是多了稽核。
+- **稽核會擋下真實缺陷**：實測邊坡圖因 `35_坡面線／36_坡體／37_植生／39_滑動圓`
+  只被實體引用、沒寫進 LAYER 表，回 `undeclared_layer` 而拒絕存檔
+  （`check_delivery.py` 的 E 系列抓不到這種錯）；已補 `ensure_slope_layers()`。
+- **`/plot` 覆寫既有 PDF 仍可直接執行**（實測回 200），不需要 overwrite 旗標。
+- **`.dwt` 等非 DWG/DXF 目標**不能用 `/save_verified`，`_ocs_save()` 改以
+  「先改名為 `.prev` → `/save` → 失敗還原、成功刪除」繞過同一個 400。
 
 ## 13. 預設後端切換為 OpenCADStudio（2026-11-10）
 

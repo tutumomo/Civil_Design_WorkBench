@@ -200,28 +200,25 @@ class Tool:
     detect: Callable[[], str | None] | None = None
     # 同一 release 內的校驗檔名（內容為 `<sha256>  <檔名>` 逐行）；有設就下載後比對，不符即中止。
     checksum_asset: str = ""
-    # macOS 專用：dmg 內 .app 複製到 /Applications 時要用的名稱（例如 "Open CAD Studio TW.app"）。
-    # 為什麼：fork 的 dmg 內 app 仍叫 OpenCADStudio.app，解析器（project_paths）只認名稱含 TW 的 .app，
-    # 不改名就會被當成「未安裝」；改名後也不會覆蓋上游同名 app。空字串＝沿用 dmg 內名稱。
+    # macOS 專用：dmg 內 .app 複製到 /Applications 時要用的名稱（空字串＝沿用 dmg 內名稱）。
+    # 為什麼：解析器只認名稱符合綁定版本的 .app；dmg 內名稱與解析鍵不同時需在這裡改名。
     macos_app_name: str = ""
 
 
-#: OpenCADStudio 資產命名（實測 v2026.44）：
-#:   OpenCADStudio-v2026.44-linux-aarch64.AppImage
-#:   OpenCADStudio-v2026.44-linux-x86_64.AppImage
-#:   OpenCADStudio-v2026.44-macos-arm64.dmg
-#:   OpenCADStudio-v2026.44-windows-x86_64-portable.exe（另有 -installer.msi，不用它）
+#: OpenCADStudio 資產命名（實測上游 v2026.47）：
+#:   OpenCADStudio-v2026.47-linux-aarch64.AppImage
+#:   OpenCADStudio-v2026.47-linux-x86_64.AppImage
+#:   OpenCADStudio-v2026.47-macos-arm64.dmg／macos-x86_64.dmg
+#:   OpenCADStudio-v2026.47-windows-x86_64-installer.msi（另有 -portable.exe）
 #:
-#: **2026-11-10 起 Windows 改取 fork 的 MSI**（不再取 portable exe）：
-#:   - fork 自 v2026.45.2 起 MSI 安裝為「Open CAD Studio.TW」（`OpenCADStudio.TW.exe`，獨立 UpgradeCode），
-#:     與上游並行共存；本專案只綁這個本地化版，portable exe 檔名與上游無從分辨，故不用。
-#:   - 舊紀錄：`msiexec /i ... /qn` 非管理員回 1603。因此改用 `/passive`（基本 UI，可跳 UAC 請使用者核准）。
-#:   - 偵測走 project_paths.opencadstudio_exe()（只認 TW 版），直接啟動 exe，`taskkill /T` 殺得到本體。
-#: Linux 仍取 AppImage，裝到 `~/.local/opt/opencadstudio-tw-<ver>/`、命令 `~/.local/bin/opencadstudio-tw`，
-#: 與舊的上游 `opencadstudio-*` 區隔。
-#: macOS：取 fork 的 `*-macos-arm64.dmg`（v2026.45.3 起確認有發行），其內 app 叫 `OpenCADStudio.app`，
-#: 安裝時改名為 `/Applications/Open CAD Studio TW.app`（見 Tool.macos_app_name），解析器才認得；
-#: 命令為 `~/.local/bin/opencadstudio-tw`，指向 app 內可獨立執行的 `OpenCADStudio-App`。
+#: **2026-11-26 起改回上游 `HakanSeven12/OpenCADStudio`**（新版已含 Big5 SHX 大字體修正，
+#: 不再需要 fork 的 TW 版）：
+#:   - Windows 取 `*-installer.msi`，以 `msiexec /passive` 安裝到「Open CAD Studio」
+#:     （`OpenCADStudio.exe`）。舊紀錄：`/qn` 非管理員回 1603，故用 `/passive`（可跳 UAC）。
+#:   - 偵測走 project_paths.opencadstudio_exe()（只認上游版），直接啟動 exe，`taskkill /T` 殺得到本體。
+#:   - Linux 取 AppImage，裝到 `~/.local/opt/opencadstudio-<ver>/`、命令 `~/.local/bin/opencadstudio`。
+#:   - macOS 取 `*-macos-*.dmg`，dmg 內 app 名即「Open CAD Studio.app」，解析器直接認得；
+#:     命令為 `~/.local/bin/opencadstudio`，指向 app 內可獨立執行的 `OpenCADStudio-App`。
 def _tools_on_path() -> None:
     tools_dir = Path(__file__).resolve().parent.parent
     if str(tools_dir) not in sys.path:
@@ -255,7 +252,7 @@ def _detect_blender() -> str | None:
 
 
 def _detect_opencadstudio() -> str | None:
-    """OCS 偵測：交給 project_paths.opencadstudio_exe()（只認 TW 版）。"""
+    """OCS 偵測：交給 project_paths.opencadstudio_exe()（只認上游版）。"""
     _tools_on_path()
     from project_paths import opencadstudio_exe
     return opencadstudio_exe()
@@ -295,7 +292,7 @@ TOOLS: list[Tool] = [
     ),
     Tool(
         key="OpenCADStudio",
-        repo="tutumomo/OpenCADStudio",   # 2026-11-10 起改用 fork（Big5 SHX 大字體修正，中文才不亂碼）；上游 HakanSeven12/OpenCADStudio
+        repo="HakanSeven12/OpenCADStudio",   # 2026-11-26 起改回上游（新版已含 Big5 SHX 修正，不再用 fork）
         asset_patterns={
             ("linux", "aarch64"): [r"linux-aarch64\.AppImage$"],
             ("linux", "x86_64"): [r"linux-x86_64\.AppImage$"],
@@ -305,15 +302,14 @@ TOOLS: list[Tool] = [
             ("windows", "aarch64"): [r"windows-arm64-installer\.msi$"],
         },
         kind="appimage",
-        bin_stem="opencadstudio-tw",
-        note="AutoCAD 開源平替（TW 版，Big5 SHX 修正）；DWG/DXF 原生讀寫、CTB 出圖、MCP 介面",
-        manual_hint="請至 https://github.com/tutumomo/OpenCADStudio/releases 下載 fork 版"
-                    "（Windows 取 *-installer.msi，裝到「Open CAD Studio.TW」），"
-                    "或以環境變數 OPENCADSTUDIO_EXE 指定 TW 版執行檔",
+        bin_stem="opencadstudio",
+        note="AutoCAD 開源平替（上游版，含 Big5 SHX 修正）；DWG/DXF 原生讀寫、CTB 出圖、MCP 介面",
+        manual_hint="請至 https://github.com/HakanSeven12/OpenCADStudio/releases 下載"
+                    "（Windows 取 *-installer.msi，裝到「Open CAD Studio」），"
+                    "或以環境變數 OPENCADSTUDIO_EXE 指定執行檔",
         verify_argv=["--version"],
         verify_must_contain="OpenCADStudio",
         detect=_detect_opencadstudio,
-        macos_app_name="Open CAD Studio TW.app",
     ),
     # ArtCraft Launcher：Craft App Suite（約 17 套開源軟體，可平替 Adobe／Office／CAD）的安裝、更新、開啟入口。
     # 它是 GUI，沒有 headless 安裝子命令，各 App 要在它的視窗裡按「Install」；因此本身也不自動安裝（kind=manual），
@@ -874,9 +870,9 @@ def _linux_desktop_integration(tool: Tool, exe: str, quiet: bool = False) -> Non
       寫包裝腳本 `~/.local/bin/open-calcsheet-studio-tw`（帶 WebKit 軟體渲染環境變數），
       並在 `~/.local/share/applications/` 放**同名** `Open CalcSheet Studio TW.desktop`
       蓋過系統那份（XDG 規則：使用者目錄同 desktop ID 優先），Exec 指向包裝腳本。
-    * OpenCADStudio（AppImage）：AppImage 不會自建選單項目，補 `Open CAD Studio TW.desktop`，
-      圖示用 `--appimage-extract` 取出。檔名比對鍵＝`opencadstudiotw`，與上游
-      `io.github.HakanSeven12.OpenCadStudio.desktop` 區隔。
+    * OpenCADStudio（AppImage）：AppImage 不會自建選單項目，補 `Open CAD Studio.desktop`，
+      圖示用 `--appimage-extract` 取出。檔名比對鍵＝`opencadstudio`，與舊 TW fork
+      `Open CAD Studio.TW.desktop` 區隔。
     失敗只印警告，不影響安裝結果。
     """
     if IS_WIN or IS_MAC:
@@ -928,10 +924,10 @@ def _linux_desktop_integration(tool: Tool, exe: str, quiet: bool = False) -> Non
                 icon = next(iter(sorted((appimage.parent / "squashfs-root").glob("*.png"))), None)
             text = "\n".join([
                 "[Desktop Entry]",
-                "Name=Open CAD Studio TW",
-                "Name[zh_TW]=Open CAD Studio TW（Big5 SHX 修正版）",
-                "Comment=OpenCADStudio TW fork - DWG/DXF 2D/3D CAD",
-                f"Exec={local_bin_dir() / (tool.bin_stem or 'opencadstudio-tw')} %F",
+                "Name=Open CAD Studio",
+                "Name[zh_TW]=Open CAD Studio",
+                "Comment=OpenCADStudio - DWG/DXF 2D/3D CAD",
+                f"Exec={local_bin_dir() / (tool.bin_stem or 'opencadstudio')} %F",
                 f"Icon={icon}" if icon else "Icon=io.github.HakanSeven12.OpenCadStudio",
                 "Terminal=false",
                 "Type=Application",
@@ -939,10 +935,10 @@ def _linux_desktop_integration(tool: Tool, exe: str, quiet: bool = False) -> Non
                 "MimeType=image/vnd.dwg;image/vnd.dxf;",
                 "StartupWMClass=OpenCADStudio",
             ]) + "\n"
-            if _write_if_changed(apps / "Open CAD Studio TW.desktop", text):
+            if _write_if_changed(apps / "Open CAD Studio.desktop", text):
                 changed = True
                 if not quiet:
-                    print(f"    ✓ 選單項目 {apps / 'Open CAD Studio TW.desktop'}")
+                    print(f"    ✓ 選單項目 {apps / 'Open CAD Studio.desktop'}")
         if changed and shutil.which("update-desktop-database"):
             subprocess.run(["update-desktop-database", str(apps)],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
@@ -1094,7 +1090,7 @@ def install_tool(tool: Tool, dry: bool = False, quiet: bool = False) -> dict:
             print(f"    （dry-run）來源 {tool.repo}／平台 "
                   f"{'windows' if IS_WIN else ('macos' if IS_MAC else 'linux')}/{ARCH}")
             if tool.key == "OpenCADStudio" and IS_WIN:
-                print("    （dry-run）下載 fork 的 *-installer.msi，以 msiexec /passive 安裝到「Open CAD Studio.TW」（可能跳 UAC）")
+                print("    （dry-run）下載上游 *-installer.msi，以 msiexec /passive 安裝到「Open CAD Studio」（可能跳 UAC）")
             elif tool.kind == "installer":
                 how = ("下載後以 SHA256SUMS 校驗，再執行 setup.exe /S 靜默安裝" if IS_WIN
                        else "macOS：掛載 dmg 複製 .app" if IS_MAC

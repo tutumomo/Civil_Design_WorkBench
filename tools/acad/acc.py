@@ -172,14 +172,25 @@ def _rm_ocs_locks(*paths, bak_before=()):
 
 
 def _ocs_post(base, token, path, payload, timeout=180):
-    """POST 一個 JSON 到 OCS 並回傳解析後的 dict。"""
+    """POST 一個 JSON 到 OCS 並回傳解析後的 dict。
+
+    失敗時把 OCS 的錯誤碼與訊息一併帶出（只印 HTTP 400 無法判斷是
+    `destination_exists`、`audit_failed` 還是檔案被 GUI 佔用）。
+    """
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(base + path, data=data, method="POST", headers={
         "Authorization": "Bearer " + token,
         "Content-Type": "application/json",
     })
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        try:
+            detail = e.read().decode("utf-8", errors="replace")[:600]
+        except Exception:
+            detail = ""
+        raise SystemExit("OCS %s 失敗（HTTP %s）：%s" % (path, e.code, detail))
 
 
 def _ocs_open(base, token, path):
@@ -195,6 +206,44 @@ def _ocs_open(base, token, path):
     return r
 
 
+def _ocs_save(base, token, target, document_id=None):
+    """存檔並回傳 OCS 回應。
+
+    上游 v2026.47 起，`/save` 對「已存在且內容不同」的目標固定回 400
+    `destination_exists`（實測帶 `overwrite=true` 也無效，只有 `/save_verified` 接受），
+    因此 DWG／DXF 一律走 `/save_verified`：存檔後重開並比對語意 manifest，
+    正好接上本專案「完稿重開驗證」的規定。`/save_verified` 不支援 `.dwt` 等格式，
+    該類目標改走 `/save`，並以「先改名為 `.prev`、失敗還原、成功刪除」避免同樣的 400。
+    """
+    ext = os.path.splitext(target)[1].lower()
+    if ext in (".dwg", ".dxf"):
+        body = {"path": target, "overwrite": True}
+        if document_id:
+            body["document_id"] = document_id
+        return _ocs_post(base, token, "/save_verified", body)
+
+    prev = target + ".prev"
+    had_prev = os.path.exists(target)
+    if had_prev:
+        os.replace(target, prev)
+    try:
+        r = _ocs_post(base, token, "/save", {"path": target})
+    except Exception:
+        if had_prev and not os.path.exists(target):
+            os.replace(prev, target)
+        raise
+    if r.get("ok") and os.path.exists(target):
+        if had_prev:
+            try:
+                os.remove(prev)
+            except OSError:
+                pass
+        return r
+    if had_prev and not os.path.exists(target):
+        os.replace(prev, target)
+    return r
+
+
 def ocs_publish(dxf, pdf=True):
     """用 OpenCADStudio 產 DWG（+PDF）。回傳 {'.dwg':…, '.pdf':…}。
 
@@ -202,6 +251,7 @@ def ocs_publish(dxf, pdf=True):
       · `layout` 必須給「圖紙名稱」或 `Model`，給 `all` 會把空的 Layout1 也輸出成空白頁
       · `plot_style` 指定 monochrome.ctb 才有正確的黑白出圖
       · 回應 `status: "waiting_input"` 是待命正常態，判成功看 `ok` 與 `result.pages`
+      · 上游 v2026.47 的 `/save` 不接受覆寫既有檔，DWG 改走 `/save_verified`（見 `_ocs_save`）
     """
     dxf = os.path.abspath(str(dxf))
     base_path = os.path.splitext(dxf)[0]
@@ -209,8 +259,9 @@ def ocs_publish(dxf, pdf=True):
     res = {}
     bak_before = tuple(b for b in (_bak_of(dxf), _bak_of(dwg)) if os.path.exists(b))
     with ocs_service() as (base, token):
-        _ocs_open(base, token, dxf)
-        r = _ocs_post(base, token, "/save", {"path": dwg})
+        opened = _ocs_open(base, token, dxf)
+        doc_id = (opened.get("state") or {}).get("document_id")
+        r = _ocs_save(base, token, dwg, document_id=doc_id)
         if not r.get("ok") or not os.path.exists(dwg):
             raise SystemExit("OCS 存 DWG 失敗：" + str(r.get("error")))
         res[".dwg"] = dwg
@@ -238,8 +289,9 @@ def ocs_todxf(src, dst):
     src, dst = os.path.abspath(str(src)), os.path.abspath(str(dst))
     bak_before = tuple(b for b in (_bak_of(src), _bak_of(dst)) if os.path.exists(b))
     with ocs_service() as (base, token):
-        _ocs_open(base, token, src)
-        r = _ocs_post(base, token, "/save", {"path": dst})
+        opened = _ocs_open(base, token, src)
+        doc_id = (opened.get("state") or {}).get("document_id")
+        r = _ocs_save(base, token, dst, document_id=doc_id)
         if not r.get("ok") or not os.path.exists(dst):
             raise SystemExit("OCS 存檔失敗（%s）：%s" % (os.path.basename(dst), r.get("error")))
     _rm_ocs_locks(src, dst, bak_before=bak_before)

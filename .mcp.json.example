@@ -1,10 +1,10 @@
 {
   "_comment": [
     "MCP 設定範本：複製成 .mcp.json 後填入實際路徑（.mcp.json 已列在 .gitignore，不進版控）。",
-    "建議直接跑 python tools/mcp/register_all.py --apply 自動填入前六個伺服器（含 opencadstudio-tw），",
+    "建議直接跑 python tools/mcp/register_all.py --apply 自動填入前六個伺服器（含 opencadstudio），",
     "再跑 python tools/crosscheck/ocss_crosscheck.py register-mcp --apply 補上 OCSS（token 不經過本檔）。",
     "open-calcsheet-studio 的 Bearer token 是機密，只存在本機 .mcp.json，切勿寫進版控或文件。",
-    "opencadstudio-tw 是 stdio 橋，連到執行中的 Open CAD Studio TW 視窗（不需 token）；command 由 project_paths.opencadstudio_exe() 解析，只認 TW 版。"
+    "opencadstudio 是 stdio 橋，連到執行中的 Open CAD Studio 視窗（不需 token）；command 由 project_paths.opencadstudio_exe() 解析，只認上游版。"
   ],
   "mcpServers": {
     "regs": {
@@ -64,8 +64,8 @@
         "PYTHONIOENCODING": "utf-8"
       }
     },
-    "opencadstudio-tw": {
-      "command": "<Open CAD Studio TW 執行檔：Linux ~/.local/bin/opencadstudio-tw；Windows「Open CAD Studio.TW」內的 OpenCADStudio.TW.exe；macOS Open CAD Studio TW.app 內執行檔>",
+    "opencadstudio": {
+      "command": "<Open CAD Studio 執行檔：Linux ~/.local/bin/opencadstudio；Windows「Open CAD Studio」內的 OpenCADStudio.exe；macOS Open CAD Studio.app 內執行檔>",
       "args": [
         "--mcp"
       ]

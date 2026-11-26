@@ -17,10 +17,11 @@ python tools/git/sync_check.py      # macOS/Linux: .venv/bin/python tools/git/sy
 python tools/project_paths.py
 
 # Install missing third-party tools after `git clone` (REQUIRED; plain project_paths.py only reports)
-# Mandatory tools auto-installed from the user's forks on GitHub Releases:
-#   OpenCADStudio       (tutumomo/OpenCADStudio, Big5 SHX fix)  -> "Open CAD Studio.TW" (headless CAD, fonts, CTB)
+# Mandatory tools auto-installed from GitHub Releases (2026-11-26):
+#   OpenCADStudio       (HakanSeven12/OpenCADStudio, upstream; Big5 SHX fix is upstream now) -> "Open CAD Studio" (headless CAD, fonts, CTB)
 #   Open CalcSheet Studio (tutumomo/Open-CalcSheet-Studio)      -> "Open CalcSheet Studio TW" (key: OpenCalcSheet)
-#   Only the localized TW builds are bound; upstream installs side by side are ignored.
+#   OpenCADStudio is bound to the UPSTREAM build; the old fork "Open CAD Studio.TW" is ignored.
+#   Only the localized TW build of Open CalcSheet Studio is bound; its upstream install is ignored.
 # Also mandatory but detect-only (install by hand; --install prints the hint and exits non-zero if missing):
 #   ArtCraft Launcher (storytold/craft-launcher; installs the Craft App Suite: open-source substitutes for Adobe/Office/CAD)
 #   Blender           (blender.org; 3D landscape simulation)

@@ -356,6 +356,18 @@ def ensure_layers(doc):
         doc.layers.get(L_EXC).dxf.linetype = "DASHED"
 
 
+def ensure_slope_layers(doc):
+    """邊坡圖專用圖層。
+
+    2026-11-26 補：這些圖層原本只被實體引用、未寫進 LAYER 表，OCS 上游版的
+    `/save_verified` 結構稽核會回 `undeclared_layer` 並拒絕存檔（出圖直接失敗）。
+    """
+    for name, color in ((L_SLOPE, 5), (L_SOIL, 8), (L_VEG, 1), (L_GWL, 4), (L_SLIP, 6)):
+        DR.add_plot_layer(doc, name, color=color)
+    if "DASHED" in doc.linetypes:
+        doc.layers.get(L_GWL).dxf.linetype = "DASHED"
+
+
 def ensure_tomo(doc):
     st = doc.styles.get("TOMO") if "TOMO" in doc.styles else None
     if st is None:
@@ -513,6 +525,7 @@ def ensure_dimstyle(doc, scale, unit="m"):
 def draw_slope_section(doc, q, scale, dimstyle):
     """邊坡標準斷面：坡面線、坡趾／坡頂平台、階段平台、坡面排水、植生、地下水位、滑動圓。"""
     import math
+    ensure_slope_layers(doc)
     msp = doc.modelspace()
     H = float(q["height_m"])
     beta = math.radians(float(q["slope_angle_deg"]))

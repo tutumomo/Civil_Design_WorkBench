@@ -131,10 +131,10 @@ def build_servers(only: list[str] | None = None) -> dict[str, dict]:
             "args": [] if iz_base.startswith("ingetrazo-mcp") else ["--mcp"],
             "env": {"PYTHONIOENCODING": "utf-8"},
         },
-        "opencadstudio-tw": {
-            # stdio 橋，連到「執行中」的 Open CAD Studio TW 視窗（不需 token）；GUI 沒開就沒有工具。
-            # 執行檔一律經 project_paths 解析（只認 TW 版），未安裝時留命令名讓使用者看出缺什麼。
-            "command": opencadstudio_exe() or "opencadstudio-tw",
+        "opencadstudio": {
+            # stdio 橋，連到「執行中」的 Open CAD Studio 視窗（不需 token）；GUI 沒開就沒有工具。
+            # 2026-11-26 起改採上游版，執行檔一律經 project_paths 解析（只認上游版）。
+            "command": opencadstudio_exe() or "opencadstudio",
             "args": ["--mcp"],
             "env": {},
         },

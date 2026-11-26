@@ -1,4 +1,4 @@
-"""把 DXF／DWG 的 TOMO 文字樣式統一改為 gbenor.shx + bigfont=CHINA1.SHX（本專案 TOMO 標準；OpenCADStudio TW 裝好後中文不亂碼）。
+"""把 DXF／DWG 的 TOMO 文字樣式統一改為 gbenor.shx + bigfont=CHINA1.SHX（本專案 TOMO 標準；OpenCADStudio 裝好後中文不亂碼）。
 
 用法::
 

@@ -40,7 +40,7 @@ web
 - 22 個以上設計計算器：擋土牆六型、排水溝、箱涵、邊坡、基礎、鋼構柱與基礎螺栓、沉砂設施等。
 - 交付六道閘門：設計檢核、圖面品管 E1~E18、圖／數對帳、配筋間距對帳、設計段落注入、全案回歸。
 - 已驗證庫（`tools/regs/verified/`）之外的公式不得進交付；工項單價未經價格庫查證者必須標註為「假設值」，不得假造來源。
-- 外部工具（OpenCADStudio TW、Open CalcSheet Studio TW）必須桌面程式開著才提供 API，沒有 headless 模式。
+- 外部工具（OpenCADStudio、Open CalcSheet Studio TW）必須桌面程式開著才提供 API，沒有 headless 模式。
 - **不可退讓**：交付格式固定為 DWG（AutoCAD 2018）＋ PDF ＋ XLSX ＋ DOCX，不得替換為其他格式。
 
 ## Brand Commitments

@@ -437,37 +437,38 @@ def _linux_desktop_exec(key: str) -> str | None:
     return None
 
 
-#: 本專案只綁定使用者 fork 的「本地化版」應用程式（2026-11-10 定案）。
-#: 上游版與 TW 版在本機並行安裝，差別是安裝資料夾／識別碼，**一律不得退回上游版**。
-OCS_TW_KEY = "opencadstudiotw"            # 資料夾「Open CAD Studio.TW」、執行檔 OpenCADStudio.TW.exe
-OCS_UPSTREAM_KEY = "opencadstudio"        # 上游「Open CAD Studio」（只用來提示，不採用）
-OCSS_TW_KEY = "opencalcsheetstudiotw"     # 資料夾「Open CalcSheet Studio TW」
+#: OpenCADStudio 自 2026-11-26 起改採**上游版**（`HakanSeven12/OpenCADStudio`；新版已含
+#: Big5 SHX 修正，不再需要 fork），與 OCSS 仍綁 TW 版不同。兩者在本機可能並存，
+#: 差別是安裝資料夾／識別碼；解析器只認上游版，舊 TW fork 僅用來提示，不採用。
+OCS_KEY = "opencadstudio"                 # 資料夾「Open CAD Studio」、執行檔 OpenCADStudio.exe
+OCS_TW_KEY = "opencadstudiotw"            # 舊 fork「Open CAD Studio.TW」（只用來提示，不採用）
+OCSS_TW_KEY = "opencalcsheetstudiotw"     # 資料夾「Open CalcSheet Studio TW"
 OCSS_UPSTREAM_KEY = "opencalcsheetstudio"
 OCSS_TW_APP_ID = "tw.opencalcsheet.studio"            # TW 版 Tauri identifier
 OCSS_UPSTREAM_APP_ID = "studio.openstructuralcalculation.app"
 
 
 def opencadstudio_exe() -> str | None:
-    """OpenCADStudio **TW 版**（fork `tutumomo/OpenCADStudio`，Big5 SHX 修正）執行檔。
+    """OpenCADStudio **上游版**（`HakanSeven12/OpenCADStudio`）執行檔。
 
-    只認本地化版，不退回上游版：
+    2026-11-26 起改採上游版（新版已含 Big5 SHX 修正）；不再使用 TW fork：
       1. `OPENCADSTUDIO_EXE`（明確指定時照用，責任在設定者）
-      2. Windows：`ProgramFiles` 等根目錄下比對鍵＝`opencadstudiotw` 的資料夾
-         （實際為「Open CAD Studio.TW」）內的 `OpenCADStudio.TW.exe`
-      3. macOS：`/Applications`、`~/Applications` 下比對鍵＝`opencadstudiotw` 的 .app
-      4. Linux／其他：`--install` 產的 `~/.local/bin/opencadstudio-tw`、
-         `~/.local/opt/opencadstudio-tw-*/` 內的 AppImage，再找 PATH 的 `opencadstudio-tw`
+      2. Windows：`ProgramFiles` 等根目錄下比對鍵＝`opencadstudio` 的資料夾
+         （實際為「Open CAD Studio」）內的 `OpenCADStudio.exe`
+      3. macOS：`/Applications`、`~/Applications` 下比對鍵＝`opencadstudio` 的 .app
+      4. Linux／其他：`--install` 產的 `~/.local/bin/opencadstudio`、
+         `~/.local/opt/opencadstudio-*/` 內的 AppImage，再找 PATH 的 `opencadstudio`
     未安裝回傳 None；補裝用 `python tools/project_paths.py --install`。
-    設定檔夾與上游共用 `%APPDATA%/OpenCADStudio`（fork 未改 `config_dir()`）。
+    設定檔夾 `%APPDATA%/OpenCADStudio` 兩版共用。
     """
     p = _env_path("OPENCADSTUDIO_EXE")
     if p and p.is_file():
         return str(p)
 
     if os.name == "nt":
-        for d in _win_app_dirs(OCS_TW_KEY):
+        for d in _win_app_dirs(OCS_KEY):
             for c in sorted(d.glob("*.exe")):
-                if _norm_app(c.stem) == OCS_TW_KEY:
+                if _norm_app(c.stem) == OCS_KEY:
                     return str(c)
 
     # macOS：`Contents/MacOS/<App>` 可能只是 launcher stub，被 symlink 到別處執行會噴
@@ -477,7 +478,7 @@ def opencadstudio_exe() -> str | None:
             if not root.is_dir():
                 continue
             for app in sorted(root.glob("*.app")):
-                if _norm_app(app.stem) != OCS_TW_KEY:
+                if _norm_app(app.stem) != OCS_KEY:
                     continue
                 cands = [c for c in (app / "Contents" / "MacOS").glob("*") if c.is_file()]
                 app_bin = [c for c in cands if c.stem.lower().endswith("-app")]
@@ -486,32 +487,40 @@ def opencadstudio_exe() -> str | None:
 
     home = Path.home()
     if os.name != "nt":
-        c = home / ".local" / "bin" / "opencadstudio-tw"
+        c = home / ".local" / "bin" / "opencadstudio"
         if c.exists():
             return str(c)
         opt = home / ".local" / "opt"
         if opt.is_dir():
-            for d in sorted(opt.glob("opencadstudio-tw-*"), reverse=True):
+            for d in sorted(opt.glob("opencadstudio-*"), reverse=True):
                 for pat in ("**/AppRun", "**/*.AppImage"):
                     for c in sorted(d.glob(pat)):
                         if c.is_file():
                             return str(c)
-        w = shutil.which("opencadstudio-tw")
+        w = shutil.which("opencadstudio")
         if w:
             return str(w)
     return None
 
 
 def upstream_only_hint(tool: str) -> str | None:
-    """若本機只有上游版（沒有 TW 版），回傳一句提示；否則 None。只用於回報，不影響解析。"""
+    """若本機只有「非採用版本」，回傳一句提示；否則 None。只用於回報，不影響解析。
+
+    OpenCADStudio 採上游版（2026-11-26 起），只有舊 TW fork 時提示；
+    Open CalcSheet Studio 仍只綁 TW 版，只有上游版時提示。
+    """
     if os.name != "nt":
         return None
-    if (opencadstudio_exe() if tool == "opencadstudio" else opencalcsheet_exe()):
-        return None
     if tool == "opencadstudio":
-        up =[d for d in _win_app_dirs(OCS_UPSTREAM_KEY) if (d / "OpenCADStudio.exe").is_file()]
-    else:
-        up = [d for d in _win_app_dirs(OCSS_UPSTREAM_KEY) if (d / "open-calcsheet-studio.exe").is_file()]
+        if opencadstudio_exe():
+            return None
+        tw = [d for d in _win_app_dirs(OCS_TW_KEY) if (d / "OpenCADStudio.TW.exe").is_file()]
+        if tw:
+            return f"偵測到 TW fork {tw[0]}，本專案已改採上游版 Open CAD Studio（2026-11-26 起）"
+        return None
+    if opencalcsheet_exe():
+        return None
+    up = [d for d in _win_app_dirs(OCSS_UPSTREAM_KEY) if (d / "open-calcsheet-studio.exe").is_file()]
     if up:
         return f"偵測到上游版 {up[0]}，本專案不採用（只綁 TW 版）"
     return None
@@ -761,9 +770,9 @@ def main(argv=None) -> int:
             acc_desc = "—（未安裝 AutoCAD；沒有也能產 DXF，但缺少 DWG 轉檔工具）"
     print(f"accoreconsole: {acc_desc}")
     if info.get("opencadstudio"):
-        print(f"OpenCADStudio: {info['opencadstudio']}  [OK]（TW 版；DWG/DXF、CTB 出圖、MCP）")
+        print(f"OpenCADStudio: {info['opencadstudio']}  [OK]（上游版；DWG/DXF、CTB 出圖、MCP）")
     else:
-        print("OpenCADStudio: —（必備；TW 版未安裝。跑 python tools/project_paths.py --install 自動補齊）")
+        print("OpenCADStudio: —（必備；上游版未安裝。跑 python tools/project_paths.py --install 自動補齊）")
     h = upstream_only_hint("opencadstudio")
     if h:
         print(f"  · {h}")
